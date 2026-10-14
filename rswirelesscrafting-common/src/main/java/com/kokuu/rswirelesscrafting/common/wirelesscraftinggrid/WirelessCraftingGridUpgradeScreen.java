@@ -1,0 +1,35 @@
+package com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid;
+
+import com.kokuu.rswirelesscrafting.common.ModIdentifierUtil;
+
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Inventory;
+
+public class WirelessCraftingGridUpgradeScreen
+    extends AbstractContainerScreen<WirelessCraftingGridUpgradeContainerMenu> {
+    private static final ResourceLocation TEXTURE =
+        ModIdentifierUtil.createIdentifier("textures/gui/wireless_crafting_grid_upgrades.png");
+
+    public WirelessCraftingGridUpgradeScreen(final WirelessCraftingGridUpgradeContainerMenu menu,
+                                             final Inventory inventory,
+                                             final Component title) {
+        super(menu, inventory, title);
+    }
+
+    @Override
+    protected void renderBg(final GuiGraphics graphics, final float partialTick, final int mouseX, final int mouseY) {
+        graphics.blit(TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight);
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+        titleLabelX = 8;
+        titleLabelY = 6;
+        inventoryLabelX = 8;
+        inventoryLabelY = 72;
+    }
+}

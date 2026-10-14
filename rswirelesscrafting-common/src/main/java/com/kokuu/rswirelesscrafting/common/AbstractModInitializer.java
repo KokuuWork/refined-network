@@ -1,8 +1,12 @@
 package com.kokuu.rswirelesscrafting.common;
 
+import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationContainerMenu;
+import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationData;
+import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.UpgradeMenuData;
 import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.WirelessCraftingGridContainerMenu;
 import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.WirelessCraftingGridData;
 import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.WirelessCraftingGridState;
+import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.WirelessCraftingGridUpgradeContainerMenu;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +32,20 @@ public abstract class AbstractModInitializer {
             () -> extendedMenuTypeFactory.create(
                 WirelessCraftingGridContainerMenu::new,
                 WirelessCraftingGridData.STREAM_CODEC
+            )
+        ));
+        Menus.INSTANCE.setChargingStation(callback.register(
+            ContentIds.CHARGING_STATION,
+            () -> extendedMenuTypeFactory.create(
+                ChargingStationContainerMenu::new,
+                ChargingStationData.STREAM_CODEC
+            )
+        ));
+        Menus.INSTANCE.setWirelessCraftingGridUpgrades(callback.register(
+            ContentIds.WIRELESS_CRAFTING_GRID_UPGRADES,
+            () -> extendedMenuTypeFactory.create(
+                WirelessCraftingGridUpgradeContainerMenu::new,
+                UpgradeMenuData.STREAM_CODEC
             )
         ));
     }

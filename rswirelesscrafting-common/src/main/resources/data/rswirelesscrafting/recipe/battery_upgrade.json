@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "PAP",
+    "RLR",
+    "PAP"
+  ],
+  "key": {
+    "P": {
+      "tag": "c:ender_pearls"
+    },
+    "A": {
+      "item": "refinedstorage:advanced_processor"
+    },
+    "R": {
+      "item": "minecraft:redstone_block"
+    },
+    "L": {
+      "item": "refinedstorage:1k_storage_block"
+    }
+  },
+  "result": {
+    "id": "rswirelesscrafting:battery_upgrade"
+  }
+}

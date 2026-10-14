@@ -16,19 +16,55 @@ import static com.kokuu.rswirelesscrafting.common.ModIdentifierUtil.createIdenti
 public final class Upgrades {
     public static final TagKey<Item> RANGE_UPGRADES =
         TagKey.create(Registries.ITEM, createIdentifier("range_upgrades"));
+    public static final TagKey<Item> BATTERY_UPGRADES =
+        TagKey.create(Registries.ITEM, createIdentifier("battery_upgrades"));
     public static final TagKey<Item> INTERDIMENSIONAL_UPGRADES =
         TagKey.create(Registries.ITEM, createIdentifier("interdimensional_upgrades"));
+    public static final TagKey<Item> REMOTE_ENERGY_UPGRADES =
+        TagKey.create(Registries.ITEM, createIdentifier("remote_energy_upgrades"));
     public static final int MAX_UPGRADES = 4;
 
+    private static final List<TagKey<Item>> ALL_UPGRADE_TAGS = List.of(
+        RANGE_UPGRADES,
+        BATTERY_UPGRADES,
+        INTERDIMENSIONAL_UPGRADES,
+        REMOTE_ENERGY_UPGRADES
+    );
+
     private Upgrades() {
+    }
+
+    /**
+     * 是否为可装配到无线合成终端上的升级卡（任意一种）。
+     */
+    public static boolean isUpgrade(final ItemStack stack) {
+        if (stack.isEmpty()) {
+            return false;
+        }
+        return ALL_UPGRADE_TAGS.stream().anyMatch(stack::is);
     }
 
     public static boolean hasRangeUpgrade(final ItemStack stack) {
         return hasUpgrade(stack, RANGE_UPGRADES);
     }
 
+    public static boolean hasBatteryUpgrade(final ItemStack stack) {
+        return hasUpgrade(stack, BATTERY_UPGRADES);
+    }
+
+    public static int countBatteryUpgrades(final ItemStack stack) {
+        return countUpgrades(stack, BATTERY_UPGRADES);
+    }
+
     public static boolean hasInterdimensionalUpgrade(final ItemStack stack) {
         return hasUpgrade(stack, INTERDIMENSIONAL_UPGRADES);
+    }
+
+    /**
+     * Whether the grid should draw its energy from the bound network instead of its own battery.
+     */
+    public static boolean hasRemoteEnergyUpgrade(final ItemStack stack) {
+        return hasUpgrade(stack, REMOTE_ENERGY_UPGRADES);
     }
 
     private static boolean hasUpgrade(final ItemStack stack, final TagKey<Item> tag) {

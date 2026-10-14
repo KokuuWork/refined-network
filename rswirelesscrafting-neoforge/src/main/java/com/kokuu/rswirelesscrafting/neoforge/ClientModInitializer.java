@@ -5,6 +5,8 @@ import com.kokuu.rswirelesscrafting.common.ContentNames;
 import com.kokuu.rswirelesscrafting.common.Items;
 import com.kokuu.rswirelesscrafting.common.KeyMappings;
 import com.kokuu.rswirelesscrafting.common.Menus;
+import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationScreen;
+import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.WirelessCraftingGridUpgradeScreen;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.refinedmods.refinedstorage.common.grid.screen.CraftingGridScreen;
@@ -40,6 +42,11 @@ public class ClientModInitializer extends AbstractClientModInitializer {
     @SubscribeEvent
     public static void onRegisterMenuScreens(final RegisterMenuScreensEvent e) {
         e.register(Menus.INSTANCE.getWirelessCraftingGrid(), CraftingGridScreen::new);
+        e.register(
+            Menus.INSTANCE.getWirelessCraftingGridUpgrades(),
+            WirelessCraftingGridUpgradeScreen::new
+        );
+        e.register(Menus.INSTANCE.getChargingStation(), ChargingStationScreen::new);
     }
 
     @SubscribeEvent

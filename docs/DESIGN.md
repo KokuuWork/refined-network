@@ -1,7 +1,9 @@
 # 设计文档：无线合成终端附属模组
-## 无线合成终端 + 范围升级卡 + 维度升级卡（Refined Storage 2 · NeoForge 1.21.1）
+## 无线合成终端 + 四张装配式升级卡 + 充电站（Refined Storage 2 · NeoForge 1.21.1）
 
 > **文档用途**：本报告是一份**自包含**的完整实现规格，供代码生成模型 / 开发者在**不依赖本对话上下文**的前提下，直接据此编写代码。所有关键类名、方法签名、扩展点、平衡数值均已核实到 Refined Storage 2（下称 RS 2）与官方附属 Quartz Arsenal 的真实源码。
+>
+> **版本对应**：§1–§13 为 **0.1.0** 的首版规格（终端 + 范围卡 + 维度卡）。**0.1.5** 新增的充电站、电池升级卡、远距离输电升级卡与「装配式升级卡」改造见 **[§14](#14-015-增量充电站--电池卡--输电卡--装配式升级)**，该节同时修正了 §2 / §12 中被实现推翻的若干条。
 
 ---
 
@@ -14,8 +16,8 @@
 | 加载器 | **NeoForge**（21.1.x） |
 | 依赖 | Refined Storage **2.0.x**（1.21.1 线，写作基线 **v2.0.0**，即 1.21.1 最新 release） |
 | 参照源码 | Quartz Arsenal **v1.0.8**（1.21.1 线，MIT） |
-| 核心产出 | ① 无线合成终端 ② 范围升级卡 ③ 维度升级卡（共 3 个 Item） |
-| 差异化 | ① 同维度无线距离可加宽（默认 64 格，可配）；② **范围卡**→同维度无限范围；③ **维度卡**→解锁跨维度，走 RS 原生 Network Transmitter/Receiver 隧道（网卡绑 Receiver） |
+| 核心产出 | ① 无线合成终端 ② 范围升级卡 ③ 维度升级卡（共 3 个 Item）；**0.1.5 追加**：④ 电池升级卡 ⑤ 远距离输电升级卡 ⑥ 充电站方块 |
+| 差异化 | ① 同维度无线距离可加宽（默认 64 格，可配）；② **范围卡**→同维度无限范围；③ **维度卡**→解锁跨维度，走 RS 原生 Network Transmitter/Receiver 隧道（网卡绑 Receiver）；④ **输电卡**→终端不耗自身电池，直接花网络电；⑤ **电池卡**→扩容 + 输电卡原料；⑥ **充电站**→为 RS 全部 FE 终端提供有线/无线充电，且接受外部标准 FE 供电 |
 
 **背景事实（已核实）**：
 - 原版 RS 2 本体没有无线合成终端（只有 Wireless Grid 查看终端）；官方附属 Quartz Arsenal 补齐了无线合成终端，但仍是「同维度 + 发射器范围（默认 16 格）内」。
@@ -30,11 +32,11 @@
 |---|---|---|
 | D1 | 目标版本/加载器 | 1.21.1 / NeoForge（RS 2.0.x） |
 | D2 | 实现架构 | **纯附属**（依赖 RS 公开 API 模块），不 fork、不 mixin |
-| D3 | 物品清单 | 无线合成终端 + 范围升级卡 + 维度升级卡（**3 个 Item**，无创造版） |
+| D3 | 物品清单 | 无线合成终端 + 范围升级卡 + 维度升级卡（**3 个 Item**，无创造版）→ **已扩至 6 件**，见 §14 |
 | D4 | 跨维度机制 | **方案 B（隧道）**：网卡绑 Network Receiver，走 Network Transmitter/Receiver 隧道 |
 | D5 | 卡片拆分 | **范围卡**只扩同维度距离；**维度卡**只解锁跨维度。两张卡正交、互不干扰 |
 | D6 | 能量模型 | 终端耗 FE、可配置关闭；跨维度时能量消耗 +50% |
-| D7 | 槽位 | 1 网卡槽 + 4 升级槽；两种卡各 1 张即生效，可堆叠 |
+| D7 | 槽位 | 1 网卡槽 + 4 升级槽；两种卡各 1 张即生效，可堆叠 → **升级卡最终定为装配式、可插拔**，见 §14.4 |
 | D8 | 命名 | modid 占位 `rswirelesscrafting`（可改，见 §4.1） |
 | D9 | 同维度距离 | 终端有效距离 = `max(发射器范围, extendedRange)`，`extendedRange` 默认 **64 格**、可配置；范围卡 → 无限 |
 | D10 | 区块加载 | 同维度：仅家庭网络侧（发射器）加载；跨维度：**Transmitter + Receiver 两端都加载**（隧道原生代价，本 mod 接受此取舍） |
@@ -570,6 +572,166 @@ public class ExtendedWirelessNetworkItemContext implements NetworkItemContext {
 | V4 | RS 标准 context 绑 Receiver 时 `resolveNetwork` 的行为（是否只认 Transmitter） | 若标准 context 对 Receiver 也做距离判定，需在步骤 1 前先判绑定方块类型再分派 |
 | V5 | 升级槽的承载方式（DataComponent vs RS 原生升级机制） | 优先复用 RS 升级机制（若有公开 API）；否则自建 `upgrades` 组件 |
 | V6 | RS 2.0.x 具体 patch 版本 | 以 Modrinth/CurseForge 1.21.1 最新 release 为准（基线 v2.0.0），锁进 `refinedstorageVersion` |
+
+---
+
+## 14. 0.1.5 增量：充电站 · 电池卡 · 输电卡 · 装配式升级
+
+本节记录 0.1.0 首版之后新增的内容，并**修正 §2 / §12 中被实现推翻的条目**。所有结论均已落到可编译代码（`./gradlew -I init-mirror.gradle build` 全绿）。
+
+### 14.1 待解决的两个前置问题
+
+| 问题 | 结论 |
+|---|---|
+| RS 2.0.7 有没有公开的**方块**基类？ | **没有**。`@API(status = STABLE)` 只覆盖 `*-api` 模块与 `refinedstorage-network` 的部分类；方块与方块实体基类全在内部模块 `refinedstorage-common`，无标注。官方附属 Quartz Arsenal 也**从不注册方块**，无样例可抄。→ 方块本体用原版 `BaseEntityBlock` |
+| 那方块实体能不能复用 RS 的？ | **能**。`AbstractNetworkNodeContainerBlockEntity<T extends NetworkNode>`（在 `refinedstorage-common-api`，标注 STABLE）是公开的，构造签名 `(BlockEntityType<?>, BlockPos, BlockState, T mainNetworkNode)`，自带网络容器生命周期（`clearRemoved` / `setRemoved`）。但它**不含 tick 与耗电**，需自己补 |
+
+### 14.2 充电站（`charging_station`）
+
+**方块** `ChargingStationBlock extends BaseEntityBlock`：
+
+- `getTicker` 服务端返回自定义 ticker 调 `station.tick()`（原版 tick 路径，不碰 RS 内部 ticker 体系）；
+- 右键用 `com.refinedmods.refinedstorage.common.Platform.INSTANCE.getMenuOpener().openMenu(serverPlayer, station)` 开界面——注意这里用的是 **RS 的 `Platform`**，不是 NeoForge 原版 `openMenu`，因为 BE 实现的是 RS 的 `ExtendedMenuProvider<D>`（包 `com.refinedmods.refinedstorage.common.support.containermenu`），**不是** `net.minecraft.world.inventory.MenuProvider`；
+- `onRemove` 掉落槽位内容物。
+
+**方块实体** `ChargingStationBlockEntity extends AbstractNetworkNodeContainerBlockEntity<ChargingStationNetworkNode> implements Container, ExtendedMenuProvider<ChargingStationData>`：
+
+| 方法 | 行为 |
+|---|---|
+| `tick()` | `refreshNetworkEnergy()` → `consumeEnergy(energyUsage)`（待机耗电，与 RS 其他机械一致） → `chargeWiredSlot()` → `chargeNearbyPlayers()` |
+| `chargeWiredSlot()` | 槽位物品每 tick 按 `wiredChargeRate` 充 |
+| `chargeNearbyPlayers()` | 遍历 `ServerLevel.players()`，排除旁观/死亡，`distanceToSqr` ≤ `wirelessRadius²` 的玩家，对其背包按 `wirelessChargeRate` 充 |
+
+**能量账本**（两条供电来源，网络优先）：
+
+```java
+private void consumeEnergy(final long amount) {
+    long remaining = amount;
+    final Network network = mainNetworkNode.getNetwork();
+    if (network != null) {
+        final EnergyNetworkComponent energy = network.getComponent(EnergyNetworkComponent.class);
+        if (energy.getStored() > 0) {
+            remaining -= energy.extract(remaining);
+        }
+    }
+    if (remaining > 0 && externalEnergy > 0) {
+        externalEnergy -= Math.min(remaining, externalEnergy);
+        setChanged();
+    }
+}
+```
+
+充电时**先模拟再扣电**（`simulateAccepted` → `deliver`），避免从网络白抽电：
+
+```java
+private long chargeItem(final ItemStack stack, final long rate) {
+    long given = 0;
+    final Platform.ItemEnergyAccess access =
+        rate > 0 ? Platform.getItemEnergy(stack).orElse(null) : null;
+    if (access != null) {
+        given = deliver(access, simulateAccepted(access, rate));
+    }
+    return given;
+}
+```
+
+**兼容性关键**：物品侧充电走 **NeoForge 的 `Capabilities.EnergyStorage.ITEM`**，**不**经过 RS 的 `PlatformImpl.getEnergyStorage`（那只会认 RS 自己的 `EnergyStorageAdapter`）。这是「能给 RS 的全部终端充电」和「能读其他模组的 FE 物品」的共同前提。为此在 common 侧抽了 `Platform.ItemEnergyProvider` / `Platform.ItemEnergyAccess` 两个抽象，由 neoforge 侧的 `PlatformImpl` 实现（内部是 `ForgeEnergyAccess` record）。
+
+**外部供电**：`ChargingStationEnergyStorage implements IEnergyStorage`，注册在 `Capabilities.EnergyStorage.BLOCK` 上，`canReceive()=true` / `canExtract()=false`，容量 10000 FE。其他模组用标准 FE 输电的方块与管道可以直接给它供电。
+
+**已知取舍**：`InWorldNetworkNodeContainerBuilder` 的默认连接策略是 `SimpleConnectionStrategy`（六向自动连），所以 **`createMainContainer` 完全不需要重写**——充电站像任何 RS 机械一样自动接入相邻网络。
+
+### 14.3 电池卡与输电卡
+
+| 卡 | 效果 | 实现落点 |
+|---|---|---|
+| `battery_upgrade` | 每张 **+1000 FE** 容量（可叠加） | `WirelessCraftingGridItem.getEnergyCapacity(stack)` 改为静态动态计算：`base + countBatteryUpgrades(stack) * batteryUpgradeCapacity`，两侧（客户端 tooltip / 服务端）走同一函数 |
+| `remote_energy_upgrade` | 不再耗终端自身电池，直接花网络电 | `ExtendedWirelessNetworkItemContext` 新增 `remoteEnergy` 字段 |
+
+输电卡只改两个覆写：
+
+```java
+@Override
+public boolean isActive() {
+    if (!remoteEnergy) {
+        return standard.isActive();
+    }
+    return resolveNetwork()
+        .map(network -> !RefinedStorageApi.INSTANCE.isEnergyRequired()
+            || network.getComponent(EnergyNetworkComponent.class).getStored() > 0)
+        .orElse(false);
+}
+
+@Override
+public void drainEnergy(final long amount) {
+    final long cost = isInterdimensional()
+        ? amount * Platform.getConfig().getWirelessCraftingGrid().getInterdimensionalEnergyMultiplier() / 100
+        : amount;
+    if (remoteEnergy && payFromNetwork(cost)) {
+        return;
+    }
+    standard.drainEnergy(cost);
+}
+```
+
+`payFromNetwork` 用 `EnergyNetworkComponent.extract(cost) >= cost` 判断「网络是否足额支付」，**抽不满就整笔回落给物品电池**（不半途改道），保证「网络无电 / 未绑定」时行为与未装卡完全一致。跨维度 ×1.5 的倍率在**两条路径上都生效**（`isInterdimensional()` 要求「插了维度卡**且**绑定维度 ≠ 玩家当前维度」）。
+
+**过渡设计**：电池卡刻意定价在 RS 存储元件递归链的**入门级**（1k 存储方块 + 红石块），前期即可量产；同时它是输电卡的配方原料，所以前期投入不会被浪费。
+
+### 14.4 装配式升级卡（推翻早期的合成式方案）
+
+**早期方案（已删除）**：自定义 `ShapelessRecipe` 子类（`InstallUpgradeRecipe` / `InstallUpgradeRecipeSerializer` + `data/.../recipe/install_upgrade.json`），在工作台把「终端 + 卡」无序合成，把卡写进数据组件。**问题**：装上去拿不下来，换卡必须重做终端，且配方会吞掉终端本体。
+
+**现行方案**：
+
+| 组件 | 职责 |
+|---|---|
+| `UpgradeContainer implements Container` | 把 4 个槽位映射到终端物品的 `upgrades` 数据组件。`snapshot()` 补齐到定长 4，`commit()` 压缩掉空位、全空时 `remove` 整个组件（保持 NBT 干净） |
+| `WirelessCraftingGridUpgradeContainerMenu` | 4 个升级槽（`mayPlace` 仅接受 `Upgrades.isUpgrade(stack)`，`getMaxStackSize()=1`）+ 玩家背包 |
+| `WirelessCraftingGridUpgradeMenuProvider` / `UpgradeMenuData` / `WirelessCraftingGridUpgradeScreen` | 从 `SlotReference` 侧打开界面（因为改的是**物品**而不是方块，不能用 `pos` 定位） |
+| `WirelessCraftingGridItem.use(...)` | 潜行时打开装配界面，否则委托 `super.use` 走标准无线网格逻辑 |
+
+`Upgrades` 工具类提供 `BATTERY_UPGRADES` / `REMOTE_ENERGY_UPGRADES` 等 `TagKey<Item>`、`ALL_UPGRADE_TAGS`、`isUpgrade(ItemStack)`、`countBatteryUpgrades(ItemStack)`、`hasRemoteEnergyUpgrade(ItemStack)`。装配上限 `MAX_UPGRADES = 4`。
+
+**为什么用「物品数据组件 + 界面」而不是 RS 原生升级机制**：RS 原生升级槽是**方块设备侧**的语义（升级装在机器里），而这里要升级的是一张**物品**，两者不通用。故自建 `upgrades` 组件（`List<ItemStack>`），并在物品 tooltip 里列出已装卡。
+
+### 14.5 配置与默认值（0.1.5 新增项）
+
+```java
+public static final long CHARGING_STATION_ENERGY_USAGE  = 8;      // 待机耗电 FE/t
+public static final long CHARGING_STATION_WIRED_RATE    = 100;    // 有线充电 FE/t
+public static final long CHARGING_STATION_WIRELESS_RATE = 10;     // 无线充电 FE/t
+public static final int  CHARGING_STATION_WIRELESS_RADIUS = 8;    // 无线半径（格）
+public static final long CHARGING_STATION_EXTERNAL_CAPACITY = 10000; // 内部 FE 缓冲
+public static final long BATTERY_UPGRADE_CAPACITY       = 1000;   // 每张电池卡容量加成
+```
+
+配置接口相应新增 `getBatteryUpgradeCapacity()` 与 `ChargingStationEntry getChargingStation()`（子接口 `getEnergyUsage` / `getWiredChargeRate` / `getWirelessChargeRate` / `getWirelessRadius`），由 neoforge 侧 `ConfigImpl` 的 `ChargingStationEntryImpl` 实现。
+
+### 14.6 构建期踩坑（checkstyle）
+
+本项目 `build` 包含 checkstyle，以下几条约束在写这些类时反复触发，编码前先记住：
+
+| 规则 | 约束 | 应对 |
+|---|---|---|
+| `CustomImportOrder` | `SAME_PACKAGE(3) → STANDARD_JAVA_PACKAGE → THIRD_PARTY → static`；`com.kokuu.*` 与 `net.*` 属**同一组**，组内字典序、不可插空行 | `javax.*` 归 STANDARD_JAVA_PACKAGE，要单独成组并用空行与 `net.*` 隔开 |
+| `InnerTypeLast` | 内部类必须放类末尾 | `ContainerData` 匿名类 → 提为末尾内部类 `ChargingStationDataSlots`；`Bar` record → 移到 `ChargingStationScreen` 末尾 |
+| `AnonInnerLength` | 匿名类 ≤ 20 行 | 同上，改用具名内部类 |
+| `ReturnCount` | 每方法 ≤ 4 个 return | 用卫语句 + 拆辅助方法（`simulateAccepted` / `deliver`） |
+| `NestedIfDepth` | 嵌套 if ≤ 1 层 | 同上，提前 return |
+
+另：**Java lambda 不能捕获非 final 的循环变量**——循环里注册回调时要先 `final int slot = i;` 再捕获。
+
+### 14.7 对 §12 待验证点的最终裁定
+
+| # | 裁定 |
+|---|---|
+| V1 | ✅ 已核实：`NetworkReceiverBlockEntity` 通过 `NetworkItemTargetBlockEntity.getNetworkForItem()` 暴露家庭网络 |
+| V2 | ✅ 已核实：`WirelessTransmitterBlockEntity` 同样实现 `NetworkItemTargetBlockEntity`；距离校验在 `NetworkItemPlayerValidator`，不在取网络这一步 |
+| V3 | ✅ 已核实：`NetworkItemHelper.bind()` + `DataComponents.getNetworkLocation()`（`GlobalPos` = 维度 + 坐标） |
+| V4 | ✅ 已核实：标准 context 对 Receiver 不做距离判定（它按 `SimpleConnectionStrategy` 走隧道），因此「先判方块类型再分派」的策略成立 |
+| V5 | ⚠️ **裁定为自建**：RS 原生升级机制是方块设备侧语义，物品侧无公开 API，故自建 `upgrades` 数据组件（见 §14.4） |
+| V6 | ✅ 已锁定：基线 **2.0.7**（1.21.1 最新 release），构建脚本实际解析到 2.0.9 也能跑 |
 
 ---
 

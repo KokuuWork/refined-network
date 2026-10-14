@@ -5,6 +5,8 @@ import com.kokuu.rswirelesscrafting.common.Platform;
 import java.util.Optional;
 
 import com.refinedmods.refinedstorage.api.network.Network;
+import com.refinedmods.refinedstorage.api.network.energy.EnergyNetworkComponent;
+import com.refinedmods.refinedstorage.common.api.RefinedStorageApi;
 import com.refinedmods.refinedstorage.common.api.support.network.item.NetworkItemContext;
 import com.refinedmods.refinedstorage.common.api.support.network.item.NetworkItemTargetBlockEntity;
 import com.refinedmods.refinedstorage.common.api.support.slotreference.SlotReference;
@@ -28,6 +30,9 @@ import net.minecraft.world.level.block.entity.BlockEntity;
  *   <li>跨维度且有<b>维度卡</b> → 跳过维度校验，直接取 Network Receiver 暴露的家庭网络（隧道）。</li>
  * </ul>
  *
+ * <p>此外，装了<b>远距离输电卡</b>时，能量不再从物品自身电池扣，而是直接从所绑定的 RS 网络抽；
+ * 若网络抽不出电（网络无电 / 未绑定），回落到物品电池兜底，行为与未装卡一致。
+ *
  * <p>注意：{@code force=true} 时无条件委托 RS 标准实现，因为 RS 用 force 语义
  * 在玩家走远后仍能移除 grid watcher，不能被卡片逻辑改变。
  */
@@ -37,19 +42,22 @@ public class ExtendedWirelessNetworkItemContext implements NetworkItemContext {
     private final SlotReference slotReference;
     private final boolean rangeUpgrade;
     private final boolean interdimensional;
+    private final boolean remoteEnergy;
     private final NetworkItemContext standard;
 
     public ExtendedWirelessNetworkItemContext(final ItemStack stack,
                                               final ServerPlayer player,
                                               final SlotReference slotReference,
                                               final boolean rangeUpgrade,
-                                              final boolean interdimensional) {
+                                              final boolean interdimensional,
+                                              final boolean remoteEnergy) {
         this.stack = stack;
         this.player = player;
         this.slotReference = slotReference;
         this.rangeUpgrade = rangeUpgrade;
         this.interdimensional = interdimensional;
-        this.standard = com.refinedmods.refinedstorage.common.api.RefinedStorageApi.INSTANCE
+        this.remoteEnergy = remoteEnergy;
+        this.standard = RefinedStorageApi.INSTANCE
             .getNetworkItemHelper()
             .createContext(stack, player, slotReference);
     }
@@ -92,9 +100,18 @@ public class ExtendedWirelessNetworkItemContext implements NetworkItemContext {
         return blockEntity instanceof WirelessTransmitterBlockEntity && rangeUpgrade;
     }
 
+    /**
+     * 装了输电卡时，「是否有电」由所绑定网络决定，而不是物品自身电池。
+     */
     @Override
     public boolean isActive() {
-        return standard.isActive();
+        if (!remoteEnergy) {
+            return standard.isActive();
+        }
+        return resolveNetwork()
+            .map(network -> !RefinedStorageApi.INSTANCE.isEnergyRequired()
+                || network.getComponent(EnergyNetworkComponent.class).getStored() > 0)
+            .orElse(false);
     }
 
     @Override
@@ -102,7 +119,19 @@ public class ExtendedWirelessNetworkItemContext implements NetworkItemContext {
         final long cost = isInterdimensional()
             ? amount * Platform.getConfig().getWirelessCraftingGrid().getInterdimensionalEnergyMultiplier() / 100
             : amount;
+        if (remoteEnergy && payFromNetwork(cost)) {
+            return;
+        }
         standard.drainEnergy(cost);
+    }
+
+    /**
+     * @return 网络是否足额支付了这笔能量；否（未绑定 / 网络无电）时由调用方回落到物品电池。
+     */
+    private boolean payFromNetwork(final long cost) {
+        return resolveNetwork()
+            .map(network -> network.getComponent(EnergyNetworkComponent.class).extract(cost) >= cost)
+            .orElse(false);
     }
 
     /**

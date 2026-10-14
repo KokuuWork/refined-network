@@ -192,6 +192,97 @@ def interdimensional_texture():
     return px
 
 
+def battery_texture():
+    """A cell with a bright charge level: the card's effect is 'bigger battery'."""
+    px = hex_card(rgb("#0E2A16"), rgb("#4CAF6A"), rgb("#1E5631"))
+    shell, cap, level, empty = (
+        rgb("#9BE8B4"), rgb("#D8FFE6"), rgb("#48E07E"), rgb("#7CFFA8")
+    )
+    for y in range(4, 13):
+        put(px, 6, y, shell)
+        put(px, 10, y, shell)
+    for x in range(6, 11):
+        put(px, x, 4, shell)
+        put(px, x, 12, shell)
+    for x in range(7, 10):
+        put(px, x, 3, cap)
+    for y in range(9, 12):
+        for x in range(7, 10):
+            put(px, x, y, level)
+    for x in range(7, 10):
+        put(px, x, 6, empty)
+    put(px, 7, 7, empty)
+    put(px, 9, 7, empty)
+    return px
+
+
+def remote_energy_texture():
+    """A bolt: the card pipes network energy over any distance."""
+    px = hex_card(rgb("#3A2405"), rgb("#D9A441"), rgb("#7A5312"))
+    bolt, glow = rgb("#FFE9A8"), rgb("#FFF8DC")
+    for x in (8, 9):
+        put(px, x, 4, bolt)
+    for x in (7, 8):
+        put(px, x, 5, bolt)
+    for x in (6, 7):
+        put(px, x, 6, bolt)
+    for x in (7, 8, 9):
+        put(px, x, 7, bolt)
+    for x in (8, 9):
+        put(px, x, 8, bolt)
+    for x in (7, 8):
+        put(px, x, 9, bolt)
+    for x in (6, 7):
+        put(px, x, 10, bolt)
+    put(px, 9, 5, glow)
+    put(px, 7, 8, glow)
+    return px
+
+
+# ================================================================ block texture
+
+def charging_station_texture():
+    """Machine casing with a dark inset panel and a glowing bolt."""
+    px = canvas()
+    base, shade, light = rgb("#8E8E8E"), rgb("#6A6A6A"), rgb("#B4B4B4")
+    panel, panel_edge = rgb("#3A3A3A"), rgb("#2A2A2A")
+    bolt, bolt_glow = rgb("#5FE0F5"), rgb("#C9F7FF")
+    for y in range(16):
+        for x in range(16):
+            if x in (0, 15) or y in (0, 15):
+                px[y][x] = shade
+            elif x == 1 or y == 1:
+                px[y][x] = light
+            elif (x + y) % 4 == 0:
+                px[y][x] = mix(base, shade, 0.35)
+            else:
+                px[y][x] = base
+    for y in range(3, 13):
+        for x in range(3, 13):
+            px[y][x] = panel
+    for x in range(3, 13):
+        px[3][x] = panel_edge
+        px[12][x] = panel_edge
+    for y in range(3, 13):
+        px[y][3] = panel_edge
+        px[y][12] = panel_edge
+    for x in (8, 9):
+        put(px, x, 5, bolt)
+    for x in (7, 8):
+        put(px, x, 6, bolt)
+    for x in (6, 7):
+        put(px, x, 7, bolt)
+    for x in (7, 8, 9):
+        put(px, x, 8, bolt)
+    for x in (8, 9):
+        put(px, x, 9, bolt)
+    for x in (7, 8):
+        put(px, x, 10, bolt)
+    put(px, 9, 6, bolt_glow)
+    put(px, 7, 9, bolt_glow)
+    return px
+
+
 # ====================================================================== driver
 
 def main():
@@ -199,12 +290,21 @@ def main():
         ("wireless_crafting_grid/inactive.png", grid_texture(False)),
         ("wireless_crafting_grid/active.png", grid_texture(True)),
         ("range_upgrade.png", range_texture()),
+        ("battery_upgrade.png", battery_texture()),
         ("interdimensional_upgrade.png", interdimensional_texture()),
+        ("remote_energy_upgrade.png", remote_energy_texture()),
     ]
     for name, pixels in targets:
         path = os.path.join(OUT, name)
         write_png(path, pixels)
         print("wrote", path)
+
+    block_out = os.path.join(HERE, "rswirelesscrafting-common", "src", "main", "resources",
+                             "assets", "rswirelesscrafting", "textures", "block")
+    os.makedirs(block_out, exist_ok=True)
+    path = os.path.join(block_out, "charging_station.png")
+    write_png(path, charging_station_texture())
+    print("wrote", path)
 
 
 if __name__ == "__main__":

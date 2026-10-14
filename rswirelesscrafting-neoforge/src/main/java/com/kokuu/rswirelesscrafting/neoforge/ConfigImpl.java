@@ -11,9 +11,11 @@ public class ConfigImpl implements Config {
     private final ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
     private final ModConfigSpec spec;
     private final WirelessCraftingGridEntry wirelessCraftingGrid;
+    private final ChargingStationEntry chargingStation;
 
     public ConfigImpl() {
         wirelessCraftingGrid = new WirelessCraftingGridEntryImpl();
+        chargingStation = new ChargingStationEntryImpl();
         spec = builder.build();
     }
 
@@ -26,12 +28,18 @@ public class ConfigImpl implements Config {
         return wirelessCraftingGrid;
     }
 
+    @Override
+    public ChargingStationEntry getChargingStation() {
+        return chargingStation;
+    }
+
     private static String translationKey(final String value) {
         return createTranslationKey("text.autoconfig", "option." + value);
     }
 
     private class WirelessCraftingGridEntryImpl implements WirelessCraftingGridEntry {
         private final ModConfigSpec.LongValue energyCapacity;
+        private final ModConfigSpec.LongValue batteryUpgradeCapacity;
         private final ModConfigSpec.LongValue openEnergyUsage;
         private final ModConfigSpec.LongValue craftingEnergyUsage;
         private final ModConfigSpec.LongValue autocraftingEnergyUsage;
@@ -45,6 +53,11 @@ public class ConfigImpl implements Config {
             energyCapacity = builder
                 .translation(translationKey("wirelessCraftingGrid.energyCapacity"))
                 .defineInRange("energyCapacity", DefaultEnergyUsage.WIRELESS_CRAFTING_GRID_CAPACITY, 1, Long.MAX_VALUE);
+            batteryUpgradeCapacity = builder
+                .translation(translationKey("wirelessCraftingGrid.batteryUpgradeCapacity"))
+                .comment("How much extra energy capacity a single Battery Upgrade adds.")
+                .defineInRange("batteryUpgradeCapacity", DefaultEnergyUsage.BATTERY_UPGRADE_CAPACITY, 0,
+                    Long.MAX_VALUE);
             openEnergyUsage = builder
                 .translation(translationKey("wirelessCraftingGrid.openEnergyUsage"))
                 .defineInRange("openEnergyUsage", DefaultEnergyUsage.WIRELESS_CRAFTING_GRID_OPEN, 0, Long.MAX_VALUE);
@@ -82,6 +95,11 @@ public class ConfigImpl implements Config {
         }
 
         @Override
+        public long getBatteryUpgradeCapacity() {
+            return batteryUpgradeCapacity.get();
+        }
+
+        @Override
         public long getOpenEnergyUsage() {
             return openEnergyUsage.get();
         }
@@ -114,6 +132,56 @@ public class ConfigImpl implements Config {
         @Override
         public int getExtendedRange() {
             return extendedRange.get();
+        }
+    }
+
+    private class ChargingStationEntryImpl implements ChargingStationEntry {
+        private final ModConfigSpec.LongValue energyUsage;
+        private final ModConfigSpec.LongValue wiredChargeRate;
+        private final ModConfigSpec.LongValue wirelessChargeRate;
+        private final ModConfigSpec.IntValue wirelessRadius;
+
+        ChargingStationEntryImpl() {
+            builder.translation(translationKey("chargingStation")).push("chargingStation");
+            energyUsage = builder
+                .translation(translationKey("chargingStation.energyUsage"))
+                .comment("Idle energy usage of the Charging Station on the network.")
+                .defineInRange("energyUsage", DefaultEnergyUsage.CHARGING_STATION_ENERGY_USAGE, 0, Long.MAX_VALUE);
+            wiredChargeRate = builder
+                .translation(translationKey("chargingStation.wiredChargeRate"))
+                .comment("Energy per tick transferred to the item in the wired slot.")
+                .defineInRange("wiredChargeRate", DefaultEnergyUsage.CHARGING_STATION_WIRED_RATE, 0, Long.MAX_VALUE);
+            wirelessChargeRate = builder
+                .translation(translationKey("chargingStation.wirelessChargeRate"))
+                .comment("Energy per tick transferred to nearby players' items.")
+                .defineInRange("wirelessChargeRate", DefaultEnergyUsage.CHARGING_STATION_WIRELESS_RATE, 0,
+                    Long.MAX_VALUE);
+            wirelessRadius = builder
+                .translation(translationKey("chargingStation.wirelessRadius"))
+                .comment("Radius (in blocks) of the wireless charging area.")
+                .defineInRange("wirelessRadius", DefaultEnergyUsage.CHARGING_STATION_WIRELESS_RADIUS, 0,
+                    Integer.MAX_VALUE);
+            builder.pop();
+        }
+
+        @Override
+        public long getEnergyUsage() {
+            return energyUsage.get();
+        }
+
+        @Override
+        public long getWiredChargeRate() {
+            return wiredChargeRate.get();
+        }
+
+        @Override
+        public long getWirelessChargeRate() {
+            return wirelessChargeRate.get();
+        }
+
+        @Override
+        public int getWirelessRadius() {
+            return wirelessRadius.get();
         }
     }
 }

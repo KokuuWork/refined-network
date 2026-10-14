@@ -25,10 +25,14 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 
 import static java.util.Objects.requireNonNullElse;
 
@@ -43,15 +47,21 @@ public class WirelessCraftingGridItem extends AbstractNetworkEnergyItem {
         );
     }
 
+    /**
+     * 电池容量 = 基础容量 + 已装配的电池升级卡数量 × 单卡加成。
+     *
+     * <p>每次查询能量能力都会重新计算，所以装配 / 拆卸电池升级卡后容量立刻生效，
+     * 无需重新合成终端。
+     */
     public EnergyStorage createEnergyStorage(final ItemStack stack) {
-        final EnergyStorage energyStorage = new EnergyStorageImpl(
-            Math.clamp(
-                Platform.getConfig().getWirelessCraftingGrid().getEnergyCapacity(),
-                1,
-                Long.MAX_VALUE
-            )
-        );
+        final EnergyStorage energyStorage = new EnergyStorageImpl(getEnergyCapacity(stack));
         return RefinedStorageApi.INSTANCE.asItemEnergyStorage(energyStorage, stack);
+    }
+
+    public static long getEnergyCapacity(final ItemStack stack) {
+        final long base = Platform.getConfig().getWirelessCraftingGrid().getEnergyCapacity();
+        final long perUpgrade = Platform.getConfig().getWirelessCraftingGrid().getBatteryUpgradeCapacity();
+        return Math.max(1L, base + (long) Upgrades.countBatteryUpgrades(stack) * perUpgrade);
     }
 
     @Override
@@ -99,8 +109,9 @@ public class WirelessCraftingGridItem extends AbstractNetworkEnergyItem {
 
     /**
      * ★ 核心挂载点：覆写 3 参 use，恒注入自定义 NetworkItemContext，
-     * 由 ExtendedWirelessNetworkItemContext 实现「范围卡 → 同维度无限范围」与
-     * 「维度卡 → 跨维度走 Network Transmitter/Receiver 隧道」。
+     * 由 ExtendedWirelessNetworkItemContext 实现「范围卡 → 同维度无限范围」、
+     * 「维度卡 → 跨维度走 Network Transmitter/Receiver 隧道」与
+     * 「输电卡 → 直接消费所绑定网络里的能量」。
      */
     @Override
     public void use(final ServerPlayer player,
@@ -111,9 +122,32 @@ public class WirelessCraftingGridItem extends AbstractNetworkEnergyItem {
             player,
             slotReference,
             Upgrades.hasRangeUpgrade(stack),
-            Upgrades.hasInterdimensionalUpgrade(stack)
+            Upgrades.hasInterdimensionalUpgrade(stack),
+            Upgrades.hasRemoteEnergyUpgrade(stack)
         );
         use(stack.get(DataComponents.CUSTOM_NAME), player, slotReference, context);
+    }
+
+    /**
+     * 潜行 + 右键打开「升级装配」界面（直接插拔升级卡）；普通右键照旧打开合成界面。
+     */
+    @Override
+    public InteractionResultHolder<ItemStack> use(final Level level,
+                                                  final Player player,
+                                                  final InteractionHand hand) {
+        final ItemStack stack = player.getItemInHand(hand);
+        if (player.isCrouching()) {
+            if (player instanceof ServerPlayer serverPlayer) {
+                final SlotReference slotReference =
+                    RefinedStorageApi.INSTANCE.createInventorySlotReference(player, hand);
+                com.refinedmods.refinedstorage.common.Platform.INSTANCE.getMenuOpener().openMenu(
+                    serverPlayer,
+                    new WirelessCraftingGridUpgradeMenuProvider(slotReference)
+                );
+            }
+            return InteractionResultHolder.consume(stack);
+        }
+        return super.use(level, player, hand);
     }
 
     @Override

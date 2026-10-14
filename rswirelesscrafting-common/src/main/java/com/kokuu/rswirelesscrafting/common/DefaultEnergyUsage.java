@@ -10,6 +10,14 @@ public final class DefaultEnergyUsage {
     public static final long INTERDIMENSIONAL_ENERGY_MULTIPLIER = 150;
     public static final int EXTENDED_RANGE = 64;
 
+    public static final long CHARGING_STATION_ENERGY_USAGE = 8;
+    public static final long CHARGING_STATION_WIRED_RATE = 100;
+    public static final long CHARGING_STATION_WIRELESS_RATE = 10;
+    public static final int CHARGING_STATION_WIRELESS_RADIUS = 8;
+    public static final long CHARGING_STATION_EXTERNAL_CAPACITY = 10000;
+
+    public static final long BATTERY_UPGRADE_CAPACITY = 1000;
+
     private DefaultEnergyUsage() {
     }
 }

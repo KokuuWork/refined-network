@@ -10,7 +10,10 @@ public final class CreativeModeTabItems {
 
     public static void addItems(final Consumer<ItemStack> consumer) {
         consumer.accept(Items.INSTANCE.getWirelessCraftingGrid().getDefaultInstance());
+        consumer.accept(Items.INSTANCE.getBatteryUpgrade().getDefaultInstance());
         consumer.accept(Items.INSTANCE.getRangeUpgrade().getDefaultInstance());
         consumer.accept(Items.INSTANCE.getInterdimensionalUpgrade().getDefaultInstance());
+        consumer.accept(Items.INSTANCE.getRemoteEnergyUpgrade().getDefaultInstance());
+        consumer.accept(Items.INSTANCE.getChargingStationBlockItem().getDefaultInstance());
     }
 }

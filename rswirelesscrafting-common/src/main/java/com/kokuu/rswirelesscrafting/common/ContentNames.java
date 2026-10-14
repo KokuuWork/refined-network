@@ -21,9 +21,25 @@ public final class ContentNames {
         "item",
         "range_upgrade"
     );
+    public static final MutableComponent BATTERY_UPGRADE = createTranslation(
+        "item",
+        "battery_upgrade"
+    );
     public static final MutableComponent INTERDIMENSIONAL_UPGRADE = createTranslation(
         "item",
         "interdimensional_upgrade"
+    );
+    public static final MutableComponent REMOTE_ENERGY_UPGRADE = createTranslation(
+        "item",
+        "remote_energy_upgrade"
+    );
+    public static final MutableComponent CHARGING_STATION = createTranslation(
+        "block",
+        "charging_station"
+    );
+    public static final MutableComponent WIRELESS_CRAFTING_GRID_UPGRADES_TITLE = createTranslation(
+        "gui",
+        "wireless_crafting_grid_upgrades"
     );
 
     // Tooltips. These are stored fully styled: MutableComponent#withStyle mutates in place,
@@ -57,6 +73,14 @@ public final class ContentNames {
         "item",
         "range_upgrade.desc"
     ).withStyle(ChatFormatting.AQUA);
+    public static final MutableComponent BATTERY_UPGRADE_DESC = createTranslation(
+        "item",
+        "battery_upgrade.desc"
+    ).withStyle(ChatFormatting.GREEN);
+    public static final String BATTERY_UPGRADE_CAPACITY_TRANSLATION_KEY = createTranslationKey(
+        "item",
+        "battery_upgrade.capacity"
+    );
     public static final MutableComponent RANGE_UPGRADE_REQUIRES = createTranslation(
         "item",
         "range_upgrade.requires"
@@ -73,6 +97,27 @@ public final class ContentNames {
         "item",
         "interdimensional_upgrade.energy"
     );
+    public static final MutableComponent REMOTE_ENERGY_UPGRADE_DESC = createTranslation(
+        "item",
+        "remote_energy_upgrade.desc"
+    ).withStyle(ChatFormatting.GOLD);
+    public static final MutableComponent REMOTE_ENERGY_UPGRADE_REQUIRES = createTranslation(
+        "item",
+        "remote_energy_upgrade.requires"
+    ).withStyle(ChatFormatting.DARK_GRAY);
+
+    public static final MutableComponent CHARGING_STATION_HELP = createTranslation(
+        "block",
+        "charging_station.help"
+    ).withStyle(ChatFormatting.GRAY);
+    public static final MutableComponent CHARGING_STATION_SLOT_HELP = createTranslation(
+        "gui",
+        "charging_station.slot_help"
+    ).withStyle(ChatFormatting.DARK_GRAY);
+    public static final MutableComponent CHARGING_STATION_WIRELESS_INFO = createTranslation(
+        "gui",
+        "charging_station.wireless_info"
+    ).withStyle(ChatFormatting.DARK_GRAY);
 
     public static final MutableComponent DIMENSION_OVERWORLD = createTranslation(
         "item",

@@ -1,13 +1,18 @@
 package com.kokuu.rswirelesscrafting.neoforge;
 
 import com.kokuu.rswirelesscrafting.common.AbstractModInitializer;
+import com.kokuu.rswirelesscrafting.common.BlockEntities;
+import com.kokuu.rswirelesscrafting.common.Blocks;
 import com.kokuu.rswirelesscrafting.common.ContentIds;
 import com.kokuu.rswirelesscrafting.common.CreativeModeTabItems;
 import com.kokuu.rswirelesscrafting.common.Items;
 import com.kokuu.rswirelesscrafting.common.Platform;
-import com.kokuu.rswirelesscrafting.common.upgrade.InstallUpgradeRecipeSerializer;
+import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlock;
+import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockEntity;
+import com.kokuu.rswirelesscrafting.common.upgrade.BatteryUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.InterdimensionalUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.RangeUpgradeItem;
+import com.kokuu.rswirelesscrafting.common.upgrade.RemoteEnergyUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.WirelessCraftingGridItem;
 
 import java.util.function.Supplier;
@@ -25,10 +30,15 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.MapColor;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -47,6 +57,9 @@ import static com.kokuu.rswirelesscrafting.common.ModIdentifierUtil.MOD_ID;
 
 @Mod(MOD_ID)
 public class ModInitializer extends AbstractModInitializer {
+    private final DeferredRegister<Block> blockRegistry = DeferredRegister.create(BuiltInRegistries.BLOCK, MOD_ID);
+    private final DeferredRegister<BlockEntityType<?>> blockEntityTypeRegistry =
+        DeferredRegister.create(BuiltInRegistries.BLOCK_ENTITY_TYPE, MOD_ID);
     private final DeferredRegister<Item> itemRegistry = DeferredRegister.create(BuiltInRegistries.ITEM, MOD_ID);
     private final DeferredRegister<MenuType<?>> menuTypeRegistry =
         DeferredRegister.create(BuiltInRegistries.MENU, MOD_ID);
@@ -54,13 +67,12 @@ public class ModInitializer extends AbstractModInitializer {
         BuiltInRegistries.DATA_COMPONENT_TYPE,
         MOD_ID
     );
-    private final DeferredRegister<RecipeSerializer<?>> recipeSerializerRegistry =
-        DeferredRegister.create(BuiltInRegistries.RECIPE_SERIALIZER, MOD_ID);
 
     public ModInitializer(final IEventBus eventBus, final ModContainer modContainer) {
         final ConfigImpl config = new ConfigImpl();
         modContainer.registerConfig(ModConfig.Type.COMMON, config.getSpec());
         Platform.setConfigProvider(() -> config);
+        Platform.setItemEnergyProvider(new PlatformImpl());
         if (FMLEnvironment.dist == Dist.CLIENT) {
             eventBus.addListener(ClientModInitializer::onClientSetup);
             eventBus.addListener(ClientModInitializer::onRegisterMenuScreens);
@@ -73,10 +85,33 @@ public class ModInitializer extends AbstractModInitializer {
     }
 
     private void registerContent(final IEventBus eventBus) {
+        registerBlocks(eventBus);
         registerItems(eventBus);
         registerMenus(eventBus);
         registerDataComponents(eventBus);
-        registerRecipeSerializers(eventBus);
+    }
+
+    private void registerBlocks(final IEventBus eventBus) {
+        final RegistryCallback<Block> callback = new ForgeRegistryCallback<>(blockRegistry);
+        Blocks.INSTANCE.setChargingStation(callback.register(
+            ContentIds.CHARGING_STATION,
+            () -> new ChargingStationBlock(BlockBehaviour.Properties.of()
+                .mapColor(MapColor.METAL)
+                .strength(2.0F, 6.0F)
+                .sound(SoundType.METAL))
+        ));
+        blockRegistry.register(eventBus);
+
+        final RegistryCallback<BlockEntityType<?>> blockEntityCallback =
+            new ForgeRegistryCallback<>(blockEntityTypeRegistry);
+        BlockEntities.INSTANCE.setChargingStation(blockEntityCallback.register(
+            ContentIds.CHARGING_STATION,
+            () -> BlockEntityType.Builder.of(
+                ChargingStationBlockEntity::new,
+                Blocks.INSTANCE.getChargingStation()
+            ).build(null)
+        ));
+        blockEntityTypeRegistry.register(eventBus);
     }
 
     private void registerItems(final IEventBus eventBus) {
@@ -99,11 +134,23 @@ public class ModInitializer extends AbstractModInitializer {
                 }
             })
         );
+        Items.INSTANCE.setBatteryUpgrade(
+            callback.register(ContentIds.BATTERY_UPGRADE, BatteryUpgradeItem::new)
+        );
         Items.INSTANCE.setRangeUpgrade(
             callback.register(ContentIds.RANGE_UPGRADE, RangeUpgradeItem::new)
         );
         Items.INSTANCE.setInterdimensionalUpgrade(
             callback.register(ContentIds.INTERDIMENSIONAL_UPGRADE, InterdimensionalUpgradeItem::new)
+        );
+        Items.INSTANCE.setRemoteEnergyUpgrade(
+            callback.register(ContentIds.REMOTE_ENERGY_UPGRADE, RemoteEnergyUpgradeItem::new)
+        );
+        Items.INSTANCE.setChargingStationBlockItem(
+            callback.register(
+                ContentIds.CHARGING_STATION,
+                () -> new BlockItem(Blocks.INSTANCE.getChargingStation(), new Item.Properties())
+            )
         );
     }
 
@@ -128,15 +175,6 @@ public class ModInitializer extends AbstractModInitializer {
         dataComponentTypeRegistry.register(eventBus);
     }
 
-    private void registerRecipeSerializers(final IEventBus eventBus) {
-        final RegistryCallback<RecipeSerializer<?>> callback = new ForgeRegistryCallback<>(recipeSerializerRegistry);
-        callback.register(
-            com.kokuu.rswirelesscrafting.common.ModIdentifierUtil.createIdentifier("install_upgrade"),
-            () -> InstallUpgradeRecipeSerializer.INSTANCE
-        );
-        recipeSerializerRegistry.register(eventBus);
-    }
-
     private void registerCapabilities(final RegisterCapabilitiesEvent event) {
         event.registerItem(
             Capabilities.EnergyStorage.ITEM,
@@ -144,6 +182,11 @@ public class ModInitializer extends AbstractModInitializer {
                 Items.INSTANCE.getWirelessCraftingGrid().createEnergyStorage(stack)
             ),
             Items.INSTANCE.getWirelessCraftingGrid()
+        );
+        event.registerBlockEntity(
+            Capabilities.EnergyStorage.BLOCK,
+            BlockEntities.INSTANCE.getChargingStation(),
+            (blockEntity, side) -> new ChargingStationEnergyStorage(blockEntity)
         );
     }
 
