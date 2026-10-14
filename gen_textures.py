@@ -239,18 +239,67 @@ def remote_energy_texture():
     return px
 
 
+def energy_texture():
+    """A downward arrow: the card's effect is 'distance energy halved'."""
+    px = hex_card(rgb("#3A2E05"), rgb("#D9B441"), rgb("#7A6312"))
+    arrow, tip = rgb("#FFE9A8"), rgb("#FFF8DC")
+    for x in range(5, 11):
+        put(px, x, 4, arrow)
+    for x in range(6, 10):
+        put(px, x, 5, arrow)
+    for x in range(7, 9):
+        put(px, x, 6, arrow)
+    for y in range(7, 11):
+        put(px, 7, y, arrow)
+        put(px, 8, y, arrow)
+    put(px, 7, 10, tip)
+    put(px, 8, 10, tip)
+    return px
+
+
+def advanced_energy_texture():
+    """A bolt with a slash: the card's effect is 'distance energy removed'."""
+    px = hex_card(rgb("#3A0A0A"), rgb("#D94A4A"), rgb("#7A1A1A"))
+    bolt, slash, glow = rgb("#FFB0B0"), rgb("#FFE0E0"), rgb("#FFF0F0")
+    for x in (8, 9):
+        put(px, x, 4, bolt)
+    for x in (7, 8):
+        put(px, x, 5, bolt)
+    for x in (6, 7):
+        put(px, x, 6, bolt)
+    for x in (7, 8, 9):
+        put(px, x, 7, bolt)
+    for x in (8, 9):
+        put(px, x, 8, bolt)
+    for x in (7, 8):
+        put(px, x, 9, bolt)
+    for x in (9, 8, 7, 6, 5):
+        put(px, x, 14 - x, slash)
+    put(px, 9, 5, glow)
+    put(px, 6, 6, glow)
+    return px
+
+
 # ================================================================ block texture
 
-def terminal_charging_station_texture():
-    """Machine casing with a dark inset panel, a glowing bolt, and a strip of
-    six indicator lights (3 wired + 3 wireless) hinting at the connection panel.
+def terminal_charging_station_texture(powered=True, wireless=True):
+    """Machine casing with a dark inset panel, a glowing bolt, and two indicator
+    lights: the bolt shows whether the station is powered, and a small corner
+    lamp shows whether wireless charging is enabled (turned off by redstone).
 
-    Neutral grey casing, cyan bolt — the terminal's whole job is pushing energy.
+    Neutral grey casing — the terminal's whole job is pushing energy.
     """
     px = canvas()
     base, shade, light = rgb("#8E8E8E"), rgb("#6A6A6A"), rgb("#B4B4B4")
     fin, fin_light = rgb("#5A5A5A"), rgb("#C2C2C2")
-    bolt, bolt_glow = rgb("#5FE0F5"), rgb("#C9F7FF")
+    if powered:
+        bolt, bolt_glow = rgb("#5FE0F5"), rgb("#C9F7FF")
+    else:
+        bolt, bolt_glow = rgb("#3E3E3E"), rgb("#333333")
+    if wireless:
+        wifi = rgb("#34E0C8")
+    else:
+        wifi = rgb("#3A3A3A")
     for y in range(16):
         for x in range(16):
             if x in (0, 15) or y in (0, 15):
@@ -275,6 +324,11 @@ def terminal_charging_station_texture():
     for y in range(3, 13):
         px[y][3] = panel_edge
         px[y][12] = panel_edge
+    # wireless indicator lamp (top-right corner of the panel, 2x2)
+    for y in (4, 5):
+        for x in (10, 11):
+            px[y][x] = wifi
+    # bolt (powered indicator)
     for x in (8, 9):
         put(px, x, 5, bolt)
     for x in (7, 8):
@@ -302,6 +356,8 @@ def main():
         ("battery_upgrade.png", battery_texture()),
         ("interdimensional_upgrade.png", interdimensional_texture()),
         ("remote_energy_upgrade.png", remote_energy_texture()),
+        ("energy_upgrade.png", energy_texture()),
+        ("advanced_energy_upgrade.png", advanced_energy_texture()),
     ]
     for name, pixels in targets:
         path = os.path.join(OUT, name)
@@ -311,9 +367,17 @@ def main():
     block_out = os.path.join(HERE, "rswirelesscrafting-common", "src", "main", "resources",
                              "assets", "rswirelesscrafting", "textures", "block")
     os.makedirs(block_out, exist_ok=True)
-    path = os.path.join(block_out, "terminal_charging_station.png")
-    write_png(path, terminal_charging_station_texture())
-    print("wrote", path)
+    station_textures = [
+        ("terminal_charging_station.png", terminal_charging_station_texture(True, True)),
+        ("terminal_charging_station_wireless_off.png", terminal_charging_station_texture(True, False)),
+        ("terminal_charging_station_unpowered.png", terminal_charging_station_texture(False, True)),
+        ("terminal_charging_station_unpowered_wireless_off.png",
+         terminal_charging_station_texture(False, False)),
+    ]
+    for name, pixels in station_textures:
+        path = os.path.join(block_out, name)
+        write_png(path, pixels)
+        print("wrote", path)
 
 
 if __name__ == "__main__":

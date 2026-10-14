@@ -50,6 +50,10 @@ import net.minecraft.world.level.block.state.BlockState;
  * <p>能量来源优先用接入的 RS 网络（{@link EnergyNetworkComponent}），取不到电时回落到
  * 内部 FE 缓冲（由其他模组以标准 Forge Energy 输入）。
  *
+ * <p><b>基础待机损耗</b>：只要无线充电模块在运行，就按 {@code energyUsage} 每秒常驻扣电
+ * （充电耗电另算）。可被两处开关关掉：① 配置总闸 {@code idleEnergyUsageEnabled}；
+ * ② 红石信号——被红石充能即关闭无线充电并停扣待机损耗，作为省电开关。
+ *
  * <p>连接面板的状态（3 有线槽 + 3 无线链接）由服务端每 tick 计算并写进 {@link ContainerData}，
  * 多人同时靠近时每个玩家独占一条无线链接，状态互不干扰。
  */
@@ -60,6 +64,7 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
     private static final int WIRELESS_LINK_COUNT = 3;
     private static final int DEVICES_PER_LINK = 3;
     private static final int DATA_SIZE = 10;
+    private static final int WIRED_EFFICIENCY_PERCENT = 100;
     private static final String EXTERNAL_ENERGY_TAG = "ExternalEnergy";
     private static final String ITEMS_TAG = "Items";
 
@@ -101,9 +106,46 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
         }
         final Config.ChargingStationEntry config = entry();
         refreshNetworkEnergy();
-        consumeEnergy(idleMeter.next(config.getEnergyUsage()));
+        final boolean wirelessEnabled = !isRedstoneDisabling();
+        final boolean powered = networkStored > 0 || externalEnergy > 0;
+        updateBlockState(powered, wirelessEnabled);
+        if (wirelessEnabled && config.isIdleEnergyUsageEnabled()) {
+            consumeEnergy(idleMeter.next(config.getEnergyUsage()));
+        }
         chargeWiredSlots(config);
-        chargeWireless(serverLevel, config);
+        if (wirelessEnabled) {
+            chargeWireless(serverLevel, config);
+        } else {
+            clearWirelessLinks();
+        }
+    }
+
+    /**
+     * 红石信号是「无线充电」的省电开关：被红石充能时关闭无线充电，并停扣基础待机损耗
+     * （有线槽仍正常工作）。玩家拉下拉杆即可关掉无线模块、省下待机损耗。
+     */
+    private boolean isRedstoneDisabling() {
+        return level != null && level.hasNeighborSignal(worldPosition);
+    }
+
+    /**
+     * 把「通电（有无能量来源）」与「无线是否开启」同步到两个方块状态，
+     * 外形上的电源灯与无线灯各自亮/灭。只在状态实际变化时写一次，避免每 tick 无谓刷新。
+     */
+    private void updateBlockState(final boolean powered, final boolean wirelessEnabled) {
+        if (level == null) {
+            return;
+        }
+        final BlockState state = getBlockState();
+        final boolean poweredChanged = state.getValue(ChargingStationBlock.POWERED) != powered;
+        final boolean wirelessChanged = state.getValue(ChargingStationBlock.WIRELESS) != wirelessEnabled;
+        if (poweredChanged || wirelessChanged) {
+            level.setBlockAndUpdate(
+                worldPosition,
+                state.setValue(ChargingStationBlock.POWERED, powered)
+                    .setValue(ChargingStationBlock.WIRELESS, wirelessEnabled)
+            );
+        }
     }
 
     private void refreshNetworkEnergy() {
@@ -132,7 +174,7 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
             return ChargeStatus.IDLE;
         }
         final long budget = wiredMeters[slot].next(config.getWiredChargeRate());
-        final long charged = budget > 0 ? chargeItem(stack, budget) : 0;
+        final long charged = budget > 0 ? chargeItem(stack, budget, WIRED_EFFICIENCY_PERCENT) : 0;
         if (charged > 0) {
             return ChargeStatus.CHARGING;
         }
@@ -151,7 +193,7 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
         final List<ServerPlayer> nearby = nearbyPlayersByDistance(serverLevel, radius);
         for (int link = 0; link < WIRELESS_LINK_COUNT; link++) {
             wirelessActive[link] = link < nearby.size()
-                && chargePlayerDevices(nearby.get(link), perDeviceBudget);
+                && chargePlayerDevices(nearby.get(link), perDeviceBudget, config.getWirelessChargeEfficiencyPercent());
         }
     }
 
@@ -182,7 +224,9 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
      *
      * @return 本 tick 是否真的充入了能量（用于点亮该条无线链接）
      */
-    private boolean chargePlayerDevices(final ServerPlayer player, final long perDeviceBudget) {
+    private boolean chargePlayerDevices(final ServerPlayer player,
+                                        final long perDeviceBudget,
+                                        final int efficiencyPercent) {
         final Inventory inventory = player.getInventory();
         boolean anyCharged = false;
         int devicesCharged = 0;
@@ -191,7 +235,7 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
             if (stack.isEmpty()) {
                 continue;
             }
-            final long charged = chargeItem(stack, perDeviceBudget);
+            final long charged = chargeItem(stack, perDeviceBudget, efficiencyPercent);
             if (charged <= 0) {
                 continue;
             }
@@ -216,14 +260,17 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
     // -------------------------------------------------------------- 核心充电
 
     /**
+     * @param efficiencyPercent 充电效率（百分比）：充入设备 {@code given} 需要消耗
+     *                          {@code given * 100 / efficiencyPercent} 的能量（向上取整），
+     *                          差额作为传输损耗。100 = 无损耗（有线）。
      * @return 实际充入物品的能量
      */
-    private long chargeItem(final ItemStack stack, final long rate) {
+    private long chargeItem(final ItemStack stack, final long rate, final int efficiencyPercent) {
         long given = 0;
         final Platform.ItemEnergyAccess access =
             rate > 0 ? Platform.getItemEnergy(stack).orElse(null) : null;
         if (access != null) {
-            given = deliver(access, simulateAccepted(access, rate));
+            given = deliver(access, simulateAccepted(access, rate), efficiencyPercent);
         }
         return given;
     }
@@ -241,16 +288,42 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
         return missing <= 0 ? 0 : access.receive(Math.min(rate, missing), true);
     }
 
-    private long deliver(final Platform.ItemEnergyAccess access, final long accepted) {
-        final long available = accepted > 0 ? availableEnergy() : 0;
+    /**
+     * 把充入量按效率折算成实际消耗后充入。
+     *
+     * <p>先按可用能量折算「最多能充多少」（{@code available * efficiency / 100}，向下取整，
+     * 保证不超支），再真正充入并按 {@link #costFor(long, int)} 扣掉对应消耗（向上取整，
+     * 防止低效率时 0 损耗白嫖）。
+     */
+    private long deliver(final Platform.ItemEnergyAccess access,
+                         final long accepted,
+                         final int efficiencyPercent) {
+        if (accepted <= 0) {
+            return 0;
+        }
+        final long available = availableEnergy();
         if (available <= 0) {
             return 0;
         }
-        final long given = access.receive(Math.min(accepted, available), false);
+        final long payable = Math.min(accepted, available * efficiencyPercent / 100);
+        if (payable <= 0) {
+            return 0;
+        }
+        final long given = access.receive(payable, false);
         if (given > 0) {
-            consumeEnergy(given);
+            consumeEnergy(costFor(given, efficiencyPercent));
         }
         return given;
+    }
+
+    /**
+     * 充入 {@code given} 能量需要消耗多少网络能量（按效率折算，向上取整）。
+     */
+    private long costFor(final long given, final int efficiencyPercent) {
+        if (efficiencyPercent >= 100) {
+            return given;
+        }
+        return (given * 100 + efficiencyPercent - 1) / efficiencyPercent;
     }
 
     // ------------------------------------------------------------ 能量账本

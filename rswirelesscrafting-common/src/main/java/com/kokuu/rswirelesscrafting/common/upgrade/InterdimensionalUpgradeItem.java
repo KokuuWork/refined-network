@@ -38,7 +38,7 @@ public class InterdimensionalUpgradeItem extends Item {
         lines.add(ContentNames.INTERDIMENSIONAL_UPGRADE_REQUIRES);
         lines.add(Component.translatable(
             ContentNames.INTERDIMENSIONAL_UPGRADE_ENERGY_TRANSLATION_KEY,
-            Platform.getConfig().getWirelessCraftingGrid().getInterdimensionalEnergyMultiplier()
+            Platform.getConfig().getDistanceEnergy().getInterdimensionalMultiplier()
         ).withStyle(ChatFormatting.DARK_GRAY));
     }
 }

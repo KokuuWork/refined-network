@@ -10,22 +10,45 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
 
 /**
  * 终端充电站方块。接入 RS 网络靠 {@code AbstractNetworkNodeContainerBlockEntity} 的默认连接策略
  * （六向自动连接），因此贴在线缆旁即可与网络互通。
+ *
+ * <p>带两个独立方块状态，把外形拆成两种亮灭：
+ * <ul>
+ *   <li>{@link #POWERED}——是否通电（有能量来源），电源指示灯亮/灭；</li>
+ *   <li>{@link #WIRELESS}——无线充电是否开启（红石信号可关掉），无线指示灯亮/灭。</li>
+ * </ul>
+ * 两者组合成 4 种形态，玩家不用打开界面就能分别看出供电与无线状态。
  */
 public class ChargingStationBlock extends BaseEntityBlock {
     public static final MapCodec<ChargingStationBlock> CODEC = simpleCodec(ChargingStationBlock::new);
 
+    public static final BooleanProperty POWERED = BooleanProperty.create("powered");
+    public static final BooleanProperty WIRELESS = BooleanProperty.create("wireless");
+
     public ChargingStationBlock(final Properties properties) {
         super(properties);
+        registerDefaultState(getDefaultState());
+    }
+
+    private BlockState getDefaultState() {
+        return getStateDefinition().any().setValue(POWERED, true).setValue(WIRELESS, true);
+    }
+
+    @Override
+    protected void createBlockStateDefinition(final StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(POWERED, WIRELESS);
     }
 
     @Override

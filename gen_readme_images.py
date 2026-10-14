@@ -227,6 +227,7 @@ def load_assets():
             "elytra": "assets/minecraft/textures/item/elytra.png",
             "netherite_ingot": "assets/minecraft/textures/item/netherite_ingot.png",
             "quartz": "assets/minecraft/textures/item/quartz.png",
+            "copper_ingot": "assets/minecraft/textures/item/copper_ingot.png",
             # Lightning rods are blocks, so their art only exists under textures/block.
             "lightning_rod": "assets/minecraft/textures/block/lightning_rod.png",
             "beacon": "assets/minecraft/textures/block/beacon.png",
@@ -240,8 +241,10 @@ def load_assets():
     for key, path in {
         "quartz_enriched_iron": "item/quartz_enriched_iron.png",
         "advanced_processor": "item/advanced_processor.png",
+        "basic_processor": "item/basic_processor.png",
         "machine_casing": "block/machine_casing/side.png",
         "1k_storage_block": "block/storage_block/1k_storage_block.png",
+        "4k_storage_block": "block/storage_block/4k_storage_block.png",
         "64k_storage_block": "block/storage_block/64k_storage_block.png",
     }.items():
         assets[key] = read_png(os.path.join(RS_TEXTURES, path))
@@ -277,6 +280,8 @@ def load_assets():
         "range": "range_upgrade.png",
         "interdim": "interdimensional_upgrade.png",
         "remote": "remote_energy_upgrade.png",
+        "energy": "energy_upgrade.png",
+        "advanced": "advanced_energy_upgrade.png",
     }.items():
         assets[key] = read_png(os.path.join(OWN_TEXTURES, path))
 
@@ -289,8 +294,8 @@ def load_assets():
 # ================================================================== figures
 
 def items_figure(assets, path):
-    order = ["grid_off", "grid_on", "battery", "range", "interdim", "remote",
-             "charging"]
+    order = ["grid_off", "grid_on", "battery", "energy", "advanced", "range",
+             "interdim", "remote", "charging"]
     scale = 8
     cell = 16 * scale + 8          # slot size, leaving a 4px inset for the sprite
     gap = 16
@@ -370,9 +375,12 @@ Y = "elytra"
 QZ = "quartz"
 RD = "redstone_block"
 L1 = "1k_storage_block"
+L4 = "4k_storage_block"
 LR = "lightning_rod"
 CB = "copper_block"
+CU = "copper_ingot"
 BI = "blue_ice"
+BP = "basic_processor"
 BAT = "battery"
 REMOTE = "remote"
 CHARGING = "charging"
@@ -385,6 +393,8 @@ def main():
     items_figure(assets, os.path.join(OUT_DIR, "items.png"))
     for key, name in (("grid_on", "item-grid.png"),
                       ("battery", "item-battery.png"),
+                      ("energy", "item-energy.png"),
+                      ("advanced", "item-advanced-energy.png"),
                       ("range", "item-range.png"),
                       ("interdim", "item-interdimensional.png"),
                       ("remote", "item-remote-energy.png"),
@@ -400,6 +410,14 @@ def main():
         [[E, A, E], [RD, L1, RD], [E, A, E]], "battery",
     )
     recipe_figure(
+        assets, os.path.join(OUT_DIR, "recipe-energy.png"),
+        [[CU, RD, CU], [E, BP, E], [CU, RD, CU]], "energy",
+    )
+    recipe_figure(
+        assets, os.path.join(OUT_DIR, "recipe-advanced-energy.png"),
+        [[Q, A, Q], [L4, "energy", L4], [Q, A, Q]], "advanced",
+    )
+    recipe_figure(
         assets, os.path.join(OUT_DIR, "recipe-range.png"),
         [[E, H, E], [T, S, R], [E, X, E]], "range",
     )
@@ -409,7 +427,7 @@ def main():
     )
     recipe_figure(
         assets, os.path.join(OUT_DIR, "recipe-remote-energy.png"),
-        [[CB, BAT, CB], [X, S, X], [CB, LR, CB]], "remote",
+        [[CB, "advanced", CB], [X, S, X], [CB, LR, CB]], "remote",
     )
     recipe_figure(
         assets, os.path.join(OUT_DIR, "recipe-terminal-charging-station.png"),

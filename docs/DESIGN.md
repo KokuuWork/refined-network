@@ -917,6 +917,89 @@ graphics.blit(TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight, imageWidt
 
 ---
 
+## 19. 0.3.0 增量：距离耗电模型 · 六张升级插件 · mixin 接入 RS 本体终端
+
+用户要求：让**所有无线终端**（本模组合成终端 + RS 原生的无线终端 `wireless_grid`、无线合成监视器 `wireless_crafting_monitor`）按**距离扣电**，配一套分段价目表；把升级插件做进这些设备；加两张「能耗插件」形成 RS 式套娃（初级→高级→远程输电），让电池插件成为前期刚需；充电站给这些物品充电（分段制，跨维度也加价）。用户明确**接受 mixin 路线**。另用户追加：6 张卡全部改叫「XX插件」。
+
+### 19.1 六张卡命名（用户 2026-10-14 追加）
+
+| id | 中文名 | 英文名 | 稀有度 |
+|---|---|---|---|
+| `battery_upgrade` | 电池升级插件 | Battery Upgrade | RARE |
+| `energy_upgrade`（新） | 初级能耗插件 | Energy Upgrade | RARE |
+| `advanced_energy_upgrade`（新） | 高级能耗插件 | Advanced Energy Upgrade | EPIC（foil） |
+| `range_upgrade` | 距离升级插件 | Range Upgrade | EPIC（foil） |
+| `interdimensional_upgrade` | 维度升级插件 | Interdimensional Upgrade | EPIC（foil） |
+| `remote_energy_upgrade` | 远程输电插件 | Remote Energy Upgrade | EPIC（foil） |
+
+### 19.2 距离耗电价目表
+
+配置在 `distanceEnergy` 节（新增，替代原 `interdimensionalEnergyMultiplier` / `extendedRange`）：
+
+| 水平距离 | 倍率（默认） |
+|---|---|
+| 0–10 格 | ×1（`tier1Multiplier`=100） |
+| 10–100 格 | ×2（200） |
+| 100–1000 格 | ×4（400） |
+| >1000 格（需距离插件） | ×8（800） |
+| 跨维度（需维度插件） | ×1.5（`interdimensionalMultiplier`=150） |
+
+- 跨维度时距离失去意义，直接套 `interdimensionalMultiplier`，**不叠加**距离档位。
+- **初级能耗插件**：距离倍率 `÷ basicEnergyDivisor`（默认 2，向上取整，最低 100%）；**高级能耗插件**：距离倍率归 100%（跨维度 ×1.5 仍保留）；能耗插件**不影响**跨维度倍率。
+- 最终 `cost = max(1, base × multiplier% / 100)`；远程输电插件时这笔 `cost` 直接从绑定网络的 `EnergyNetworkComponent.extract` 出账，抽不出才回落物品电池。
+
+### 19.3 基础容量 1000 → 400
+
+`WIRELESS_CRAFTING_GRID_CAPACITY` 改 400，电池插件每张仍 +1000。距离倍率最高能把单次动作抬到上百 FE，400 的底舱在远距离下几下就见底——**电池插件成为前期刚需**。
+
+### 19.4 mixin（唯一动 RS 类的地方）
+
+RS 原生无线终端继承 `AbstractNetworkEnergyItem` 且都**没覆写** 3 参 `use(ServerPlayer, ItemStack, SlotReference)`，因此用一处窄 mixin 覆盖两个父类方法：
+
+- `AbstractNetworkEnergyItemMixin`（`neoforge/mixin`，`@Mixin(AbstractNetworkEnergyItem.class)`）：
+  1. `@Inject` 3 参 `use` 头部 → 用 `ExtendedWirelessNetworkItemContext.wrap(stack, player, slot)` 包一层（替代 RS 默认 `createContext`），再调 `@Shadow` 的 4 参抽象 `use`，`ci.cancel()`；
+  2. `@Inject` 2 参 `use(Level, Player, InteractionHand)` 头部 → 潜行右键打开同一个插件装配界面（`WirelessCraftingGridUpgradeMenuProvider`）；
+  3. `@Inject` `appendHoverText` 尾部 → 追加与本 mod 合成终端一致的展示：绑定位置（维度 + 坐标）、「已安装插件」列表、潜行装配提示（对本 mod 合成终端跳过，避免双写；复用 `WirelessCraftingGridItem.createBoundLine` / `createInstalledUpgradesLine`，两者已提为 public static）。
+
+- mixin 注册：`rswirelesscrafting.mixins.json` + `neoforge.mods.toml` 的 `[[mixins]]`。
+- 关键事实（已核实）：NeoForge 1.21.1 运行时用 Mojang 名，RS2 官方 jar（2.0.7）**同样无 refmap**、直接 `@Inject(method="…")` 写 Mojang 名即可，本项目照此办理；`compatibilityLevel` 用 `JAVA_21`（本项目 class 主版本 65）。
+- 本 mod 合成终端自己覆写了 3 参 `use`，mixin 不会命中它；`wrap` 静态工厂保证两者走同一套距离耗电 + 卡片放宽逻辑。
+
+### 19.5 升级舱保持 4 槽
+
+`Upgrades.MAX_UPGRADES` 定为 4（初版曾临时扩到 6，按用户最终要求回退）；`UpgradeContainer` / `WirelessCraftingGridUpgradeContainerMenu` 自动跟随。菜单槽 X = 53（4 槽宽 72 居中），`gen_gui_textures.py` 的 `upgrades_gui()` 同步画 4 格。
+
+### 19.6 套娃配方
+
+- `energy_upgrade`（初级）：`CRC/PSP/CRC`，C=铜锭、R=红石块、P=末影珍珠、S=基础处理器。
+- `advanced_energy_upgrade`（高级）：`QPQ/XEX/QPQ`，Q=石英富集铁、P=高级处理器、X=4k 存储方块、E=初级能耗插件。
+- `remote_energy_upgrade`（远程输电）：中心由电池插件改为**高级能耗插件**，其余（铜块/64k/下界之星/避雷针）不变。
+
+于是套娃链 `初级能耗插件 → 高级能耗插件 → 远程输电插件` 每一环回收上一环，前期投入不打水漂。
+
+### 19.7 关于「便携终端」
+
+RS2 的便携终端（`portable_grid`）是**方块物品**（`PortableGridBlockItem extends AbstractEnergyBlockItem`，用磁盘制），不是手持的 `AbstractNetworkEnergyItem`，也没有「绑定网络 + 距离」概念，因此**不在距离耗电模型内**。它仍能被充电站补电（走通用 FE 能力）。
+
+### 19.8 构建期踩坑
+
+- `CustomImportOrder`：`com.kokuu.rswirelesscrafting.*` 属于 `SAME_PACKAGE(3)` 组，必须排在 `java.*` 之前（mixin 类同样适用）。
+- mixin 包要有 `package-info.java`（`JavadocPackage`）。
+- `DeclarationOrder`：构造函数必须排在静态工厂方法之前。
+
+### 19.9 充电站：待机损耗可开关 · 红石省电 · 无线 45% 效率 · 4 形态外形
+
+用户 2026-10-14 连续追加，定稿为「充电另算、基础待机损耗单独且要高到有惩罚感」：
+
+- **能量模型拆分**：`chargeItem` 里的充电耗电与基础待机损耗**分开**——待机损耗只由无线模块在运行时常驻扣，充电耗电按充入量实时另算。
+- **基础待机损耗默认 128 FE/s**（原 8，用户两次嫌低）：空转约 4 分钟吃空一个基础网络，红石开关才有省电意义。配置总闸 `idleEnergyUsageEnabled`（默认 true）关掉后待机永不扣。
+- **红石信号 = 省电开关**：`level.hasNeighborSignal(pos)` 为真时关闭无线充电并停扣待机损耗（有线槽仍工作）。
+- **无线充电 45% 效率**（配置 `wirelessChargeEfficiencyPercent`，默认 45，1–100）：`deliver` 里 `cost = ceil(given * 100 / efficiency)`，消耗 100 只给设备充 45；有线恒 100% 无损耗。可用能量按 `available * efficiency / 100` 向下折算可充入量，避免低效率时超支。
+- **外形 4 形态**（两个独立亮灭，用户要求「通电/断电」与「无线开/关」分开）：方块加 `POWERED` + `WIRELESS` 两个 `BooleanProperty`，服务端在状态变化时一次性 `setBlockAndUpdate`。纹理用 `gen_textures.py` 的 `terminal_charging_station_texture(powered, wireless)` 生成 4 张——中央闪电亮青=通电、面板右上 2×2 小灯亮青绿=无线开，各自独立亮灭。
+- **关键核实**：本项目充电站用的是 STABLE API 的 `AbstractNetworkNodeContainerBlockEntity`，它**不会**自动调 `node.doWork()` 去 `extract(getEnergyUsage())`（那是非 API 包 `AbstractBaseNetworkNodeContainerBlockEntity` 的 `ticker` 行为），所以待机损耗完全由方块实体手动 `consumeEnergy` 控制，红石/配置开关得以精确生效，不存在双重扣电。
+
+---
+
 ## 13. 参考仓库
 
 - **Quartz Arsenal（核心参照，MIT）**：`https://github.com/refinedmods/refinedstorage-quartz-arsenal`（1.21.1 用 `v1.0.8` tag）

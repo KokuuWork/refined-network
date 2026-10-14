@@ -10,7 +10,7 @@
       "item": "minecraft:copper_block"
     },
     "B": {
-      "item": "rswirelesscrafting:battery_upgrade"
+      "item": "rswirelesscrafting:advanced_energy_upgrade"
     },
     "X": {
       "item": "refinedstorage:64k_storage_block"

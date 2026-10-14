@@ -13,7 +13,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * 无线合成终端的「升级装配」界面：4 个槽位直接映射到终端物品身上的升级组件，
+ * 无线终端的「插件装配」界面：4 个槽位直接映射到终端物品身上的升级组件，
  * 装配与拆卸都是即时的，物品本体不需要重新合成。
  */
 public class WirelessCraftingGridUpgradeContainerMenu extends AbstractContainerMenu {

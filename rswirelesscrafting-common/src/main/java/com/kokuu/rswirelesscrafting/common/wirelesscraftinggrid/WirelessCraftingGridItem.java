@@ -80,7 +80,7 @@ public class WirelessCraftingGridItem extends AbstractNetworkEnergyItem {
         lines.add(ContentNames.WIRELESS_CRAFTING_GRID_INSTALL_HINT);
     }
 
-    private static Component createBoundLine(final ItemStack stack) {
+    public static Component createBoundLine(final ItemStack stack) {
         final GlobalPos location = stack.get(
             com.refinedmods.refinedstorage.common.content.DataComponents.INSTANCE.getNetworkLocation()
         );
@@ -96,7 +96,7 @@ public class WirelessCraftingGridItem extends AbstractNetworkEnergyItem {
         ).withStyle(ChatFormatting.DARK_GRAY);
     }
 
-    private static Component createInstalledUpgradesLine(final List<ItemStack> upgrades) {
+    public static Component createInstalledUpgradesLine(final List<ItemStack> upgrades) {
         final MutableComponent line = ContentNames.WIRELESS_CRAFTING_GRID_UPGRADES.copy();
         for (final ItemStack upgrade : upgrades) {
             line.append(Component.literal("\n  · "));
@@ -107,22 +107,15 @@ public class WirelessCraftingGridItem extends AbstractNetworkEnergyItem {
 
     /**
      * ★ 核心挂载点：覆写 3 参 use，恒注入自定义 NetworkItemContext，
-     * 由 ExtendedWirelessNetworkItemContext 实现「范围卡 → 同维度无限范围」、
-     * 「维度卡 → 跨维度走 Network Transmitter/Receiver 隧道」与
-     * 「输电卡 → 直接消费所绑定网络里的能量」。
+     * 由 ExtendedWirelessNetworkItemContext 实现「距离耗电」、
+     * 「范围插件 → 同维度无限范围」、「维度插件 → 跨维度走 Network Transmitter/Receiver 隧道」与
+     * 「输电插件 → 直接消费所绑定网络里的能量」。
      */
     @Override
     public void use(final ServerPlayer player,
                     final ItemStack stack,
                     final SlotReference slotReference) {
-        final NetworkItemContext context = new ExtendedWirelessNetworkItemContext(
-            stack,
-            player,
-            slotReference,
-            Upgrades.hasRangeUpgrade(stack),
-            Upgrades.hasInterdimensionalUpgrade(stack),
-            Upgrades.hasRemoteEnergyUpgrade(stack)
-        );
+        final NetworkItemContext context = ExtendedWirelessNetworkItemContext.wrap(stack, player, slotReference);
         use(stack.get(DataComponents.CUSTOM_NAME), player, slotReference, context);
     }
 

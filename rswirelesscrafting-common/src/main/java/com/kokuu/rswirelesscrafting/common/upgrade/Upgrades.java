@@ -23,20 +23,26 @@ public final class Upgrades {
         TagKey.create(Registries.ITEM, createIdentifier("interdimensional_upgrades"));
     public static final TagKey<Item> REMOTE_ENERGY_UPGRADES =
         TagKey.create(Registries.ITEM, createIdentifier("remote_energy_upgrades"));
+    public static final TagKey<Item> ENERGY_UPGRADES =
+        TagKey.create(Registries.ITEM, createIdentifier("energy_upgrades"));
+    public static final TagKey<Item> ADVANCED_ENERGY_UPGRADES =
+        TagKey.create(Registries.ITEM, createIdentifier("advanced_energy_upgrades"));
     public static final int MAX_UPGRADES = 4;
 
     private static final List<TagKey<Item>> ALL_UPGRADE_TAGS = List.of(
         RANGE_UPGRADES,
         BATTERY_UPGRADES,
         INTERDIMENSIONAL_UPGRADES,
-        REMOTE_ENERGY_UPGRADES
+        REMOTE_ENERGY_UPGRADES,
+        ENERGY_UPGRADES,
+        ADVANCED_ENERGY_UPGRADES
     );
 
     private Upgrades() {
     }
 
     /**
-     * 是否为可装配到无线合成终端上的升级卡（任意一种）。
+     * 是否为可装配到无线终端上的升级插件（任意一种）。
      */
     public static boolean isUpgrade(final ItemStack stack) {
         if (stack.isEmpty()) {
@@ -68,6 +74,14 @@ public final class Upgrades {
         return hasUpgrade(stack, REMOTE_ENERGY_UPGRADES);
     }
 
+    public static boolean hasEnergyUpgrade(final ItemStack stack) {
+        return hasUpgrade(stack, ENERGY_UPGRADES);
+    }
+
+    public static boolean hasAdvancedEnergyUpgrade(final ItemStack stack) {
+        return hasUpgrade(stack, ADVANCED_ENERGY_UPGRADES);
+    }
+
     private static boolean hasUpgrade(final ItemStack stack, final TagKey<Item> tag) {
         final List<ItemStack> upgrades = stack.get(DataComponents.INSTANCE.getUpgrades());
         if (upgrades == null) {
@@ -89,8 +103,8 @@ public final class Upgrades {
     }
 
     /**
-     * 每类升级卡的主题色，用于把终端悬停提示里「已安装升级」的名称高亮出来。
-     * 与各升级卡自身描述文字的颜色保持一致（范围=青、电池=绿、维度=浅紫、输电=金）。
+     * 每类升级插件的主题色，用于把终端悬停提示里「已安装插件」的名称高亮出来。
+     * 与各插件自身描述文字的颜色保持一致。
      */
     public static ChatFormatting getColor(final ItemStack stack) {
         ChatFormatting color = ChatFormatting.YELLOW;
@@ -102,6 +116,10 @@ public final class Upgrades {
             color = ChatFormatting.LIGHT_PURPLE;
         } else if (stack.is(REMOTE_ENERGY_UPGRADES)) {
             color = ChatFormatting.GOLD;
+        } else if (stack.is(ENERGY_UPGRADES)) {
+            color = ChatFormatting.YELLOW;
+        } else if (stack.is(ADVANCED_ENERGY_UPGRADES)) {
+            color = ChatFormatting.RED;
         }
         return color;
     }

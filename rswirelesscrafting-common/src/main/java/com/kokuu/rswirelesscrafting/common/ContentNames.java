@@ -33,6 +33,14 @@ public final class ContentNames {
         "item",
         "remote_energy_upgrade"
     );
+    public static final MutableComponent ENERGY_UPGRADE = createTranslation(
+        "item",
+        "energy_upgrade"
+    );
+    public static final MutableComponent ADVANCED_ENERGY_UPGRADE = createTranslation(
+        "item",
+        "advanced_energy_upgrade"
+    );
     public static final MutableComponent TERMINAL_CHARGING_STATION = createTranslation(
         "block",
         "terminal_charging_station"
@@ -105,6 +113,22 @@ public final class ContentNames {
         "item",
         "remote_energy_upgrade.requires"
     ).withStyle(ChatFormatting.DARK_GRAY);
+    public static final MutableComponent ENERGY_UPGRADE_DESC = createTranslation(
+        "item",
+        "energy_upgrade.desc"
+    ).withStyle(ChatFormatting.YELLOW);
+    public static final String ENERGY_UPGRADE_DIVISOR_TRANSLATION_KEY = createTranslationKey(
+        "item",
+        "energy_upgrade.divisor"
+    );
+    public static final MutableComponent ADVANCED_ENERGY_UPGRADE_DESC = createTranslation(
+        "item",
+        "advanced_energy_upgrade.desc"
+    ).withStyle(ChatFormatting.RED);
+    public static final MutableComponent ADVANCED_ENERGY_UPGRADE_REQUIRES = createTranslation(
+        "item",
+        "advanced_energy_upgrade.requires"
+    ).withStyle(ChatFormatting.DARK_GRAY);
 
     // 充电站：界面内的两条能量条提示，以及方块物品上的动态数值行
     // （数值随配置变化，所以只在这里放 key，文案在各处按当前配置拼装）。
@@ -140,6 +164,14 @@ public final class ContentNames {
         "block",
         "charging_station.idle"
     );
+    public static final MutableComponent CHARGING_STATION_IDLE_DISABLED = createTranslation(
+        "block",
+        "charging_station.idle_disabled"
+    ).withStyle(ChatFormatting.DARK_GRAY);
+    public static final MutableComponent CHARGING_STATION_REDSTONE = createTranslation(
+        "block",
+        "charging_station.redstone"
+    ).withStyle(ChatFormatting.DARK_GRAY);
     public static final String CHARGING_STATION_BUFFER_TRANSLATION_KEY = createTranslationKey(
         "block",
         "charging_station.buffer"

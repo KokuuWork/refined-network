@@ -1,7 +1,9 @@
 package com.kokuu.rswirelesscrafting.common;
 
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockItem;
+import com.kokuu.rswirelesscrafting.common.upgrade.AdvancedEnergyUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.BatteryUpgradeItem;
+import com.kokuu.rswirelesscrafting.common.upgrade.EnergyUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.InterdimensionalUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.RangeUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.RemoteEnergyUpgradeItem;
@@ -25,6 +27,10 @@ public final class Items {
     private Supplier<InterdimensionalUpgradeItem> interdimensionalUpgrade;
     @Nullable
     private Supplier<RemoteEnergyUpgradeItem> remoteEnergyUpgrade;
+    @Nullable
+    private Supplier<EnergyUpgradeItem> energyUpgrade;
+    @Nullable
+    private Supplier<AdvancedEnergyUpgradeItem> advancedEnergyUpgrade;
     @Nullable
     private Supplier<ChargingStationBlockItem> terminalChargingStation;
 
@@ -69,6 +75,22 @@ public final class Items {
 
     public void setRemoteEnergyUpgrade(final Supplier<RemoteEnergyUpgradeItem> supplier) {
         this.remoteEnergyUpgrade = supplier;
+    }
+
+    public EnergyUpgradeItem getEnergyUpgrade() {
+        return requireNonNull(energyUpgrade).get();
+    }
+
+    public void setEnergyUpgrade(final Supplier<EnergyUpgradeItem> supplier) {
+        this.energyUpgrade = supplier;
+    }
+
+    public AdvancedEnergyUpgradeItem getAdvancedEnergyUpgrade() {
+        return requireNonNull(advancedEnergyUpgrade).get();
+    }
+
+    public void setAdvancedEnergyUpgrade(final Supplier<AdvancedEnergyUpgradeItem> supplier) {
+        this.advancedEnergyUpgrade = supplier;
     }
 
     public ChargingStationBlockItem getTerminalChargingStationBlockItem() {

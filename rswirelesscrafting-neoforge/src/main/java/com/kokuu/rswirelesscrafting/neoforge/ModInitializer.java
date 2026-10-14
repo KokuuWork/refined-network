@@ -10,7 +10,9 @@ import com.kokuu.rswirelesscrafting.common.Platform;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlock;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockEntity;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockItem;
+import com.kokuu.rswirelesscrafting.common.upgrade.AdvancedEnergyUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.BatteryUpgradeItem;
+import com.kokuu.rswirelesscrafting.common.upgrade.EnergyUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.InterdimensionalUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.RangeUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.RemoteEnergyUpgradeItem;
@@ -145,6 +147,12 @@ public class ModInitializer extends AbstractModInitializer {
         );
         Items.INSTANCE.setRemoteEnergyUpgrade(
             callback.register(ContentIds.REMOTE_ENERGY_UPGRADE, RemoteEnergyUpgradeItem::new)
+        );
+        Items.INSTANCE.setEnergyUpgrade(
+            callback.register(ContentIds.ENERGY_UPGRADE, EnergyUpgradeItem::new)
+        );
+        Items.INSTANCE.setAdvancedEnergyUpgrade(
+            callback.register(ContentIds.ADVANCED_ENERGY_UPGRADE, AdvancedEnergyUpgradeItem::new)
         );
         Items.INSTANCE.setTerminalChargingStationBlockItem(
             callback.register(

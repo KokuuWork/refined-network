@@ -37,12 +37,18 @@ public class ChargingStationBlockItem extends BlockItem {
         lines.add(Component.translatable(
             ContentNames.CHARGING_STATION_WIRELESS_TRANSLATION_KEY,
             entry.getWirelessChargeRate(),
-            entry.getWirelessRadius()
+            entry.getWirelessRadius(),
+            entry.getWirelessChargeEfficiencyPercent()
         ).withStyle(ChatFormatting.AQUA));
         lines.add(ContentNames.CHARGING_STATION_WIRELESS_CAPACITY_INFO);
-        lines.add(Component.translatable(
-            ContentNames.CHARGING_STATION_IDLE_TRANSLATION_KEY,
-            entry.getEnergyUsage()
-        ).withStyle(ChatFormatting.DARK_GRAY));
+        if (entry.isIdleEnergyUsageEnabled()) {
+            lines.add(Component.translatable(
+                ContentNames.CHARGING_STATION_IDLE_TRANSLATION_KEY,
+                entry.getEnergyUsage()
+            ).withStyle(ChatFormatting.DARK_GRAY));
+        } else {
+            lines.add(ContentNames.CHARGING_STATION_IDLE_DISABLED);
+        }
+        lines.add(ContentNames.CHARGING_STATION_REDSTONE);
     }
 }

@@ -8,9 +8,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * 直接读写「无线合成终端物品的 {@code upgrades} 数据组件」的容器视图。
+ * 直接读写「无线终端物品的 {@code upgrades} 数据组件」的容器视图。
  *
- * <p>升级卡不再写死在合成配方里，而是像插件一样随时插拔：这个容器把 4 个槽位映射到
+ * <p>升级插件不再写死在合成配方里，而是像插件一样随时插拔：这个容器把 4 个槽位映射到
  * 物品身上的升级列表，装配 = 放入槽位，拆卸 = 取出槽位，物品本体不需要重新合成。
  */
 public class UpgradeContainer implements Container {
