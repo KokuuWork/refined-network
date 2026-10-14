@@ -43,6 +43,6 @@ jobs:
           tag_name: ${{ github.event.inputs.tag || github.ref_name }}
           name: "rswirelesscrafting ${{ steps.mod.outputs.version }}"
           generate_release_notes: true
-          files: |
-            rswirelesscrafting-neoforge/build/libs/*.jar
-            !rswirelesscrafting-neoforge/build/libs/*-sources.jar
+          # Exact filename rather than a glob: excluding *-sources.jar via "!"
+          # negation is not honoured reliably by this action.
+          files: rswirelesscrafting-neoforge/build/libs/rswirelesscrafting-neoforge-${{ steps.mod.outputs.version }}.jar
