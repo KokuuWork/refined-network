@@ -5,6 +5,7 @@
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 ![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1-3C8527)
 ![NeoForge](https://img.shields.io/badge/NeoForge-21.1.x-E8892B)
+![Fabric](https://img.shields.io/badge/Fabric-1.21.1-AAA)
 ![Refined Storage](https://img.shields.io/badge/Refined_Storage-2.0.7%2B-3E7BB6)
 
 **简体中文** | [English](#english)
@@ -50,7 +51,7 @@
 |---|---|
 | **有线**（终端放进 GUI 槽位） | **3 个槽位**，各 **200 FE/s**（**无损耗**） |
 | **无线**（玩家在范围内自动补电） | **20 FE/s**（每个设备，半径 **5 格**），**45% 效率**：消耗 100 只给设备充 45，其余作传输损耗 |
-| 无线并发 | 每名玩家最多同时充 **3 个设备**，最多服务 **3 名玩家**（按离站距离由近到远分配） |
+| 无线并发 | **全局 3 个设备名额**，按离站距离由近到远分配：3 名玩家各充 1 个、1 名玩家独占 3 个 |
 | 基础待机损耗 | **128 FE/s**（常驻，充电另算）——可用**红石信号**关掉无线充电并停扣待机损耗 |
 | 外部 FE 缓冲 | 10000 FE |
 
@@ -106,15 +107,21 @@
 | | 要求 |
 |---|---|
 | Minecraft | **1.21.1** |
-| 模组加载器 | NeoForge **21.1.x** |
-| 前置 | Refined Storage **2.0.7+**（已在 2.0.9 上实测运行） |
+| 模组加载器 | NeoForge **21.1.x** ｜ Fabric **0.14.6+** |
+| 前置 | Refined Storage **2.0.7+**（已在 2.0.9 上实测运行）；Fabric 侧另需 **Fabric API** + **Cloth Config** + **Team Reborn Energy** |
 | 构建 | JDK **21** + Gradle 8.14.4 |
 
 ## 安装
 
+**NeoForge**：
 1. 装好 NeoForge 1.21.1 与 Refined Storage。
-2. 把 `rswirelesscrafting-neoforge-<version>.jar`（从 [Releases](https://github.com/KokuuWork/rswirelesscrafting/releases/latest) 下载）丢进 `mods/`。
-3. 启动游戏。
+2. 把 `rswirelesscrafting-neoforge-<version>.jar` 丢进 `mods/`。
+
+**Fabric**：
+1. 装好 Fabric 1.21.1、Fabric API 与 Refined Storage。
+2. 把 `rswirelesscrafting-fabric-<version>.jar` 丢进 `mods/`，并确保已装 Cloth Config 与 Team Reborn Energy（通常随 Refined Storage 一并提供）。
+
+两种加载器的 jar 都从 [Releases](https://github.com/KokuuWork/rswirelesscrafting/releases/latest) 下载，功能与配置完全一致。
 
 > 本模组是**纯附属（addon）**：只依赖 Refined Storage 的公开 API，另用一处**窄 mixin**（只包一层 `AbstractNetworkEnergyItem.use` 的上下文，让距离耗电与升级插件对 RS 原生无线终端同样生效），不 fork、不魔改 RS 本体逻辑。移除本模组不会损坏存档（已装升级插件的终端会保留数据组件，重新装上即恢复）。
 
@@ -229,11 +236,11 @@ RS 的距离/维度校验并不位于 `resolveNetwork`，而在 `NetworkItemPlay
 
 方块实体则继承 RS 公开且标注为 STABLE 的 `AbstractNetworkNodeContainerBlockEntity<T extends NetworkNode>`，由它负责网络容器生命周期；自定义的 `ChargingStationNetworkNode` 只声明待机耗电。网络连接用的是 RS 的默认六向连接策略，因此连 `createMainContainer` 都不用重写。
 
-每 tick 里，服务端先为 3 个有线槽各自按速率补电，再扫描半径内的玩家（按距离由近到远排序），给最近的 3 名玩家各分配一条无线链接，逐条链接对玩家背包里的 FE 设备充电（同一玩家同时最多 3 个设备，充满一个自动轮到下一个）。连接面板的 6 个灯（3 有线 + 3 无线）由服务端算好状态写进 `ContainerData` 同步给客户端，客户端用 `level.getGameTime()` 驱动蓝灯的呼吸闪烁——纯视觉，不占额外网络包。多名玩家各自独占一条链接，状态互不干扰。
+每 tick 里，服务端先为 3 个有线槽各自按速率补电，再扫描半径内的玩家（按距离由近到远排序），把全局 3 个「设备名额」按「每名玩家先拿 1 个、有余再轮」的次序分给最近的玩家——3 名玩家各充 1 个设备、1 名玩家独占 3 个，充满一个自动轮到下一个。连接面板的 6 个灯（3 有线 + 3 无线）由服务端算好状态写进 `ContainerData` 同步给客户端，客户端用 `level.getGameTime()` 驱动蓝灯的呼吸闪烁——纯视觉，不占额外网络包。多名玩家各自独占一个名额，状态互不干扰。
 
 无线充电带 **45% 效率**（`deliver` 里按 `cost = ceil(given * 100 / efficiency)` 出账，消耗 100 只充 45）；有线恒为 100%。基础待机损耗（128 FE/s）只有在无线模块开启时才会扣，被红石信号关掉后停扣。方块带一个 `wireless` 方块状态，服务端在状态变化时 `setBlockAndUpdate`，用亮/灭两套纹理让外形直接反映无线是否开启。
 
-物品充电走 NeoForge 的 `Capabilities.EnergyStorage.ITEM`，**不**经过 RS 的 `PlatformImpl.getEnergyStorage`（那只会认 RS 自己的适配器），这样才能兼容其他模组的 FE 物品。
+物品充电在两加载器上分别走各自的**通用**能量能力——NeoForge 用 `Capabilities.EnergyStorage.ITEM`、Fabric 用 Team Reborn Energy 的 `EnergyStorage.ITEM`——**不**经过 RS 的 `PlatformImpl.getEnergyStorage`（那只会认 RS 自己的适配器），这样才能兼容其他模组的 FE 物品。
 
 完整设计文档（含决策记录、逐文件实现规格、RS 2.0.7 API 核实结果）见 [`docs/DESIGN.md`](docs/DESIGN.md)。
 
@@ -246,7 +253,7 @@ export JAVA_HOME="/path/to/jdk-21"
 ./gradlew build
 ```
 
-产物位于 `rswirelesscrafting-neoforge/build/libs/`。
+产物位于 `rswirelesscrafting-neoforge/build/libs/`（NeoForge）与 `rswirelesscrafting-fabric/build/libs/`（Fabric）。
 
 > 若 `maven.neoforged.net` 在你所在网络不可达，仓库内附带 `init-mirror.gradle`，可把依赖重写到 NeoForged CDN：
 > ```bash
@@ -312,13 +319,13 @@ Cards are **not** baked into a crafting recipe. **Sneak + right-click** any wire
 
 ### Charging Station
 
-One block, two charging paths, two power sources. It works with **any FE terminal from Refined Storage** (wireless grid, wireless crafting grid, portable grid, …) because it uses the generic NeoForge energy capability rather than RS's internal adapter.
+One block, two charging paths, two power sources. It works with **any FE terminal from Refined Storage** (wireless grid, wireless crafting grid, portable grid, …) because it uses each loader's generic energy capability (NeoForge `Capabilities.EnergyStorage.ITEM`, Fabric Team Reborn Energy) rather than RS's internal adapter.
 
 | | Terminal Charging Station<br>`terminal_charging_station` |
 |---|---|
 | **Wired** (terminal in the GUI slot) | **3 slots** at **200 FE/s** each (**lossless**) |
 | **Wireless** (players in range) | **20 FE/s** per device (radius **5 blocks**), at **45% efficiency**: drawing 100 only puts 45 into the device, the rest is lost |
-| Wireless concurrency | up to **3 devices per player**, up to **3 players** (nearest first) |
+| Wireless concurrency | **3 device slots total**, assigned nearest-first: 3 players get 1 each, 1 player gets all 3 |
 | Base idle drain | **128 FE/s** (constant; charging billed separately) — a **redstone signal** shuts off wireless charging and pauses the idle drain |
 | External FE buffer | 10000 FE |
 
@@ -371,7 +378,7 @@ The base battery is only **400 FE**, while the distance multiplier can push a si
 
 ### Requirements
 
-- Minecraft **1.21.1**, NeoForge **21.1.x**, Refined Storage **2.0.7+** (verified on 2.0.9)
+- Minecraft **1.21.1**; **NeoForge 21.1.x** or **Fabric 0.14.6+**; Refined Storage **2.0.7+** (verified on 2.0.9). On Fabric you also need Fabric API, Cloth Config and Team Reborn Energy (normally bundled with Refined Storage).
 - Pure addon — no forking; one narrow mixin (wrapping `AbstractNetworkEnergyItem.use` so distance energy and upgrade cards also apply to RS's own wireless terminals), no permanent changes to your world (terminals keep their data components if you uninstall; they come back when you reinstall)
 
 ### Recipes
@@ -409,7 +416,7 @@ Cross-dimensional access requires both the Transmitter and Receiver chunks to be
 
 **Grid and cards.** The core extension point is overriding `AbstractNetworkEnergyItem.use(ServerPlayer, ItemStack, SlotReference)` to inject a custom `ExtendedWirelessNetworkItemContext`. To make distance energy and upgrade cards work on RS's own wireless terminals (wireless grid, wireless crafting monitor) too, a single narrow mixin (`AbstractNetworkEnergyItemMixin`) wraps the very same 3-arg `use` and opens the same upgrade panel on sneak-right-click — this is the only place that touches RS classes, and it only wraps a parent method without changing any logic branch. RS's distance/dimension check lives in `NetworkItemPlayerValidator`, not in `resolveNetwork`, so upgrades apply as a **fallback relaxation** — the standard resolution runs first, and only when it comes back empty do the installed cards get a say. The `force=true` path is deliberately left untouched, since RS relies on that semantic to remove stale grid watchers. On the energy side, `isActive()` and `drainEnergy(long)` are overridden so the distance tariff is computed and applied to every drain, and the bound network answers "is there power?" and pays the bill when the Remote Energy Upgrade is installed.
 
-**Charging Station.** RS 2.0.7 exposes no public block base class (blocks live in an internal, un-annotated module), so the block extends vanilla `BaseEntityBlock` and uses vanilla `getTicker`. Note that `BaseEntityBlock` returns `RenderShape.INVISIBLE` by default — vanilla's own block entities such as chests and furnaces draw themselves — so a block entity block that wants an ordinary json model has to override `getRenderShape()` and return `RenderShape.MODEL`, or it renders as nothing at all and you see straight through it. Fixed in 0.1.9. The block entity extends the STABLE-annotated `AbstractNetworkNodeContainerBlockEntity<T extends NetworkNode>`, with a minimal `ChargingStationNetworkNode` declaring the idle draw; RS's default six-way connection strategy means `createMainContainer` needs no override at all. Each tick it tops up the three wired slots, then scans nearby players (nearest first) and assigns the three wireless links, charging up to three devices per player. The six panel lights (3 wired + 3 wireless) are computed server-side and synced through `ContainerData`; the client drives the blue breathing pulse off `level.getGameTime()`, so it's purely visual with no extra packets. Item charging uses NeoForge's `Capabilities.EnergyStorage.ITEM` rather than RS's `PlatformImpl.getEnergyStorage` (which only recognises RS's own adapter), which is what makes it compatible with other mods' FE items.
+**Charging Station.** RS 2.0.7 exposes no public block base class (blocks live in an internal, un-annotated module), so the block extends vanilla `BaseEntityBlock` and uses vanilla `getTicker`. Note that `BaseEntityBlock` returns `RenderShape.INVISIBLE` by default — vanilla's own block entities such as chests and furnaces draw themselves — so a block entity block that wants an ordinary json model has to override `getRenderShape()` and return `RenderShape.MODEL`, or it renders as nothing at all and you see straight through it. Fixed in 0.1.9. The block entity extends the STABLE-annotated `AbstractNetworkNodeContainerBlockEntity<T extends NetworkNode>`, with a minimal `ChargingStationNetworkNode` declaring the idle draw; RS's default six-way connection strategy means `createMainContainer` needs no override at all. Each tick it tops up the three wired slots, then scans nearby players (nearest first) and hands out three device slots round-robin — three players charge one device each, a single player charges all three. The six panel lights (3 wired + 3 wireless) are computed server-side and synced through `ContainerData`; the client drives the blue breathing pulse off `level.getGameTime()`, so it's purely visual with no extra packets. Item charging uses each loader's generic energy capability (NeoForge `Capabilities.EnergyStorage.ITEM`, Fabric Team Reborn Energy) rather than RS's `PlatformImpl.getEnergyStorage` (which only recognises RS's own adapter), which is what makes it compatible with other mods' FE items.
 
 **GUI backgrounds.** The custom screens use 176×166 backgrounds, so they must draw with the explicit-texture-size `blit` overload — the 7-arg `blit(loc, x, y, u, v, w, h)` silently assumes a 256×256 texture, which magnifies only the top-left corner of the background and made the slots look misaligned with an "invisible" inventory. Fixed in 0.1.10.
 
@@ -423,6 +430,8 @@ cd rswirelesscrafting
 export JAVA_HOME="/path/to/jdk-21"
 ./gradlew build
 ```
+
+The jars land in `rswirelesscrafting-neoforge/build/libs/` (NeoForge) and `rswirelesscrafting-fabric/build/libs/` (Fabric).
 
 All artwork is script-generated with the Python standard library (no Pillow): `gen_textures.py` (item and block textures), `gen_gui_textures.py` (176×166 GUI backgrounds) and `gen_readme_images.py` (the images above; needs `MC_CLIENT_JAR` and `RS_TEXTURES`).
 

@@ -61,8 +61,8 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
     implements Container, ExtendedMenuProvider<ChargingStationData> {
 
     private static final int WIRED_SLOT_COUNT = 3;
+    // 3 个无线链接位 = 全局 3 个「设备名额」：3 名玩家各占 1 个，1 名玩家独占 3 个。
     private static final int WIRELESS_LINK_COUNT = 3;
-    private static final int DEVICES_PER_LINK = 3;
     private static final int DATA_SIZE = 10;
     private static final int WIRED_EFFICIENCY_PERCENT = 100;
     private static final String EXTERNAL_ENERGY_TAG = "ExternalEnergy";
@@ -186,19 +186,36 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
     private void chargeWireless(final ServerLevel serverLevel, final Config.ChargingStationEntry config) {
         final int radius = config.getWirelessRadius();
         final long perDeviceBudget = wirelessMeter.next(config.getWirelessChargeRate());
+        clearWirelessLinks();
         if (radius <= 0 || perDeviceBudget <= 0) {
-            clearWirelessLinks();
             return;
         }
         final List<ServerPlayer> nearby = nearbyPlayersByDistance(serverLevel, radius);
+        if (nearby.isEmpty()) {
+            return;
+        }
+        // 全局只有 {@link #WIRELESS_LINK_COUNT} 个设备名额，按「每名玩家先拿 1 个、有余再轮」
+        // 的次序分配给按距离排序的玩家：3 名玩家各充 1 个设备，1 名玩家独占 3 个。
+        final int playerCount = Math.min(nearby.size(), WIRELESS_LINK_COUNT);
+        final int[] quota = new int[playerCount];
         for (int link = 0; link < WIRELESS_LINK_COUNT; link++) {
-            wirelessActive[link] = link < nearby.size()
-                && chargePlayerDevices(nearby.get(link), perDeviceBudget, config.getWirelessChargeEfficiencyPercent());
+            quota[link % playerCount]++;
+        }
+        final boolean[][] charged = new boolean[playerCount][];
+        final int efficiencyPercent = config.getWirelessChargeEfficiencyPercent();
+        for (int i = 0; i < playerCount; i++) {
+            charged[i] = chargePlayerDevices(nearby.get(i), perDeviceBudget, efficiencyPercent, quota[i]);
+        }
+        int link = 0;
+        for (int i = 0; i < playerCount; i++) {
+            for (int device = 0; device < quota[i]; device++) {
+                wirelessActive[link++] = charged[i][device];
+            }
         }
     }
 
     /**
-     * 半径内的玩家按离站距离由近到远排序，最靠近的 {@link #WIRELESS_LINK_COUNT} 名玩家各占一条链接。
+     * 半径内的玩家按离站距离由近到远排序，最靠近的 {@link #WIRELESS_LINK_COUNT} 名玩家参与名额分配。
      */
     private List<ServerPlayer> nearbyPlayersByDistance(final ServerLevel level, final int radius) {
         final double radiusSquared = (double) radius * radius;
@@ -219,36 +236,36 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
     }
 
     /**
-     * 为一名玩家背包里的 FE 设备充电：同一 tick 最多同时充 {@link #DEVICES_PER_LINK} 个，
-     * 已充满的自动跳过，于是「先同时充 3 个、充满后轮到后续设备」自然成立。
+     * 为一名玩家背包里的 FE 设备充电：本轮最多同时充 {@code maxDevices} 个，已充满的自动跳过，
+     * 于是「先同时充 N 个、充满后轮到后续设备」自然成立。
      *
-     * @return 本 tick 是否真的充入了能量（用于点亮该条无线链接）
+     * @return 每个设备名额是否真的充入了能量（用于逐个点亮无线链接灯）
      */
-    private boolean chargePlayerDevices(final ServerPlayer player,
-                                        final long perDeviceBudget,
-                                        final int efficiencyPercent) {
+    private boolean[] chargePlayerDevices(final ServerPlayer player,
+                                          final long perDeviceBudget,
+                                          final int efficiencyPercent,
+                                          final int maxDevices) {
+        final boolean[] charged = new boolean[maxDevices];
         final Inventory inventory = player.getInventory();
         boolean anyCharged = false;
         int devicesCharged = 0;
-        for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
+        for (int slot = 0; slot < inventory.getContainerSize() && devicesCharged < maxDevices; slot++) {
             final ItemStack stack = inventory.getItem(slot);
             if (stack.isEmpty()) {
                 continue;
             }
-            final long charged = chargeItem(stack, perDeviceBudget, efficiencyPercent);
-            if (charged <= 0) {
+            final long given = chargeItem(stack, perDeviceBudget, efficiencyPercent);
+            if (given <= 0) {
                 continue;
             }
-            anyCharged = true;
+            charged[devicesCharged] = true;
             devicesCharged++;
-            if (devicesCharged >= DEVICES_PER_LINK) {
-                break;
-            }
+            anyCharged = true;
         }
         if (anyCharged) {
             inventory.setChanged();
         }
-        return anyCharged;
+        return charged;
     }
 
     private void clearWirelessLinks() {

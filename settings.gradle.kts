@@ -49,3 +49,4 @@ pluginManagement {
 rootProject.name = "rswirelesscrafting"
 include("rswirelesscrafting-common")
 include("rswirelesscrafting-neoforge")
+include("rswirelesscrafting-fabric")

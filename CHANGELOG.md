@@ -2,6 +2,16 @@
 
 本项目遵循[语义化版本](https://semver.org/lang/zh-CN/)。所有显著变更都会记录在此。
 
+## [0.3.1] - 2026-10-15
+
+### 新增
+- **Fabric 移植**：新增 `rswirelesscrafting-fabric` 模块，完整支持 **Minecraft 1.21.1 + Fabric**（官方 `quartz-arsenal` 三模块同构）。common 模块零改动，复用同一份 `Platform` 抽象。
+  - 配置用 Cloth Config（`AutoConfig`），能量用 Team Reborn Energy，入口走 RS 的 `refinedstorage_plugin` entrypoint（`RefinedStoragePlugin`）。
+  - 给 RS 原生无线终端加的 mixin 原样迁移（Mojang 名，Loom 自动 remap 生成 refmap）。
+
+### 变更
+- **无线充电并发修正**：从「每名玩家最多 3 个设备」改为「**全局总共 3 个设备名额**」——3 名玩家一起充时每人充 1 个，1 名玩家独占时充 3 个（按离站距离由近到远轮转）。
+
 ## [0.3.0] - 2026-10-15
 
 模组中文名定稿 **「无线合成终端」**（英文名 *Refined Storage - Wireless Crafting*）。
