@@ -63,11 +63,12 @@ R = 网络接收器 (network_receiver)     X = 64k存储方块 (refinedstorage)
 维度升级卡（跨维度）
 P = 末影珍珠 (c:ender_pearls)        B = 信标 (minecraft:beacon)
 N = 下界合金锭 (c:ingots/netherite)  S = 下界之星 (minecraft:nether_star)
-                                    E = 鞘翅 (minecraft:elytra)
+X = 64k存储方块 (refinedstorage)     E = 鞘翅 (minecraft:elytra)
 
-  P B P          鞘翅 → 全末地仅存于末地船，「跨越」的象征
+  P B X          鞘翅 → 全末地仅存于末地船，「跨越」的象征
   N S N          信标 → 本身还需 1 颗下界之星，用于定位与锚定
   P E P          下界之星（连同信标内的共需 2 颗 = 2 只凋灵）→ 撕裂维度的能量
+                 64k存储方块 → RS「套娃」到顶的后期产物
                  2× 下界合金锭 → 承受维度压力的材料
 ```
 

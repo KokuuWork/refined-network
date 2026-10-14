@@ -1,7 +1,7 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "PBP",
+    "PBX",
     "NSN",
     "PEP"
   ],
@@ -11,6 +11,9 @@
     },
     "B": {
       "item": "minecraft:beacon"
+    },
+    "X": {
+      "item": "refinedstorage:64k_storage_block"
     },
     "N": {
       "tag": "c:ingots/netherite"

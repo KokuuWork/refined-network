@@ -243,7 +243,7 @@ modid 占位 `rswirelesscrafting`，包名建议 `com.yourname.rswirelesscraftin
              X = refinedstorage:64k_storage_block（64k存储方块）
   ```
 
-  **设计意图**：这是本 mod 最「重」的一张卡，六个稀有件各有语义 ——
+  **设计意图**：六个稀有件各有语义 ——
   - `heart_of_the_sea`：潮涌核心的能量象征，对应「远距离能量传输」；
   - `nether_star`：无限能量源，撑起「无限范围」；
   - `wireless_transmitter`（无线访问点）：本卡机制的物理载体，绑的就是它；
@@ -259,9 +259,10 @@ modid 占位 `rswirelesscrafting`，包名建议 `com.yourname.rswirelesscraftin
 - 配方：
 
   ```
-  P B P      P = c:ender_pearls（标签）
+  P B X      P = c:ender_pearls（标签）
   N S N      B = minecraft:beacon（信标）
-  P E P      N = c:ingots/netherite（标签）
+  P E P      X = refinedstorage:64k_storage_block（64k存储方块）
+             N = c:ingots/netherite（标签）
              S = minecraft:nether_star（下界之星）
              E = minecraft:elytra（鞘翅）
   ```
@@ -270,6 +271,7 @@ modid 占位 `rswirelesscrafting`，包名建议 `com.yourname.rswirelesscraftin
   - `elytra` 鞘翅 —— 全末地仅存于末地船的稀有品，象征「跨越」；
   - `beacon` 信标 —— 本身还需 1 颗下界之星，象征「定位与锚定」（跨维隧道需要两端坐标对齐）；
   - `nether_star` 下界之星（与信标内的合计共需 **2 颗**，即 2 只凋灵）—— 维度撕裂的能量源；
+  - `64k_storage_block` —— RS「套娃」链的顶点，与范围卡同级（单块需 64 个 1k 元件 = 256 硅 + 64 石英铁 + 256 玻璃 + 64 红石）；两张卡各有各的资源槽，维度卡再叠上鞘翅/信标/凋灵链，整体仍是最贵的一张；
   - 2×下界合金锭 —— 能承受跨维度压力的外壳材料。
 - 可堆叠 64。
 

@@ -1,9 +1,11 @@
 package com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid;
 
 import com.kokuu.rswirelesscrafting.common.ContentNames;
+import com.kokuu.rswirelesscrafting.common.DimensionNames;
 import com.kokuu.rswirelesscrafting.common.Platform;
 import com.kokuu.rswirelesscrafting.common.upgrade.Upgrades;
 
+import java.util.List;
 import javax.annotation.Nullable;
 
 import com.refinedmods.refinedstorage.api.network.energy.EnergyStorage;
@@ -17,11 +19,16 @@ import com.refinedmods.refinedstorage.common.api.support.network.item.NetworkIte
 import com.refinedmods.refinedstorage.common.api.support.slotreference.SlotReference;
 import com.refinedmods.refinedstorage.common.grid.CraftingGrid;
 import com.refinedmods.refinedstorage.common.security.BuiltinPermission;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.TooltipFlag;
 
 import static java.util.Objects.requireNonNullElse;
 
@@ -30,7 +37,7 @@ public class WirelessCraftingGridItem extends AbstractNetworkEnergyItem {
     public WirelessCraftingGridItem(final EnergyItemHelper energyItemHelper,
                                     final NetworkItemHelper networkItemHelper) {
         super(
-            new Item.Properties().stacksTo(1),
+            new Item.Properties().stacksTo(1).rarity(Rarity.RARE),
             energyItemHelper,
             networkItemHelper
         );
@@ -45,6 +52,49 @@ public class WirelessCraftingGridItem extends AbstractNetworkEnergyItem {
             )
         );
         return RefinedStorageApi.INSTANCE.asItemEnergyStorage(energyStorage, stack);
+    }
+
+    @Override
+    public void appendHoverText(final ItemStack stack,
+                                final TooltipContext context,
+                                final List<Component> lines,
+                                final TooltipFlag flag) {
+        super.appendHoverText(stack, context, lines, flag);
+        lines.add(ContentNames.WIRELESS_CRAFTING_GRID_DESC);
+        lines.add(Component.empty());
+        lines.add(createBoundLine(stack));
+        final List<ItemStack> upgrades = Upgrades.getUpgrades(stack);
+        if (!upgrades.isEmpty()) {
+            lines.add(createInstalledUpgradesLine(upgrades));
+        }
+        lines.add(ContentNames.WIRELESS_CRAFTING_GRID_INSTALL_HINT);
+    }
+
+    private static Component createBoundLine(final ItemStack stack) {
+        final GlobalPos location = stack.get(
+            com.refinedmods.refinedstorage.common.content.DataComponents.INSTANCE.getNetworkLocation()
+        );
+        if (location == null) {
+            return ContentNames.WIRELESS_CRAFTING_GRID_UNBOUND;
+        }
+        return Component.translatable(
+            ContentNames.WIRELESS_CRAFTING_GRID_BOUND_TRANSLATION_KEY,
+            DimensionNames.get(location.dimension()).withStyle(ChatFormatting.YELLOW),
+            location.pos().getX(),
+            location.pos().getY(),
+            location.pos().getZ()
+        ).withStyle(ChatFormatting.DARK_GRAY);
+    }
+
+    private static Component createInstalledUpgradesLine(final List<ItemStack> upgrades) {
+        final MutableComponent line = ContentNames.WIRELESS_CRAFTING_GRID_UPGRADES.copy();
+        for (int i = 0; i < upgrades.size(); i++) {
+            if (i > 0) {
+                line.append(Component.literal(", "));
+            }
+            line.append(upgrades.get(i).getHoverName());
+        }
+        return line;
     }
 
     /**
