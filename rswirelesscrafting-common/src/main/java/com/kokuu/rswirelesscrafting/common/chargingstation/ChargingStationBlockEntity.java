@@ -36,10 +36,14 @@ import net.minecraft.world.level.block.state.BlockState;
  *
  * <p>两条充电路径：
  * <ul>
- *   <li><b>有线</b>：物品放进 GUI 的槽位，每 tick 按 {@code wiredChargeRate} 快速充入；</li>
- *   <li><b>无线</b>：玩家站在 {@code wirelessRadius} 格内，背包里的物品每 tick 按
+ *   <li><b>有线</b>：物品放进 GUI 的槽位，按 {@code wiredChargeRate} 快速充入；</li>
+ *   <li><b>无线</b>：玩家站在 {@code wirelessRadius} 格内，背包里的物品按
  *       {@code wirelessChargeRate} 自动缓充。</li>
  * </ul>
+ *
+ * <p>配置里的能量值一律以<b>每秒（FE/s）</b>计，方块内部再按 20 tick/s 摊到每 tick 上。
+ * 除不尽的部分交给 {@link RateMeter} 累积到下一 tick，所以把速率配成 7 这种除不尽的数
+ * 也不会白白漏电，长期平均值仍然精确。
  *
  * <p>能量来源同样是两条，且与 RS 其他机械一致地优先使用网络：
  * <ol>
@@ -63,6 +67,9 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
     private final NonNullList<ItemStack> items = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
     private final ChargingStationTier tier;
     private final long externalCapacity;
+    private final RateMeter idleMeter = new RateMeter();
+    private final RateMeter wiredMeter = new RateMeter();
+    private final RateMeter wirelessMeter = new RateMeter();
 
     private long externalEnergy;
     private long networkStored;
@@ -109,11 +116,12 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
         if (!(level instanceof ServerLevel serverLevel)) {
             return;
         }
+        final Config.ChargingStationEntry config = entry();
         refreshNetworkEnergy();
         // 待机耗电：与 RS 其他机械一样，先在网络上扣掉自身开销。
-        consumeEnergy(mainNetworkNode.getEnergyUsage());
-        chargeWiredSlot();
-        chargeNearbyPlayers(serverLevel);
+        consumeEnergy(idleMeter.next(config.getEnergyUsage()));
+        chargeWiredSlot(config);
+        chargeNearbyPlayers(serverLevel, config);
     }
 
     private void refreshNetworkEnergy() {
@@ -130,22 +138,23 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
 
     // ------------------------------------------------------------ 有线充电
 
-    private void chargeWiredSlot() {
+    private void chargeWiredSlot(final Config.ChargingStationEntry config) {
         final ItemStack stack = items.get(0);
         if (stack.isEmpty()) {
             return;
         }
-        if (chargeItem(stack, entry().getWiredChargeRate()) > 0) {
+        final long budget = wiredMeter.next(config.getWiredChargeRate());
+        if (budget > 0 && chargeItem(stack, budget) > 0) {
             setChanged();
         }
     }
 
     // ------------------------------------------------------------ 无线充电
 
-    private void chargeNearbyPlayers(final ServerLevel serverLevel) {
-        final int radius = entry().getWirelessRadius();
-        final long rate = entry().getWirelessChargeRate();
-        if (radius <= 0 || rate <= 0) {
+    private void chargeNearbyPlayers(final ServerLevel serverLevel, final Config.ChargingStationEntry config) {
+        final int radius = config.getWirelessRadius();
+        final long budget = wirelessMeter.next(config.getWirelessChargeRate());
+        if (radius <= 0 || budget <= 0) {
             return;
         }
         final double radiusSquared = (double) radius * radius;
@@ -161,7 +170,7 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
             ) > radiusSquared) {
                 continue;
             }
-            chargeInventory(player, rate);
+            chargeInventory(player, budget);
         }
     }
 
@@ -386,6 +395,30 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
                 ItemStack.parse(registries, itemsTag.getCompound(key))
                     .ifPresent(stack -> items.set(slot, stack));
             }
+        }
+    }
+
+    /**
+     * 把配置里的「每秒」额度摊到每 tick 上。
+     *
+     * <p>Minecraft 是每秒 20 tick，而 {@code 每秒额度 / 20} 常常除不尽（例如 7 FE/s）。
+     * 直接整除会持续漏掉那一小截，所以这里把余数留在 {@code carry} 里顺延到下一 tick，
+     * 长期平均恰好等于配置值。
+     */
+    private static final class RateMeter {
+        private static final long TICKS_PER_SECOND = 20;
+
+        private long carry;
+
+        /**
+         * 推进一 tick。
+         *
+         * @return 本 tick 可用的额度
+         */
+        long next(final long perSecond) {
+            final long total = carry + Math.max(0, perSecond);
+            carry = total % TICKS_PER_SECOND;
+            return total / TICKS_PER_SECOND;
         }
     }
 

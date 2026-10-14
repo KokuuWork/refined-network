@@ -47,9 +47,9 @@
 
 | | 400V 风冷<br>`air_cooled_charging_station` | 800V 液冷<br>`liquid_cooled_charging_station` |
 |---|---|---|
-| **有线**（终端放进 GUI 槽位） | **120 FE/t** | **240 FE/t** |
-| **无线**（玩家在范围内自动补电） | **20 FE/t**，半径 **4 格** | **80 FE/t**，半径 **10 格** |
-| 待机耗电 | 8 FE/t | 32 FE/t |
+| **有线**（终端放进 GUI 槽位） | **120 FE/s** | **240 FE/s** |
+| **无线**（玩家在范围内自动补电） | **20 FE/s**，半径 **4 格** | **80 FE/s**，半径 **10 格** |
+| 待机耗电 | 8 FE/s | 32 FE/s |
 | 外部 FE 缓冲 | 10000 FE | 40000 FE |
 
 两座站共用同一套方块实体与界面，只在数值与外观上分档：界面背景和能量条主色随规格切换（风冷青蓝、液冷紫），方块物品的 tooltip 会直接列出**这一档当前生效的数值**（改配置也会跟着变，不会出现文案与实物不符）。
@@ -61,7 +61,9 @@
 
 取电优先级是**网络优先、缓冲兜底**；网络抽不出来（未联网或网络空）时才动内部缓冲。GUI 里两条能量条分别显示网络存量与外部缓冲。
 
-> 数值单位是 Minecraft 的 tick（**20 tick = 1 秒**），所以 400V 的有线 120 FE/t ≈ 2400 FE/s。
+> 表里的速率一律是**每秒（FE/s）**。Minecraft 按 **20 tick = 1 秒** 结算，方块内部就把每秒额度摊到每 tick，除不尽的部分顺延到下一 tick，所以长期平均值精确、也不会漏电。折算成每 tick 是：400V 有线 6、无线 1；800V 有线 12、无线 4。
+>
+> 待机耗电同样按每秒算，否则会出现「站一空转，待机就把有线充电全吃掉」的倒挂（8 FE/t = 160 FE/s，比 120 FE/s 的充电输出还高）。
 
 ## 能量模型
 
@@ -191,6 +193,8 @@ RS 的距离/维度校验并不位于 `resolveNetwork`，而在 `NetworkItemPlay
 
 充电站**不**沿用 RS 的方块基类——RS 2.0.7 没有公开的方块基类（方块全部在无 `@API` 标注的内部模块里），所以方块本身继承原版 `BaseEntityBlock`，tick 走原版 `getTicker`。
 
+注意 `BaseEntityBlock` 默认返回 `RenderShape.INVISIBLE`（原版方块实体如箱子、熔炉都是自己画模型的），所以带方块实体又想用普通 json 模型的方块必须显式覆写 `getRenderShape()` 返回 `RenderShape.MODEL`，否则方块放下后完全不画、直接看穿到后面的世界。本模组在 0.1.9 修掉了这个坑。
+
 方块实体则继承 RS 公开且标注为 STABLE 的 `AbstractNetworkNodeContainerBlockEntity<T extends NetworkNode>`，由它负责网络容器生命周期；自定义的 `ChargingStationNetworkNode` 只声明待机耗电。网络连接用的是 RS 的默认六向连接策略，因此连 `createMainContainer` 都不用重写。
 
 400V 与 800V 是**同一个方块类、同一个方块实体类型**的两份实例：`ChargingStationBlock` 带一个档位字段，方块实体在构造时从 `BlockState` 反查档位，据此决定读哪一节配置（`airCooledChargingStation` / `liquidCooledChargingStation`）。界面按档位切换背景与能量条主色，其余逻辑完全共用——两档之间没有一行重复代码。
@@ -273,9 +277,9 @@ Two blocks, two charging paths, two power sources. They work with **any FE termi
 
 | | 400V Air-Cooled<br>`air_cooled_charging_station` | 800V Liquid-Cooled<br>`liquid_cooled_charging_station` |
 |---|---|---|
-| **Wired** (terminal in the GUI slot) | **120 FE/t** | **240 FE/t** |
-| **Wireless** (players in range) | **20 FE/t**, radius **4 blocks** | **80 FE/t**, radius **10 blocks** |
-| Idle draw | 8 FE/t | 32 FE/t |
+| **Wired** (terminal in the GUI slot) | **120 FE/s** | **240 FE/s** |
+| **Wireless** (players in range) | **20 FE/s**, radius **4 blocks** | **80 FE/s**, radius **10 blocks** |
+| Idle draw | 8 FE/s | 32 FE/s |
 | External FE buffer | 10000 FE | 40000 FE |
 
 Both share one block entity and one screen, differing only in numbers and looks: the GUI background and energy-bar colour follow the tier (cyan for air-cooled, violet for liquid-cooled), and the item tooltip lists **the values actually in effect** for that tier, so it tracks your config instead of going stale.
@@ -287,7 +291,9 @@ Both share one block entity and one screen, differing only in numbers and looks:
 
 Power is drawn **network first, buffer second**. The GUI shows both bars.
 
-> Rates are per Minecraft tick (**20 ticks = 1 second**), so the 400V wired path at 120 FE/t is ≈ 2400 FE/s.
+> Every rate above is **per second (FE/s)**. Minecraft settles on **20 ticks = 1 second**, so the block spreads the per-second budget across the ticks of each second and carries the remainder over, which keeps the long-run average exact and never leaks energy. Per tick that works out to: 400V wired 6, wireless 1; 800V wired 12, wireless 4.
+>
+> The idle draw is per second too — otherwise a station would burn 8 FE/t = 160 FE/s doing nothing, more than the 120 FE/s it can deliver when charging.
 
 ### Energy model
 
@@ -339,7 +345,7 @@ Cross-dimensional access requires both the Transmitter and Receiver chunks to be
 
 **Grid and cards.** The single extension point is overriding `AbstractNetworkEnergyItem.use(ServerPlayer, ItemStack, SlotReference)` to inject a custom `ExtendedWirelessNetworkItemContext`. RS's distance/dimension check lives in `NetworkItemPlayerValidator`, not in `resolveNetwork`, so upgrades apply as a **fallback relaxation** — the standard resolution runs first, and only when it comes back empty do the installed cards get a say. The `force=true` path is deliberately left untouched, since RS relies on that semantic to remove stale grid watchers. On the energy side, `isActive()` and `drainEnergy(long)` are overridden so the bound network answers "is there power?" and pays the bill.
 
-**Charging Station.** RS 2.0.7 exposes no public block base class (blocks live in an internal, un-annotated module), so the block extends vanilla `BaseEntityBlock` and uses vanilla `getTicker`. The block entity extends the STABLE-annotated `AbstractNetworkNodeContainerBlockEntity<T extends NetworkNode>`, with a minimal `ChargingStationNetworkNode` declaring the idle draw; RS's default six-way connection strategy means `createMainContainer` needs no override at all. Both tiers are two instances of the *same* block class and the *same* block entity type: the block carries a tier field, the block entity reads it back from the `BlockState` when constructed, and that decides which config section it reads (`airCooledChargingStation` / `liquidCooledChargingStation`). The screen switches background and bar colour by tier; everything else is shared, so no logic is duplicated between the two. Item charging uses NeoForge's `Capabilities.EnergyStorage.ITEM` rather than RS's `PlatformImpl.getEnergyStorage` (which only recognises RS's own adapter), which is what makes it compatible with other mods' FE items.
+**Charging Station.** RS 2.0.7 exposes no public block base class (blocks live in an internal, un-annotated module), so the block extends vanilla `BaseEntityBlock` and uses vanilla `getTicker`. Note that `BaseEntityBlock` returns `RenderShape.INVISIBLE` by default — vanilla's own block entities such as chests and furnaces draw themselves — so a block entity block that wants an ordinary json model has to override `getRenderShape()` and return `RenderShape.MODEL`, or it renders as nothing at all and you see straight through it. Fixed in 0.1.9. The block entity extends the STABLE-annotated `AbstractNetworkNodeContainerBlockEntity<T extends NetworkNode>`, with a minimal `ChargingStationNetworkNode` declaring the idle draw; RS's default six-way connection strategy means `createMainContainer` needs no override at all. Both tiers are two instances of the *same* block class and the *same* block entity type: the block carries a tier field, the block entity reads it back from the `BlockState` when constructed, and that decides which config section it reads (`airCooledChargingStation` / `liquidCooledChargingStation`). The screen switches background and bar colour by tier; everything else is shared, so no logic is duplicated between the two. Item charging uses NeoForge's `Capabilities.EnergyStorage.ITEM` rather than RS's `PlatformImpl.getEnergyStorage` (which only recognises RS's own adapter), which is what makes it compatible with other mods' FE items.
 
 See [`docs/DESIGN.md`](docs/DESIGN.md) for the full design document.
 

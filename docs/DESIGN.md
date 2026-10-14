@@ -760,21 +760,21 @@ for y in range(h - 15):
 
 ### 15.1 0.1.7：无线充电速率 10 → 20 FE/t
 
-0.1.5 的单座充电站无线速率偏低（10 FE/t），路过补电意义不大 → 提到 20 FE/t，与有线保持 5× 的「快 / 慢」对比。
+0.1.5 的单座充电站无线速率偏低（10 FE/t），路过补电意义不大 → 提到 20 FE/t，与有线保持 5× 的「快 / 慢」对比。（当时是 FE/t 语义；0.1.9 起充电站的全部速率统一改为**每秒**口径，见 §16.2。）
 
 ### 15.2 0.1.8：拆成 400V 风冷与 800V 液冷两档
 
 | | 400V 风冷 `air_cooled_charging_station` | 800V 液冷 `liquid_cooled_charging_station` |
 |---|---|---|
-| 有线（GUI 槽位） | 120 FE/t | 240 FE/t |
-| 无线（范围内玩家） | 20 FE/t | 80 FE/t |
+| 有线（GUI 槽位） | 120 FE/s | 240 FE/s |
+| 无线（范围内玩家，每物品） | 20 FE/s | 80 FE/s |
 | 无线半径 | 4 格 | 10 格 |
-| 待机耗电 | 8 FE/t | 32 FE/t |
+| 待机耗电 | 8 FE/s | 32 FE/s |
 | 外部 FE 缓冲 | 10000 FE | 40000 FE |
 | 方块强度（破坏 / 抗爆） | 2.0 / 6.0 | 3.5 / 9.0 |
 | 配方 | 8 石英 + 4 红石块 + 4 机器外壳 + 1 高级处理器 | 同图案：红石块→**蓝冰**、高级处理器→**下界之星** |
 
-**单位口径**：MC 的能量按 tick 结算（**20 tick = 1 秒**）。需求里给的「120 / 20 / 240 / 80 每秒」按 **FE/t** 落地——其中的「20」与 0.1.7 刚落地的默认值一致；若按真实秒理解（÷20），400V 反而比旧版慢 20 倍，与「数值偏低要调高」的前提矛盾。
+**单位口径**：需求里给的「120 / 20 / 240 / 80 每秒」就是**每秒（FE/s）**，0.1.8 曾误按 FE/t 落地，0.1.9 已改回每秒口径并统一实现方式（见 **§16.2**）。下面这些默认值本身没有变，变的是它们的含义与内部换算。
 
 **关键决策：两档共用一套类，不复制**
 
@@ -799,6 +799,66 @@ for y in range(h - 15):
 - `simpleCodec(ChargingStationBlock::new)` 只能对应 `(Properties)` 一个构造签名 → 保留该构造器并委托到默认档位；mod 方块不走这个 codec 反序列化，无实际影响。
 - 方块物品要有动态 tooltip 必须用 `BlockItem` 子类（`ChargingStationBlockItem`）；`Item.TooltipContext` 照旧裸名使用、不 import。
 - 配置节改名后，旧存档的 `config/rswirelesscrafting-common.toml` 会残留失效的 `chargingStation` 段，NeoForge 会忽略它；新时段与值需重新生成（或删掉该 toml）。
+
+---
+
+## 16. 0.1.9 增量：方块渲染修复 · 能量口径改为每秒
+
+首轮真机测试报回两个 bug，都是 0.1.5 起就潜伏、而构建期无法发现的。
+
+### 16.1 方块放下后完全不可见（可透视）
+
+**现象**：两档充电站放进世界后不渲染，直接看穿到后面的地形。
+
+**根因**：`ChargingStationBlock extends BaseEntityBlock`，而原版 `BaseEntityBlock` **默认覆写了 `getRenderShape(BlockState)` 返回 `RenderShape.INVISIBLE`**——因为原版所有方块实体方块（箱子、熔炉、告示牌……）都由自己的 `BlockEntityRenderer` 画，不需要 json 模型。本模组的充电站是**普通 json 模型 + 方块实体只存数据**，于是模型被整体跳过。
+
+**修法**：显式覆写
+
+```java
+@Override
+protected RenderShape getRenderShape(final BlockState state) {
+    return RenderShape.MODEL;   // 否则 BaseEntityBlock 默认 INVISIBLE
+}
+```
+
+**教训**：凡是「原版 `BaseEntityBlock` + 静态 json 模型」的组合，`getRenderShape` 是必答题，不是可选项。构建、checkstyle、资源打包全都发现不了，只有进游戏才能看见——这也是本项目第一次真机冒烟测试就抓到的第一个问题。
+
+### 16.2 充电速率的口径：每秒（FE/s），不是每 tick
+
+**需求原文给的是「每秒」**，0.1.8 误按 FE/t 落地（当时判断依据是其中的「20」与 0.1.7 默认值吻合，怕按秒理解会慢 20 倍）。0.1.9 按用户明确要求改回**每秒**口径。
+
+**实现：配置仍写每秒值，方块内部摊到 tick**
+
+新增 `ChargingStationBlockEntity.RateMeter` 内部类，把「每秒额度」摊成每 tick 额度：
+
+```java
+private static final class RateMeter {
+    private static final long TICKS_PER_SECOND = 20;
+    private long carry;
+
+    long next(final long perSecond) {
+        final long total = carry + Math.max(0, perSecond);
+        carry = total % TICKS_PER_SECOND;   // 余数顺延，长期平均精确
+        return total / TICKS_PER_SECOND;
+    }
+}
+```
+
+- 三个实例：`idleMeter` / `wiredMeter` / `wirelessMeter`，分别对应待机、有线、无线。
+- `tick()` 里每 tick 各推进一次，把返回值当本 tick 的额度用（`consumeEnergy(budget)` / `chargeItem(stack, budget)`）。
+- 余数累积的意义：配额若被整除（20 / 80 / 120 / 240 都能整除）看不出差别，但玩家一旦把速率配成 7 这种除不尽的数，直接整除会持续漏掉 13/20 的电；累积后长期平均恰好等于配置值。
+- 好处是**配置项里的数字就是玩家给的那些数**（120 / 20 / 240 / 80），语义直白；代价是内部多一个 5 行的小类。
+
+**待机耗电也一并改为每秒**：否则会倒挂——400V 待机 8 FE/t = 160 FE/s，比它 120 FE/s 的充电输出还高，站只要在跑就净亏电。改为 FE/s 后：400V 8 FE/s（= 0.4 FE/t）、800V 32 FE/s（= 1.6 FE/t）。`RateMeter` 恰好也解决了「每秒不到 1 FE」时的整数截断。
+
+**连带改动**：`Config.ChargingStationEntry` 接口加单位说明（全部 FE/s，`wirelessChargeRate` 指每个物品）；`ChargingStationDefaults` record 的 `@param` 全部改注 FE/s；`ConfigImpl` 的配置注释、`lang/*.json` 的 tooltip 与三个方块文案（`wired` / `wireless` / `idle`）从 `FE/t` 改成 `FE/s`；README 的中英速率表与说明同步。
+
+### 16.3 复核方式（构建期可做）
+
+- 反编译确认常量与逻辑真进了包：
+  `javap -p -c -cp <jar> com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlock | grep -A4 getRenderShape`
+- 确认内部类打包：`javap -p -cp <jar> 'com.kokuu...ChargingStationBlockEntity$RateMeter'`
+- 这两项都无法替代真机验证，但能排除「改了没打进去」这一类低级失误。
 
 ---
 

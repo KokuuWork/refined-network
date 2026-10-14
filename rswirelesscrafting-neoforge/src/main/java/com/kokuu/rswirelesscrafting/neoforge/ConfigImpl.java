@@ -160,15 +160,15 @@ public class ConfigImpl implements Config {
             builder.translation(translationKey(path)).push(path);
             energyUsage = builder
                 .translation(translationKey(path + ".energyUsage"))
-                .comment("Idle energy usage of this Charging Station on the network.")
+                .comment("Idle energy usage of this Charging Station on the network, in FE per second.")
                 .defineInRange("energyUsage", defaults.energyUsage(), 0, Long.MAX_VALUE);
             wiredChargeRate = builder
                 .translation(translationKey(path + ".wiredChargeRate"))
-                .comment("Energy per tick transferred to the item in the wired slot.")
+                .comment("Energy per second transferred to the item in the wired slot.")
                 .defineInRange("wiredChargeRate", defaults.wiredChargeRate(), 0, Long.MAX_VALUE);
             wirelessChargeRate = builder
                 .translation(translationKey(path + ".wirelessChargeRate"))
-                .comment("Energy per tick transferred to nearby players' items.")
+                .comment("Energy per second transferred to each item in nearby players' inventories.")
                 .defineInRange("wirelessChargeRate", defaults.wirelessChargeRate(), 0,
                     Long.MAX_VALUE);
             wirelessRadius = builder

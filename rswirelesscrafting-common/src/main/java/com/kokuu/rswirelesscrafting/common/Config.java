@@ -27,6 +27,13 @@ public interface Config {
         int getExtendedRange();
     }
 
+    /**
+     * 一档充电站的配置。
+     *
+     * <p>{@code energyUsage}、{@code wiredChargeRate}、{@code wirelessChargeRate} 的单位都是
+     * <b>每秒（FE/s）</b>，方块内部按每秒 20 tick 摊到每 tick；{@code wirelessChargeRate}
+     * 指的是<b>每个物品</b>的额度。
+     */
     interface ChargingStationEntry {
         long getEnergyUsage();
 

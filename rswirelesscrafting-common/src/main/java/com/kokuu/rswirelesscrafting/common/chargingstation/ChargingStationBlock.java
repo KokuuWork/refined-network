@@ -10,6 +10,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -44,6 +45,16 @@ public class ChargingStationBlock extends BaseEntityBlock {
     @Override
     protected MapCodec<? extends BaseEntityBlock> codec() {
         return CODEC;
+    }
+
+    /**
+     * {@code BaseEntityBlock} 默认返回 {@link RenderShape#INVISIBLE}（原版方块实体都是自绘的，
+     * 如箱子、熔炉），所以带方块实体又想用普通 json 模型的方块必须显式声明用模型渲染，
+     * 否则方块放下后完全不画，直接看穿到后面的世界。
+     */
+    @Override
+    protected RenderShape getRenderShape(final BlockState state) {
+        return RenderShape.MODEL;
     }
 
     @Nullable
