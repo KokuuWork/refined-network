@@ -1,0 +1,48 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to release (e.g. v0.1.0)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build
+        run: ./gradlew build -x test
+
+      - name: Read mod version
+        id: mod
+        run: |
+          version="$(grep -oP '^version = "\K[^"]+' rswirelesscrafting-neoforge/build.gradle.kts | head -1)"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Built mod version: $version"
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag || github.ref_name }}
+          name: "rswirelesscrafting ${{ steps.mod.outputs.version }}"
+          generate_release_notes: true
+          files: |
+            rswirelesscrafting-neoforge/build/libs/*.jar
+            !rswirelesscrafting-neoforge/build/libs/*-sources.jar
