@@ -1,4 +1,4 @@
-# Refined Storage - Wireless Crafting
+# Refined Storage - Wireless Crafting（无线合成终端）
 
 [![Build](https://github.com/KokuuWork/rswirelesscrafting/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/KokuuWork/rswirelesscrafting/actions/workflows/build.yml)
 [![Release](https://img.shields.io/github/v/release/KokuuWork/rswirelesscrafting?label=release)](https://github.com/KokuuWork/rswirelesscrafting/releases/latest)
@@ -257,13 +257,17 @@ export JAVA_HOME="/path/to/jdk-21"
 
 | 脚本 | 产出 |
 |---|---|
-| `gen_textures.py` | 8 张物品纹理 + 1 张方块纹理（终端充电站） |
+| `gen_textures.py` | 8 张物品纹理 + 4 张方块纹理（终端充电站 4 形态：通电/断电 × 无线开/关） |
 | `gen_gui_textures.py` | 2 张 176×166 的界面背景（终端充电站、升级装配） |
 | `gen_readme_images.py` | 上文的全部配图（需 `MC_CLIENT_JAR` 与 `RS_TEXTURES` 指向 1.21.1 客户端 jar 与 RS 源码树） |
 
 ## 致谢
 
 本项目大量逻辑衍生于 [Refined Storage](https://github.com/refinedmods/refinedstorage)（MIT License, Copyright © 2020 - 2025 Refined Mods），模块结构参考了官方附属样例 [Quartz Arsenal](https://github.com/refinedmods/quartz-arsenal)。在此致谢。
+
+## 更新日志
+
+见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 许可
 
