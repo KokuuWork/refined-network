@@ -33,9 +33,13 @@ public final class ContentNames {
         "item",
         "remote_energy_upgrade"
     );
-    public static final MutableComponent CHARGING_STATION = createTranslation(
+    public static final MutableComponent AIR_COOLED_CHARGING_STATION = createTranslation(
         "block",
-        "charging_station"
+        "air_cooled_charging_station"
+    );
+    public static final MutableComponent LIQUID_COOLED_CHARGING_STATION = createTranslation(
+        "block",
+        "liquid_cooled_charging_station"
     );
     public static final MutableComponent WIRELESS_CRAFTING_GRID_UPGRADES_TITLE = createTranslation(
         "gui",
@@ -106,18 +110,32 @@ public final class ContentNames {
         "remote_energy_upgrade.requires"
     ).withStyle(ChatFormatting.DARK_GRAY);
 
+    // 充电站：界面内的两条能量条提示，以及方块物品上的动态数值行
+    // （数值随配置变化，所以只在这里放 key，文案在各处按当前配置拼装）。
     public static final MutableComponent CHARGING_STATION_HELP = createTranslation(
         "block",
         "charging_station.help"
     ).withStyle(ChatFormatting.GRAY);
-    public static final MutableComponent CHARGING_STATION_SLOT_HELP = createTranslation(
+    public static final MutableComponent CHARGING_STATION_BUFFER_INFO = createTranslation(
         "gui",
-        "charging_station.slot_help"
+        "charging_station.buffer_info"
     ).withStyle(ChatFormatting.DARK_GRAY);
-    public static final MutableComponent CHARGING_STATION_WIRELESS_INFO = createTranslation(
-        "gui",
-        "charging_station.wireless_info"
-    ).withStyle(ChatFormatting.DARK_GRAY);
+    public static final String CHARGING_STATION_WIRED_TRANSLATION_KEY = createTranslationKey(
+        "block",
+        "charging_station.wired"
+    );
+    public static final String CHARGING_STATION_WIRELESS_TRANSLATION_KEY = createTranslationKey(
+        "block",
+        "charging_station.wireless"
+    );
+    public static final String CHARGING_STATION_IDLE_TRANSLATION_KEY = createTranslationKey(
+        "block",
+        "charging_station.idle"
+    );
+    public static final String CHARGING_STATION_BUFFER_TRANSLATION_KEY = createTranslationKey(
+        "block",
+        "charging_station.buffer"
+    );
 
     public static final MutableComponent DIMENSION_OVERWORLD = createTranslation(
         "item",

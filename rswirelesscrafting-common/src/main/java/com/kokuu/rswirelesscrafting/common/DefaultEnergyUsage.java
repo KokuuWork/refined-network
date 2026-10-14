@@ -1,5 +1,7 @@
 package com.kokuu.rswirelesscrafting.common;
 
+import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationDefaults;
+
 public final class DefaultEnergyUsage {
     public static final long WIRELESS_CRAFTING_GRID_CAPACITY = 1000;
     public static final long WIRELESS_CRAFTING_GRID_OPEN = 5;
@@ -10,11 +12,23 @@ public final class DefaultEnergyUsage {
     public static final long INTERDIMENSIONAL_ENERGY_MULTIPLIER = 150;
     public static final int EXTENDED_RANGE = 64;
 
-    public static final long CHARGING_STATION_ENERGY_USAGE = 8;
-    public static final long CHARGING_STATION_WIRED_RATE = 100;
-    public static final long CHARGING_STATION_WIRELESS_RATE = 20;
-    public static final int CHARGING_STATION_WIRELESS_RADIUS = 8;
-    public static final long CHARGING_STATION_EXTERNAL_CAPACITY = 10000;
+    // 400V 风冷充电站：入门款，速度快、范围小、待机开销低。
+    public static final ChargingStationDefaults AIR_COOLED_CHARGING_STATION = new ChargingStationDefaults(
+        8,     // 待机耗电 FE/t
+        120,   // 有线充电 FE/t
+        20,    // 无线充电 FE/t
+        4,     // 无线半径（格）
+        10000  // 内部 FE 缓冲
+    );
+
+    // 800V 液冷充电站：终局款，速率与范围大幅提升，代价是待机开销与缓冲要求都更高。
+    public static final ChargingStationDefaults LIQUID_COOLED_CHARGING_STATION = new ChargingStationDefaults(
+        32,    // 待机耗电 FE/t
+        240,   // 有线充电 FE/t
+        80,    // 无线充电 FE/t
+        10,    // 无线半径（格）
+        40000  // 内部 FE 缓冲
+    );
 
     public static final long BATTERY_UPGRADE_CAPACITY = 1000;
 

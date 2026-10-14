@@ -1,5 +1,6 @@
 package com.kokuu.rswirelesscrafting.common;
 
+import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.BatteryUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.InterdimensionalUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.RangeUpgradeItem;
@@ -8,8 +9,6 @@ import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.WirelessCrafting
 
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
-
-import net.minecraft.world.item.BlockItem;
 
 import static java.util.Objects.requireNonNull;
 
@@ -27,7 +26,9 @@ public final class Items {
     @Nullable
     private Supplier<RemoteEnergyUpgradeItem> remoteEnergyUpgrade;
     @Nullable
-    private Supplier<BlockItem> chargingStation;
+    private Supplier<ChargingStationBlockItem> airCooledChargingStation;
+    @Nullable
+    private Supplier<ChargingStationBlockItem> liquidCooledChargingStation;
 
     private Items() {
     }
@@ -72,11 +73,19 @@ public final class Items {
         this.remoteEnergyUpgrade = supplier;
     }
 
-    public BlockItem getChargingStationBlockItem() {
-        return requireNonNull(chargingStation).get();
+    public ChargingStationBlockItem getAirCooledChargingStationBlockItem() {
+        return requireNonNull(airCooledChargingStation).get();
     }
 
-    public void setChargingStationBlockItem(final Supplier<BlockItem> supplier) {
-        this.chargingStation = supplier;
+    public void setAirCooledChargingStationBlockItem(final Supplier<ChargingStationBlockItem> supplier) {
+        this.airCooledChargingStation = supplier;
+    }
+
+    public ChargingStationBlockItem getLiquidCooledChargingStationBlockItem() {
+        return requireNonNull(liquidCooledChargingStation).get();
+    }
+
+    public void setLiquidCooledChargingStationBlockItem(final Supplier<ChargingStationBlockItem> supplier) {
+        this.liquidCooledChargingStation = supplier;
     }
 }

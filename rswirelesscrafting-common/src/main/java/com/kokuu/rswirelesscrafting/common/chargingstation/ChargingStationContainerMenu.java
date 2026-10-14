@@ -29,6 +29,7 @@ public class ChargingStationContainerMenu extends AbstractContainerMenu {
 
     private final Container container;
     private final ContainerData data;
+    private final ChargingStationTier tier;
 
     /**
      * 服务端构造：直接绑定方块实体与其实时数据。
@@ -36,17 +37,19 @@ public class ChargingStationContainerMenu extends AbstractContainerMenu {
     public ChargingStationContainerMenu(final int syncId,
                                         final Inventory playerInventory,
                                         final Container container,
-                                        final ContainerData data) {
+                                        final ContainerData data,
+                                        final ChargingStationTier tier) {
         super(Menus.INSTANCE.getChargingStation(), syncId);
         this.container = container;
         this.data = data;
+        this.tier = tier;
         addSlot(new Slot(container, 0, CHARGE_SLOT_X, CHARGE_SLOT_Y));
         addPlayerInventory(playerInventory);
         addDataSlots(data);
     }
 
     /**
-     * 客户端构造：坐标由服务端随界面打开数据下发，方块实体从本地世界解析。
+     * 客户端构造：坐标与档位由服务端随界面打开数据下发，方块实体从本地世界解析。
      * 数据槽用可写实现，等待服务端同步覆盖。
      */
     public ChargingStationContainerMenu(final int syncId,
@@ -56,7 +59,8 @@ public class ChargingStationContainerMenu extends AbstractContainerMenu {
             syncId,
             playerInventory,
             resolveContainer(playerInventory, chargingStationData.pos()),
-            new SimpleContainerData(DATA_SIZE)
+            new SimpleContainerData(DATA_SIZE),
+            ChargingStationTier.byNetworkId(chargingStationData.tier())
         );
     }
 
@@ -86,6 +90,10 @@ public class ChargingStationContainerMenu extends AbstractContainerMenu {
 
     public int getDataValue(final int index) {
         return data.get(index);
+    }
+
+    public ChargingStationTier getTier() {
+        return tier;
     }
 
     @Override

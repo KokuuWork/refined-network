@@ -588,6 +588,8 @@ public class ExtendedWirelessNetworkItemContext implements NetworkItemContext {
 
 ### 14.2 充电站（`charging_station`）
 
+> ⚠️ **0.1.8 起分为 400V 风冷与 800V 液冷两档**，方块 ID 变成 `air_cooled_charging_station` 与 `liquid_cooled_charging_station`。本节描述的机制（方块/方块实体/开界面路径/能量账本）全部不变，档位差异与数值见 **§15.2**。
+
 **方块** `ChargingStationBlock extends BaseEntityBlock`：
 
 - `getTicker` 服务端返回自定义 ticker 调 `station.tick()`（原版 tick 路径，不碰 RS 内部 ticker 体系）；
@@ -697,6 +699,8 @@ public void drainEnergy(final long amount) {
 
 ### 14.5 配置与默认值（0.1.5 新增项）
 
+> ⚠️ 下面的充电站常量是 **0.1.5 当时的数值**，已被 §15.2 取代（现为两个 `ChargingStationDefaults` 常量、两节配置）。
+
 ```java
 public static final long CHARGING_STATION_ENERGY_USAGE  = 8;      // 待机耗电 FE/t
 public static final long CHARGING_STATION_WIRED_RATE    = 100;    // 有线充电 FE/t
@@ -749,6 +753,52 @@ for y in range(h - 15):
 ```
 
 当前对齐结果：充电槽 `(80, 51)`、升级槽 `(53/71/89/107, 31)`、玩家背包 `(8 + col*18, 84 + row*18)`、快捷栏 `y = 142`，全部与菜单常量一致。
+
+---
+
+## 15. 0.1.7 / 0.1.8 增量：两档充电站 · 输电卡配方修正
+
+### 15.1 0.1.7：无线充电速率 10 → 20 FE/t
+
+0.1.5 的单座充电站无线速率偏低（10 FE/t），路过补电意义不大 → 提到 20 FE/t，与有线保持 5× 的「快 / 慢」对比。
+
+### 15.2 0.1.8：拆成 400V 风冷与 800V 液冷两档
+
+| | 400V 风冷 `air_cooled_charging_station` | 800V 液冷 `liquid_cooled_charging_station` |
+|---|---|---|
+| 有线（GUI 槽位） | 120 FE/t | 240 FE/t |
+| 无线（范围内玩家） | 20 FE/t | 80 FE/t |
+| 无线半径 | 4 格 | 10 格 |
+| 待机耗电 | 8 FE/t | 32 FE/t |
+| 外部 FE 缓冲 | 10000 FE | 40000 FE |
+| 方块强度（破坏 / 抗爆） | 2.0 / 6.0 | 3.5 / 9.0 |
+| 配方 | 8 石英 + 4 红石块 + 4 机器外壳 + 1 高级处理器 | 同图案：红石块→**蓝冰**、高级处理器→**下界之星** |
+
+**单位口径**：MC 的能量按 tick 结算（**20 tick = 1 秒**）。需求里给的「120 / 20 / 240 / 80 每秒」按 **FE/t** 落地——其中的「20」与 0.1.7 刚落地的默认值一致；若按真实秒理解（÷20），400V 反而比旧版慢 20 倍，与「数值偏低要调高」的前提矛盾。
+
+**关键决策：两档共用一套类，不复制**
+
+- `ChargingStationBlock` 只多一个 `ChargingStationTier` 字段；两个注册项是**同一个类、同一个 `BlockEntityType`** 的两份实例（`BlockEntityType.Builder.of(..., 风冷方块, 液冷方块)`）。菜单类型与界面也只有一份。
+- 方块实体在**构造时**从 `BlockState` 反查档位：`state.getBlock() instanceof ChargingStationBlock block → block.getTier()`。因为是静态辅助方法（`tierOf(state)` / `entryOf(state)`），可以直接写在 `super(...)` 的参数位里，用它决定 `ChargingStationNetworkNode` 的待机耗电与 `externalCapacity`。
+- 档位 → 配置节的映射收敛在枚举上：`ChargingStationTier.getEntry(config)` 返回 `getAirCooledChargingStation()` 或 `getLiquidCooledChargingStation()`，方块实体其余代码不出现任何 `if (tier == ...)` 分支。
+- 界面：`ChargingStationData` 增加 `tier`（网络 id，`writeVarInt`/`readVarInt`），客户端据此选背景图与能量条主色。
+- **新增类**：`ChargingStationTier`（枚举：`networkId` / `byNetworkId` / `getEntry`）、`ChargingStationDefaults`（record，打包一档的 5 个默认值）、`ChargingStationBlockItem`（`BlockItem` 子类，tooltip 动态读本档配置列出数值）。
+
+**配置**：`chargingStation` 一节拆成 `airCooledChargingStation` / `liquidCooledChargingStation`，各含 `energyUsage` / `wiredChargeRate` / `wirelessChargeRate` / `wirelessRadius` / `externalCapacity`（最后一项是 0.1.8 新增的可配项，此前硬编码在常量里）。`DefaultEnergyUsage` 中改为两个 `ChargingStationDefaults` 常量，仍是全部默认数值的单一出处。
+
+**资源与美术**：两套 blockstate / block model / item model / loot table / 方块纹理 / GUI 背景；旧的 `charging_station.*` 资源已删除。方块纹理参数化为 `charging_station_texture(liquid_cooled)`——风冷是中性灰机壳 + 两侧散热鳍片 + 青蓝闪电，液冷压向紫灰 + 环绕面板的冷却回路 + 紫闪电；界面背景同样参数化为 `charging_station_gui(liquid_cooled)`，两条能量条加一圈 accent 外框（青蓝 / 紫）以便一眼分辨。
+
+🚨 **破坏性变更**：方块 ID 从 `charging_station` 变成两个新 ID，**已放置的旧方块更新后会消失**。考虑到该方块 0.1.5 才引入、仓库又只保留最新 Release，按项目惯例直接替换，不做存档迁移。
+
+### 15.3 输电卡配方：去掉末影珍珠
+
+`remote_energy_upgrade` 四角的 `c:ender_pearls` 换成 `minecraft:copper_block`。理由：这张卡讲的是**电**（从网络远距离取电），而末影珍珠是空间 / 传送语义，两者没有关系（用户指出）。改为**铜块**后，与中心的**避雷针**构成同一组「导电材料」语言，同时把这张卡和范围卡 / 维度卡区分开——后两张才是空间语义、才该用末影珍珠。其余材料（电池卡 / 64k 存储方块 / 下界之星）不变，价位不降。
+
+### 15.4 踩坑记录
+
+- `simpleCodec(ChargingStationBlock::new)` 只能对应 `(Properties)` 一个构造签名 → 保留该构造器并委托到默认档位；mod 方块不走这个 codec 反序列化，无实际影响。
+- 方块物品要有动态 tooltip 必须用 `BlockItem` 子类（`ChargingStationBlockItem`）；`Item.TooltipContext` 照旧裸名使用、不 import。
+- 配置节改名后，旧存档的 `config/rswirelesscrafting-common.toml` 会残留失效的 `chargingStation` 段，NeoForge 会忽略它；新时段与值需重新生成（或删掉该 toml）。
 
 ---
 

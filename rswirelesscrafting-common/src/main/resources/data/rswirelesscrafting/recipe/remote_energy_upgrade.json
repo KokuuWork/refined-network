@@ -1,13 +1,13 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "PBP",
+    "CBC",
     "XSX",
-    "PLP"
+    "CLC"
   ],
   "key": {
-    "P": {
-      "tag": "c:ender_pearls"
+    "C": {
+      "item": "minecraft:copper_block"
     },
     "B": {
       "item": "rswirelesscrafting:battery_upgrade"

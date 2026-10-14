@@ -10,8 +10,8 @@ displayURL = "https://github.com/KokuuWork/rswirelesscrafting"
 authors = "Kokuu"
 description = '''
 Adds the wireless crafting grid Refined Storage never had, plus four pluggable
-upgrade cards (battery, range, interdimensional, remote energy) and a charging
-station that recharges every FE-based terminal.
+upgrade cards (battery, range, interdimensional, remote energy) and two charging
+stations (400V air-cooled, 800V liquid-cooled) that recharge every FE terminal.
 '''
 [[dependencies.rswirelesscrafting]]
 modId = "refinedstorage"

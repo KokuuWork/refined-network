@@ -9,6 +9,8 @@ import com.kokuu.rswirelesscrafting.common.Items;
 import com.kokuu.rswirelesscrafting.common.Platform;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlock;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockEntity;
+import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockItem;
+import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationTier;
 import com.kokuu.rswirelesscrafting.common.upgrade.BatteryUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.InterdimensionalUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.RangeUpgradeItem;
@@ -30,7 +32,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -93,22 +94,31 @@ public class ModInitializer extends AbstractModInitializer {
 
     private void registerBlocks(final IEventBus eventBus) {
         final RegistryCallback<Block> callback = new ForgeRegistryCallback<>(blockRegistry);
-        Blocks.INSTANCE.setChargingStation(callback.register(
-            ContentIds.CHARGING_STATION,
+        Blocks.INSTANCE.setAirCooledChargingStation(callback.register(
+            ContentIds.AIR_COOLED_CHARGING_STATION,
             () -> new ChargingStationBlock(BlockBehaviour.Properties.of()
                 .mapColor(MapColor.METAL)
                 .strength(2.0F, 6.0F)
-                .sound(SoundType.METAL))
+                .sound(SoundType.METAL), ChargingStationTier.AIR_COOLED)
+        ));
+        Blocks.INSTANCE.setLiquidCooledChargingStation(callback.register(
+            ContentIds.LIQUID_COOLED_CHARGING_STATION,
+            () -> new ChargingStationBlock(BlockBehaviour.Properties.of()
+                .mapColor(MapColor.METAL)
+                .strength(3.5F, 9.0F)
+                .sound(SoundType.METAL), ChargingStationTier.LIQUID_COOLED)
         ));
         blockRegistry.register(eventBus);
 
+        // 两种规格共用同一个方块实体类型与同一个界面。
         final RegistryCallback<BlockEntityType<?>> blockEntityCallback =
             new ForgeRegistryCallback<>(blockEntityTypeRegistry);
         BlockEntities.INSTANCE.setChargingStation(blockEntityCallback.register(
             ContentIds.CHARGING_STATION,
             () -> BlockEntityType.Builder.of(
                 ChargingStationBlockEntity::new,
-                Blocks.INSTANCE.getChargingStation()
+                Blocks.INSTANCE.getAirCooledChargingStation(),
+                Blocks.INSTANCE.getLiquidCooledChargingStation()
             ).build(null)
         ));
         blockEntityTypeRegistry.register(eventBus);
@@ -146,10 +156,22 @@ public class ModInitializer extends AbstractModInitializer {
         Items.INSTANCE.setRemoteEnergyUpgrade(
             callback.register(ContentIds.REMOTE_ENERGY_UPGRADE, RemoteEnergyUpgradeItem::new)
         );
-        Items.INSTANCE.setChargingStationBlockItem(
+        Items.INSTANCE.setAirCooledChargingStationBlockItem(
             callback.register(
-                ContentIds.CHARGING_STATION,
-                () -> new BlockItem(Blocks.INSTANCE.getChargingStation(), new Item.Properties())
+                ContentIds.AIR_COOLED_CHARGING_STATION,
+                () -> new ChargingStationBlockItem(
+                    Blocks.INSTANCE.getAirCooledChargingStation(),
+                    new Item.Properties()
+                )
+            )
+        );
+        Items.INSTANCE.setLiquidCooledChargingStationBlockItem(
+            callback.register(
+                ContentIds.LIQUID_COOLED_CHARGING_STATION,
+                () -> new ChargingStationBlockItem(
+                    Blocks.INSTANCE.getLiquidCooledChargingStation(),
+                    new Item.Properties()
+                )
             )
         );
     }

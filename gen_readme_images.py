@@ -231,6 +231,8 @@ def load_assets():
             "lightning_rod": "assets/minecraft/textures/block/lightning_rod.png",
             "beacon": "assets/minecraft/textures/block/beacon.png",
             "redstone_block": "assets/minecraft/textures/block/redstone_block.png",
+            "copper_block": "assets/minecraft/textures/block/copper_block.png",
+            "blue_ice": "assets/minecraft/textures/block/blue_ice.png",
             "crafting_table": "assets/minecraft/textures/block/crafting_table_front.png",
         }.items():
             assets[key] = read_zip_png(zf, path)
@@ -278,8 +280,11 @@ def load_assets():
     }.items():
         assets[key] = read_png(os.path.join(OWN_TEXTURES, path))
 
-    assets["charging"] = read_png(
-        os.path.join(OWN_TEXTURES, "..", "block", "charging_station.png")
+    assets["charging_air"] = read_png(
+        os.path.join(OWN_TEXTURES, "..", "block", "air_cooled_charging_station.png")
+    )
+    assets["charging_liquid"] = read_png(
+        os.path.join(OWN_TEXTURES, "..", "block", "liquid_cooled_charging_station.png")
     )
     return assets
 
@@ -287,7 +292,8 @@ def load_assets():
 # ================================================================== figures
 
 def items_figure(assets, path):
-    order = ["grid_off", "grid_on", "battery", "range", "interdim", "remote", "charging"]
+    order = ["grid_off", "grid_on", "battery", "range", "interdim", "remote",
+             "charging_air", "charging_liquid"]
     scale = 8
     cell = 16 * scale + 8          # slot size, leaving a 4px inset for the sprite
     gap = 16
@@ -368,9 +374,12 @@ QZ = "quartz"
 RD = "redstone_block"
 L1 = "1k_storage_block"
 LR = "lightning_rod"
+CB = "copper_block"
+BI = "blue_ice"
 BAT = "battery"
 REMOTE = "remote"
-CHARGING = "charging"
+CHARGING_AIR = "charging_air"
+CHARGING_LIQUID = "charging_liquid"
 
 
 def main():
@@ -383,7 +392,8 @@ def main():
                       ("range", "item-range.png"),
                       ("interdim", "item-interdimensional.png"),
                       ("remote", "item-remote-energy.png"),
-                      ("charging", "item-charging-station.png")):
+                      ("charging_air", "item-air-cooled-charging-station.png"),
+                      ("charging_liquid", "item-liquid-cooled-charging-station.png")):
         single_item_figure(assets, key, os.path.join(OUT_DIR, name))
 
     recipe_figure(
@@ -404,11 +414,15 @@ def main():
     )
     recipe_figure(
         assets, os.path.join(OUT_DIR, "recipe-remote-energy.png"),
-        [[E, BAT, E], [X, S, X], [E, LR, E]], "remote",
+        [[CB, BAT, CB], [X, S, X], [CB, LR, CB]], "remote",
     )
     recipe_figure(
-        assets, os.path.join(OUT_DIR, "recipe-charging-station.png"),
-        [[QZ, RD, QZ], [M, A, M], [QZ, RD, QZ]], "charging",
+        assets, os.path.join(OUT_DIR, "recipe-air-cooled-charging-station.png"),
+        [[QZ, RD, QZ], [M, A, M], [QZ, RD, QZ]], CHARGING_AIR,
+    )
+    recipe_figure(
+        assets, os.path.join(OUT_DIR, "recipe-liquid-cooled-charging-station.png"),
+        [[QZ, BI, QZ], [M, S, M], [QZ, BI, QZ]], CHARGING_LIQUID,
     )
 
 

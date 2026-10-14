@@ -2,6 +2,7 @@ package com.kokuu.rswirelesscrafting.neoforge;
 
 import com.kokuu.rswirelesscrafting.common.Config;
 import com.kokuu.rswirelesscrafting.common.DefaultEnergyUsage;
+import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationDefaults;
 
 import net.neoforged.neoforge.common.ModConfigSpec;
 
@@ -11,11 +12,19 @@ public class ConfigImpl implements Config {
     private final ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
     private final ModConfigSpec spec;
     private final WirelessCraftingGridEntry wirelessCraftingGrid;
-    private final ChargingStationEntry chargingStation;
+    private final ChargingStationEntry airCooledChargingStation;
+    private final ChargingStationEntry liquidCooledChargingStation;
 
     public ConfigImpl() {
         wirelessCraftingGrid = new WirelessCraftingGridEntryImpl();
-        chargingStation = new ChargingStationEntryImpl();
+        airCooledChargingStation = new ChargingStationEntryImpl(
+            "airCooledChargingStation",
+            DefaultEnergyUsage.AIR_COOLED_CHARGING_STATION
+        );
+        liquidCooledChargingStation = new ChargingStationEntryImpl(
+            "liquidCooledChargingStation",
+            DefaultEnergyUsage.LIQUID_COOLED_CHARGING_STATION
+        );
         spec = builder.build();
     }
 
@@ -29,8 +38,13 @@ public class ConfigImpl implements Config {
     }
 
     @Override
-    public ChargingStationEntry getChargingStation() {
-        return chargingStation;
+    public ChargingStationEntry getAirCooledChargingStation() {
+        return airCooledChargingStation;
+    }
+
+    @Override
+    public ChargingStationEntry getLiquidCooledChargingStation() {
+        return liquidCooledChargingStation;
     }
 
     private static String translationKey(final String value) {
@@ -140,27 +154,32 @@ public class ConfigImpl implements Config {
         private final ModConfigSpec.LongValue wiredChargeRate;
         private final ModConfigSpec.LongValue wirelessChargeRate;
         private final ModConfigSpec.IntValue wirelessRadius;
+        private final ModConfigSpec.LongValue externalCapacity;
 
-        ChargingStationEntryImpl() {
-            builder.translation(translationKey("chargingStation")).push("chargingStation");
+        ChargingStationEntryImpl(final String path, final ChargingStationDefaults defaults) {
+            builder.translation(translationKey(path)).push(path);
             energyUsage = builder
-                .translation(translationKey("chargingStation.energyUsage"))
-                .comment("Idle energy usage of the Charging Station on the network.")
-                .defineInRange("energyUsage", DefaultEnergyUsage.CHARGING_STATION_ENERGY_USAGE, 0, Long.MAX_VALUE);
+                .translation(translationKey(path + ".energyUsage"))
+                .comment("Idle energy usage of this Charging Station on the network.")
+                .defineInRange("energyUsage", defaults.energyUsage(), 0, Long.MAX_VALUE);
             wiredChargeRate = builder
-                .translation(translationKey("chargingStation.wiredChargeRate"))
+                .translation(translationKey(path + ".wiredChargeRate"))
                 .comment("Energy per tick transferred to the item in the wired slot.")
-                .defineInRange("wiredChargeRate", DefaultEnergyUsage.CHARGING_STATION_WIRED_RATE, 0, Long.MAX_VALUE);
+                .defineInRange("wiredChargeRate", defaults.wiredChargeRate(), 0, Long.MAX_VALUE);
             wirelessChargeRate = builder
-                .translation(translationKey("chargingStation.wirelessChargeRate"))
+                .translation(translationKey(path + ".wirelessChargeRate"))
                 .comment("Energy per tick transferred to nearby players' items.")
-                .defineInRange("wirelessChargeRate", DefaultEnergyUsage.CHARGING_STATION_WIRELESS_RATE, 0,
+                .defineInRange("wirelessChargeRate", defaults.wirelessChargeRate(), 0,
                     Long.MAX_VALUE);
             wirelessRadius = builder
-                .translation(translationKey("chargingStation.wirelessRadius"))
+                .translation(translationKey(path + ".wirelessRadius"))
                 .comment("Radius (in blocks) of the wireless charging area.")
-                .defineInRange("wirelessRadius", DefaultEnergyUsage.CHARGING_STATION_WIRELESS_RADIUS, 0,
+                .defineInRange("wirelessRadius", defaults.wirelessRadius(), 0,
                     Integer.MAX_VALUE);
+            externalCapacity = builder
+                .translation(translationKey(path + ".externalCapacity"))
+                .comment("Internal FE buffer, used when other mods' energy blocks feed this station.")
+                .defineInRange("externalCapacity", defaults.externalCapacity(), 0, Long.MAX_VALUE);
             builder.pop();
         }
 
@@ -182,6 +201,11 @@ public class ConfigImpl implements Config {
         @Override
         public int getWirelessRadius() {
             return wirelessRadius.get();
+        }
+
+        @Override
+        public long getExternalCapacity() {
+            return externalCapacity.get();
         }
     }
 }

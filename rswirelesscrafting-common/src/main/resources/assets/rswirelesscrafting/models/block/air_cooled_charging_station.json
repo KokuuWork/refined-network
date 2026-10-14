@@ -1,0 +1,6 @@
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "all": "rswirelesscrafting:block/air_cooled_charging_station"
+  }
+}

@@ -1,8 +1,8 @@
 package com.kokuu.rswirelesscrafting.common.chargingstation;
 
 import com.kokuu.rswirelesscrafting.common.BlockEntities;
+import com.kokuu.rswirelesscrafting.common.Config;
 import com.kokuu.rswirelesscrafting.common.ContentNames;
-import com.kokuu.rswirelesscrafting.common.DefaultEnergyUsage;
 import com.kokuu.rswirelesscrafting.common.Platform;
 
 import java.util.List;
@@ -48,6 +48,9 @@ import net.minecraft.world.level.block.state.BlockState;
  *       {@code Capabilities.EnergyStorage.BLOCK} 上），在网络取不到电时兜底，
  *       让充电站在纯 FE 整合包里也能工作。</li>
  * </ol>
+ *
+ * <p>400V 风冷与 800V 液冷共用本类，档位来自方块自身（{@link ChargingStationBlock#getTier()}），
+ * 据此选择配置节与界面背景。
  */
 public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBlockEntity<ChargingStationNetworkNode>
     implements Container, ExtendedMenuProvider<ChargingStationData> {
@@ -58,7 +61,8 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
     private static final String ITEMS_TAG = "Items";
 
     private final NonNullList<ItemStack> items = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
-    private final long externalCapacity = DefaultEnergyUsage.CHARGING_STATION_EXTERNAL_CAPACITY;
+    private final ChargingStationTier tier;
+    private final long externalCapacity;
 
     private long externalEnergy;
     private long networkStored;
@@ -71,8 +75,32 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
             BlockEntities.INSTANCE.getChargingStation(),
             pos,
             state,
-            new ChargingStationNetworkNode(Platform.getConfig().getChargingStation().getEnergyUsage())
+            new ChargingStationNetworkNode(entryOf(state).getEnergyUsage())
         );
+        this.tier = tierOf(state);
+        this.externalCapacity = entryOf(state).getExternalCapacity();
+    }
+
+    /**
+     * 档位随方块而来：同一个方块实体类型同时挂着风冷与液冷两个方块。
+     */
+    private static ChargingStationTier tierOf(final BlockState state) {
+        if (state.getBlock() instanceof ChargingStationBlock block) {
+            return block.getTier();
+        }
+        return ChargingStationTier.AIR_COOLED;
+    }
+
+    private static Config.ChargingStationEntry entryOf(final BlockState state) {
+        return tierOf(state).getEntry(Platform.getConfig());
+    }
+
+    public ChargingStationTier getTier() {
+        return tier;
+    }
+
+    private Config.ChargingStationEntry entry() {
+        return tier.getEntry(Platform.getConfig());
     }
 
     // ---------------------------------------------------------------- tick
@@ -107,7 +135,7 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
         if (stack.isEmpty()) {
             return;
         }
-        if (chargeItem(stack, Platform.getConfig().getChargingStation().getWiredChargeRate()) > 0) {
+        if (chargeItem(stack, entry().getWiredChargeRate()) > 0) {
             setChanged();
         }
     }
@@ -115,8 +143,8 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
     // ------------------------------------------------------------ 无线充电
 
     private void chargeNearbyPlayers(final ServerLevel serverLevel) {
-        final int radius = Platform.getConfig().getChargingStation().getWirelessRadius();
-        final long rate = Platform.getConfig().getChargingStation().getWirelessChargeRate();
+        final int radius = entry().getWirelessRadius();
+        final long rate = entry().getWirelessChargeRate();
         if (radius <= 0 || rate <= 0) {
             return;
         }
@@ -260,7 +288,9 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
 
     @Override
     public Component getDisplayName() {
-        return ContentNames.CHARGING_STATION;
+        return tier == ChargingStationTier.LIQUID_COOLED
+            ? ContentNames.LIQUID_COOLED_CHARGING_STATION
+            : ContentNames.AIR_COOLED_CHARGING_STATION;
     }
 
     @Nullable
@@ -268,12 +298,12 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
     public AbstractContainerMenu createMenu(final int syncId,
                                             final Inventory inventory,
                                             final Player player) {
-        return new ChargingStationContainerMenu(syncId, inventory, this, containerData);
+        return new ChargingStationContainerMenu(syncId, inventory, this, containerData, tier);
     }
 
     @Override
     public ChargingStationData getMenuData() {
-        return new ChargingStationData(worldPosition);
+        return new ChargingStationData(worldPosition, tier.getNetworkId());
     }
 
     @Override

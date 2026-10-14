@@ -11,16 +11,26 @@ public final class Blocks {
     public static final Blocks INSTANCE = new Blocks();
 
     @Nullable
-    private Supplier<ChargingStationBlock> chargingStation;
+    private Supplier<ChargingStationBlock> airCooledChargingStation;
+    @Nullable
+    private Supplier<ChargingStationBlock> liquidCooledChargingStation;
 
     private Blocks() {
     }
 
-    public ChargingStationBlock getChargingStation() {
-        return requireNonNull(chargingStation).get();
+    public ChargingStationBlock getAirCooledChargingStation() {
+        return requireNonNull(airCooledChargingStation).get();
     }
 
-    public void setChargingStation(final Supplier<ChargingStationBlock> supplier) {
-        this.chargingStation = supplier;
+    public void setAirCooledChargingStation(final Supplier<ChargingStationBlock> supplier) {
+        this.airCooledChargingStation = supplier;
+    }
+
+    public ChargingStationBlock getLiquidCooledChargingStation() {
+        return requireNonNull(liquidCooledChargingStation).get();
+    }
+
+    public void setLiquidCooledChargingStation(final Supplier<ChargingStationBlock> supplier) {
+        this.liquidCooledChargingStation = supplier;
     }
 }

@@ -7,7 +7,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "rswirelesscrafting:charging_station"
+          "name": "rswirelesscrafting:air_cooled_charging_station"
         }
       ],
       "conditions": [

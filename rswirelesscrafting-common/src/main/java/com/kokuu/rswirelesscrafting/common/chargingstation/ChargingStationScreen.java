@@ -9,15 +9,23 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 
+/**
+ * 两种充电站共用的界面。背景图与能量条主色按档位切换：风冷走青蓝，液冷走紫。
+ */
 public class ChargingStationScreen extends AbstractContainerScreen<ChargingStationContainerMenu> {
-    private static final ResourceLocation TEXTURE =
-        ModIdentifierUtil.createIdentifier("textures/gui/charging_station.png");
+    private static final ResourceLocation AIR_TEXTURE =
+        ModIdentifierUtil.createIdentifier("textures/gui/air_cooled_charging_station.png");
+    private static final ResourceLocation LIQUID_TEXTURE =
+        ModIdentifierUtil.createIdentifier("textures/gui/liquid_cooled_charging_station.png");
 
     // 两条能量条的几何必须与 gen_gui_textures.py 里的 panel() 调用逐像素一致，
     // 高度统一为 10，才能让条内的 "x / y FE" 文字（9px 高）完整落在条内。
-    private static final Bar NETWORK_BAR = new Bar(26, 18, 124, 10, 0xFF1E88C7);
-    private static final Bar BUFFER_BAR = new Bar(26, 32, 124, 10, 0xFFD98A00);
+    private static final Bar NETWORK_BAR = new Bar(26, 18, 124, 10);
+    private static final Bar BUFFER_BAR = new Bar(26, 32, 124, 10);
 
+    private static final int AIR_NETWORK_COLOR = 0xFF1E88C7;
+    private static final int LIQUID_NETWORK_COLOR = 0xFF8E52C8;
+    private static final int BUFFER_COLOR = 0xFFD98A00;
     private static final int LABEL_COLOR = 0x404040;
 
     public ChargingStationScreen(final ChargingStationContainerMenu menu,
@@ -28,15 +36,24 @@ public class ChargingStationScreen extends AbstractContainerScreen<ChargingStati
 
     @Override
     protected void renderBg(final GuiGraphics graphics, final float partialTick, final int mouseX, final int mouseY) {
-        graphics.blit(TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight);
-        renderBar(graphics, 0, 1, NETWORK_BAR);
-        renderBar(graphics, 2, 3, BUFFER_BAR);
+        graphics.blit(texture(), leftPos, topPos, 0, 0, imageWidth, imageHeight);
+        renderBar(graphics, 0, 1, NETWORK_BAR, networkColor());
+        renderBar(graphics, 2, 3, BUFFER_BAR, BUFFER_COLOR);
+    }
+
+    private ResourceLocation texture() {
+        return menu.getTier() == ChargingStationTier.LIQUID_COOLED ? LIQUID_TEXTURE : AIR_TEXTURE;
+    }
+
+    private int networkColor() {
+        return menu.getTier() == ChargingStationTier.LIQUID_COOLED ? LIQUID_NETWORK_COLOR : AIR_NETWORK_COLOR;
     }
 
     private void renderBar(final GuiGraphics graphics,
                            final int valueIndex,
                            final int maxIndex,
-                           final Bar bar) {
+                           final Bar bar,
+                           final int color) {
         final int value = menu.getDataValue(valueIndex);
         final int max = Math.max(1, menu.getDataValue(maxIndex));
         final int filled = (int) Math.min(bar.width - 2L, (long) value * (bar.width - 2) / max);
@@ -53,7 +70,7 @@ public class ChargingStationScreen extends AbstractContainerScreen<ChargingStati
                 topPos + bar.y + 1,
                 leftPos + bar.x + 1 + filled,
                 topPos + bar.y + bar.height - 1,
-                bar.color
+                color
             );
         }
     }
@@ -108,10 +125,10 @@ public class ChargingStationScreen extends AbstractContainerScreen<ChargingStati
             mouseX,
             mouseY
         )) {
-            graphics.renderTooltip(font, ContentNames.CHARGING_STATION_WIRELESS_INFO, mouseX, mouseY);
+            graphics.renderTooltip(font, ContentNames.CHARGING_STATION_BUFFER_INFO, mouseX, mouseY);
         }
     }
 
-    private record Bar(int x, int y, int width, int height, int color) {
+    private record Bar(int x, int y, int width, int height) {
     }
 }

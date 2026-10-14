@@ -19,12 +19,26 @@ import net.minecraft.world.phys.BlockHitResult;
 /**
  * 充电站方块。接入 RS 网络靠 {@code AbstractNetworkNodeContainerBlockEntity} 的默认连接策略
  * （六向自动连接），因此贴在线缆旁即可与网络互通。
+ *
+ * <p>400V 风冷与 800V 液冷是同一个类、同一个方块实体类型的两份实例，只有 {@link #getTier()}
+ * 不同；方块实体据此选择自己该读哪一节配置。
  */
 public class ChargingStationBlock extends BaseEntityBlock {
     public static final MapCodec<ChargingStationBlock> CODEC = simpleCodec(ChargingStationBlock::new);
 
+    private final ChargingStationTier tier;
+
     public ChargingStationBlock(final Properties properties) {
+        this(properties, ChargingStationTier.AIR_COOLED);
+    }
+
+    public ChargingStationBlock(final Properties properties, final ChargingStationTier tier) {
         super(properties);
+        this.tier = tier;
+    }
+
+    public ChargingStationTier getTier() {
+        return tier;
     }
 
     @Override

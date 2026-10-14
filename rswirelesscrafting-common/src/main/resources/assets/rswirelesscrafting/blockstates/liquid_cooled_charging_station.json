@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "rswirelesscrafting:block/liquid_cooled_charging_station"
+    }
+  }
+}
