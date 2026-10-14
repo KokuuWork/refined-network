@@ -1,0 +1,26 @@
+// Rewrite repositories that point at maven.neoforged.net (unreachable from this network)
+// to the NeoForged ForgeCDN mirror. This catches repositories declared internally by the
+// NeoForm/ModDevGradle plugins, which cannot be configured from build scripts.
+// The path layout is preserved: maven.neoforged.net/<path> -> neoforged.forgecdn.net/<path>
+def mirrorHost = "https://neoforged.forgecdn.net/"
+
+def rewrite = { repositories ->
+    repositories.all { repo ->
+        if (repo instanceof org.gradle.api.artifacts.repositories.MavenArtifactRepository) {
+            def url = repo.url.toString()
+            if (url.startsWith("https://maven.neoforged.net/")) {
+                repo.url = mirrorHost + url.substring("https://maven.neoforged.net/".length())
+                println "[mirror] rewrote ${url} -> ${repo.url}"
+            }
+        }
+    }
+}
+
+gradle.projectsLoaded {
+    gradle.rootProject.allprojects { project ->
+        rewrite(project.repositories)
+        project.afterEvaluate {
+            rewrite(project.repositories)
+        }
+    }
+}

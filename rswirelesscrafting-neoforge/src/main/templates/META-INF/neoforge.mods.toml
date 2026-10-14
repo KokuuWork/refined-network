@@ -1,0 +1,18 @@
+modLoader = "javafml"
+loaderVersion = "[2,)"
+issueTrackerURL = "https://github.com/KokuuStudio/rswirelesscrafting"
+license = "MIT"
+[[mods]]
+modId = "rswirelesscrafting"
+version = "${version}"
+displayName = "Refined Storage - Wireless Crafting"
+displayURL = "https://github.com/KokuuStudio/rswirelesscrafting"
+authors = "Kokuu"
+description = '''
+An addon for Refined Storage that adds a wireless crafting grid with range and interdimensional upgrades.
+'''
+[[dependencies.rswirelesscrafting]]
+modId = "refinedstorage"
+type = "required"
+versionRange = "[2.0.7,)"
+side = "BOTH"

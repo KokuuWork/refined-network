@@ -1,0 +1,57 @@
+package com.kokuu.rswirelesscrafting.common.upgrade;
+
+import com.kokuu.rswirelesscrafting.common.DataComponents;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+
+import static com.kokuu.rswirelesscrafting.common.ModIdentifierUtil.createIdentifier;
+
+public final class Upgrades {
+    public static final TagKey<Item> RANGE_UPGRADES =
+        TagKey.create(Registries.ITEM, createIdentifier("range_upgrades"));
+    public static final TagKey<Item> INTERDIMENSIONAL_UPGRADES =
+        TagKey.create(Registries.ITEM, createIdentifier("interdimensional_upgrades"));
+    public static final int MAX_UPGRADES = 4;
+
+    private Upgrades() {
+    }
+
+    public static boolean hasRangeUpgrade(final ItemStack stack) {
+        return hasUpgrade(stack, RANGE_UPGRADES);
+    }
+
+    public static boolean hasInterdimensionalUpgrade(final ItemStack stack) {
+        return hasUpgrade(stack, INTERDIMENSIONAL_UPGRADES);
+    }
+
+    private static boolean hasUpgrade(final ItemStack stack, final TagKey<Item> tag) {
+        final List<ItemStack> upgrades = stack.get(DataComponents.INSTANCE.getUpgrades());
+        if (upgrades == null) {
+            return false;
+        }
+        return upgrades.stream().anyMatch(upgrade -> upgrade.is(tag));
+    }
+
+    public static int countUpgrades(final ItemStack stack, final TagKey<Item> tag) {
+        final List<ItemStack> upgrades = stack.get(DataComponents.INSTANCE.getUpgrades());
+        if (upgrades == null) {
+            return 0;
+        }
+        return (int) upgrades.stream().filter(upgrade -> upgrade.is(tag)).count();
+    }
+
+    public static List<ItemStack> getUpgrades(final ItemStack stack) {
+        return new ArrayList<>(stack.getOrDefault(DataComponents.INSTANCE.getUpgrades(), List.of()));
+    }
+
+    public static DataComponentType<List<ItemStack>> getUpgradesComponent() {
+        return DataComponents.INSTANCE.getUpgrades();
+    }
+}
