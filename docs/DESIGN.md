@@ -733,6 +733,23 @@ public static final long BATTERY_UPGRADE_CAPACITY       = 1000;   // 每张电�
 | V5 | ⚠️ **裁定为自建**：RS 原生升级机制是方块设备侧语义，物品侧无公开 API，故自建 `upgrades` 数据组件（见 §14.4） |
 | V6 | ✅ 已锁定：基线 **2.0.7**（1.21.1 最新 release），构建脚本实际解析到 2.0.9 也能跑 |
 
+### 14.8 GUI 槽位几何约定（踩过坑）
+
+`AbstractContainerScreen` 把 16×16 的物品图标画在 `leftPos + slot.x` / `topPos + slot.y`，所以背景图里那个 18×18 的凹陷框必须画在 **(slot.x - 1, slot.y - 1)**——这是原版约定，`gen_gui_textures.py` 的 `slot(pixels, x, y)` 参数即「凹陷框左上角」。
+
+**这里出过一次真实的错位 bug**：初版 `charging_station.png` 把充电槽画在 y=52，而 `ChargingStationContainerMenu.CHARGE_SLOT_Y` 写的是 35，结果放进去的终端图标直接盖在外部 FE 缓冲条上；同时两条能量条高度不一致（12 / 6），6px 高的那条装不下 9px 的文字。
+
+**校验方法**（不需要启动游戏）：扫描背景 PNG 里 16×16 的纯 `SLOT_BG(139,139,139)` 区域，其左上角坐标应当**逐个等于**菜单里的槽位坐标。
+
+```python
+for y in range(h - 15):
+    for x in range(w - 15):
+        if all(px[y+r][x+c] == (139,139,139,255) for r in range(16) for c in range(16)):
+            ...  # (x, y) 应为某个 slot 的菜单坐标
+```
+
+当前对齐结果：充电槽 `(80, 51)`、升级槽 `(53/71/89/107, 31)`、玩家背包 `(8 + col*18, 84 + row*18)`、快捷栏 `y = 142`，全部与菜单常量一致。
+
 ---
 
 ## 13. 参考仓库
