@@ -97,12 +97,17 @@ def upgrades_gui():
 
 
 def charging_station_gui():
-    """Network energy bar, external FE buffer bar and the wired charge slot."""
+    """Network energy bar, external FE buffer bar and the wired charge slot.
+
+    Slot frames are drawn at (menu coordinate - 1), the vanilla convention: a
+    menu slot at (x, y) renders a 16x16 icon at x..x+15, so its 18x18 recess
+    has to sit at x-1..x+16.
+    """
     pixels = canvas()
     frame(pixels)
-    panel(pixels, 26, 18, 124, 12)
-    panel(pixels, 26, 34, 124, 6)
-    slot(pixels, 79, 52)
+    panel(pixels, 26, 18, 124, 10)
+    panel(pixels, 26, 32, 124, 10)
+    slot(pixels, 79, 50)
     for x in range(7, WIDTH - 7):
         pixels[76][x] = BG_SHADE
     for row in range(3):

@@ -13,8 +13,10 @@ public class ChargingStationScreen extends AbstractContainerScreen<ChargingStati
     private static final ResourceLocation TEXTURE =
         ModIdentifierUtil.createIdentifier("textures/gui/charging_station.png");
 
-    private static final Bar NETWORK_BAR = new Bar(26, 18, 124, 12, 0xFF1E88C7);
-    private static final Bar BUFFER_BAR = new Bar(26, 34, 124, 6, 0xFFD98A00);
+    // 两条能量条的几何必须与 gen_gui_textures.py 里的 panel() 调用逐像素一致，
+    // 高度统一为 10，才能让条内的 "x / y FE" 文字（9px 高）完整落在条内。
+    private static final Bar NETWORK_BAR = new Bar(26, 18, 124, 10, 0xFF1E88C7);
+    private static final Bar BUFFER_BAR = new Bar(26, 32, 124, 10, 0xFFD98A00);
 
     private static final int LABEL_COLOR = 0x404040;
 

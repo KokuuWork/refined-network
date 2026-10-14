@@ -17,8 +17,9 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 public class ChargingStationContainerMenu extends AbstractContainerMenu {
     public static final int DATA_SIZE = 4;
 
+    // 槽位 y 必须落在两条能量条（背景 y=18..41）下方，否则物品图标会盖在能量条上。
     private static final int CHARGE_SLOT_X = 80;
-    private static final int CHARGE_SLOT_Y = 35;
+    private static final int CHARGE_SLOT_Y = 51;
     private static final int INVENTORY_X = 8;
     private static final int INVENTORY_Y = 84;
     private static final int HOTBAR_Y = 142;

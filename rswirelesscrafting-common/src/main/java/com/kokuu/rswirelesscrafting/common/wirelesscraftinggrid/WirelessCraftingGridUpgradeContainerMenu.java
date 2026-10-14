@@ -18,8 +18,9 @@ import net.minecraft.world.item.ItemStack;
  */
 public class WirelessCraftingGridUpgradeContainerMenu extends AbstractContainerMenu {
     private static final int UPGRADE_SLOT_COUNT = Upgrades.MAX_UPGRADES;
-    private static final int UPGRADE_SLOT_X = 52;
-    private static final int UPGRADE_SLOT_Y = 30;
+    // 4 个槽宽 72，居中即起点 53；背景图画的凹陷框在 (x-1, y-1)。
+    private static final int UPGRADE_SLOT_X = 53;
+    private static final int UPGRADE_SLOT_Y = 31;
     private static final int INVENTORY_X = 8;
     private static final int INVENTORY_Y = 84;
     private static final int HOTBAR_Y = 142;
