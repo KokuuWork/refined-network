@@ -15,6 +15,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.level.Level;
 
@@ -35,12 +36,36 @@ public class InstallUpgradeRecipe extends ShapelessRecipe {
     ).apply(instance, InstallUpgradeRecipe::new));
 
     public InstallUpgradeRecipe(final String group, final CraftingBookCategory category) {
-        super(group, category, ItemStack.EMPTY, NonNullList.create());
+        // The result must not be empty: every recipe is encoded through the recipe registry when
+        // the server syncs 'update_recipes', and ItemStack.STREAM_CODEC rejects empty stacks.
+        super(
+            group,
+            category,
+            Items.INSTANCE.getWirelessCraftingGrid().getDefaultInstance(),
+            NonNullList.create()
+        );
     }
 
+    /**
+     * Without this override the inherited implementation returns vanilla's {@code shapeless}
+     * serializer, so the recipe would be encoded by {@code ShapelessRecipe.Serializer#toNetwork}
+     * — which serialises the raw result field and aborts the connection with
+     * "Empty ItemStack not allowed". It would also be decoded back as a plain
+     * {@link ShapelessRecipe} on the client, losing {@code getSerializer}/{@code matches}.
+     */
     @Override
-    public ItemStack getResultItem(final HolderLookup.Provider registries) {
-        return Items.INSTANCE.getWirelessCraftingGrid().getDefaultInstance();
+    public RecipeSerializer<?> getSerializer() {
+        return InstallUpgradeRecipeSerializer.INSTANCE;
+    }
+
+    /**
+     * The ingredient list is intentionally empty because matching is fully dynamic, so this
+     * recipe cannot be represented in the recipe book. This mirrors vanilla's
+     * {@link net.minecraft.world.item.crafting.CustomRecipe}, which is special by default.
+     */
+    @Override
+    public boolean isSpecial() {
+        return true;
     }
 
     private static Optional<ItemStack> findGrid(final CraftingInput input) {
