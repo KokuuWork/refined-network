@@ -32,6 +32,28 @@ Refined Storage 2 的附属模组，新增一个**无线合成终端**，并支�
 3. 右键终端打开合成界面。
 4. **安装升级卡**：工作台无序合成「终端 + 升级卡」→ 得到装有该卡的终端（合成矩阵、能量、绑定全部保留）。
 
+## 配方
+
+```
+无线合成终端                        范围升级卡                        维度升级卡
+E = 石英富集铁 (refinedstorage)     E = 石英富集铁                    P = 末影珍珠 (c:ender_pearls)
+P = 末影珍珠 (c:ender_pearls)       A = 高级处理器                    N = 下界合金锭 (c:ingots/netherite)
+G = rswirelesscrafting:crafting_    P = 末影珍珠                      C = 网络卡 (refinedstorage)
+    grids 标签 (任意合成网格)        U = 无线发射器
+A = 高级处理器                      M = 机器外壳
+
+  E P E                             E A E                             P N P
+  E G E                             P U P                             N C N
+  E A E                             E M E                             P N P
+```
+
+两张升级卡都定位为**后期物品**，价位对齐（维度卡则超过）Refined Storage 自带的无线设备与跨维隧道设备：
+
+- **范围卡**核心是一台 `wireless_transmitter` —— 卡的效果正是「绑发射器时无视距离」，等于把设备压成一张卡。整卡约 12 石英铁 + 3 末影珍珠 + 2 高级处理器 + 2 机器外壳，明显贵于 RS 原生 `range_upgrade`（只加一档距离、可叠加），以匹配「一次到位、永久无限」的强度。
+- **维度卡**需要 4×下界合金（≈16 远古残骸）+ 4×末影珍珠 + 1×网络卡，比 RS 的 `network_transmitter` / `network_receiver`（各含 1 下界合金）更贵，匹配它作为本模组终极能力的定位。
+
+安装升级卡用工作台的**无序合成**：终端 + 升级卡 → 装有该卡的终端。
+
 ## 距离与维度行为
 
 | 槽位 | 同维度（绑 Wireless Transmitter） | 跨维度（绑 Network Receiver） |
@@ -90,6 +112,8 @@ An addon for **Refined Storage 2** that adds a **Wireless Crafting Grid** plus t
 | `interdimensional_upgrade` | **Cross-dimensional** access via the Network Transmitter/Receiver link |
 
 Vanilla Refined Storage ships only a wireless *viewing* grid. This mod fills the wireless *crafting* gap.
+
+Both upgrade cards are **late-game items**, priced in line with (and for the interdimensional card, above) Refined Storage's own wireless and cross-dimensional hardware. The range card is built around a `wireless_transmitter` — the card's whole effect is "ignore distance while bound to a transmitter", so the device is compressed into the card. The interdimensional card costs 4 netherite ingots, more than RS's own `network_transmitter` / `network_receiver`. See `docs/DESIGN.md` §4.3–4.4 for full recipes.
 
 **Requirements**: Minecraft 1.21.1, NeoForge 21.1.x, Refined Storage 2.0.7+.
 

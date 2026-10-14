@@ -222,7 +222,17 @@ modid 占位 `rswirelesscrafting`，包名建议 `com.yourname.rswirelesscraftin
 - 普通 `Item`（无能量、无网络绑定）。
 - 判定方式：**物品 tag** `rswirelesscrafting:range_upgrades`（终端遍历升级槽，命中即视为已升级）。
 - 作用：同维度绑 Wireless Transmitter 时，使 `resolveNetwork` **无视距离**（无限范围）。**不作用于**跨维度（跨维度走隧道，天然无限）。
-- 配方（占位）：2× 末影珍珠 + 1× 高级处理器 + 1× `refinedstorage:range_upgrade`（若存在；否则 1× `minecraft:ender_pearl` + 1× 红石 + 1× 高级处理器）。
+- 配方（终端本身用 `refinedstorage:crafting_grids` 标签，兼容全部网格变体）：
+
+  ```
+  E A E      E = refinedstorage:quartz_enriched_iron
+  P U P      A = refinedstorage:advanced_processor
+  E M E      P = c:ender_pearls（标签）
+             U = refinedstorage:wireless_transmitter
+             M = refinedstorage:machine_casing
+  ```
+
+  **设计意图**：卡的效果正是「绑 Wireless Transmitter 时无视距离」，所以核心直接放一台 Wireless Transmitter —— 把设备压成一张卡。整卡合计约 12 石英铁 + 3 末影珍珠 + 2 高级处理器 + 2 机器外壳，显著高于 RS 原生 `range_upgrade`（6 石英铁 + 3 末影珍珠 + 1 升级基板），以匹配「一次到位、永久无限」而非「+1 档可叠加」的强度差。
 - 可堆叠 64。
 
 ### 4.4 维度升级卡（Interdimensional Upgrade）
@@ -230,7 +240,15 @@ modid 占位 `rswirelesscrafting`，包名建议 `com.yourname.rswirelesscraftin
 - 普通 `Item`（无能量、无网络绑定）。
 - 判定方式：**物品 tag** `rswirelesscrafting:interdimensional_upgrades`。
 - 作用：解锁「网卡绑 Network Receiver → 走隧道」的跨维度能力（见 §7）。
-- 配方（占位）：3× 末影珍珠 + 1× 高级处理器 + 1× `refinedstorage:network_card`，产出 1 个。
+- 配方：
+
+  ```
+  P N P      P = c:ender_pearls（标签）
+  N C N      N = c:ingots/netherite（标签）
+  P N P      C = refinedstorage:network_card
+  ```
+
+  **设计意图**：跨维度是本 mod 的终极能力，价位对齐并**超过** RS 自带的跨维隧道设备（`network_transmitter` / `network_receiver`，各含 1 下界合金 + 2 高级处理器 + 机器外壳 + 2 核心 + 3 末影珍珠）。4×下界合金（≈16 远古残骸）+ 4×末影珍珠 + 1 网络卡的组合，保证它是一件真正的终局物品。
 - 可堆叠 64。
 
 > 说明：RS 1 曾存在同名「Interdimensional Upgrade」但 RS 2 已移除（跨维变默认）。本 mod 的维度卡是 addon 自有物品，registry id 独立，不冲突；语义是「解锁终端侧跨维访问」，与 RS 1 那张无关。

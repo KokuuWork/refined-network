@@ -1,19 +1,25 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    " Q ",
-    "QPQ",
-    " R "
+    "EAE",
+    "PUP",
+    "EME"
   ],
   "key": {
-    "Q": {
+    "E": {
       "item": "refinedstorage:quartz_enriched_iron"
+    },
+    "A": {
+      "item": "refinedstorage:advanced_processor"
     },
     "P": {
       "tag": "c:ender_pearls"
     },
-    "R": {
-      "item": "minecraft:redstone_block"
+    "U": {
+      "item": "refinedstorage:wireless_transmitter"
+    },
+    "M": {
+      "item": "refinedstorage:machine_casing"
     }
   },
   "result": {
