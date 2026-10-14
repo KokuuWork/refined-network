@@ -12,18 +12,13 @@ public class ConfigImpl implements Config {
     private final ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
     private final ModConfigSpec spec;
     private final WirelessCraftingGridEntry wirelessCraftingGrid;
-    private final ChargingStationEntry airCooledChargingStation;
-    private final ChargingStationEntry liquidCooledChargingStation;
+    private final ChargingStationEntry chargingStation;
 
     public ConfigImpl() {
         wirelessCraftingGrid = new WirelessCraftingGridEntryImpl();
-        airCooledChargingStation = new ChargingStationEntryImpl(
-            "airCooledChargingStation",
-            DefaultEnergyUsage.AIR_COOLED_CHARGING_STATION
-        );
-        liquidCooledChargingStation = new ChargingStationEntryImpl(
-            "liquidCooledChargingStation",
-            DefaultEnergyUsage.LIQUID_COOLED_CHARGING_STATION
+        chargingStation = new ChargingStationEntryImpl(
+            "chargingStation",
+            DefaultEnergyUsage.CHARGING_STATION
         );
         spec = builder.build();
     }
@@ -38,13 +33,8 @@ public class ConfigImpl implements Config {
     }
 
     @Override
-    public ChargingStationEntry getAirCooledChargingStation() {
-        return airCooledChargingStation;
-    }
-
-    @Override
-    public ChargingStationEntry getLiquidCooledChargingStation() {
-        return liquidCooledChargingStation;
+    public ChargingStationEntry getChargingStation() {
+        return chargingStation;
     }
 
     private static String translationKey(final String value) {

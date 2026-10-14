@@ -5,6 +5,8 @@ import com.kokuu.rswirelesscrafting.common.Config;
 import com.kokuu.rswirelesscrafting.common.ContentNames;
 import com.kokuu.rswirelesscrafting.common.Platform;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import javax.annotation.Nullable;
 
@@ -31,45 +33,45 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * 充电站：为玩家身上和槽位里的 FE 物品（含 Refined Storage 的全部无线终端、便携终端，
- * 以及本 mod 的无线合成终端）补电。
+ * 终端充电站：为「精致存储」的全部便携终端 / 无线终端以及本 mod 的无线合成终端补电。
  *
  * <p>两条充电路径：
  * <ul>
- *   <li><b>有线</b>：物品放进 GUI 的槽位，按 {@code wiredChargeRate} 快速充入；</li>
+ *   <li><b>有线</b>：物品放进 GUI 的 3 个槽位，各自按 {@code wiredChargeRate} 快速充入；</li>
  *   <li><b>无线</b>：玩家站在 {@code wirelessRadius} 格内，背包里的物品按
- *       {@code wirelessChargeRate} 自动缓充。</li>
+ *       {@code wirelessChargeRate} 自动缓充。同一玩家同时最多充 3 个设备，充满一个后
+ *       自动轮到下一个；同屏最多服务 3 名玩家，按离站距离由近到远各占一条无线链接。</li>
  * </ul>
  *
- * <p>配置里的能量值一律以<b>每秒（FE/s）</b>计，方块内部再按 20 tick/s 摊到每 tick 上。
- * 除不尽的部分交给 {@link RateMeter} 累积到下一 tick，所以把速率配成 7 这种除不尽的数
- * 也不会白白漏电，长期平均值仍然精确。
+ * <p>配置里的能量值一律以<b>每秒（FE/s）</b>计，方块内部再按 20 tick/s 摊到每 tick 上
+ * （{@code 200 FE/s → 10 FE/t}、{@code 20 FE/s → 1 FE/t}）。除不尽的部分交给
+ * {@link RateMeter} 累积到下一 tick，配成 7 这种数也不会漏电。
  *
- * <p>能量来源同样是两条，且与 RS 其他机械一致地优先使用网络：
- * <ol>
- *   <li>方块接入的 RS 网络（{@link EnergyNetworkComponent}）——主来源；</li>
- *   <li>内部 FE 缓冲——由其他模组以标准 Forge Energy 输入（注册在
- *       {@code Capabilities.EnergyStorage.BLOCK} 上），在网络取不到电时兜底，
- *       让充电站在纯 FE 整合包里也能工作。</li>
- * </ol>
+ * <p>能量来源优先用接入的 RS 网络（{@link EnergyNetworkComponent}），取不到电时回落到
+ * 内部 FE 缓冲（由其他模组以标准 Forge Energy 输入）。
  *
- * <p>400V 风冷与 800V 液冷共用本类，档位来自方块自身（{@link ChargingStationBlock#getTier()}），
- * 据此选择配置节与界面背景。
+ * <p>连接面板的状态（3 有线槽 + 3 无线链接）由服务端每 tick 计算并写进 {@link ContainerData}，
+ * 多人同时靠近时每个玩家独占一条无线链接，状态互不干扰。
  */
 public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBlockEntity<ChargingStationNetworkNode>
     implements Container, ExtendedMenuProvider<ChargingStationData> {
 
-    private static final int SLOT_COUNT = 1;
-    private static final int DATA_SIZE = 4;
+    private static final int WIRED_SLOT_COUNT = 3;
+    private static final int WIRELESS_LINK_COUNT = 3;
+    private static final int DEVICES_PER_LINK = 3;
+    private static final int DATA_SIZE = 10;
     private static final String EXTERNAL_ENERGY_TAG = "ExternalEnergy";
     private static final String ITEMS_TAG = "Items";
 
-    private final NonNullList<ItemStack> items = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
-    private final ChargingStationTier tier;
-    private final long externalCapacity;
-    private final RateMeter idleMeter = new RateMeter();
-    private final RateMeter wiredMeter = new RateMeter();
+    private final NonNullList<ItemStack> items = NonNullList.withSize(WIRED_SLOT_COUNT, ItemStack.EMPTY);
+    private final RateMeter[] wiredMeters = {new RateMeter(), new RateMeter(), new RateMeter()};
     private final RateMeter wirelessMeter = new RateMeter();
+    private final RateMeter idleMeter = new RateMeter();
+    private final ChargeStatus[] wiredStatus = {
+        ChargeStatus.IDLE, ChargeStatus.IDLE, ChargeStatus.IDLE
+    };
+    private final boolean[] wirelessActive = new boolean[WIRELESS_LINK_COUNT];
+    private final long externalCapacity;
 
     private long externalEnergy;
     private long networkStored;
@@ -82,32 +84,13 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
             BlockEntities.INSTANCE.getChargingStation(),
             pos,
             state,
-            new ChargingStationNetworkNode(entryOf(state).getEnergyUsage())
+            new ChargingStationNetworkNode(Platform.getConfig().getChargingStation().getEnergyUsage())
         );
-        this.tier = tierOf(state);
-        this.externalCapacity = entryOf(state).getExternalCapacity();
-    }
-
-    /**
-     * 档位随方块而来：同一个方块实体类型同时挂着风冷与液冷两个方块。
-     */
-    private static ChargingStationTier tierOf(final BlockState state) {
-        if (state.getBlock() instanceof ChargingStationBlock block) {
-            return block.getTier();
-        }
-        return ChargingStationTier.AIR_COOLED;
-    }
-
-    private static Config.ChargingStationEntry entryOf(final BlockState state) {
-        return tierOf(state).getEntry(Platform.getConfig());
-    }
-
-    public ChargingStationTier getTier() {
-        return tier;
+        this.externalCapacity = Platform.getConfig().getChargingStation().getExternalCapacity();
     }
 
     private Config.ChargingStationEntry entry() {
-        return tier.getEntry(Platform.getConfig());
+        return Platform.getConfig().getChargingStation();
     }
 
     // ---------------------------------------------------------------- tick
@@ -118,10 +101,9 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
         }
         final Config.ChargingStationEntry config = entry();
         refreshNetworkEnergy();
-        // 待机耗电：与 RS 其他机械一样，先在网络上扣掉自身开销。
         consumeEnergy(idleMeter.next(config.getEnergyUsage()));
-        chargeWiredSlot(config);
-        chargeNearbyPlayers(serverLevel, config);
+        chargeWiredSlots(config);
+        chargeWireless(serverLevel, config);
     }
 
     private void refreshNetworkEnergy() {
@@ -138,59 +120,96 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
 
     // ------------------------------------------------------------ 有线充电
 
-    private void chargeWiredSlot(final Config.ChargingStationEntry config) {
-        final ItemStack stack = items.get(0);
+    private void chargeWiredSlots(final Config.ChargingStationEntry config) {
+        for (int slot = 0; slot < WIRED_SLOT_COUNT; slot++) {
+            wiredStatus[slot] = chargeWiredSlot(slot, config);
+        }
+    }
+
+    private ChargeStatus chargeWiredSlot(final int slot, final Config.ChargingStationEntry config) {
+        final ItemStack stack = items.get(slot);
         if (stack.isEmpty()) {
-            return;
+            return ChargeStatus.IDLE;
         }
-        final long budget = wiredMeter.next(config.getWiredChargeRate());
-        if (budget > 0 && chargeItem(stack, budget) > 0) {
-            setChanged();
+        final long budget = wiredMeters[slot].next(config.getWiredChargeRate());
+        final long charged = budget > 0 ? chargeItem(stack, budget) : 0;
+        if (charged > 0) {
+            return ChargeStatus.CHARGING;
         }
+        return isFull(stack) ? ChargeStatus.FULL : ChargeStatus.IDLE;
     }
 
     // ------------------------------------------------------------ 无线充电
 
-    private void chargeNearbyPlayers(final ServerLevel serverLevel, final Config.ChargingStationEntry config) {
+    private void chargeWireless(final ServerLevel serverLevel, final Config.ChargingStationEntry config) {
         final int radius = config.getWirelessRadius();
-        final long budget = wirelessMeter.next(config.getWirelessChargeRate());
-        if (radius <= 0 || budget <= 0) {
+        final long perDeviceBudget = wirelessMeter.next(config.getWirelessChargeRate());
+        if (radius <= 0 || perDeviceBudget <= 0) {
+            clearWirelessLinks();
             return;
         }
-        final double radiusSquared = (double) radius * radius;
-        final List<ServerPlayer> players = serverLevel.players();
-        for (final ServerPlayer player : players) {
-            if (player.isSpectator() || !player.isAlive()) {
-                continue;
-            }
-            if (player.distanceToSqr(
-                worldPosition.getX() + 0.5,
-                worldPosition.getY() + 0.5,
-                worldPosition.getZ() + 0.5
-            ) > radiusSquared) {
-                continue;
-            }
-            chargeInventory(player, budget);
+        final List<ServerPlayer> nearby = nearbyPlayersByDistance(serverLevel, radius);
+        for (int link = 0; link < WIRELESS_LINK_COUNT; link++) {
+            wirelessActive[link] = link < nearby.size()
+                && chargePlayerDevices(nearby.get(link), perDeviceBudget);
         }
     }
 
-    private void chargeInventory(final ServerPlayer player, final long budget) {
+    /**
+     * 半径内的玩家按离站距离由近到远排序，最靠近的 {@link #WIRELESS_LINK_COUNT} 名玩家各占一条链接。
+     */
+    private List<ServerPlayer> nearbyPlayersByDistance(final ServerLevel level, final int radius) {
+        final double radiusSquared = (double) radius * radius;
+        final double centerX = worldPosition.getX() + 0.5;
+        final double centerY = worldPosition.getY() + 0.5;
+        final double centerZ = worldPosition.getZ() + 0.5;
+        final List<ServerPlayer> nearby = new ArrayList<>();
+        for (final ServerPlayer player : level.players()) {
+            if (player.isSpectator() || !player.isAlive()) {
+                continue;
+            }
+            if (player.distanceToSqr(centerX, centerY, centerZ) <= radiusSquared) {
+                nearby.add(player);
+            }
+        }
+        nearby.sort(Comparator.comparingDouble(player -> player.distanceToSqr(centerX, centerY, centerZ)));
+        return nearby;
+    }
+
+    /**
+     * 为一名玩家背包里的 FE 设备充电：同一 tick 最多同时充 {@link #DEVICES_PER_LINK} 个，
+     * 已充满的自动跳过，于是「先同时充 3 个、充满后轮到后续设备」自然成立。
+     *
+     * @return 本 tick 是否真的充入了能量（用于点亮该条无线链接）
+     */
+    private boolean chargePlayerDevices(final ServerPlayer player, final long perDeviceBudget) {
         final Inventory inventory = player.getInventory();
-        long remaining = budget;
-        boolean changed = false;
-        for (int slot = 0; slot < inventory.getContainerSize() && remaining > 0; slot++) {
+        boolean anyCharged = false;
+        int devicesCharged = 0;
+        for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
             final ItemStack stack = inventory.getItem(slot);
             if (stack.isEmpty()) {
                 continue;
             }
-            final long charged = chargeItem(stack, remaining);
-            if (charged > 0) {
-                remaining -= charged;
-                changed = true;
+            final long charged = chargeItem(stack, perDeviceBudget);
+            if (charged <= 0) {
+                continue;
+            }
+            anyCharged = true;
+            devicesCharged++;
+            if (devicesCharged >= DEVICES_PER_LINK) {
+                break;
             }
         }
-        if (changed) {
+        if (anyCharged) {
             inventory.setChanged();
+        }
+        return anyCharged;
+    }
+
+    private void clearWirelessLinks() {
+        for (int link = 0; link < WIRELESS_LINK_COUNT; link++) {
+            wirelessActive[link] = false;
         }
     }
 
@@ -207,6 +226,11 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
             given = deliver(access, simulateAccepted(access, rate));
         }
         return given;
+    }
+
+    private boolean isFull(final ItemStack stack) {
+        final Platform.ItemEnergyAccess access = Platform.getItemEnergy(stack).orElse(null);
+        return access != null && access.getCapacity() > 0 && access.getStored() >= access.getCapacity();
     }
 
     /**
@@ -297,9 +321,7 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
 
     @Override
     public Component getDisplayName() {
-        return tier == ChargingStationTier.LIQUID_COOLED
-            ? ContentNames.LIQUID_COOLED_CHARGING_STATION
-            : ContentNames.AIR_COOLED_CHARGING_STATION;
+        return ContentNames.TERMINAL_CHARGING_STATION;
     }
 
     @Nullable
@@ -307,12 +329,12 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
     public AbstractContainerMenu createMenu(final int syncId,
                                             final Inventory inventory,
                                             final Player player) {
-        return new ChargingStationContainerMenu(syncId, inventory, this, containerData, tier);
+        return new ChargingStationContainerMenu(syncId, inventory, this, containerData);
     }
 
     @Override
     public ChargingStationData getMenuData() {
-        return new ChargingStationData(worldPosition, tier.getNetworkId());
+        return new ChargingStationData(worldPosition);
     }
 
     @Override
@@ -324,12 +346,17 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
 
     @Override
     public int getContainerSize() {
-        return SLOT_COUNT;
+        return WIRED_SLOT_COUNT;
     }
 
     @Override
     public boolean isEmpty() {
-        return items.get(0).isEmpty();
+        for (final ItemStack stack : items) {
+            if (!stack.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -401,9 +428,8 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
     /**
      * 把配置里的「每秒」额度摊到每 tick 上。
      *
-     * <p>Minecraft 是每秒 20 tick，而 {@code 每秒额度 / 20} 常常除不尽（例如 7 FE/s）。
-     * 直接整除会持续漏掉那一小截，所以这里把余数留在 {@code carry} 里顺延到下一 tick，
-     * 长期平均恰好等于配置值。
+     * <p>Minecraft 是每秒 20 tick，而 {@code 每秒额度 / 20} 常常除不尽。直接整除会持续漏掉
+     * 那一小截，所以这里把余数留在 {@code carry} 里顺延到下一 tick，长期平均恰好等于配置值。
      */
     private static final class RateMeter {
         private static final long TICKS_PER_SECOND = 20;
@@ -423,7 +449,8 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
     }
 
     /**
-     * 同步给界面的实时数值：网络存量 / 网络容量 / 外部 FE 缓冲 / 缓冲上限。
+     * 同步给界面的实时数值：网络存量 / 网络容量 / 外部 FE 缓冲 / 缓冲上限，
+     * 以及 3 个有线槽状态（{@link ChargeStatus#ordinal()}）与 3 条无线链接的开关（0/1）。
      */
     private class ChargingStationDataSlots implements ContainerData {
         @Override
@@ -433,6 +460,8 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
                 case 1 -> (int) Math.min(networkCapacity, Integer.MAX_VALUE);
                 case 2 -> (int) Math.min(externalEnergy, Integer.MAX_VALUE);
                 case 3 -> (int) Math.min(externalCapacity, Integer.MAX_VALUE);
+                case 4, 5, 6 -> wiredStatus[index - 4].ordinal();
+                case 7, 8, 9 -> wirelessActive[index - 7] ? 1 : 0;
                 default -> 0;
             };
         }

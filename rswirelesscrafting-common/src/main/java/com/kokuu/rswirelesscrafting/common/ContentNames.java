@@ -33,13 +33,9 @@ public final class ContentNames {
         "item",
         "remote_energy_upgrade"
     );
-    public static final MutableComponent AIR_COOLED_CHARGING_STATION = createTranslation(
+    public static final MutableComponent TERMINAL_CHARGING_STATION = createTranslation(
         "block",
-        "air_cooled_charging_station"
-    );
-    public static final MutableComponent LIQUID_COOLED_CHARGING_STATION = createTranslation(
-        "block",
-        "liquid_cooled_charging_station"
+        "terminal_charging_station"
     );
     public static final MutableComponent WIRELESS_CRAFTING_GRID_UPGRADES_TITLE = createTranslation(
         "gui",
@@ -119,6 +115,18 @@ public final class ContentNames {
     public static final MutableComponent CHARGING_STATION_BUFFER_INFO = createTranslation(
         "gui",
         "charging_station.buffer_info"
+    ).withStyle(ChatFormatting.DARK_GRAY);
+    public static final MutableComponent CHARGING_STATION_WIRED_LABEL = createTranslation(
+        "gui",
+        "charging_station.wired_label"
+    );
+    public static final MutableComponent CHARGING_STATION_WIRELESS_LABEL = createTranslation(
+        "gui",
+        "charging_station.wireless_label"
+    );
+    public static final MutableComponent CHARGING_STATION_WIRELESS_CAPACITY_INFO = createTranslation(
+        "block",
+        "charging_station.wireless_capacity"
     ).withStyle(ChatFormatting.DARK_GRAY);
     public static final String CHARGING_STATION_WIRED_TRANSLATION_KEY = createTranslationKey(
         "block",

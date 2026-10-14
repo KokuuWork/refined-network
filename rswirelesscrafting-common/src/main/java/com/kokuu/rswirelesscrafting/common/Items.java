@@ -26,9 +26,7 @@ public final class Items {
     @Nullable
     private Supplier<RemoteEnergyUpgradeItem> remoteEnergyUpgrade;
     @Nullable
-    private Supplier<ChargingStationBlockItem> airCooledChargingStation;
-    @Nullable
-    private Supplier<ChargingStationBlockItem> liquidCooledChargingStation;
+    private Supplier<ChargingStationBlockItem> terminalChargingStation;
 
     private Items() {
     }
@@ -73,19 +71,11 @@ public final class Items {
         this.remoteEnergyUpgrade = supplier;
     }
 
-    public ChargingStationBlockItem getAirCooledChargingStationBlockItem() {
-        return requireNonNull(airCooledChargingStation).get();
+    public ChargingStationBlockItem getTerminalChargingStationBlockItem() {
+        return requireNonNull(terminalChargingStation).get();
     }
 
-    public void setAirCooledChargingStationBlockItem(final Supplier<ChargingStationBlockItem> supplier) {
-        this.airCooledChargingStation = supplier;
-    }
-
-    public ChargingStationBlockItem getLiquidCooledChargingStationBlockItem() {
-        return requireNonNull(liquidCooledChargingStation).get();
-    }
-
-    public void setLiquidCooledChargingStationBlockItem(final Supplier<ChargingStationBlockItem> supplier) {
-        this.liquidCooledChargingStation = supplier;
+    public void setTerminalChargingStationBlockItem(final Supplier<ChargingStationBlockItem> supplier) {
+        this.terminalChargingStation = supplier;
     }
 }

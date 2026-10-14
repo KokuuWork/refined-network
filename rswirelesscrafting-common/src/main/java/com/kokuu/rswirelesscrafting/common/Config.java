@@ -3,9 +3,7 @@ package com.kokuu.rswirelesscrafting.common;
 public interface Config {
     WirelessCraftingGridEntry getWirelessCraftingGrid();
 
-    ChargingStationEntry getAirCooledChargingStation();
-
-    ChargingStationEntry getLiquidCooledChargingStation();
+    ChargingStationEntry getChargingStation();
 
     interface WirelessCraftingGridEntry {
         long getEnergyCapacity();

@@ -10,22 +10,23 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 
 /**
- * 两种充电站共用的界面。背景图与能量条主色按档位切换：风冷走青蓝，液冷走紫。
+ * 终端充电站界面：一张 3×2 连接面板（上排 3 个有线槽、下排 3 个无线链接灯）+ 一条网络能量条。
+ *
+ * <p>灯的状态由服务端经 {@code ContainerData} 同步（见 {@link ChargingStationBlockEntity}）：
+ * 有线槽「充电中」蓝灯呼吸闪烁、充满绿灯；无线链接「正在充电」时呼吸闪烁的亮灯。
+ * 呼吸用 {@code level.getGameTime()} 驱动，纯客户端视觉，不占用额外网络包。
  */
 public class ChargingStationScreen extends AbstractContainerScreen<ChargingStationContainerMenu> {
-    private static final ResourceLocation AIR_TEXTURE =
-        ModIdentifierUtil.createIdentifier("textures/gui/air_cooled_charging_station.png");
-    private static final ResourceLocation LIQUID_TEXTURE =
-        ModIdentifierUtil.createIdentifier("textures/gui/liquid_cooled_charging_station.png");
+    private static final ResourceLocation TEXTURE =
+        ModIdentifierUtil.createIdentifier("textures/gui/terminal_charging_station.png");
 
-    // 两条能量条的几何必须与 gen_gui_textures.py 里的 panel() 调用逐像素一致，
-    // 高度统一为 10，才能让条内的 "x / y FE" 文字（9px 高）完整落在条内。
-    private static final Bar NETWORK_BAR = new Bar(26, 18, 124, 10);
-    private static final Bar BUFFER_BAR = new Bar(26, 32, 124, 10);
+    // 网络能量条的几何必须与 gen_gui_textures.py 里的 panel() 调用逐像素一致。
+    private static final Bar NETWORK_BAR = new Bar(26, 61, 124, 10);
 
-    private static final int AIR_NETWORK_COLOR = 0xFF1E88C7;
-    private static final int LIQUID_NETWORK_COLOR = 0xFF8E52C8;
-    private static final int BUFFER_COLOR = 0xFFD98A00;
+    private static final int CHARGING_COLOR = 0xFF40A8FF;
+    private static final int FULL_COLOR = 0xFF4BE070;
+    private static final int WIRELESS_COLOR = 0xFF34E0C8;
+    private static final int NETWORK_FILL_COLOR = 0xFF40A8FF;
     private static final int LABEL_COLOR = 0x404040;
 
     public ChargingStationScreen(final ChargingStationContainerMenu menu,
@@ -38,61 +39,140 @@ public class ChargingStationScreen extends AbstractContainerScreen<ChargingStati
     protected void renderBg(final GuiGraphics graphics, final float partialTick, final int mouseX, final int mouseY) {
         // 注意：7 参 blit 假定纹理是 256x256，会把 176x166 的背景只画出左上角一小块；
         // 必须用带纹理尺寸的重载，按 1:1 铺满整张背景。
-        graphics.blit(texture(), leftPos, topPos, 0, 0, imageWidth, imageHeight, imageWidth, imageHeight);
-        renderBar(graphics, 0, 1, NETWORK_BAR, networkColor());
-        renderBar(graphics, 2, 3, BUFFER_BAR, BUFFER_COLOR);
+        graphics.blit(TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight, imageWidth, imageHeight);
+        renderNetworkBar(graphics);
+        renderConnectionPanel(graphics, partialTick);
     }
 
-    private ResourceLocation texture() {
-        return menu.getTier() == ChargingStationTier.LIQUID_COOLED ? LIQUID_TEXTURE : AIR_TEXTURE;
-    }
-
-    private int networkColor() {
-        return menu.getTier() == ChargingStationTier.LIQUID_COOLED ? LIQUID_NETWORK_COLOR : AIR_NETWORK_COLOR;
-    }
-
-    private void renderBar(final GuiGraphics graphics,
-                           final int valueIndex,
-                           final int maxIndex,
-                           final Bar bar,
-                           final int color) {
-        final int value = menu.getDataValue(valueIndex);
-        final int max = Math.max(1, menu.getDataValue(maxIndex));
-        final int filled = (int) Math.min(bar.width - 2L, (long) value * (bar.width - 2) / max);
-        graphics.fill(
-            leftPos + bar.x,
-            topPos + bar.y,
-            leftPos + bar.x + bar.width,
-            topPos + bar.y + bar.height,
-            0xFF555555
-        );
+    private void renderNetworkBar(final GuiGraphics graphics) {
+        final int value = menu.getDataValue(0);
+        final int max = Math.max(1, menu.getDataValue(1));
+        final int filled = (int) Math.min(NETWORK_BAR.width - 2L, (long) value * (NETWORK_BAR.width - 2) / max);
         if (filled > 0) {
             graphics.fill(
-                leftPos + bar.x + 1,
-                topPos + bar.y + 1,
-                leftPos + bar.x + 1 + filled,
-                topPos + bar.y + bar.height - 1,
-                color
+                leftPos + NETWORK_BAR.x + 1,
+                topPos + NETWORK_BAR.y + 1,
+                leftPos + NETWORK_BAR.x + 1 + filled,
+                topPos + NETWORK_BAR.y + NETWORK_BAR.height - 1,
+                NETWORK_FILL_COLOR
             );
         }
+    }
+
+    private void renderConnectionPanel(final GuiGraphics graphics, final float partialTick) {
+        final double phase = breathePhase(partialTick);
+        for (int i = 0; i < ChargingStationContainerMenu.WIRED_SLOT_X.length; i++) {
+            renderWiredLight(graphics, i, phase);
+            renderWirelessLight(graphics, i, phase);
+        }
+    }
+
+    private void renderWiredLight(final GuiGraphics graphics, final int slot, final double phase) {
+        final ChargeStatus status = ChargeStatus.byOrdinal(menu.getDataValue(4 + slot));
+        final int color = switch (status) {
+            case CHARGING -> pulse(CHARGING_COLOR, phase);
+            case FULL -> FULL_COLOR;
+            case IDLE -> 0;
+            default -> 0;
+        };
+        if (color == 0) {
+            return;
+        }
+        drawFrame(
+            graphics,
+            ChargingStationContainerMenu.WIRED_SLOT_X[slot],
+            ChargingStationContainerMenu.WIRED_SLOT_Y,
+            color
+        );
+    }
+
+    private void renderWirelessLight(final GuiGraphics graphics, final int link, final double phase) {
+        final boolean active = menu.getDataValue(7 + link) != 0;
+        if (!active) {
+            return;
+        }
+        drawDot(
+            graphics,
+            ChargingStationContainerMenu.WIRELESS_LIGHT_X[link],
+            ChargingStationContainerMenu.WIRELESS_LIGHT_Y,
+            pulse(WIRELESS_COLOR, phase)
+        );
+    }
+
+    /**
+     * 呼吸相位：2 秒一个周期，供蓝灯与无线灯同步呼吸。
+     */
+    private double breathePhase(final float partialTick) {
+        final long gameTime = minecraft.level == null ? 0 : minecraft.level.getGameTime();
+        return ((gameTime % 40L) + partialTick) / 40.0;
+    }
+
+    /**
+     * 把颜色按正弦波压暗再提亮，实现「呼吸」闪烁（0.35x ~ 1.0x）。
+     */
+    private static int pulse(final int color, final double phase) {
+        final double wave = 0.5 + 0.5 * Math.sin(phase * Math.PI * 2.0);
+        final double factor = 0.35 + 0.65 * wave;
+        final int alpha = color & 0xFF000000;
+        final int red = (int) (((color >> 16) & 0xFF) * factor);
+        final int green = (int) (((color >> 8) & 0xFF) * factor);
+        final int blue = (int) ((color & 0xFF) * factor);
+        final int rgb = (red << 16) | (green << 8) | blue;
+        return alpha | rgb;
+    }
+
+    /**
+     * 在某个 18×18 凹陷框（左上角 = 菜单坐标 - 1）外沿画一圈 1px 状态框。
+     */
+    private void drawFrame(final GuiGraphics graphics, final int slotX, final int slotY, final int color) {
+        final int x = leftPos + slotX - 1;
+        final int y = topPos + slotY - 1;
+        graphics.fill(x, y, x + 18, y + 1, color);
+        graphics.fill(x, y + 17, x + 18, y + 18, color);
+        graphics.fill(x, y, x + 1, y + 18, color);
+        graphics.fill(x + 17, y, x + 18, y + 18, color);
+    }
+
+    /**
+     * 在某个 18×18 凹陷框中心画一个 8×8 的实心灯。
+     */
+    private void drawDot(final GuiGraphics graphics, final int slotX, final int slotY, final int color) {
+        final int x = leftPos + slotX - 1;
+        final int y = topPos + slotY - 1;
+        graphics.fill(x + 5, y + 5, x + 13, y + 13, color);
     }
 
     @Override
     protected void renderLabels(final GuiGraphics graphics, final int mouseX, final int mouseY) {
         super.renderLabels(graphics, mouseX, mouseY);
-        drawValue(graphics, 0, 1, NETWORK_BAR);
-        drawValue(graphics, 2, 3, BUFFER_BAR);
+        graphics.drawString(
+            font,
+            ContentNames.CHARGING_STATION_WIRED_LABEL,
+            8,
+            ChargingStationContainerMenu.WIRED_SLOT_Y + 5,
+            LABEL_COLOR,
+            false
+        );
+        graphics.drawString(
+            font,
+            ContentNames.CHARGING_STATION_WIRELESS_LABEL,
+            8,
+            ChargingStationContainerMenu.WIRELESS_LIGHT_Y + 5,
+            LABEL_COLOR,
+            false
+        );
+        drawNetworkValue(graphics);
     }
 
-    private void drawValue(final GuiGraphics graphics, final int valueIndex, final int maxIndex, final Bar bar) {
+    private void drawNetworkValue(final GuiGraphics graphics) {
         final Component text = Component.literal(
-            menu.getDataValue(valueIndex) + " / " + menu.getDataValue(maxIndex) + " FE"
+            menu.getDataValue(0) + " / " + menu.getDataValue(1) + " FE"
         );
         graphics.drawString(
             font,
             text,
-            bar.x + bar.width / 2 - font.width(text) / 2,
-            bar.y + (bar.height - 8) / 2,
+            NETWORK_BAR.x + NETWORK_BAR.width / 2 - font.width(text) / 2,
+            NETWORK_BAR.y + (NETWORK_BAR.height - 8) / 2,
             LABEL_COLOR,
             false
         );
@@ -115,15 +195,6 @@ public class ChargingStationScreen extends AbstractContainerScreen<ChargingStati
             NETWORK_BAR.y() - 2,
             NETWORK_BAR.width() + 8,
             NETWORK_BAR.height() + 4,
-            mouseX,
-            mouseY
-        )) {
-            graphics.renderTooltip(font, ContentNames.CHARGING_STATION_HELP, mouseX, mouseY);
-        } else if (isHovering(
-            BUFFER_BAR.x() - 4,
-            BUFFER_BAR.y() - 2,
-            BUFFER_BAR.width() + 8,
-            BUFFER_BAR.height() + 4,
             mouseX,
             mouseY
         )) {

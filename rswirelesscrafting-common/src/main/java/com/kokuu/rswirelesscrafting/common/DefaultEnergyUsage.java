@@ -12,23 +12,14 @@ public final class DefaultEnergyUsage {
     public static final long INTERDIMENSIONAL_ENERGY_MULTIPLIER = 150;
     public static final int EXTENDED_RANGE = 64;
 
-    // 400V 风冷充电站：入门款，速度快、范围小、待机开销低。
-    // 注意：充电站的三个速率都是每秒（FE/s），方块内部按 20 tick/s 分摊，不是每 tick。
-    public static final ChargingStationDefaults AIR_COOLED_CHARGING_STATION = new ChargingStationDefaults(
-        8,     // 待机耗电 FE/s（= 0.4 FE/t）
-        120,   // 有线充电 FE/s（= 6 FE/t）
-        20,    // 无线充电 FE/s（= 1 FE/t，每个物品）
-        4,     // 无线半径（格）
+    // 终端充电站（单档）。三个速率都是每秒（FE/s），方块内部按 20 tick/s 分摊，
+    // 不是每 tick：有线 200 FE/s = 10 FE/t，无线 20 FE/s = 1 FE/t（每个设备）。
+    public static final ChargingStationDefaults CHARGING_STATION = new ChargingStationDefaults(
+        8,     // 待机耗电 FE/s
+        200,   // 有线充电 FE/s（= 10 FE/t，每个槽位）
+        20,    // 无线充电 FE/s（= 1 FE/t，每个设备）
+        5,     // 无线半径（格）
         10000  // 内部 FE 缓冲
-    );
-
-    // 800V 液冷充电站：终局款，速率与范围大幅提升，代价是待机开销与缓冲要求都更高。
-    public static final ChargingStationDefaults LIQUID_COOLED_CHARGING_STATION = new ChargingStationDefaults(
-        32,    // 待机耗电 FE/s（= 1.6 FE/t）
-        240,   // 有线充电 FE/s（= 12 FE/t）
-        80,    // 无线充电 FE/s（= 4 FE/t，每个物品）
-        10,    // 无线半径（格）
-        40000  // 内部 FE 缓冲
     );
 
     public static final long BATTERY_UPGRADE_CAPACITY = 1000;

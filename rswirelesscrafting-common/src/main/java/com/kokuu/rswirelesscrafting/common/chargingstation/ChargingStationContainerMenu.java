@@ -15,21 +15,23 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class ChargingStationContainerMenu extends AbstractContainerMenu {
-    public static final int DATA_SIZE = 4;
+    public static final int WIRED_SLOT_COUNT = 3;
+    public static final int DATA_SIZE = 10;
 
-    // 槽位 y 必须落在两条能量条（背景 y=18..41）下方，否则物品图标会盖在能量条上。
-    private static final int CHARGE_SLOT_X = 80;
-    private static final int CHARGE_SLOT_Y = 51;
+    // 连接面板：3 个有线槽（放物品）+ 3 个无线链接灯。坐标对界面渲染公开，
+    // 供 ChargingStationScreen 画状态灯时对齐（避免两处各写一份坐标导致错位）。
+    public static final int[] WIRED_SLOT_X = {44, 80, 116};
+    public static final int WIRED_SLOT_Y = 17;
+    public static final int[] WIRELESS_LIGHT_X = {44, 80, 116};
+    public static final int WIRELESS_LIGHT_Y = 40;
     private static final int INVENTORY_X = 8;
     private static final int INVENTORY_Y = 84;
     private static final int HOTBAR_Y = 142;
     private static final int INVENTORY_ROWS = 3;
     private static final int INVENTORY_COLUMNS = 9;
-    private static final int PLAYER_INVENTORY_SIZE = 36;
 
     private final Container container;
     private final ContainerData data;
-    private final ChargingStationTier tier;
 
     /**
      * 服务端构造：直接绑定方块实体与其实时数据。
@@ -37,20 +39,19 @@ public class ChargingStationContainerMenu extends AbstractContainerMenu {
     public ChargingStationContainerMenu(final int syncId,
                                         final Inventory playerInventory,
                                         final Container container,
-                                        final ContainerData data,
-                                        final ChargingStationTier tier) {
+                                        final ContainerData data) {
         super(Menus.INSTANCE.getChargingStation(), syncId);
         this.container = container;
         this.data = data;
-        this.tier = tier;
-        addSlot(new Slot(container, 0, CHARGE_SLOT_X, CHARGE_SLOT_Y));
+        for (int i = 0; i < WIRED_SLOT_X.length; i++) {
+            addSlot(new Slot(container, i, WIRED_SLOT_X[i], WIRED_SLOT_Y));
+        }
         addPlayerInventory(playerInventory);
         addDataSlots(data);
     }
 
     /**
-     * 客户端构造：坐标与档位由服务端随界面打开数据下发，方块实体从本地世界解析。
-     * 数据槽用可写实现，等待服务端同步覆盖。
+     * 客户端构造：坐标由服务端随界面打开数据下发，方块实体从本地世界解析。
      */
     public ChargingStationContainerMenu(final int syncId,
                                         final Inventory playerInventory,
@@ -59,8 +60,7 @@ public class ChargingStationContainerMenu extends AbstractContainerMenu {
             syncId,
             playerInventory,
             resolveContainer(playerInventory, chargingStationData.pos()),
-            new SimpleContainerData(DATA_SIZE),
-            ChargingStationTier.byNetworkId(chargingStationData.tier())
+            new SimpleContainerData(DATA_SIZE)
         );
     }
 
@@ -69,7 +69,7 @@ public class ChargingStationContainerMenu extends AbstractContainerMenu {
         if (blockEntity instanceof ChargingStationBlockEntity station) {
             return station;
         }
-        return new SimpleContainer(1);
+        return new SimpleContainer(WIRED_SLOT_COUNT);
     }
 
     private void addPlayerInventory(final Inventory playerInventory) {
@@ -92,10 +92,6 @@ public class ChargingStationContainerMenu extends AbstractContainerMenu {
         return data.get(index);
     }
 
-    public ChargingStationTier getTier() {
-        return tier;
-    }
-
     @Override
     public boolean stillValid(final Player player) {
         return container.stillValid(player);
@@ -109,11 +105,11 @@ public class ChargingStationContainerMenu extends AbstractContainerMenu {
         }
         final ItemStack stackInSlot = slot.getItem();
         final ItemStack original = stackInSlot.copy();
-        if (index == 0) {
-            if (!moveItemStackTo(stackInSlot, 1, slots.size(), true)) {
+        if (index < WIRED_SLOT_COUNT) {
+            if (!moveItemStackTo(stackInSlot, WIRED_SLOT_COUNT, slots.size(), true)) {
                 return ItemStack.EMPTY;
             }
-        } else if (!moveItemStackTo(stackInSlot, 0, 1, false)) {
+        } else if (!moveItemStackTo(stackInSlot, 0, WIRED_SLOT_COUNT, false)) {
             return ItemStack.EMPTY;
         }
         if (stackInSlot.isEmpty()) {

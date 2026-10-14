@@ -241,38 +241,16 @@ def remote_energy_texture():
 
 # ================================================================ block texture
 
-def cooling_detail(px, liquid_cooled, primary, secondary):
-    """外圈冷却特征：风冷是两侧散热鳍片，液冷是环绕面板的冷却回路。"""
-    if liquid_cooled:
-        for y in range(3, 13):
-            px[y][2] = primary
-            px[y][13] = primary
-        for x in range(3, 13):
-            px[2][x] = primary
-            px[13][x] = primary
-        px[2][3] = secondary
-        px[13][12] = secondary
-        return
-    for y in range(3, 13):
-        px[y][2] = primary if y % 2 == 0 else secondary
-        px[y][13] = primary if y % 2 == 0 else secondary
+def terminal_charging_station_texture():
+    """Machine casing with a dark inset panel, a glowing bolt, and a strip of
+    six indicator lights (3 wired + 3 wireless) hinting at the connection panel.
 
-
-def charging_station_texture(liquid_cooled):
-    """Machine casing with a dark inset panel and a glowing bolt.
-
-    400V 风冷是中性灰机壳 + 两侧散热鳍片，闪电走青蓝；
-    800V 液冷把机壳压向紫灰，鳍片换成环绕面板的冷却回路，闪电走紫。
+    Neutral grey casing, cyan bolt — the terminal's whole job is pushing energy.
     """
     px = canvas()
-    if liquid_cooled:
-        base, shade, light = rgb("#6E6A7A"), rgb("#4C4858"), rgb("#928CA0")
-        fin, fin_light = rgb("#8A5FD0"), rgb("#B79AF0")
-        bolt, bolt_glow = rgb("#A97BF0"), rgb("#DCC8FF")
-    else:
-        base, shade, light = rgb("#8E8E8E"), rgb("#6A6A6A"), rgb("#B4B4B4")
-        fin, fin_light = rgb("#5A5A5A"), rgb("#C2C2C2")
-        bolt, bolt_glow = rgb("#5FE0F5"), rgb("#C9F7FF")
+    base, shade, light = rgb("#8E8E8E"), rgb("#6A6A6A"), rgb("#B4B4B4")
+    fin, fin_light = rgb("#5A5A5A"), rgb("#C2C2C2")
+    bolt, bolt_glow = rgb("#5FE0F5"), rgb("#C9F7FF")
     for y in range(16):
         for x in range(16):
             if x in (0, 15) or y in (0, 15):
@@ -283,7 +261,10 @@ def charging_station_texture(liquid_cooled):
                 px[y][x] = mix(base, shade, 0.35)
             else:
                 px[y][x] = base
-    cooling_detail(px, liquid_cooled, fin, fin_light)
+    # side cooling fins
+    for y in range(3, 13):
+        px[y][2] = fin if y % 2 == 0 else fin_light
+        px[y][13] = fin if y % 2 == 0 else fin_light
     panel, panel_edge = rgb("#33323C"), rgb("#22212A")
     for y in range(3, 13):
         for x in range(3, 13):
@@ -330,13 +311,9 @@ def main():
     block_out = os.path.join(HERE, "rswirelesscrafting-common", "src", "main", "resources",
                              "assets", "rswirelesscrafting", "textures", "block")
     os.makedirs(block_out, exist_ok=True)
-    for name, pixels in [
-        ("air_cooled_charging_station.png", charging_station_texture(False)),
-        ("liquid_cooled_charging_station.png", charging_station_texture(True)),
-    ]:
-        path = os.path.join(block_out, name)
-        write_png(path, pixels)
-        print("wrote", path)
+    path = os.path.join(block_out, "terminal_charging_station.png")
+    write_png(path, terminal_charging_station_texture())
+    print("wrote", path)
 
 
 if __name__ == "__main__":

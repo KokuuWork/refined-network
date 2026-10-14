@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "rswirelesscrafting:block/terminal_charging_station"
+    }
+  }
+}

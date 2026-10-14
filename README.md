@@ -11,9 +11,9 @@
 
 给 [Refined Storage 2](https://github.com/refinedmods/refinedstorage) 补上原版缺失的**无线合成**能力。
 
-原版只有一个无线**查看**终端（`wireless_grid`）——你能远程看库存，但不能远程合成。本模组提供一个**无线合成终端**，用四张可插拔的**装配式升级卡**把它的续航、范围、维度与供能方式一路推到终局，再配**400V 风冷 / 800V 液冷两档充电站**为所有 FE 终端补电。
+原版只有一个无线**查看**终端（`wireless_grid`）——你能远程看库存，但不能远程合成。本模组提供一个**无线合成终端**，用四张可插拔的**装配式升级卡**把它的续航、范围、维度与供能方式一路推到终局，再配一座**终端充电站**为所有 FE 终端补电。
 
-![无线合成终端的未激活态与激活态，以及四张升级卡和两座充电站](docs/images/items.png)
+![无线合成终端的未激活态与激活态，以及四张升级卡和终端充电站](docs/images/items.png)
 
 > 上图中第 1、2 个图标是同一件**无线合成终端**的两种状态：未绑定（灰）与已接入网络（亮）。
 
@@ -26,8 +26,7 @@
 | <img src="docs/images/item-range.png" width="40" alt=""> | **范围升级卡**<br>`range_upgrade` | 同维度内**无视距离**。 | EPIC |
 | <img src="docs/images/item-interdimensional.png" width="40" alt=""> | **维度升级卡**<br>`interdimensional_upgrade` | 解锁**跨维度**访问。 | EPIC |
 | <img src="docs/images/item-remote-energy.png" width="40" alt=""> | **远距离输电升级卡**<br>`remote_energy_upgrade` | **不再消耗终端自身电池**，直接花所绑定网络里的电。 | EPIC |
-| <img src="docs/images/item-air-cooled-charging-station.png" width="40" alt=""> | **400V 风冷充电站**<br>`air_cooled_charging_station` | 入门基建：槽位有线快充，4 格范围内的玩家自动无线补电。 | — |
-| <img src="docs/images/item-liquid-cooled-charging-station.png" width="40" alt=""> | **800V 液冷充电站**<br>`liquid_cooled_charging_station` | 终局基建：有线与无线速率都翻倍以上，无线覆盖 10 格。 | — |
+| <img src="docs/images/item-terminal-charging-station.png" width="40" alt=""> | **终端充电站**<br>`terminal_charging_station` | 3 个有线槽位快充，5 格范围内自动无线补电（最多 3 名玩家）。 | — |
 
 所有鼠标悬停说明都是活的：终端会显示**当前绑定的维度与坐标**和**已安装的升级卡**；每张卡会显示自己的效果、生效前提，以及从配置里实时读出的数值（电池卡显示容量加成，维度卡显示当前跨维度能量倍率）。
 
@@ -43,27 +42,28 @@
 
 ## 充电站
 
-两座方块，两条充电路径，两种供电来源。**兼容 RS 的任意 FE 终端**（无线查看终端、无线合成终端、便携终端……），因为它走的是通用的 NeoForge 能量能力，而不是 RS 内部的适配器。
+一座方块，两条充电路径，两种供电来源。**兼容 RS 的任意 FE 终端**（无线查看终端、无线合成终端、便携终端……），因为它走的是通用的 NeoForge 能量能力，而不是 RS 内部的适配器。
 
-| | 400V 风冷<br>`air_cooled_charging_station` | 800V 液冷<br>`liquid_cooled_charging_station` |
-|---|---|---|
-| **有线**（终端放进 GUI 槽位） | **120 FE/s** | **240 FE/s** |
-| **无线**（玩家在范围内自动补电） | **20 FE/s**，半径 **4 格** | **80 FE/s**，半径 **10 格** |
-| 待机耗电 | 8 FE/s | 32 FE/s |
-| 外部 FE 缓冲 | 10000 FE | 40000 FE |
+| | 终端充电站<br>`terminal_charging_station` |
+|---|---|
+| **有线**（终端放进 GUI 槽位） | **3 个槽位**，各 **200 FE/s** |
+| **无线**（玩家在范围内自动补电） | **20 FE/s**（每个设备），半径 **5 格** |
+| 无线并发 | 每名玩家最多同时充 **3 个设备**，最多服务 **3 名玩家**（按离站距离由近到远分配） |
+| 待机耗电 | 8 FE/s |
+| 外部 FE 缓冲 | 10000 FE |
 
-两座站共用同一套方块实体与界面，只在数值与外观上分档：界面背景和能量条主色随规格切换（风冷青蓝、液冷紫），方块物品的 tooltip 会直接列出**这一档当前生效的数值**（改配置也会跟着变，不会出现文案与实物不符）。
+界面是一张 **3×2 连接面板**：上排 3 个有线槽（放物品，充电中蓝灯呼吸闪烁、充满绿灯），下排 3 个无线链接灯（正在为某名玩家充电时呼吸闪烁）。
 
 | 供电来源 | 说明 |
 |---|---|
 | **RS 网络**（主来源） | 与 RS 其他机械一致：方块接入网络后，待机耗电直接从 `EnergyNetworkComponent` 抽取 |
 | **外部 FE 缓冲**（兜底） | 注册标准 `Capabilities.EnergyStorage.BLOCK` 能力，其他模组用标准 FE 输电的方块/管道可以给它供电，纯 FE 整合包里也能用 |
 
-取电优先级是**网络优先、缓冲兜底**；网络抽不出来（未联网或网络空）时才动内部缓冲。GUI 里两条能量条分别显示网络存量与外部缓冲。
+取电优先级是**网络优先、缓冲兜底**；网络抽不出来（未联网或网络空）时才动内部缓冲。GUI 里的能量条显示网络存量。
 
-> 表里的速率一律是**每秒（FE/s）**。Minecraft 按 **20 tick = 1 秒** 结算，方块内部就把每秒额度摊到每 tick，除不尽的部分顺延到下一 tick，所以长期平均值精确、也不会漏电。折算成每 tick 是：400V 有线 6、无线 1；800V 有线 12、无线 4。
+> 表里的速率一律是**每秒（FE/s）**。Minecraft 按 **20 tick = 1 秒** 结算，方块内部就把每秒额度摊到每 tick，除不尽的部分顺延到下一 tick，所以长期平均值精确、也不会漏电。折算成每 tick 是：有线 10、无线 1（每个设备）。
 >
-> 待机耗电同样按每秒算，否则会出现「站一空转，待机就把有线充电全吃掉」的倒挂（8 FE/t = 160 FE/s，比 120 FE/s 的充电输出还高）。
+> 待机耗电同样按每秒算，否则会出现「站一空转，待机就把有线充电全吃掉」的倒挂。
 
 ## 能量模型
 
@@ -98,11 +98,11 @@
 2. **绑定**。手持无线合成终端，对着无线访问点或网络接收器**右键**完成绑定。
 3. **装卡**。**潜行 + 右键**终端打开装配界面，把升级卡拖进 4 个槽位之一。想换卡就拖出来。
 4. **打开**。右键终端即可打开合成界面（也可在按键设置里绑定快捷键）。
-5. **补电**。通风冷站适合摆在工作台旁随身补；液冷站半径 10 格，一座就能罩住整间基地，走过去自动回电。
+5. **补电**。终端充电站摆在基地里，3 个槽位有线快充，5 格范围内的玩家自动无线补电——走过去就回电。
 
 ## 配方
 
-七件内容大多定位为**后期到终局**：材料取自 Refined Storage 自带的无线设备与递归存储元件、原版最稀有的掉落。只有**电池升级卡**与 **400V 风冷充电站**刻意压低到前中期——它们负责把曲线撑平，剩下的都是终局件。
+六件内容大多定位为**后期到终局**：材料取自 Refined Storage 自带的无线设备与递归存储元件、原版最稀有的掉落。只有**电池升级卡**与**终端充电站**刻意压低到前中期——它们负责把曲线撑平，剩下的都是终局件。
 
 ### 无线合成终端
 
@@ -150,23 +150,13 @@
 
 > 早期版本四角是末影珍珠，但末影珍珠与「电」没有任何语义关系，纯粹是为了凑稀有度——现已换成铜块。
 
-### 400V 风冷充电站
+### 终端充电站
 
-<img src="docs/images/recipe-air-cooled-charging-station.png" width="270" alt="400V 风冷充电站配方">
+<img src="docs/images/recipe-terminal-charging-station.png" width="270" alt="终端充电站配方">
 
 `Q` `c:gems/quartz` 标签（任意石英）· `G` 红石块 · `C` 机器外壳 · `M` 高级处理器
 
 比三张终局卡低一个量级：8 个石英 + 4 个红石块 + 4 个机器外壳 + 1 个高级处理器。它是**功能性基建**而不是升级件，所以定价落在 RS 常规机械的区间里，前中期就能搭起来。
-
-### 800V 液冷充电站
-
-<img src="docs/images/recipe-liquid-cooled-charging-station.png" width="270" alt="800V 液冷充电站配方">
-
-`Q` `c:gems/quartz` 标签（任意石英）· `G` 蓝冰 · `C` 机器外壳 · `M` 下界之星
-
-与风冷站同一张图案、同一套材料语言，只把两处升级：红石块换成**蓝冰**（液冷介质），中心的高级处理器换成**下界之星**。速率与覆盖都翻倍以上的代价，就是一颗下界之星。
-
-两座站摆在一起能一眼看出是同一个「机柜」的两种配置——这也正是实际效果：同一套方块实体、同一个界面，只是档位不同。
 
 ## 距离与维度行为
 
@@ -197,7 +187,7 @@ RS 的距离/维度校验并不位于 `resolveNetwork`，而在 `NetworkItemPlay
 
 方块实体则继承 RS 公开且标注为 STABLE 的 `AbstractNetworkNodeContainerBlockEntity<T extends NetworkNode>`，由它负责网络容器生命周期；自定义的 `ChargingStationNetworkNode` 只声明待机耗电。网络连接用的是 RS 的默认六向连接策略，因此连 `createMainContainer` 都不用重写。
 
-400V 与 800V 是**同一个方块类、同一个方块实体类型**的两份实例：`ChargingStationBlock` 带一个档位字段，方块实体在构造时从 `BlockState` 反查档位，据此决定读哪一节配置（`airCooledChargingStation` / `liquidCooledChargingStation`）。界面按档位切换背景与能量条主色，其余逻辑完全共用——两档之间没有一行重复代码。
+每 tick 里，服务端先为 3 个有线槽各自按速率补电，再扫描半径内的玩家（按距离由近到远排序），给最近的 3 名玩家各分配一条无线链接，逐条链接对玩家背包里的 FE 设备充电（同一玩家同时最多 3 个设备，充满一个自动轮到下一个）。连接面板的 6 个灯（3 有线 + 3 无线）由服务端算好状态写进 `ContainerData` 同步给客户端，客户端用 `level.getGameTime()` 驱动蓝灯的呼吸闪烁——纯视觉，不占额外网络包。多名玩家各自独占一条链接，状态互不干扰。
 
 物品充电走 NeoForge 的 `Capabilities.EnergyStorage.ITEM`，**不**经过 RS 的 `PlatformImpl.getEnergyStorage`（那只会认 RS 自己的适配器），这样才能兼容其他模组的 FE 物品。
 
@@ -223,8 +213,8 @@ export JAVA_HOME="/path/to/jdk-21"
 
 | 脚本 | 产出 |
 |---|---|
-| `gen_textures.py` | 6 张物品纹理 + 2 张方块纹理（风冷 / 液冷充电站） |
-| `gen_gui_textures.py` | 3 张 176×166 的界面背景（风冷 / 液冷充电站、升级装配） |
+| `gen_textures.py` | 6 张物品纹理 + 1 张方块纹理（终端充电站） |
+| `gen_gui_textures.py` | 2 张 176×166 的界面背景（终端充电站、升级装配） |
 | `gen_readme_images.py` | 上文的全部配图（需 `MC_CLIENT_JAR` 与 `RS_TEXTURES` 指向 1.21.1 客户端 jar 与 RS 源码树） |
 
 ## 致谢
@@ -241,9 +231,9 @@ export JAVA_HOME="/path/to/jdk-21"
 
 An addon for **[Refined Storage 2](https://github.com/refinedmods/refinedstorage)** that adds the wireless **crafting** grid the base mod never had.
 
-Vanilla Refined Storage ships only a wireless *viewing* grid — you can browse your network remotely, but not craft on it. This mod adds a **Wireless Crafting Grid**, four swappable **upgrade cards** that extend its endurance, range, dimensions and power source all the way to endgame, plus two **Charging Stations** (400V air-cooled / 800V liquid-cooled) that recharge every FE-based terminal.
+Vanilla Refined Storage ships only a wireless *viewing* grid — you can browse your network remotely, but not craft on it. This mod adds a **Wireless Crafting Grid**, four swappable **upgrade cards** that extend its endurance, range, dimensions and power source all the way to endgame, plus a **Terminal Charging Station** that recharges every FE-based terminal.
 
-<img src="docs/images/items.png" width="620" alt="Wireless crafting grid (inactive and active), the four upgrade cards, and both charging stations">
+<img src="docs/images/items.png" width="620" alt="Wireless crafting grid (inactive and active), the four upgrade cards, and the terminal charging station">
 
 > The first two icons are the *same* item — the **Wireless Crafting Grid** — in its unbound (dim) and network-connected (lit) states.
 
@@ -256,8 +246,7 @@ Vanilla Refined Storage ships only a wireless *viewing* grid — you can browse 
 | <img src="docs/images/item-range.png" width="40" alt=""> | **Range Upgrade**<br>`range_upgrade` | **Unlimited range** within the same dimension. | epic |
 | <img src="docs/images/item-interdimensional.png" width="40" alt=""> | **Interdimensional Upgrade**<br>`interdimensional_upgrade` | **Cross-dimensional** access. | epic |
 | <img src="docs/images/item-remote-energy.png" width="40" alt=""> | **Remote Energy Upgrade**<br>`remote_energy_upgrade` | Draws power **from the bound network** instead of the grid's own battery. | epic |
-| <img src="docs/images/item-air-cooled-charging-station.png" width="40" alt=""> | **400V Air-Cooled Charging Station**<br>`air_cooled_charging_station` | Early infrastructure: fast wired slot, plus a 4-block wireless aura. | — |
-| <img src="docs/images/item-liquid-cooled-charging-station.png" width="40" alt=""> | **800V Liquid-Cooled Charging Station**<br>`liquid_cooled_charging_station` | Endgame infrastructure: more than double the rates, 10-block coverage. | — |
+| <img src="docs/images/item-terminal-charging-station.png" width="40" alt=""> | **Terminal Charging Station**<br>`terminal_charging_station` | 3 wired fast-charge slots, plus a 5-block wireless aura (up to 3 players). | — |
 
 Tooltips are live: the grid shows the **bound dimension and coordinates** and its **installed upgrades**; each card explains its effect, its prerequisite, and the values read from config in real time.
 
@@ -273,27 +262,28 @@ Cards are **not** baked into a crafting recipe. **Sneak + right-click** the grid
 
 ### Charging Station
 
-Two blocks, two charging paths, two power sources. They work with **any FE terminal from Refined Storage** (wireless grid, wireless crafting grid, portable grid, …) because they use the generic NeoForge energy capability rather than RS's internal adapter.
+One block, two charging paths, two power sources. It works with **any FE terminal from Refined Storage** (wireless grid, wireless crafting grid, portable grid, …) because it uses the generic NeoForge energy capability rather than RS's internal adapter.
 
-| | 400V Air-Cooled<br>`air_cooled_charging_station` | 800V Liquid-Cooled<br>`liquid_cooled_charging_station` |
-|---|---|---|
-| **Wired** (terminal in the GUI slot) | **120 FE/s** | **240 FE/s** |
-| **Wireless** (players in range) | **20 FE/s**, radius **4 blocks** | **80 FE/s**, radius **10 blocks** |
-| Idle draw | 8 FE/s | 32 FE/s |
-| External FE buffer | 10000 FE | 40000 FE |
+| | Terminal Charging Station<br>`terminal_charging_station` |
+|---|---|
+| **Wired** (terminal in the GUI slot) | **3 slots** at **200 FE/s** each |
+| **Wireless** (players in range) | **20 FE/s** per device, radius **5 blocks** |
+| Wireless concurrency | up to **3 devices per player**, up to **3 players** (nearest first) |
+| Idle draw | 8 FE/s |
+| External FE buffer | 10000 FE |
 
-Both share one block entity and one screen, differing only in numbers and looks: the GUI background and energy-bar colour follow the tier (cyan for air-cooled, violet for liquid-cooled), and the item tooltip lists **the values actually in effect** for that tier, so it tracks your config instead of going stale.
+The GUI is a **3×2 connection panel**: three wired slots up top (blue breathing light while charging, green when full) and three wireless link lights below (breathing while charging a player).
 
 | Power source | Notes |
 |---|---|
 | **RS network** (primary) | Like every other RS machine: the idle draw comes straight out of the network's `EnergyNetworkComponent` |
 | **External FE buffer** (fallback) | Registers the standard `Capabilities.EnergyStorage.BLOCK` capability, so other mods' FE generators and cables can feed it — it works in pure-FE packs too |
 
-Power is drawn **network first, buffer second**. The GUI shows both bars.
+Power is drawn **network first, buffer second**. The GUI shows the network energy bar.
 
-> Every rate above is **per second (FE/s)**. Minecraft settles on **20 ticks = 1 second**, so the block spreads the per-second budget across the ticks of each second and carries the remainder over, which keeps the long-run average exact and never leaks energy. Per tick that works out to: 400V wired 6, wireless 1; 800V wired 12, wireless 4.
+> Every rate above is **per second (FE/s)**. Minecraft settles on **20 ticks = 1 second**, so the block spreads the per-second budget across the ticks of each second and carries the remainder over, which keeps the long-run average exact and never leaks energy. Per tick that works out to: wired 10, wireless 1 (per device).
 >
-> The idle draw is per second too — otherwise a station would burn 8 FE/t = 160 FE/s doing nothing, more than the 120 FE/s it can deliver when charging.
+> The idle draw is per second too — otherwise a station would burn energy doing nothing, more than it can deliver when charging.
 
 ### Energy model
 
@@ -312,11 +302,11 @@ All costs are **×1.5 when cross-dimensional** (`interdimensionalEnergyMultiplie
 
 ### Recipes
 
-Most of the seven items are late-game crafts, built around Refined Storage's own wireless hardware and nested storage parts plus the rarest vanilla drops. Only the **Battery Upgrade** and the **400V Air-Cooled Charging Station** sit in the early-to-mid game, to keep the progression curve gentle.
+Most of the six items are late-game crafts, built around Refined Storage's own wireless hardware and nested storage parts plus the rarest vanilla drops. Only the **Battery Upgrade** and the **Terminal Charging Station** sit in the early-to-mid game, to keep the progression curve gentle.
 
-<img src="docs/images/recipe-grid.png" width="230" alt="Wireless crafting grid recipe"> <img src="docs/images/recipe-battery.png" width="230" alt="Battery upgrade recipe"> <img src="docs/images/recipe-air-cooled-charging-station.png" width="230" alt="400V air-cooled charging station recipe">
+<img src="docs/images/recipe-grid.png" width="230" alt="Wireless crafting grid recipe"> <img src="docs/images/recipe-battery.png" width="230" alt="Battery upgrade recipe"> <img src="docs/images/recipe-terminal-charging-station.png" width="230" alt="Terminal charging station recipe">
 
-The **Battery Upgrade** is the cheap one — 1k storage blocks and redstone blocks are early-game materials, so the grid stops running dry long before the endgame cards are affordable. It is also the ingredient of the **Remote Energy Upgrade**, so the early investment is never wasted. The **400V Air-Cooled Charging Station** is priced like RS's ordinary machines: it is infrastructure, not an upgrade.
+The **Battery Upgrade** is the cheap one — 1k storage blocks and redstone blocks are early-game materials, so the grid stops running dry long before the endgame cards are affordable. It is also the ingredient of the **Remote Energy Upgrade**, so the early investment is never wasted. The **Terminal Charging Station** is priced like RS's ordinary machines: it is infrastructure, not an upgrade.
 
 <img src="docs/images/recipe-range.png" width="270" alt="Range upgrade recipe">
 
@@ -326,9 +316,9 @@ The **Battery Upgrade** is the cheap one — 1k storage blocks and redstone bloc
 
 The three endgame cards share one material language (nether star + 64k storage block), so they read as a set. The **Remote Energy Upgrade** is the one that talks about electricity rather than space, so its corners are **copper blocks** — the conductor — with a lightning rod down the middle; earlier builds used ender pearls there, which had no relation to power at all.
 
-<img src="docs/images/recipe-liquid-cooled-charging-station.png" width="270" alt="800V liquid-cooled charging station recipe">
+<img src="docs/images/recipe-terminal-charging-station.png" width="270" alt="Terminal charging station recipe">
 
-The **800V Liquid-Cooled Charging Station** keeps the air-cooled pattern and the same material language, upgrading exactly two slots: redstone blocks become **blue ice** (the coolant) and the advanced processor becomes a **nether star**. More than double the rates and coverage, for one wither.
+The **Terminal Charging Station** is priced like RS's ordinary machines — quartz, redstone blocks, a machine casing and an advanced processor. It is infrastructure, not an upgrade.
 
 ### Range and dimensions
 
@@ -345,9 +335,9 @@ Cross-dimensional access requires both the Transmitter and Receiver chunks to be
 
 **Grid and cards.** The single extension point is overriding `AbstractNetworkEnergyItem.use(ServerPlayer, ItemStack, SlotReference)` to inject a custom `ExtendedWirelessNetworkItemContext`. RS's distance/dimension check lives in `NetworkItemPlayerValidator`, not in `resolveNetwork`, so upgrades apply as a **fallback relaxation** — the standard resolution runs first, and only when it comes back empty do the installed cards get a say. The `force=true` path is deliberately left untouched, since RS relies on that semantic to remove stale grid watchers. On the energy side, `isActive()` and `drainEnergy(long)` are overridden so the bound network answers "is there power?" and pays the bill.
 
-**Charging Station.** RS 2.0.7 exposes no public block base class (blocks live in an internal, un-annotated module), so the block extends vanilla `BaseEntityBlock` and uses vanilla `getTicker`. Note that `BaseEntityBlock` returns `RenderShape.INVISIBLE` by default — vanilla's own block entities such as chests and furnaces draw themselves — so a block entity block that wants an ordinary json model has to override `getRenderShape()` and return `RenderShape.MODEL`, or it renders as nothing at all and you see straight through it. Fixed in 0.1.9. The block entity extends the STABLE-annotated `AbstractNetworkNodeContainerBlockEntity<T extends NetworkNode>`, with a minimal `ChargingStationNetworkNode` declaring the idle draw; RS's default six-way connection strategy means `createMainContainer` needs no override at all. Both tiers are two instances of the *same* block class and the *same* block entity type: the block carries a tier field, the block entity reads it back from the `BlockState` when constructed, and that decides which config section it reads (`airCooledChargingStation` / `liquidCooledChargingStation`). The screen switches background and bar colour by tier; everything else is shared, so no logic is duplicated between the two. Item charging uses NeoForge's `Capabilities.EnergyStorage.ITEM` rather than RS's `PlatformImpl.getEnergyStorage` (which only recognises RS's own adapter), which is what makes it compatible with other mods' FE items.
+**Charging Station.** RS 2.0.7 exposes no public block base class (blocks live in an internal, un-annotated module), so the block extends vanilla `BaseEntityBlock` and uses vanilla `getTicker`. Note that `BaseEntityBlock` returns `RenderShape.INVISIBLE` by default — vanilla's own block entities such as chests and furnaces draw themselves — so a block entity block that wants an ordinary json model has to override `getRenderShape()` and return `RenderShape.MODEL`, or it renders as nothing at all and you see straight through it. Fixed in 0.1.9. The block entity extends the STABLE-annotated `AbstractNetworkNodeContainerBlockEntity<T extends NetworkNode>`, with a minimal `ChargingStationNetworkNode` declaring the idle draw; RS's default six-way connection strategy means `createMainContainer` needs no override at all. Each tick it tops up the three wired slots, then scans nearby players (nearest first) and assigns the three wireless links, charging up to three devices per player. The six panel lights (3 wired + 3 wireless) are computed server-side and synced through `ContainerData`; the client drives the blue breathing pulse off `level.getGameTime()`, so it's purely visual with no extra packets. Item charging uses NeoForge's `Capabilities.EnergyStorage.ITEM` rather than RS's `PlatformImpl.getEnergyStorage` (which only recognises RS's own adapter), which is what makes it compatible with other mods' FE items.
 
-**GUI backgrounds.** The three custom screens use 176×166 backgrounds, so they must draw with the explicit-texture-size `blit` overload — the 7-arg `blit(loc, x, y, u, v, w, h)` silently assumes a 256×256 texture, which magnifies only the top-left corner of the background and made the slots look misaligned with an "invisible" inventory. Fixed in 0.1.10.
+**GUI backgrounds.** The custom screens use 176×166 backgrounds, so they must draw with the explicit-texture-size `blit` overload — the 7-arg `blit(loc, x, y, u, v, w, h)` silently assumes a 256×256 texture, which magnifies only the top-left corner of the background and made the slots look misaligned with an "invisible" inventory. Fixed in 0.1.10.
 
 See [`docs/DESIGN.md`](docs/DESIGN.md) for the full design document.
 

@@ -96,30 +96,32 @@ def upgrades_gui():
     return pixels
 
 
-def charging_station_gui(liquid_cooled):
-    """Network energy bar, external FE buffer bar and the wired charge slot.
+def terminal_charging_station_gui():
+    """3 wired slots + 3 wireless link lights + network energy bar + inventory.
 
     Slot frames are drawn at (menu coordinate - 1), the vanilla convention: a
     menu slot at (x, y) renders a 16x16 icon at x..x+15, so its 18x18 recess
-    has to sit at x-1..x+16.
+    has to sit at x-1..x+16. The wireless "slots" are indicator-only, so they
+    reuse the same recessed square purely for the visuals.
 
-    The two bars get a coloured outline so the 400V and 800V panels stay
-    distinguishable at a glance: cyan for air-cooled, violet for liquid-cooled.
+    Menu coordinates (must match ChargingStationContainerMenu / Screen):
+        wired slots   y=17, x=44/80/116
+        wireless      y=40, x=44/80/116
+        network bar   (26, 61) 124x10
     """
-    accent = (154, 107, 224) if liquid_cooled else (60, 170, 210)
+    accent = (60, 170, 210)
     pixels = canvas()
     frame(pixels)
-    panel(pixels, 26, 18, 124, 10)
-    panel(pixels, 26, 32, 124, 10)
+    for x in (44, 80, 116):
+        slot(pixels, x - 1, 17 - 1)
+        slot(pixels, x - 1, 40 - 1)
+    panel(pixels, 26, 61, 124, 10)
     for x in range(25, 151):
-        pixels[17][x] = accent
-        pixels[28][x] = accent
-        pixels[31][x] = accent
-        pixels[42][x] = accent
-    for y in range(17, 43):
+        pixels[60][x] = accent
+        pixels[70][x] = accent
+    for y in range(60, 71):
         pixels[y][25] = accent
         pixels[y][150] = accent
-    slot(pixels, 79, 50)
     for x in range(7, WIDTH - 7):
         pixels[76][x] = BG_SHADE
     for row in range(3):
@@ -133,8 +135,7 @@ def charging_station_gui(liquid_cooled):
 def main():
     targets = [
         ("wireless_crafting_grid_upgrades.png", upgrades_gui()),
-        ("air_cooled_charging_station.png", charging_station_gui(False)),
-        ("liquid_cooled_charging_station.png", charging_station_gui(True)),
+        ("terminal_charging_station.png", terminal_charging_station_gui()),
     ]
     for name, pixels in targets:
         path = os.path.join(OUT, name)

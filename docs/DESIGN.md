@@ -889,6 +889,34 @@ graphics.blit(TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight, imageWidt
 
 ---
 
+## 18. 0.2.0 增量：充电站重做为单档「终端充电站」
+
+用户要求撤掉 400V 风冷 / 800V 液冷两档，只留一座 `terminal_charging_station`，并把能量口径从「每秒」落定。要点：
+
+### 18.1 数值（单档，默认）
+
+- 有线：**3 个槽位**，各 **200 FE/s**（= 10 FE/t）。
+- 无线：**20 FE/s**（= 1 FE/t，每个设备），半径 **5 格**。
+- 无线并发：同一玩家同时最多 **3 个设备**（充满一个自动轮到下一个）；最多服务 **3 名玩家**，按离站距离由近到远各占一条无线链接。
+- 待机 8 FE/s；外部 FE 缓冲 10000 FE。
+
+### 18.2 连接面板（6 灯）与多人同步
+
+- GUI 是一张 3×2 面板：上排 3 个有线槽（功能性物品槽），下排 3 个无线链接灯（纯指示）。
+- 有线槽状态由 `ChargeStatus` 枚举表达（`IDLE` / `CHARGING` / `FULL`）：充电中蓝灯呼吸闪烁、充满绿灯、空槽暗灯。
+- 无线链接每 tick 重算：`level.players()` 过滤半径内非旁观、存活玩家 → 按 `distanceToSqr` 排序 → 最近 3 名各占一条链接；`chargePlayerDevices` 按背包顺序充最多 3 个非满设备。
+- 状态经 `ContainerData` 同步（下标 0-3 网络/缓冲，4-6 有线状态 ordinal，7-9 无线 0/1）。呼吸闪烁是**纯客户端视觉**：`breathePhase(partialTick)` 用 `level.getGameTime() % 40` 做 2 秒正弦，不占额外网络包。
+
+### 18.3 代码变化
+
+- 删除 `ChargingStationTier`；`ChargingStationBlock`/`BlockItem`/`ContainerMenu`/`Screen`/`Data` 全部去档位。
+- 新增 `ChargeStatus` 枚举与 `ChargingStationBlockEntity` 的 `nearbyPlayersByDistance` / `chargePlayerDevices` / `clearWirelessLinks`。
+- `Config` / `ConfigImpl` / `DefaultEnergyUsage` 收敛为单节 `chargingStation`。
+- 资源全部改名为 `terminal_charging_station`；`gen_gui_textures.py` 与 `gen_textures.py` 改为单张充电站 GUI/方块纹理；`gen_readme_images.py` 同步。
+- checkstyle 注意：数组字面量 `{ ... }` 内不得有空格（`NoWhitespaceAfter`），单条位运算表达式运算符数 ≤3（`BooleanExpressionComplexity`），`pulse()` 为此拆成 `alpha`/`rgb` 两段。
+
+---
+
 ## 13. 参考仓库
 
 - **Quartz Arsenal（核心参照，MIT）**：`https://github.com/refinedmods/refinedstorage-quartz-arsenal`（1.21.1 用 `v1.0.8` tag）

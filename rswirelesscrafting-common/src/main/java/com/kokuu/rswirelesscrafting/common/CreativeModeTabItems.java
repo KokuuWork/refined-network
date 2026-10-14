@@ -14,7 +14,6 @@ public final class CreativeModeTabItems {
         consumer.accept(Items.INSTANCE.getRangeUpgrade().getDefaultInstance());
         consumer.accept(Items.INSTANCE.getInterdimensionalUpgrade().getDefaultInstance());
         consumer.accept(Items.INSTANCE.getRemoteEnergyUpgrade().getDefaultInstance());
-        consumer.accept(Items.INSTANCE.getAirCooledChargingStationBlockItem().getDefaultInstance());
-        consumer.accept(Items.INSTANCE.getLiquidCooledChargingStationBlockItem().getDefaultInstance());
+        consumer.accept(Items.INSTANCE.getTerminalChargingStationBlockItem().getDefaultInstance());
     }
 }

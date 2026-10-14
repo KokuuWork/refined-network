@@ -10,7 +10,6 @@ import com.kokuu.rswirelesscrafting.common.Platform;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlock;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockEntity;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockItem;
-import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationTier;
 import com.kokuu.rswirelesscrafting.common.upgrade.BatteryUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.InterdimensionalUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.RangeUpgradeItem;
@@ -94,31 +93,22 @@ public class ModInitializer extends AbstractModInitializer {
 
     private void registerBlocks(final IEventBus eventBus) {
         final RegistryCallback<Block> callback = new ForgeRegistryCallback<>(blockRegistry);
-        Blocks.INSTANCE.setAirCooledChargingStation(callback.register(
-            ContentIds.AIR_COOLED_CHARGING_STATION,
+        Blocks.INSTANCE.setTerminalChargingStation(callback.register(
+            ContentIds.TERMINAL_CHARGING_STATION,
             () -> new ChargingStationBlock(BlockBehaviour.Properties.of()
                 .mapColor(MapColor.METAL)
-                .strength(2.0F, 6.0F)
-                .sound(SoundType.METAL), ChargingStationTier.AIR_COOLED)
-        ));
-        Blocks.INSTANCE.setLiquidCooledChargingStation(callback.register(
-            ContentIds.LIQUID_COOLED_CHARGING_STATION,
-            () -> new ChargingStationBlock(BlockBehaviour.Properties.of()
-                .mapColor(MapColor.METAL)
-                .strength(3.5F, 9.0F)
-                .sound(SoundType.METAL), ChargingStationTier.LIQUID_COOLED)
+                .strength(2.5F, 7.0F)
+                .sound(SoundType.METAL))
         ));
         blockRegistry.register(eventBus);
 
-        // 两种规格共用同一个方块实体类型与同一个界面。
         final RegistryCallback<BlockEntityType<?>> blockEntityCallback =
             new ForgeRegistryCallback<>(blockEntityTypeRegistry);
         BlockEntities.INSTANCE.setChargingStation(blockEntityCallback.register(
             ContentIds.CHARGING_STATION,
             () -> BlockEntityType.Builder.of(
                 ChargingStationBlockEntity::new,
-                Blocks.INSTANCE.getAirCooledChargingStation(),
-                Blocks.INSTANCE.getLiquidCooledChargingStation()
+                Blocks.INSTANCE.getTerminalChargingStation()
             ).build(null)
         ));
         blockEntityTypeRegistry.register(eventBus);
@@ -156,20 +146,11 @@ public class ModInitializer extends AbstractModInitializer {
         Items.INSTANCE.setRemoteEnergyUpgrade(
             callback.register(ContentIds.REMOTE_ENERGY_UPGRADE, RemoteEnergyUpgradeItem::new)
         );
-        Items.INSTANCE.setAirCooledChargingStationBlockItem(
+        Items.INSTANCE.setTerminalChargingStationBlockItem(
             callback.register(
-                ContentIds.AIR_COOLED_CHARGING_STATION,
+                ContentIds.TERMINAL_CHARGING_STATION,
                 () -> new ChargingStationBlockItem(
-                    Blocks.INSTANCE.getAirCooledChargingStation(),
-                    new Item.Properties()
-                )
-            )
-        );
-        Items.INSTANCE.setLiquidCooledChargingStationBlockItem(
-            callback.register(
-                ContentIds.LIQUID_COOLED_CHARGING_STATION,
-                () -> new ChargingStationBlockItem(
-                    Blocks.INSTANCE.getLiquidCooledChargingStation(),
+                    Blocks.INSTANCE.getTerminalChargingStation(),
                     new Item.Properties()
                 )
             )

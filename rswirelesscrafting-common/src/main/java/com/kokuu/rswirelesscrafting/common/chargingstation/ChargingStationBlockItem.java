@@ -13,15 +13,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 
 /**
- * 充电站的方块物品。两种规格的差别全在数值上，所以 tooltip 直接把这一档当前生效的
- * 有线速率、无线速率与半径摊开写（读的是配置，玩家改过配置也会与实物一致）。
+ * 终端充电站的方块物品。tooltip 直接把当前生效的有线 / 无线速率、半径与待机开销摊开写
+ * （读的是配置，玩家改过配置也会与实物一致）。
  */
 public class ChargingStationBlockItem extends BlockItem {
-    private final ChargingStationTier tier;
-
     public ChargingStationBlockItem(final ChargingStationBlock block, final Properties properties) {
         super(block, properties);
-        this.tier = block.getTier();
     }
 
     @Override
@@ -32,7 +29,7 @@ public class ChargingStationBlockItem extends BlockItem {
         super.appendHoverText(stack, context, lines, flag);
         lines.add(ContentNames.CHARGING_STATION_HELP);
         lines.add(Component.empty());
-        final Config.ChargingStationEntry entry = tier.getEntry(Platform.getConfig());
+        final Config.ChargingStationEntry entry = Platform.getConfig().getChargingStation();
         lines.add(Component.translatable(
             ContentNames.CHARGING_STATION_WIRED_TRANSLATION_KEY,
             entry.getWiredChargeRate()
@@ -42,13 +39,10 @@ public class ChargingStationBlockItem extends BlockItem {
             entry.getWirelessChargeRate(),
             entry.getWirelessRadius()
         ).withStyle(ChatFormatting.AQUA));
+        lines.add(ContentNames.CHARGING_STATION_WIRELESS_CAPACITY_INFO);
         lines.add(Component.translatable(
             ContentNames.CHARGING_STATION_IDLE_TRANSLATION_KEY,
             entry.getEnergyUsage()
-        ).withStyle(ChatFormatting.DARK_GRAY));
-        lines.add(Component.translatable(
-            ContentNames.CHARGING_STATION_BUFFER_TRANSLATION_KEY,
-            entry.getExternalCapacity()
         ).withStyle(ChatFormatting.DARK_GRAY));
     }
 }
