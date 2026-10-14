@@ -20,7 +20,7 @@ repositories {
 // RefinedArchitect 会在项目求值时用 CI 环境变量（GITHUB_SHA / RELEASE_VERSION）计算 version，
 // 本地无 CI 时回落为 0.0.0；且 mods.toml 的 ${version} 在扩展注册时就被捕获。
 // 因此这里必须在 refinedarchitect { } 之前显式覆盖版本号。
-version = "0.1.6"
+version = "0.1.7"
 
 refinedarchitect {
     modId = "rswirelesscrafting"

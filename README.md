@@ -47,7 +47,7 @@
 | 路径 | 条件 | 默认速率 |
 |---|---|---|
 | **有线** | 终端放进 GUI 槽位 | **100 FE/t** |
-| **无线** | 玩家站在方块 **8 格**内，背包里的终端自动补电 | **10 FE/t** |
+| **无线** | 玩家站在方块 **8 格**内，背包里的终端自动补电 | **20 FE/t** |
 
 | 供电来源 | 说明 |
 |---|---|
@@ -250,7 +250,7 @@ One block, two charging paths, two power sources. It works with **any FE termina
 | Path | Requirement | Default rate |
 |---|---|---|
 | **Wired** | Terminal sits in the GUI slot | **100 FE/t** |
-| **Wireless** | Player stands within **8 blocks**; terminals in their inventory are topped up | **10 FE/t** |
+| **Wireless** | Player stands within **8 blocks**; terminals in their inventory are topped up | **20 FE/t** |
 
 | Power source | Notes |
 |---|---|

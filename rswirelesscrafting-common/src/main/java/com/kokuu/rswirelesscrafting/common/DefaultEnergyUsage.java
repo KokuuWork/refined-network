@@ -12,7 +12,7 @@ public final class DefaultEnergyUsage {
 
     public static final long CHARGING_STATION_ENERGY_USAGE = 8;
     public static final long CHARGING_STATION_WIRED_RATE = 100;
-    public static final long CHARGING_STATION_WIRELESS_RATE = 10;
+    public static final long CHARGING_STATION_WIRELESS_RATE = 20;
     public static final int CHARGING_STATION_WIRELESS_RADIUS = 8;
     public static final long CHARGING_STATION_EXTERNAL_CAPACITY = 10000;
 

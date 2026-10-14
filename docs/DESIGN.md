@@ -700,7 +700,7 @@ public void drainEnergy(final long amount) {
 ```java
 public static final long CHARGING_STATION_ENERGY_USAGE  = 8;      // 待机耗电 FE/t
 public static final long CHARGING_STATION_WIRED_RATE    = 100;    // 有线充电 FE/t
-public static final long CHARGING_STATION_WIRELESS_RATE = 10;     // 无线充电 FE/t
+public static final long CHARGING_STATION_WIRELESS_RATE = 20;     // 无线充电 FE/t
 public static final int  CHARGING_STATION_WIRELESS_RADIUS = 8;    // 无线半径（格）
 public static final long CHARGING_STATION_EXTERNAL_CAPACITY = 10000; // 内部 FE 缓冲
 public static final long BATTERY_UPGRADE_CAPACITY       = 1000;   // 每张电池卡容量加成
