@@ -1,19 +1,25 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "PNP",
-    "NCN",
-    "PNP"
+    "PBP",
+    "NSN",
+    "PEP"
   ],
   "key": {
     "P": {
       "tag": "c:ender_pearls"
     },
+    "B": {
+      "item": "minecraft:beacon"
+    },
     "N": {
       "tag": "c:ingots/netherite"
     },
-    "C": {
-      "item": "refinedstorage:network_card"
+    "S": {
+      "item": "minecraft:nether_star"
+    },
+    "E": {
+      "item": "minecraft:elytra"
     }
   },
   "result": {

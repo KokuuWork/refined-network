@@ -1,25 +1,28 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "EAE",
-    "PUP",
-    "EME"
+    "PHP",
+    "TSR",
+    "PXP"
   ],
   "key": {
-    "E": {
-      "item": "refinedstorage:quartz_enriched_iron"
-    },
-    "A": {
-      "item": "refinedstorage:advanced_processor"
-    },
     "P": {
       "tag": "c:ender_pearls"
     },
-    "U": {
+    "H": {
+      "item": "minecraft:heart_of_the_sea"
+    },
+    "T": {
       "item": "refinedstorage:wireless_transmitter"
     },
-    "M": {
-      "item": "refinedstorage:machine_casing"
+    "S": {
+      "item": "minecraft:nether_star"
+    },
+    "R": {
+      "item": "refinedstorage:network_receiver"
+    },
+    "X": {
+      "item": "refinedstorage:64k_storage_block"
     }
   },
   "result": {

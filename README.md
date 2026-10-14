@@ -34,23 +34,42 @@ Refined Storage 2 的附属模组，新增一个**无线合成终端**，并支�
 
 ## 配方
 
+三件物品都定位为**后期物品**，用 RS 自带的通信设备、原版最稀有的掉落物，以及 RS「套娃」到顶的 64k 存储方块作为材料。
+
 ```
-无线合成终端                        范围升级卡                        维度升级卡
-E = 石英富集铁 (refinedstorage)     E = 石英富集铁                    P = 末影珍珠 (c:ender_pearls)
-P = 末影珍珠 (c:ender_pearls)       A = 高级处理器                    N = 下界合金锭 (c:ingots/netherite)
-G = rswirelesscrafting:crafting_    P = 末影珍珠                      C = 网络卡 (refinedstorage)
-    grids 标签 (任意合成网格)        U = 无线发射器
-A = 高级处理器                      M = 机器外壳
+无线合成终端
+Q = 石英富集铁 (refinedstorage)      P = 末影珍珠 (c:ender_pearls)
+A = 高级处理器 (refinedstorage)      G = refinedstorage:crafting_grids 标签
+M = 机器外壳 (refinedstorage)
 
-  E P E                             E A E                             P N P
-  E G E                             P U P                             N C N
-  E A E                             E M E                             P N P
+  Q A Q          合计约 14 石英铁 + 2 末影珍珠 + 2 高级处理器 + 1 合成网格
+  P G P          （约为 RS 自带「无线终端」的 2.3 倍）
+  Q M Q
 ```
 
-两张升级卡都定位为**后期物品**，价位对齐（维度卡则超过）Refined Storage 自带的无线设备与跨维隧道设备：
+```
+范围升级卡（同维度无限范围）
+P = 末影珍珠 (c:ender_pearls)        H = 海洋之心 (minecraft:heart_of_the_sea)
+T = 无线访问点 (wireless_transmitter) S = 下界之星 (minecraft:nether_star)
+R = 网络接收器 (network_receiver)     X = 64k存储方块 (refinedstorage)
 
-- **范围卡**核心是一台 `wireless_transmitter` —— 卡的效果正是「绑发射器时无视距离」，等于把设备压成一张卡。整卡约 12 石英铁 + 3 末影珍珠 + 2 高级处理器 + 2 机器外壳，明显贵于 RS 原生 `range_upgrade`（只加一档距离、可叠加），以匹配「一次到位、永久无限」的强度。
-- **维度卡**需要 4×下界合金（≈16 远古残骸）+ 4×末影珍珠 + 1×网络卡，比 RS 的 `network_transmitter` / `network_receiver`（各含 1 下界合金）更贵，匹配它作为本模组终极能力的定位。
+  P H P          海洋之心 → 远距离能量传输
+  T S R          下界之星 → 无限能量源
+  P X P          无线访问点 + 网络接收器 → RS 通信链路两端，收发成对
+                 64k存储方块 → RS「套娃」到顶的后期产物
+```
+
+```
+维度升级卡（跨维度）
+P = 末影珍珠 (c:ender_pearls)        B = 信标 (minecraft:beacon)
+N = 下界合金锭 (c:ingots/netherite)  S = 下界之星 (minecraft:nether_star)
+                                    E = 鞘翅 (minecraft:elytra)
+
+  P B P          鞘翅 → 全末地仅存于末地船，「跨越」的象征
+  N S N          信标 → 本身还需 1 颗下界之星，用于定位与锚定
+  P E P          下界之星（连同信标内的共需 2 颗 = 2 只凋灵）→ 撕裂维度的能量
+                 2× 下界合金锭 → 承受维度压力的材料
+```
 
 安装升级卡用工作台的**无序合成**：终端 + 升级卡 → 装有该卡的终端。
 
@@ -113,7 +132,7 @@ An addon for **Refined Storage 2** that adds a **Wireless Crafting Grid** plus t
 
 Vanilla Refined Storage ships only a wireless *viewing* grid. This mod fills the wireless *crafting* gap.
 
-Both upgrade cards are **late-game items**, priced in line with (and for the interdimensional card, above) Refined Storage's own wireless and cross-dimensional hardware. The range card is built around a `wireless_transmitter` — the card's whole effect is "ignore distance while bound to a transmitter", so the device is compressed into the card. The interdimensional card costs 4 netherite ingots, more than RS's own `network_transmitter` / `network_receiver`. See `docs/DESIGN.md` §4.3–4.4 for full recipes.
+All three items are **late-game items**. They are priced with Refined Storage's own wireless hardware, the rarest vanilla drops, and RS's top-tier 64k storage block — the apex of RS's nested storage-part chain (1k → 4k → 16k → 64k, each tier built from the previous one). See [`docs/DESIGN.md`](docs/DESIGN.md) §4 for the full recipes and the reasoning behind each ingredient.
 
 **Requirements**: Minecraft 1.21.1, NeoForge 21.1.x, Refined Storage 2.0.7+.
 

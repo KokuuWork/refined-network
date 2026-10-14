@@ -215,7 +215,17 @@ modid 占位 `rswirelesscrafting`，包名建议 `com.yourname.rswirelesscraftin
   | 配方转移 | 5 |
 - **距离**：同维度有效距离 = `max(发射器范围, extendedRange)`，`extendedRange` 默认 **64 格**（可配）。插**范围卡**→ 同维度无限范围。跨维度走隧道（需维度卡），天然无距离概念（见 §7）。
 - 跨维度时以上能量消耗 ×1.5（见 §7.5）。
-- 配方（占位，可调）：`refinedstorage:wireless_grid` + `refinedstorage:construction_core` + `refinedstorage:crafting_grid`（或 1× 工作台 + 3× 高级处理器），产出 1 个。
+- 配方：`refinedstorage:crafting_grids` 标签为合成核心，外围石英富集铁 + 高级处理器 + 机器外壳：
+
+  ```
+  Q A Q      Q = refinedstorage:quartz_enriched_iron
+  P G P      A = refinedstorage:advanced_processor
+  Q M Q      P = c:ender_pearls（标签）
+             G = refinedstorage:crafting_grids（标签，兼容全部网格变体）
+             M = refinedstorage:machine_casing
+  ```
+
+  合计约 14 石英铁 + 2 末影珍珠 + 2 高级处理器 + 1 合成网格。相比 RS 自带的 `wireless_grid`（6 石英铁 + 2 末影珍珠 + 1 网格 + 1 高级处理器）约 2.3 倍，体现「无线＋可合成」在原版无线查看终端之上的额外价值。
 
 ### 4.3 范围升级卡（Range Upgrade）
 
@@ -225,14 +235,20 @@ modid 占位 `rswirelesscrafting`，包名建议 `com.yourname.rswirelesscraftin
 - 配方（终端本身用 `refinedstorage:crafting_grids` 标签，兼容全部网格变体）：
 
   ```
-  E A E      E = refinedstorage:quartz_enriched_iron
-  P U P      A = refinedstorage:advanced_processor
-  E M E      P = c:ender_pearls（标签）
-             U = refinedstorage:wireless_transmitter
-             M = refinedstorage:machine_casing
+  P H P      P = c:ender_pearls（标签）
+  T S R      H = minecraft:heart_of_the_sea（海洋之心）
+  P X P      T = refinedstorage:wireless_transmitter（无线访问点）
+             S = minecraft:nether_star（下界之星）
+             R = refinedstorage:network_receiver（网络接收器）
+             X = refinedstorage:64k_storage_block（64k存储方块）
   ```
 
-  **设计意图**：卡的效果正是「绑 Wireless Transmitter 时无视距离」，所以核心直接放一台 Wireless Transmitter —— 把设备压成一张卡。整卡合计约 12 石英铁 + 3 末影珍珠 + 2 高级处理器 + 2 机器外壳，显著高于 RS 原生 `range_upgrade`（6 石英铁 + 3 末影珍珠 + 1 升级基板），以匹配「一次到位、永久无限」而非「+1 档可叠加」的强度差。
+  **设计意图**：这是本 mod 最「重」的一张卡，六个稀有件各有语义 ——
+  - `heart_of_the_sea`：潮涌核心的能量象征，对应「远距离能量传输」；
+  - `nether_star`：无限能量源，撑起「无限范围」；
+  - `wireless_transmitter`（无线访问点）：本卡机制的物理载体，绑的就是它；
+  - `network_receiver`（网络接收器）：RS 通信链路另一端，收发成对；
+  - `64k_storage_block`：RS 自身「套娃」到顶的后期产物 —— 存储元件 1k→4k→16k→64k 逐级递归合成，每级都要上一级的元件。它是一个**可自动化量产、但资源吞吐极大**的终结型资源槽（单块需 64 个 1k 元件 = 256 硅 + 64 石英铁 + 256 玻璃 + 64 红石，另加处理器链）。
 - 可堆叠 64。
 
 ### 4.4 维度升级卡（Interdimensional Upgrade）
@@ -243,12 +259,18 @@ modid 占位 `rswirelesscrafting`，包名建议 `com.yourname.rswirelesscraftin
 - 配方：
 
   ```
-  P N P      P = c:ender_pearls（标签）
-  N C N      N = c:ingots/netherite（标签）
-  P N P      C = refinedstorage:network_card
+  P B P      P = c:ender_pearls（标签）
+  N S N      B = minecraft:beacon（信标）
+  P E P      N = c:ingots/netherite（标签）
+             S = minecraft:nether_star（下界之星）
+             E = minecraft:elytra（鞘翅）
   ```
 
-  **设计意图**：跨维度是本 mod 的终极能力，价位对齐并**超过** RS 自带的跨维隧道设备（`network_transmitter` / `network_receiver`，各含 1 下界合金 + 2 高级处理器 + 机器外壳 + 2 核心 + 3 末影珍珠）。4×下界合金（≈16 远古残骸）+ 4×末影珍珠 + 1 网络卡的组合，保证它是一件真正的终局物品。
+  **设计意图**：跨维度是本 mod 的终极能力，用原版最稀有的几件物品表达「撕开维度屏障」：
+  - `elytra` 鞘翅 —— 全末地仅存于末地船的稀有品，象征「跨越」；
+  - `beacon` 信标 —— 本身还需 1 颗下界之星，象征「定位与锚定」（跨维隧道需要两端坐标对齐）；
+  - `nether_star` 下界之星（与信标内的合计共需 **2 颗**，即 2 只凋灵）—— 维度撕裂的能量源；
+  - 2×下界合金锭 —— 能承受跨维度压力的外壳材料。
 - 可堆叠 64。
 
 > 说明：RS 1 曾存在同名「Interdimensional Upgrade」但 RS 2 已移除（跨维变默认）。本 mod 的维度卡是 addon 自有物品，registry id 独立，不冲突；语义是「解锁终端侧跨维访问」，与 RS 1 那张无关。
