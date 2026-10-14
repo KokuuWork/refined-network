@@ -36,7 +36,9 @@ public class ChargingStationScreen extends AbstractContainerScreen<ChargingStati
 
     @Override
     protected void renderBg(final GuiGraphics graphics, final float partialTick, final int mouseX, final int mouseY) {
-        graphics.blit(texture(), leftPos, topPos, 0, 0, imageWidth, imageHeight);
+        // 注意：7 参 blit 假定纹理是 256x256，会把 176x166 的背景只画出左上角一小块；
+        // 必须用带纹理尺寸的重载，按 1:1 铺满整张背景。
+        graphics.blit(texture(), leftPos, topPos, 0, 0, imageWidth, imageHeight, imageWidth, imageHeight);
         renderBar(graphics, 0, 1, NETWORK_BAR, networkColor());
         renderBar(graphics, 2, 3, BUFFER_BAR, BUFFER_COLOR);
     }

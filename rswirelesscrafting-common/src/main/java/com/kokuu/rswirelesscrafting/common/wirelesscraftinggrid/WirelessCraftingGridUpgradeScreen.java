@@ -21,7 +21,8 @@ public class WirelessCraftingGridUpgradeScreen
 
     @Override
     protected void renderBg(final GuiGraphics graphics, final float partialTick, final int mouseX, final int mouseY) {
-        graphics.blit(TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight);
+        // 7 参 blit 假定纹理是 256x256，必须用带纹理尺寸的重载按 1:1 铺满。
+        graphics.blit(TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight, imageWidth, imageHeight);
     }
 
     @Override

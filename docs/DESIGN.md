@@ -862,6 +862,33 @@ private static final class RateMeter {
 
 ---
 
+## 17. 0.1.10 增量：GUI 背景错乱根因修复 · 升级名高亮
+
+### 17.1 三个自定义 GUI 全部错乱的根因：blit 的 256×256 假定
+
+真机复现「界面只显示左上角一块、物品栏区域变透明、格子和实际画的格子对不上」，两个充电站与升级装配界面全中招。根因不是槽位坐标（0.1.6 已按 `slot-1` 约定对齐），而是背景纹理的绘制调用：
+
+```java
+// 错：7 参 blit 假定纹理是 256×256，却把 176×166 的背景按 256 纹理采 UV
+graphics.blit(TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight);
+
+// 对：带纹理尺寸的重载，按真实 176×166 采 UV、1:1 铺满
+graphics.blit(TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight, imageWidth, imageHeight);
+```
+
+`GuiGraphics.blit(loc, x, y, u, v, w, h)` 内部把 UV 按 **256×256** 归一化；我们的背景是 176×166，于是只采到纹理左上约 69%×65% 的内容、再放大到整个界面——视觉上就是「只显示四分之一、槽位框错位、底部物品栏区域根本没有背景（显得透明）」。
+
+- 教训：**自定义 GUI 背景只要不是 256×256，就必须用带 `textureWidth/textureHeight` 的重载**（本项目背景 176×166 恰好等于 `imageWidth/imageHeight`，所以直接 `0,0,imageWidth,imageHeight,imageWidth,imageHeight`）。
+- RS 自带的合成终端界面不受影响——它用的是 RS 自己的 256×256 纹理与 RS 自己的绘制，标准路径。
+- 连带收益：能量条此前用 `fill()` 按屏幕坐标画、背景却是缩放后的纹理，两者错位；修掉 blit 后能量条与背景里的凹槽也重新对齐了。
+
+### 17.2 终端 tooltip 里已安装升级的排版与高亮
+
+- 新增 `Upgrades.getColor(ItemStack)`：按卡类型返回主题色（范围=青、电池=绿、维度=浅紫、输电=金），与各卡自身描述文字的颜色一致。
+- `WirelessCraftingGridItem` 的「已安装升级」从一行逗号拼接改为逐行列出，每行 `· ` 前缀 + 该卡主题色名称，视觉上更清楚。
+
+---
+
 ## 13. 参考仓库
 
 - **Quartz Arsenal（核心参照，MIT）**：`https://github.com/refinedmods/refinedstorage-quartz-arsenal`（1.21.1 用 `v1.0.8` tag）

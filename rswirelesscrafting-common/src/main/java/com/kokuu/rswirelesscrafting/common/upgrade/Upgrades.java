@@ -5,6 +5,7 @@ import com.kokuu.rswirelesscrafting.common.DataComponents;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
@@ -85,6 +86,24 @@ public final class Upgrades {
 
     public static List<ItemStack> getUpgrades(final ItemStack stack) {
         return new ArrayList<>(stack.getOrDefault(DataComponents.INSTANCE.getUpgrades(), List.of()));
+    }
+
+    /**
+     * 每类升级卡的主题色，用于把终端悬停提示里「已安装升级」的名称高亮出来。
+     * 与各升级卡自身描述文字的颜色保持一致（范围=青、电池=绿、维度=浅紫、输电=金）。
+     */
+    public static ChatFormatting getColor(final ItemStack stack) {
+        ChatFormatting color = ChatFormatting.YELLOW;
+        if (stack.is(RANGE_UPGRADES)) {
+            color = ChatFormatting.AQUA;
+        } else if (stack.is(BATTERY_UPGRADES)) {
+            color = ChatFormatting.GREEN;
+        } else if (stack.is(INTERDIMENSIONAL_UPGRADES)) {
+            color = ChatFormatting.LIGHT_PURPLE;
+        } else if (stack.is(REMOTE_ENERGY_UPGRADES)) {
+            color = ChatFormatting.GOLD;
+        }
+        return color;
     }
 
     public static DataComponentType<List<ItemStack>> getUpgradesComponent() {

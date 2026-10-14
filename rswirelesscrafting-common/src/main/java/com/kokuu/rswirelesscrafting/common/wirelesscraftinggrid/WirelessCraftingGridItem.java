@@ -98,11 +98,9 @@ public class WirelessCraftingGridItem extends AbstractNetworkEnergyItem {
 
     private static Component createInstalledUpgradesLine(final List<ItemStack> upgrades) {
         final MutableComponent line = ContentNames.WIRELESS_CRAFTING_GRID_UPGRADES.copy();
-        for (int i = 0; i < upgrades.size(); i++) {
-            if (i > 0) {
-                line.append(Component.literal(", "));
-            }
-            line.append(upgrades.get(i).getHoverName());
+        for (final ItemStack upgrade : upgrades) {
+            line.append(Component.literal("\n  · "));
+            line.append(upgrade.getHoverName().copy().withStyle(Upgrades.getColor(upgrade)));
         }
         return line;
     }
