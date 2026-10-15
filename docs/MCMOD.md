@@ -118,6 +118,11 @@ Refined Storage - Wireless Crafting（无线合成终端）是一个 [RS]精致�
 - 前置：Refined Storage 2.0.7 及以上（NeoForge 与 Fabric 双加载器均支持）
 - Fabric 侧另需 Fabric API、Cloth Config、Team Reborn Energy
 
+### 反馈与 Bug 维修群
+
+遇到问题、想提需求，可以来 **QQ 群 498700382**：[点击加入群聊](https://qm.qq.com/q/ueYTU8T3xK)（也可在 QQ 内搜索群号 498700382）。
+也可以在 GitHub 提 Issue：https://github.com/KokuuWork/rswirelesscrafting/issues
+
 本模组是纯附属：只依赖精致存储的公开 API，另通过一处窄 mixin 让距离扣电与升级插件对精致存储原生无线终端同样生效，不修改精致存储本体逻辑。卸载本模组不会损坏存档，已装插件的终端会保留其数据组件。
 
 ---

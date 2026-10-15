@@ -3,13 +3,27 @@
 
 > 🧪 **测试版声明 / Testing build**
 > 本版本作为 **0.3.1 正式版**发布，但**仍处于测试阶段** —— 尤其是**首次移植的 Fabric 侧**尚未完成完整真机验证。
-> 建议在测试存档中使用，**务必先备份世界**；如遇到问题欢迎直接在
-> [Issues](https://github.com/KokuuWork/rswirelesscrafting/issues) 反馈（附日志 + 复现步骤）。
+> 建议在测试存档中使用，**务必先备份世界**；遇到问题**优先来 QQ 群 498700382**（👉 [点击加入](https://qm.qq.com/q/ueYTU8T3xK)），
+> 或在 [Issues](https://github.com/KokuuWork/rswirelesscrafting/issues) 反馈（附日志 + 复现步骤）。
 
 > 🧪 **Testing build**
 > Released as **0.3.1**, but it is still a **testing build** — the brand-new **Fabric** port has not gone through
 > full in-game verification yet. Use it in a test world and **back up your saves** first. Bug reports are very
 > welcome in [Issues](https://github.com/KokuuWork/rswirelesscrafting/issues) (please include logs + repro steps).
+
+---
+
+## 🐞 有问题？来 QQ 群（Bug 维修 / 反馈群）
+
+**QQ 群号：`498700382`** —— 👉 **[点击加入群聊](https://qm.qq.com/q/ueYTU8T3xK)**
+（群名「MC-玩了X年服务器终于不想玩了」；也可以在 QQ 里直接搜索群号 `498700382`）
+
+崩溃、耗电数值不对、GUI 显示异常、多人 / 服务器故障、新功能建议，**来群里直接说最快**，带上 `latest.log` 或崩溃报告即可。
+不方便用 QQ 也可以提 [Issue](https://github.com/KokuuWork/rswirelesscrafting/issues)。
+
+> 🐞 **Got a bug? Join the QQ support group: `498700382`** — 👉 [click to join](https://qm.qq.com/q/ueYTU8T3xK).
+> Crashes, wrong energy numbers, GUI glitches, server trouble or feature requests: the group is the fastest way to
+> get help. Otherwise open an [Issue](https://github.com/KokuuWork/rswirelesscrafting/issues).
 
 ---
 
@@ -72,7 +86,9 @@
 
 ## 反馈 / Feedback
 
-测试版阶段任何异常（GUI、耗电数值、多人同步、Fabric 启动）都欢迎提 Issue，附：
+**最快的方式：QQ 群 `498700382`** —— 👉 [点击加入群聊](https://qm.qq.com/q/ueYTU8T3xK)（也可在 QQ 里搜索群号）。
+
+测试版阶段任何异常（GUI、耗电数值、多人同步、Fabric 启动）都欢迎反馈，附：
 
 1. 加载器 + 版本号（NeoForge / Fabric，本模组与 RS 的版本）
 2. `latest.log` 或崩溃报告

@@ -8,11 +8,17 @@
 ![Fabric](https://img.shields.io/badge/Fabric-1.21.1-AAA)
 ![Refined Storage](https://img.shields.io/badge/Refined_Storage-2.0.7%2B-3E7BB6)
 [![Downloads](https://img.shields.io/github/downloads/KokuuWork/rswirelesscrafting/total?label=downloads)](https://github.com/KokuuWork/rswirelesscrafting/releases)
+[![QQ群](https://img.shields.io/badge/QQ%E7%BE%A4%E5%8F%8D%E9%A6%88-498700382-12B7F5?logo=tencentqq)](https://qm.qq.com/q/ueYTU8T3xK)
 
 **简体中文** | [English](#english)
 
+> ## 🐞 出问题了？来 **Bug 维修 QQ 群：498700382**
+> 崩溃、耗电异常、GUI 显示问题、联机/服务器故障，或者想要新功能——**直接进群说**就行（进群随便备注来意）。
+> 👉 **[点击加入群聊（群号 498700382）](https://qm.qq.com/q/ueYTU8T3xK)** ｜ 也可以在 QQ 里**搜索群号 498700382** 找到我们。
+> 不方便用 QQ 的话，欢迎直接提 [Issue](https://github.com/KokuuWork/rswirelesscrafting/issues)。
+
 > 🧪 **当前版本 0.3.1**（2026-10-15）· **仍处于测试阶段**：Fabric 侧为首次移植，尚未完成完整真机验证。
-> 请在测试存档中使用并**先备份世界**；遇到问题欢迎提 [Issue](https://github.com/KokuuWork/rswirelesscrafting/issues)（附日志与复现步骤）。
+> 请在测试存档中使用并**先备份世界**；遇到问题欢迎来上面的 QQ 群反馈（附日志与复现步骤）。
 
 给 [Refined Storage 2](https://github.com/refinedmods/refinedstorage) 补上原版缺失的**无线合成**能力。
 
@@ -307,6 +313,15 @@ export JAVA_HOME="/path/to/jdk-21"
 
 本项目大量逻辑衍生于 [Refined Storage](https://github.com/refinedmods/refinedstorage)（MIT License, Copyright © 2020 - 2025 Refined Mods），模块结构参考了官方附属样例 [Quartz Arsenal](https://github.com/refinedmods/quartz-arsenal)。在此致谢。
 
+## 反馈 / Bug 维修群
+
+| 渠道 | 入口 |
+|---|---|
+| **QQ 群（推荐）** | 群号 **498700382** · 👉 [点击加入群聊](https://qm.qq.com/q/ueYTU8T3xK)（群名「MC-玩了X年服务器终于不想玩了」） |
+| GitHub | [Issues](https://github.com/KokuuWork/rswirelesscrafting/issues) |
+
+崩溃、耗电数值不对、GUI 显示异常、多人/服务器问题、新功能建议——**来群里直接说最快**，附上 `latest.log` 或崩溃报告就行。
+
 ## 更新日志
 
 最新 **0.3.1**（2026-10-15）：**Fabric 移植**、**饰品栏兼容**（Curios / Trinkets）、距离耗电改**线性**（16 格内 ×1，超出按距离 ÷ 16）、跨维度 **×16**、合成 **20 FE** / 自动合成 **40 FE**、充电站改显自身缓冲并改为全局 3 设备名额、GUI 与 tooltip 修复、多人三项修复。
@@ -320,6 +335,12 @@ export JAVA_HOME="/path/to/jdk-21"
 ---
 
 ## English
+
+> ## 🐞 Hit a bug? Join the **QQ support group: 498700382**
+> Crashes, wrong energy numbers, GUI glitches, multiplayer/server trouble, or a feature request — come and say it
+> in the group. 👉 **[Click to join (group 498700382)](https://qm.qq.com/q/ueYTU8T3xK)**, or search the group
+> number **498700382** inside QQ.
+> No QQ? Open an [Issue](https://github.com/KokuuWork/rswirelesscrafting/issues) instead.
 
 > 🧪 **Current version 0.3.1** (2026-10-15) · **still a testing build**: the Fabric port is brand new and has not gone
 > through full in-game verification yet. Use it in a test world and **back up your saves** first; bug reports are
@@ -502,6 +523,15 @@ export JAVA_HOME="/path/to/jdk-21"
 The jars land in `rswirelesscrafting-neoforge/build/libs/` (NeoForge) and `rswirelesscrafting-fabric/build/libs/` (Fabric).
 
 All artwork is script-generated with the Python standard library (no Pillow): `gen_textures.py` (item and block textures), `gen_gui_textures.py` (176×166 GUI backgrounds) and `gen_readme_images.py` (the images above; needs `MC_CLIENT_JAR` and `RS_TEXTURES`).
+
+### Feedback / support group
+
+| Channel | Where |
+|---|---|
+| **QQ group (fastest)** | Group **498700382** · 👉 [Click to join](https://qm.qq.com/q/ueYTU8T3xK) |
+| GitHub | [Issues](https://github.com/KokuuWork/rswirelesscrafting/issues) |
+
+Bring a `latest.log` or crash report and the group is the quickest way to get a fix.
 
 ### Credits
 
