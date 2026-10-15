@@ -22,7 +22,7 @@
 
 给 [Refined Storage 2](https://github.com/refinedmods/refinedstorage) 补上原版缺失的**无线合成**能力。
 
-原版只有一个无线**查看**终端（`wireless_grid`）——你能远程看库存，但不能远程合成。本模组提供一个**无线合成终端**，用六张可插拔的**装配式升级插件**把它的续航、范围、维度与供能方式一路推到终局，再配一座**终端充电站**为所有 FE 终端补电。所有无线终端（含 RS 原生的无线终端与无线合成监视器）都遵循**按距离扣电**的线性价目表，离网络越远耗电越狠。
+原版只有一个无线**查看**终端（`wireless_grid`）——你能远程看库存，但不能远程合成。本模组提供一个**无线合成终端**，用六张可插拔的**装配式升级插件**把它的续航、范围、维度与供能方式一路推到终局，再配一座**终端充电站**为所有 FE 终端补电。所有无线终端（含 RS 原生的无线终端与无线自动合成监视器）都遵循**按距离扣电**的线性价目表，离网络越远耗电越狠。
 
 ![无线合成终端的未激活态与激活态，以及四张升级卡和终端充电站](docs/images/items.png)
 
@@ -45,7 +45,7 @@
 
 ## 升级插件是装配式的，可随时插拔
 
-升级插件**不写死在合成配方里**。手持任意无线终端（本模组合成终端，或 RS 原生的无线终端 / 无线合成监视器）**潜行 + 右键**，打开「插件装配」界面——**4 个槽位**，把插件拖进去就装、拖出来就卸，终端本体不需要重新合成，合成矩阵、能量、网络绑定全部原样保留。
+升级插件**不写死在合成配方里**。手持任意无线终端（本模组合成终端，或 RS 原生的无线终端 / 无线自动合成监视器）**潜行 + 右键**，打开「插件装配」界面——**4 个槽位**，把插件拖进去就装、拖出来就卸，终端本体不需要重新合成，合成矩阵、能量、网络绑定全部原样保留。
 
 - 只有真正的升级插件能放进槽位（由物品标签判定），槽位内每格最多 1 张；
 - 组件层面只在真的装了插件时才写入 `upgrades` 数据组件，拔空后组件会被移除，物品 NBT 保持干净；
@@ -84,7 +84,7 @@
 
 ### 按距离扣电（所有无线终端通用）
 
-所有无线终端——本模组的无线合成终端，以及 RS 原生的**无线终端**和**无线合成监视器**——每执行一次动作，消耗的能量都乘上一个**距离倍率**（配置在 `distanceEnergy` 节）：
+所有无线终端——本模组的无线合成终端，以及 RS 原生的**无线终端**和**无线自动合成监视器**——每执行一次动作，消耗的能量都乘上一个**距离倍率**（配置在 `distanceEnergy` 节）：
 
 | 水平距离（玩家 ↔ 绑定网络） | 倍率（默认） |
 |---|---|
@@ -263,7 +263,7 @@
 
 核心扩展点是覆写 `AbstractNetworkEnergyItem.use(ServerPlayer, ItemStack, SlotReference)`（RS 2.0.7 的 3 参重载），注入自定义的 `ExtendedWirelessNetworkItemContext`。
 
-为了让距离耗电与升级插件也对 **RS 原生无线终端**（无线终端、无线合成监视器）生效，本模组用一处**窄 mixin**（`AbstractNetworkEnergyItemMixin`）在同一个 3 参 `use` 上包一层同样的上下文，并在潜行右键时打开同一个插件装配界面。这是唯一动到 RS 类的地方，且只在父类方法上包一层、不改任何逻辑分支。
+为了让距离耗电与升级插件也对 **RS 原生无线终端**（无线终端、无线自动合成监视器）生效，本模组用一处**窄 mixin**（`AbstractNetworkEnergyItemMixin`）在同一个 3 参 `use` 上包一层同样的上下文，并在潜行右键时打开同一个插件装配界面。这是唯一动到 RS 类的地方，且只在父类方法上包一层、不改任何逻辑分支。
 
 RS 的距离/维度校验并不位于 `resolveNetwork`，而在 `NetworkItemPlayerValidator`。因此本模组采用「**标准逻辑优先、升级插件兜底放宽**」策略——先让 RS 原生校验跑完，仅在原生返回空时，才根据已安装的升级插件判断是否放宽。同时刻意**不干预 `force=true` 路径**，因为 RS 依赖该语义移除失效的网格 watcher。
 
@@ -350,7 +350,7 @@ export JAVA_HOME="/path/to/jdk-21"
 
 An addon for **[Refined Storage 2](https://github.com/refinedmods/refinedstorage)** that adds the wireless **crafting** grid the base mod never had.
 
-Vanilla Refined Storage ships only a wireless *viewing* grid — you can browse your network remotely, but not craft on it. This mod adds a **Wireless Crafting Grid**, six swappable **upgrade cards** that extend its endurance, range, dimensions and power source all the way to endgame, plus a **Terminal Charging Station** that recharges every FE-based terminal. Every wireless terminal (including RS's own wireless grid and wireless crafting monitor) follows a **distance-based energy tariff** — the further you are from the network, the more each action costs.
+Vanilla Refined Storage ships only a wireless *viewing* grid — you can browse your network remotely, but not craft on it. This mod adds a **Wireless Crafting Grid**, six swappable **upgrade cards** that extend its endurance, range, dimensions and power source all the way to endgame, plus a **Terminal Charging Station** that recharges every FE-based terminal. Every wireless terminal (including RS's own wireless grid and wireless autocrafting monitor) follows a **distance-based energy tariff** — the further you are from the network, the more each action costs.
 
 <img src="docs/images/items.png" width="620" alt="Wireless crafting grid (inactive and active), the six upgrade cards, and the terminal charging station">
 
@@ -373,7 +373,7 @@ Tooltips are live: the terminal shows the **bound dimension and coordinates**, i
 
 ### The upgrade cards are pluggable
 
-Cards are **not** baked into a crafting recipe. **Sneak + right-click** any wireless terminal (this mod's grid, or RS's wireless grid / wireless crafting monitor) to open the upgrade panel — **4 slots**. Drop a card in to install it, pull it out to remove it. The terminal is never re-crafted, and its crafting matrix, stored energy and network binding are all preserved.
+Cards are **not** baked into a crafting recipe. **Sneak + right-click** any wireless terminal (this mod's grid, or RS's wireless grid / wireless autocrafting monitor) to open the upgrade panel — **4 slots**. Drop a card in to install it, pull it out to remove it. The terminal is never re-crafted, and its crafting matrix, stored energy and network binding are all preserved.
 
 - Only genuine upgrade cards fit (decided by item tags); one card per slot.
 - The `upgrades` data component is written only when a card is actually installed, and removed once the last one is pulled — item NBT stays clean.
@@ -412,7 +412,7 @@ The GUI's energy bar shows the station's **own buffer**. Idle drain and both cha
 
 #### Distance tariff (all wireless terminals)
 
-Every wireless terminal — this mod's grid and RS's own **wireless grid** and **wireless crafting monitor** — multiplies each action's energy cost by a **distance multiplier** (configured under `distanceEnergy`):
+Every wireless terminal — this mod's grid and RS's own **wireless grid** and **wireless autocrafting monitor** — multiplies each action's energy cost by a **distance multiplier** (configured under `distanceEnergy`):
 
 | Horizontal distance (player ↔ bound network) | Multiplier (default) |
 |---|---|
@@ -505,7 +505,7 @@ Known limitation (display only, not correctness): the config is registered as a 
 
 ### How it works
 
-**Grid and cards.** The core extension point is overriding `AbstractNetworkEnergyItem.use(ServerPlayer, ItemStack, SlotReference)` to inject a custom `ExtendedWirelessNetworkItemContext`. To make distance energy and upgrade cards work on RS's own wireless terminals (wireless grid, wireless crafting monitor) too, a single narrow mixin (`AbstractNetworkEnergyItemMixin`) wraps the very same 3-arg `use` and opens the same upgrade panel on sneak-right-click — this is the only place that touches RS classes, and it only wraps a parent method without changing any logic branch. RS's distance/dimension check lives in `NetworkItemPlayerValidator`, not in `resolveNetwork`, so upgrades apply as a **fallback relaxation** — the standard resolution runs first, and only when it comes back empty do the installed cards get a say. The `force=true` path is deliberately left untouched, since RS relies on that semantic to remove stale grid watchers. On the energy side, `isActive()` and `drainEnergy(long)` are overridden so the distance tariff is computed and applied to every drain, and the bound network answers "is there power?" and pays the bill when the Remote Energy Upgrade is installed.
+**Grid and cards.** The core extension point is overriding `AbstractNetworkEnergyItem.use(ServerPlayer, ItemStack, SlotReference)` to inject a custom `ExtendedWirelessNetworkItemContext`. To make distance energy and upgrade cards work on RS's own wireless terminals (wireless grid, wireless autocrafting monitor) too, a single narrow mixin (`AbstractNetworkEnergyItemMixin`) wraps the very same 3-arg `use` and opens the same upgrade panel on sneak-right-click — this is the only place that touches RS classes, and it only wraps a parent method without changing any logic branch. RS's distance/dimension check lives in `NetworkItemPlayerValidator`, not in `resolveNetwork`, so upgrades apply as a **fallback relaxation** — the standard resolution runs first, and only when it comes back empty do the installed cards get a say. The `force=true` path is deliberately left untouched, since RS relies on that semantic to remove stale grid watchers. On the energy side, `isActive()` and `drainEnergy(long)` are overridden so the distance tariff is computed and applied to every drain, and the bound network answers "is there power?" and pays the bill when the Remote Energy Upgrade is installed.
 
 **Charging Station.** RS 2.0.7 exposes no public block base class (blocks live in an internal, un-annotated module), so the block extends vanilla `BaseEntityBlock` and uses vanilla `getTicker`. Note that `BaseEntityBlock` returns `RenderShape.INVISIBLE` by default — vanilla's own block entities such as chests and furnaces draw themselves — so a block entity block that wants an ordinary json model has to override `getRenderShape()` and return `RenderShape.MODEL`, or it renders as nothing at all and you see straight through it. Fixed in 0.1.9. The block entity extends the STABLE-annotated `AbstractNetworkNodeContainerBlockEntity<T extends NetworkNode>`, with a minimal `ChargingStationNetworkNode` declaring the idle draw; RS's default six-way connection strategy means `createMainContainer` needs no override at all. Each tick it tops up the three wired slots, and every 10 ticks it scans nearby players (nearest first) and hands out three device slots round-robin — three players charge one device each, a single player charges all three. The scan is deliberately throttled: on a busy server, walking every nearby player's inventory every tick for every station is a real hot spot, and charging the 10-tick budget in one go gives the same rate for a tenth of the cost. The block's powered/wireless states are also rate-limited to one write per 10 ticks, so a nearly-empty network (where the buffer flickers between "empty" and "a few FE") can't turn into a block-update and redstone-neighbour storm. The six panel lights (3 wired + 3 wireless) are computed server-side and synced through `ContainerData`; the client drives the blue breathing pulse off `level.getGameTime()`, so it's purely visual with no extra packets. Item charging uses each loader's generic energy capability (NeoForge `Capabilities.EnergyStorage.ITEM`, Fabric Team Reborn Energy) rather than RS's `PlatformImpl.getEnergyStorage` (which only recognises RS's own adapter), which is what makes it compatible with other mods' FE items.
 
