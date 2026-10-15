@@ -147,5 +147,13 @@
   "text.autoconfig.rswirelesscrafting.option.wirelessBridge.chunkLoading.tooltip": "Force-load both ends once paired.",
   "text.autoconfig.rswirelesscrafting.option.wirelessBridge.chunkLoadingEnergyUsage": "Chunk keeping drain (FE/s each)",
   "text.autoconfig.rswirelesscrafting.option.wirelessBridge.chunkLoadingEnergyUsage.tooltip": "Extra drain per held chunk (deliberately expensive by default); a pair usually holds two. Set 0 for free chunk keeping.",
-  "msg.rswirelesscrafting.bridge.unpaid": "unpaid and idle (chunks are still kept - it reconnects once the network has power)"
+  "msg.rswirelesscrafting.bridge.unpaid": "unpaid and idle (chunks are still kept - it reconnects once the network has power)",
+  "item.rswirelesscrafting.wireless_configuration_card": "Wireless Configuration Card",
+  "item.rswirelesscrafting.wireless_configuration_card.desc": "Copy a block's settings, then paste them in bulk",
+  "item.rswirelesscrafting.wireless_configuration_card.hint.copy": "Right-click a block to copy its settings",
+  "item.rswirelesscrafting.wireless_configuration_card.hint.paste": "Right-click to paste to it - sneak + right-click to paste to every matching block in range (stand inside an amplifier's coverage to widen it)",
+  "msg.rswirelesscrafting.config_card.hint": "Right-click an RS block: copies if empty, pastes if loaded (sneak = bulk)",
+  "msg.rswirelesscrafting.config_card.wrong_type": "The card holds settings for another block type",
+  "msg.rswirelesscrafting.config_card.pasted_one": "Settings pasted",
+  "msg.rswirelesscrafting.config_card.pasted_batch": "Settings applied to %s blocks"
 }

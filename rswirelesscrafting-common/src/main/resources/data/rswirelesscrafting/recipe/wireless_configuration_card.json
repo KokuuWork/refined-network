@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "QAQ",
+    "WCW",
+    "QAQ"
+  ],
+  "key": {
+    "Q": {
+      "item": "refinedstorage:quartz_enriched_iron"
+    },
+    "A": {
+      "item": "refinedstorage:advanced_processor"
+    },
+    "W": {
+      "item": "refinedstorage:wireless_transmitter"
+    },
+    "C": {
+      "item": "refinedstorage:configuration_card"
+    }
+  },
+  "result": {
+    "id": "rswirelesscrafting:wireless_configuration_card"
+  }
+}

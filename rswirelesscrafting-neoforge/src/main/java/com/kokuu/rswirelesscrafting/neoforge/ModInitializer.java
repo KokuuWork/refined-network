@@ -17,6 +17,7 @@ import com.kokuu.rswirelesscrafting.common.bridge.WirelessBridgeBlockItem;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlock;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockEntity;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockItem;
+import com.kokuu.rswirelesscrafting.common.configcard.WirelessConfigurationCardItem;
 import com.kokuu.rswirelesscrafting.common.patterngrid.WirelessPatternGridItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.AdvancedEnergyUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.BatteryUpgradeItem;
@@ -216,6 +217,11 @@ public class ModInitializer extends AbstractModInitializer {
         );
         Items.INSTANCE.setAdvancedEnergyUpgrade(
             callback.register(ContentIds.ADVANCED_ENERGY_UPGRADE, AdvancedEnergyUpgradeItem::new)
+        );
+        Items.INSTANCE.setWirelessConfigurationCard(
+            callback.register(ContentIds.WIRELESS_CONFIGURATION_CARD, () -> new WirelessConfigurationCardItem(
+                new Item.Properties().stacksTo(1)
+            ))
         );
         Items.INSTANCE.setWirelessBridgeBlockItem(
             callback.register(ContentIds.WIRELESS_BRIDGE, () -> new WirelessBridgeBlockItem(

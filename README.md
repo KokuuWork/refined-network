@@ -48,6 +48,7 @@
 | <img src="docs/images/item-remote-energy.png" width="40" alt=""> | **远程输电插件**<br>`remote_energy_upgrade` | **不再消耗终端自身电池**，直接花所绑定网络里的电。 | EPIC |
 | <img src="docs/images/item-wireless-amplifier.png" width="40" alt=""> | **无线增幅塔** 🧪<br>`wireless_amplifier` | 覆盖半径 **64 格内**的无线终端**距离耗电打对折**。接网络常驻耗电，跨维度不享受。 | — |
 | <img src="docs/images/item-wireless-bridge.png" width="40" alt=""> | **无线桥** 🧪<br>`wireless_bridge` | 未配对 = 基点、配对后 = 据点：把网络**延伸到远处**（可跨维度），自带区块保活（很贵）。 | — |
+| <img src="docs/images/item-wireless-configuration-card.png" width="40" alt=""> | **无线配置卡** 🧪<br>`wireless_configuration_card` | 就地复制设置，**批量**刷给一片同类方块；站进增幅塔覆盖可扩大范围。 | — |
 | <img src="docs/images/item-terminal-charging-station.png" width="40" alt=""> | **终端充电站**<br>`terminal_charging_station` | 3 个有线槽位快充，5 格范围内自动无线补电（**全局 3 个设备名额**）。 | — |
 
 所有鼠标悬停说明都是活的：终端会显示**当前绑定的维度与坐标**、**已安装的插件**，以及**当前距离与收费倍率**（同维度显示格数，跨维度单独标注，与实际扣费完全一致）；每张插件会显示自己的效果、生效前提，以及从配置里实时读出的数值（电池插件显示容量加成，维度插件显示当前跨维度能量倍率，初级能耗插件显示除数）。
@@ -128,6 +129,23 @@
 配方：`QWQ / RSR / QXQ`（石英富集铁 / 无线访问点 / **网络接收器 ×2** —— 桥的两端 / 下界之星 / 64k 存储方块）。
 
 <img src="docs/images/recipe-wireless-bridge.png" width="270" alt="无线桥配方">
+
+## 无线配置卡 🧪 预览·未发布
+
+RS 原版配置卡很好用，但得一个个方块点过去——一排机器、一片产线改设置就是体力活。这张卡把**粘贴**变成范围操作：
+
+- **右键方块** = 复制它的设置（和原版一样）。
+- **右键另一个方块** = 粘贴给它。
+- **潜行 + 右键** = 把设置**批量刷给半径内所有同类型方块**（基础半径 8 格）。
+- **站进增幅塔的覆盖范围里，批量半径直接扩到塔的覆盖半径**（上限 16 格，避免一次点击扫爆区块）——增幅塔从此多了一个用途：「这片区域归我管」。
+
+数据格式**直接复用 RS 原版的配置卡数据组件**，所以两种卡互相认：原版卡复制的设置我们能粘，反之亦然。
+
+**两条说明**
+- **不额外收费**：它搬运的是一次性设置，不像终端那样按次消耗。真正的成本是增幅塔的常驻耗电——没塔就只能小批量。
+- **本版不搬升级卡**（原版卡粘贴时会顺带把升级卡挪过去）：我们没做，避免猜错它的消耗语义；要搬升级卡请用原版卡。
+
+配方：`QAQ / WCW / QAQ`（石英富集铁 / 高级处理器 / **无线访问点 ×2** / 原版配置卡）。
 
 ## 充电站
 
@@ -457,6 +475,7 @@ Vanilla Refined Storage ships only a wireless *viewing* grid — you can browse 
 | <img src="docs/images/item-remote-energy.png" width="40" alt=""> | **Remote Energy Upgrade**<br>`remote_energy_upgrade` | Draws power **from the bound network** instead of the terminal's own battery. | epic |
 | <img src="docs/images/item-wireless-amplifier.png" width="40" alt=""> | **Wireless Amplifier** 🧪<br>`wireless_amplifier` | **Halves** the distance multiplier for terminals inside a **64-block** radius. A permanent load on the network; never applies cross-dimension. | — |
 | <img src="docs/images/item-wireless-bridge.png" width="40" alt=""> | **Wireless Bridge** 🧪<br>`wireless_bridge` | Unpaired = anchor, paired = endpoint: extends the network **far away** (across dimensions) with chunk keeping (pricey). | — |
+| <img src="docs/images/item-wireless-configuration-card.png" width="40" alt=""> | **Wireless Configuration Card** 🧪<br>`wireless_configuration_card` | Copy settings, then **paste them in bulk**; standing inside an amplifier widens the range. | — |
 | <img src="docs/images/item-terminal-charging-station.png" width="40" alt=""> | **Terminal Charging Station**<br>`terminal_charging_station` | 3 wired fast-charge slots, plus a 5-block wireless aura (**3 device slots total**). | — |
 
 Tooltips are live: the terminal shows the **bound dimension and coordinates**, its **installed upgrades**, and the **current distance and energy multiplier** (distance in blocks within a dimension, a separate label when cross-dimensional — always matching what the server bills); each card explains its effect, its prerequisite, and the values read from config in real time.
@@ -537,6 +556,23 @@ There is a blunter answer to the distance tariff: **do not let the network be th
 Recipe: `QWQ / RSR / QXQ` (quartz enriched iron / wireless transmitter / **two network receivers** — the two ends of the bridge / nether star / 64k storage block).
 
 <img src="docs/images/recipe-wireless-bridge.png" width="270" alt="Wireless bridge recipe">
+
+### Wireless Configuration Card 🧪 preview (unreleased)
+
+RS's own configuration card is handy, but you click one block at a time — reconfiguring a row of machines or a whole production line is pure labour. This card turns **paste** into a range operation:
+
+- **Right-click a block** — copies its settings (same as RS).
+- **Right-click another block** — pastes them into it.
+- **Sneak + right-click** — pastes the settings into **every matching block in range** (8 blocks by default).
+- **Stand inside an amplifier's coverage and the batch radius expands to the amplifier's radius** (capped at 16 blocks so one click cannot scan a whole chunk region) — giving amplifiers a second purpose: "this area is mine".
+
+It **reuses RS's own configuration-card data component**, so the two cards understand each other: settings copied by RS's card can be pasted by ours and vice versa.
+
+**Two notes**
+- **No extra energy cost**: it moves settings once, it is not a per-use terminal. The real cost is the amplifier's constant drain — without one you only get a small batch.
+- **Upgrade cards are not transferred** (RS's card moves them across as well): we skipped that rather than guess its consumption semantics; use RS's card if you need it.
+
+Recipe: `QAQ / WCW / QAQ` (quartz enriched iron / advanced processor / **two wireless transmitters** / RS's configuration card).
 
 ### Charging Station
 

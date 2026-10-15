@@ -89,6 +89,38 @@ public final class ContentNames {
         "block",
         "wireless_amplifier.redstone"
     ).withStyle(ChatFormatting.DARK_GRAY);
+    public static final MutableComponent WIRELESS_CONFIGURATION_CARD = createTranslation(
+        "item",
+        "wireless_configuration_card"
+    );
+    public static final MutableComponent WIRELESS_CONFIGURATION_CARD_DESC = createTranslation(
+        "item",
+        "wireless_configuration_card.desc"
+    ).withStyle(ChatFormatting.GRAY);
+    public static final MutableComponent WIRELESS_CONFIGURATION_CARD_HINT_COPY = createTranslation(
+        "item",
+        "wireless_configuration_card.hint.copy"
+    ).withStyle(ChatFormatting.GRAY);
+    public static final MutableComponent WIRELESS_CONFIGURATION_CARD_HINT_PASTE = createTranslation(
+        "item",
+        "wireless_configuration_card.hint.paste"
+    ).withStyle(ChatFormatting.GRAY);
+    public static final MutableComponent CONFIG_CARD_HINT = createTranslation(
+        "msg",
+        "config_card.hint"
+    ).withStyle(ChatFormatting.YELLOW);
+    public static final MutableComponent CONFIG_CARD_WRONG_TYPE = createTranslation(
+        "msg",
+        "config_card.wrong_type"
+    ).withStyle(ChatFormatting.RED);
+    public static final MutableComponent CONFIG_CARD_PASTED_ONE = createTranslation(
+        "msg",
+        "config_card.pasted_one"
+    ).withStyle(ChatFormatting.GREEN);
+    public static final String CONFIG_CARD_PASTED_BATCH_TRANSLATION_KEY = createTranslationKey(
+        "msg",
+        "config_card.pasted_batch"
+    );
     public static final MutableComponent WIRELESS_BRIDGE = createTranslation(
         "block",
         "wireless_bridge"

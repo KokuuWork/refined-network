@@ -507,6 +507,43 @@ def bridge_texture(linked):
     return px
 
 
+# ======================================================== configuration card
+#
+# A card at the bottom with a pair of signal arcs above it: "settings, delivered".
+
+CARD_ART = [
+    "................",
+    "................",
+    "..A..........A..",
+    "...AA......AA...",
+    "....AA....AA....",
+    ".....AA..AA.....",
+    "......AAAA......",
+    "................",
+    "..KKKKKKKKKKKK..",
+    "..KllllllllllK..",
+    "..KlKKKKKKKKlK..",
+    "..KlKnnnnnnKlK..",
+    "..KlKnnnnnnKlK..",
+    "..KlKKKKKKKKlK..",
+    "..KllllllllllK..",
+    "..KKKKKKKKKKKK..",
+]
+
+CARD_PALETTE = {
+    "A": rgb("#38BBDC"),
+    "K": rgb("#2E323B"),
+    "l": rgb("#3F5C6B"),
+    "n": rgb("#6E7784"),
+}
+
+
+def configuration_card_texture():
+    px = canvas()
+    paint(px, CARD_ART, CARD_PALETTE)
+    return px
+
+
 # ====================================================================== driver
 
 def main():
@@ -515,6 +552,7 @@ def main():
         ("wireless_crafting_grid/active.png", grid_texture(True)),
         ("wireless_pattern_grid/inactive.png", pattern_grid_texture(False)),
         ("wireless_pattern_grid/active.png", pattern_grid_texture(True)),
+        ("wireless_configuration_card.png", configuration_card_texture()),
         ("wireless_autocrafter_manager/inactive.png", manager_texture(False)),
         ("wireless_autocrafter_manager/active.png", manager_texture(True)),
         ("range_upgrade.png", range_texture()),

@@ -147,5 +147,13 @@
   "text.autoconfig.rswirelesscrafting.option.wirelessBridge.chunkLoading.tooltip": "配对后自动强加载两端区块。",
   "text.autoconfig.rswirelesscrafting.option.wirelessBridge.chunkLoadingEnergyUsage": "区块保活耗电（FE/s·每区块）",
   "text.autoconfig.rswirelesscrafting.option.wirelessBridge.chunkLoadingEnergyUsage.tooltip": "每保活一个区块的附加耗电（默认很贵）；配对通常保两端共 2 个。设 0 = 免费保活。",
-  "msg.rswirelesscrafting.bridge.unpaid": "欠费停运（区块仍在保活 · 网络供电恢复后会自动接上）"
+  "msg.rswirelesscrafting.bridge.unpaid": "欠费停运（区块仍在保活 · 网络供电恢复后会自动接上）",
+  "item.rswirelesscrafting.wireless_configuration_card": "无线配置卡",
+  "item.rswirelesscrafting.wireless_configuration_card.desc": "就地复制、批量粘贴 RS 方块的设置",
+  "item.rswirelesscrafting.wireless_configuration_card.hint.copy": "右键方块 = 复制它的设置",
+  "item.rswirelesscrafting.wireless_configuration_card.hint.paste": "右键 = 粘贴给它 · 潜行 + 右键 = 批量刷给半径内所有同类方块（站进增幅塔覆盖范围可扩大）",
+  "msg.rswirelesscrafting.config_card.hint": "对着 RS 方块右键：没存过就复制，存过就粘贴（潜行 = 批量）",
+  "msg.rswirelesscrafting.config_card.wrong_type": "卡里存的是另一种方块的设置",
+  "msg.rswirelesscrafting.config_card.pasted_one": "设置已粘贴",
+  "msg.rswirelesscrafting.config_card.pasted_batch": "设置已刷给 %s 个方块"
 }

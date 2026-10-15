@@ -87,6 +87,36 @@ public final class AmplifierRegistry {
         return multiplierPercent;
     }
 
+    /**
+     * 这个位置被增幅塔罩着的话，返回塔的覆盖半径（格）；没被罩着返回 0。
+     *
+     * <p>给无线配置卡用：站进塔的覆盖里，批量半径就从基础值扩到塔的半径——
+     * 让「增幅塔」除了给终端打折，还能表示「这片区域归我管」。
+     */
+    public static int coverageRadiusAt(final Level level, final double x, final double z) {
+        final Config.AmplifierEntry config = Platform.getConfig().getAmplifier();
+        if (!config.isEnabled()) {
+            return 0;
+        }
+        final Set<BlockPos> positions = AMPLIFIERS.get(level.dimension());
+        if (positions == null || positions.isEmpty()) {
+            return 0;
+        }
+        final double radius = config.getRadius();
+        final double radiusSquared = radius * radius;
+        for (final BlockPos pos : positions) {
+            if (!isActive(level, pos)) {
+                continue;
+            }
+            final double dx = x - (pos.getX() + 0.5);
+            final double dz = z - (pos.getZ() + 0.5);
+            if (dx * dx + dz * dz <= radiusSquared) {
+                return config.getRadius();
+            }
+        }
+        return 0;
+    }
+
     private static boolean isActive(final Level level, final BlockPos pos) {
         final BlockState state = level.getBlockState(pos);
         return state.is(Blocks.INSTANCE.getWirelessAmplifier())
