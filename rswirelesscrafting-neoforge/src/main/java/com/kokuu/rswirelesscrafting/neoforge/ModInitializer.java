@@ -80,6 +80,7 @@ public class ModInitializer extends AbstractModInitializer {
             eventBus.addListener(ClientModInitializer::onClientSetup);
             eventBus.addListener(ClientModInitializer::onRegisterMenuScreens);
             eventBus.addListener(ClientModInitializer::onRegisterKeyMappings);
+            eventBus.addListener(ClientModInitializer::onRegisterGuiLayers);
             modContainer.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
         }
         registerContent(eventBus);

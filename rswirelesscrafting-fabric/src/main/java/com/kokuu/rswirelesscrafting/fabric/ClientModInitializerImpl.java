@@ -7,6 +7,7 @@ import com.kokuu.rswirelesscrafting.common.KeyMappings;
 import com.kokuu.rswirelesscrafting.common.Menus;
 import com.kokuu.rswirelesscrafting.common.Platform;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationScreen;
+import com.kokuu.rswirelesscrafting.common.hud.WirelessTerminalHud;
 import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.WirelessCraftingGridUpgradeScreen;
 
 import com.mojang.blaze3d.platform.InputConstants;
@@ -15,6 +16,7 @@ import com.refinedmods.refinedstorage.common.support.network.item.NetworkItemPro
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
@@ -27,6 +29,7 @@ public class ClientModInitializerImpl extends AbstractClientModInitializer imple
         registerKeyMappings();
         registerMenuScreens();
         registerItemProperties();
+        HudRenderCallback.EVENT.register((graphics, tickCounter) -> WirelessTerminalHud.render(graphics));
     }
 
     private void registerKeyMappings() {
@@ -49,10 +52,16 @@ public class ClientModInitializerImpl extends AbstractClientModInitializer imple
     }
 
     private static void registerItemProperties() {
+        final NetworkItemPropertyFunction boundActive = new NetworkItemPropertyFunction();
         ItemProperties.register(
             Items.INSTANCE.getWirelessCraftingGrid(),
             NetworkItemPropertyFunction.NAME,
-            new NetworkItemPropertyFunction()
+            boundActive
+        );
+        ItemProperties.register(
+            Items.INSTANCE.getWirelessPatternGrid(),
+            NetworkItemPropertyFunction.NAME,
+            boundActive
         );
     }
 }

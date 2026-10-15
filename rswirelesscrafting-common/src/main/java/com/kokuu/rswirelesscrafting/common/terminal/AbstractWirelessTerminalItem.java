@@ -187,10 +187,23 @@ public abstract class AbstractWirelessTerminalItem extends AbstractNetworkEnergy
         lines.add(ContentNames.WIRELESS_CRAFTING_GRID_INSTALL_HINT);
     }
 
+    /**
+     * 终端是否已绑定到某个网络方块（未绑定就没有距离、没有倍率，也就没什么可显示的）。
+     */
+    public static boolean isBoundToNetwork(final ItemStack stack) {
+        return getBoundLocation(stack) != null;
+    }
+
+    /**
+     * 终端绑定的位置；未绑定返回 {@code null}。
+     */
+    @Nullable
+    public static GlobalPos getBoundLocation(final ItemStack stack) {
+        return stack.get(com.refinedmods.refinedstorage.common.content.DataComponents.INSTANCE.getNetworkLocation());
+    }
+
     public static Component createBoundLine(final ItemStack stack) {
-        final GlobalPos location = stack.get(
-            com.refinedmods.refinedstorage.common.content.DataComponents.INSTANCE.getNetworkLocation()
-        );
+        final GlobalPos location = getBoundLocation(stack);
         if (location == null) {
             return ContentNames.WIRELESS_CRAFTING_GRID_UNBOUND;
         }
@@ -222,9 +235,7 @@ public abstract class AbstractWirelessTerminalItem extends AbstractNetworkEnergy
         if (player == null) {
             return null;
         }
-        final GlobalPos location = stack.get(
-            com.refinedmods.refinedstorage.common.content.DataComponents.INSTANCE.getNetworkLocation()
-        );
+        final GlobalPos location = getBoundLocation(stack);
         if (location == null) {
             return null;
         }
@@ -243,7 +254,7 @@ public abstract class AbstractWirelessTerminalItem extends AbstractNetworkEnergy
         ).withStyle(ChatFormatting.DARK_GRAY);
     }
 
-    private static String formatMultiplier(final long percent) {
+    public static String formatMultiplier(final long percent) {
         if (percent % 100 == 0) {
             return Long.toString(percent / 100);
         }

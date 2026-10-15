@@ -90,5 +90,7 @@
   "text.autoconfig.rswirelesscrafting.option.chargingStation.wirelessRadius": "Wireless radius",
   "text.autoconfig.rswirelesscrafting.option.chargingStation.wirelessRadius.tooltip": "Radius (in blocks) of the wireless charging area.",
   "text.autoconfig.rswirelesscrafting.option.chargingStation.externalCapacity": "Internal energy buffer capacity",
-  "text.autoconfig.rswirelesscrafting.option.chargingStation.externalCapacity.tooltip": "Capacity of the station's internal buffer, refilled from the network when not full."
+  "text.autoconfig.rswirelesscrafting.option.chargingStation.externalCapacity.tooltip": "Capacity of the station's internal buffer, refilled from the network when not full.",
+  "gui.rswirelesscrafting.wireless_pattern_grid_failed": "Could not open the Wireless Pattern Terminal: please send your log to the author (QQ group 498700382)",
+  "hud.rswirelesscrafting.energy": "Energy %s / %s FE"
 }

@@ -14,6 +14,7 @@ public class ConfigImpl implements Config {
     private final WirelessCraftingGridEntry wirelessCraftingGrid;
     private final DistanceEnergyEntry distanceEnergy;
     private final ChargingStationEntry chargingStation;
+    private final HudEntryImpl hud = new HudEntryImpl();
 
     public ConfigImpl() {
         wirelessCraftingGrid = new WirelessCraftingGridEntryImpl();
@@ -42,6 +43,11 @@ public class ConfigImpl implements Config {
     @Override
     public ChargingStationEntry getChargingStation() {
         return chargingStation;
+    }
+
+    @Override
+    public HudEntry getHud() {
+        return hud;
     }
 
     private static String translationKey(final String value) {
@@ -248,6 +254,24 @@ public class ConfigImpl implements Config {
         @Override
         public long getExternalCapacity() {
             return externalCapacity.get();
+        }
+    }
+
+    private class HudEntryImpl implements HudEntry {
+        private final ModConfigSpec.BooleanValue enabled;
+
+        HudEntryImpl() {
+            builder.translation(translationKey("hud")).push("hud");
+            enabled = builder
+                .translation(translationKey("hud.enabled"))
+                .comment("手持无线终端时显示「电量 · 距离 · 收费倍率」的小字提示。")
+                .define("enabled", true);
+            builder.pop();
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return enabled.get();
         }
     }
 }

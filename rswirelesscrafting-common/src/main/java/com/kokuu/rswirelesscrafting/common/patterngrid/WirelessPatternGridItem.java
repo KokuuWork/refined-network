@@ -3,6 +3,7 @@ package com.kokuu.rswirelesscrafting.common.patterngrid;
 import com.kokuu.rswirelesscrafting.common.ContentNames;
 import com.kokuu.rswirelesscrafting.common.Platform;
 import com.kokuu.rswirelesscrafting.common.terminal.AbstractWirelessTerminalItem;
+import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.ExtendedWirelessNetworkItemContext;
 
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -20,6 +21,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static java.util.Objects.requireNonNullElse;
 
@@ -31,6 +34,11 @@ import static java.util.Objects.requireNonNullElse;
  * {@link VirtualPatternGrid} 与 RS 原版样板网格菜单」。
  */
 public class WirelessPatternGridItem extends AbstractWirelessTerminalItem {
+    private static final Logger LOGGER = LoggerFactory.getLogger(WirelessPatternGridItem.class);
+    /**
+     * 只在每个游戏会话里打一次成功日志，避免玩家反复开界面把日志刷满。
+     */
+    private static boolean loggedOpen;
 
     public WirelessPatternGridItem(final EnergyItemHelper energyItemHelper,
                                    final NetworkItemHelper networkItemHelper) {
@@ -68,17 +76,56 @@ public class WirelessPatternGridItem extends AbstractWirelessTerminalItem {
             RefinedStorageApi.INSTANCE.sendNoPermissionToOpenMessage(player, getTerminalName());
             return;
         }
-        // 开界面本身就要钱：与无线合成终端同口径，按距离倍率结算。
-        context.drainEnergy(Platform.getConfig().getWirelessCraftingGrid().getOpenEnergyUsage());
-        final VirtualPatternGrid grid = new VirtualPatternGrid(
-            resolved.get(),
-            player.level(),
-            network.orElse(null),
-            new WirelessPatternGridSession(resolved.get(), context)
-        );
-        com.refinedmods.refinedstorage.common.Platform.INSTANCE.getMenuOpener().openMenu(
-            player,
-            new WirelessPatternGridMenuProvider(grid, requireNonNullElse(name, getTerminalName()))
+        // 这一整段都不是 RS 的公开 API：反射构造 + 虚拟方块实体，任何一步都可能因为 RS 换版本而失败。
+        // 失败时给玩家一条明确提示、把堆栈写进日志，绝不把游戏带崩。
+        try {
+            if (!WirelessPatternGridMenuProvider.isAvailable()) {
+                fail(player, new IllegalStateException("RS 的样板网格菜单服务端构造不可用"));
+                return;
+            }
+            // 开界面本身就要钱：与无线合成终端同口径，按距离倍率结算。
+            context.drainEnergy(Platform.getConfig().getWirelessCraftingGrid().getOpenEnergyUsage());
+            final VirtualPatternGrid grid = new VirtualPatternGrid(
+                resolved.get(),
+                player.level(),
+                network.orElse(null),
+                new WirelessPatternGridSession(resolved.get(), context)
+            );
+            com.refinedmods.refinedstorage.common.Platform.INSTANCE.getMenuOpener().openMenu(
+                player,
+                new WirelessPatternGridMenuProvider(grid, requireNonNullElse(name, getTerminalName()))
+            );
+            logFirstOpen(player, resolved.get());
+        } catch (final IllegalStateException | NullPointerException | ClassCastException | LinkageError e) {
+            // 只捕获可预期的几类：反射/构造失败（IllegalStateException）、RS 内部空指针与类型不符、
+            // 以及 RS 换版本导致的 NoSuchMethodError 之类链接错误。checkstyle 禁止 catch 宽泛类型。
+            fail(player, e);
+        }
+    }
+
+    /**
+     * 打开失败：日志留全栈、玩家收一条可操作的提示（带上 QQ 反馈群，别让人只能干看着）。
+     */
+    private static void fail(final ServerPlayer player, final Throwable cause) {
+        LOGGER.error("无线样板终端打开失败", cause);
+        player.displayClientMessage(ContentNames.WIRELESS_PATTERN_GRID_FAILED, false);
+    }
+
+    /**
+     * 每个游戏会话记一次成功打开（含电量与距离倍率），方便只靠日志判断功能是否真的跑通。
+     */
+    private static void logFirstOpen(final ServerPlayer player, final ItemStack stack) {
+        if (loggedOpen) {
+            LOGGER.debug("无线样板终端再次打开：{}", player.getName().getString());
+            return;
+        }
+        loggedOpen = true;
+        LOGGER.info(
+            "无线样板终端打开成功：玩家={} 电量={}/{} 距离倍率={}%",
+            player.getName().getString(),
+            AbstractWirelessTerminalItem.getStoredEnergy(stack),
+            AbstractWirelessTerminalItem.getEnergyCapacity(stack),
+            ExtendedWirelessNetworkItemContext.distanceMultiplierPercent(stack, player)
         );
     }
 }

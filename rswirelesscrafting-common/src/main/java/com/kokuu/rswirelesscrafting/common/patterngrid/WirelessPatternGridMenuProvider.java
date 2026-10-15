@@ -57,6 +57,13 @@ public class WirelessPatternGridMenuProvider implements ExtendedMenuProvider<Pat
         return name;
     }
 
+    /**
+     * RS 那个构造是否可用。打开界面前先问一句，免得玩家点了终端才收到崩溃报告。
+     */
+    public static boolean isAvailable() {
+        return SERVER_CONSTRUCTOR != null;
+    }
+
     @Override
     public AbstractContainerMenu createMenu(final int syncId, final Inventory inventory, final Player player) {
         if (SERVER_CONSTRUCTOR == null) {

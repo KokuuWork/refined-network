@@ -20,6 +20,9 @@ public class ConfigImpl implements ConfigData, Config {
     @ConfigEntry.Gui.CollapsibleObject
     private ChargingStationEntryEntryImpl chargingStation = new ChargingStationEntryEntryImpl();
 
+    @ConfigEntry.Gui.CollapsibleObject
+    private HudEntryEntryImpl hud = new HudEntryEntryImpl();
+
     public static ConfigImpl get() {
         return AutoConfig.getConfigHolder(ConfigImpl.class).getConfig();
     }
@@ -37,6 +40,20 @@ public class ConfigImpl implements ConfigData, Config {
     @Override
     public ChargingStationEntry getChargingStation() {
         return chargingStation;
+    }
+
+    @Override
+    public HudEntry getHud() {
+        return hud;
+    }
+
+    private static class HudEntryEntryImpl implements HudEntry {
+        private boolean enabled = true;
+
+        @Override
+        public boolean isEnabled() {
+            return enabled;
+        }
     }
 
     private static class WirelessCraftingGridEntryEntryImpl implements WirelessCraftingGridEntry {

@@ -5,8 +5,10 @@ import com.kokuu.rswirelesscrafting.common.ContentNames;
 import com.kokuu.rswirelesscrafting.common.Items;
 import com.kokuu.rswirelesscrafting.common.KeyMappings;
 import com.kokuu.rswirelesscrafting.common.Menus;
+import com.kokuu.rswirelesscrafting.common.ModIdentifierUtil;
 import com.kokuu.rswirelesscrafting.common.Platform;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationScreen;
+import com.kokuu.rswirelesscrafting.common.hud.WirelessTerminalHud;
 import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.WirelessCraftingGridUpgradeScreen;
 
 import com.mojang.blaze3d.platform.InputConstants;
@@ -18,8 +20,10 @@ import net.minecraft.client.renderer.item.ItemProperties;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
+import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.neoforged.neoforge.common.NeoForge;
 
@@ -64,11 +68,26 @@ public class ClientModInitializer extends AbstractClientModInitializer {
         KeyMappings.INSTANCE.setOpenWirelessCraftingGrid(openWirelessCraftingGrid);
     }
 
+    @SubscribeEvent
+    public static void onRegisterGuiLayers(final RegisterGuiLayersEvent e) {
+        e.registerAbove(
+            VanillaGuiLayers.HOTBAR,
+            ModIdentifierUtil.createIdentifier("wireless_terminal_hud"),
+            (graphics, deltaTracker) -> WirelessTerminalHud.render(graphics)
+        );
+    }
+
     private static void registerItemProperties() {
+        final NetworkItemPropertyFunction boundActive = new NetworkItemPropertyFunction();
         ItemProperties.register(
             Items.INSTANCE.getWirelessCraftingGrid(),
             NetworkItemPropertyFunction.NAME,
-            new NetworkItemPropertyFunction()
+            boundActive
+        );
+        ItemProperties.register(
+            Items.INSTANCE.getWirelessPatternGrid(),
+            NetworkItemPropertyFunction.NAME,
+            boundActive
         );
     }
 }

@@ -90,5 +90,7 @@
   "text.autoconfig.rswirelesscrafting.option.chargingStation.wirelessRadius": "无线充电半径",
   "text.autoconfig.rswirelesscrafting.option.chargingStation.wirelessRadius.tooltip": "无线充电区域的半径（格）。",
   "text.autoconfig.rswirelesscrafting.option.chargingStation.externalCapacity": "内部电量缓冲容量",
-  "text.autoconfig.rswirelesscrafting.option.chargingStation.externalCapacity.tooltip": "充电站自身缓存的电量上限，未满时自动从网络补电。"
+  "text.autoconfig.rswirelesscrafting.option.chargingStation.externalCapacity.tooltip": "充电站自身缓存的电量上限，未满时自动从网络补电。",
+  "gui.rswirelesscrafting.wireless_pattern_grid_failed": "无线样板终端打开失败：请把日志发给作者（QQ 群 498700382）",
+  "hud.rswirelesscrafting.energy": "电量 %s / %s FE"
 }

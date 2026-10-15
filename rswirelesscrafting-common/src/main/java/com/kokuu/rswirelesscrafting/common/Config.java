@@ -7,6 +7,15 @@ public interface Config {
 
     ChargingStationEntry getChargingStation();
 
+    HudEntry getHud();
+
+    /**
+     * 手持无线终端时的常驻小字提示（电量 · 距离 · 收费倍率）。
+     */
+    interface HudEntry {
+        boolean isEnabled();
+    }
+
     interface WirelessCraftingGridEntry {
         long getEnergyCapacity();
 

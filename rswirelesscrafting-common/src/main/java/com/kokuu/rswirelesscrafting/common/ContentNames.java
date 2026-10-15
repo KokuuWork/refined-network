@@ -53,6 +53,10 @@ public final class ContentNames {
         "item",
         "wireless_pattern_grid.desc"
     ).withStyle(ChatFormatting.GRAY);
+    public static final MutableComponent WIRELESS_PATTERN_GRID_FAILED = createTranslation(
+        "gui",
+        "wireless_pattern_grid_failed"
+    ).withStyle(ChatFormatting.RED);
     public static final MutableComponent WIRELESS_CRAFTING_GRID_UPGRADES_TITLE = createTranslation(
         "gui",
         "wireless_crafting_grid_upgrades"
@@ -60,6 +64,7 @@ public final class ContentNames {
 
     // Tooltips. These are stored fully styled: MutableComponent#withStyle mutates in place,
     // so styling has to be applied once here rather than at every append site.
+    public static final String HUD_ENERGY_TRANSLATION_KEY = createTranslationKey("hud", "energy");
     public static final String WIRELESS_CRAFTING_GRID_BOUND_TRANSLATION_KEY = createTranslationKey(
         "item",
         "wireless_crafting_grid.bound"
