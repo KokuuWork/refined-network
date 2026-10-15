@@ -17,8 +17,13 @@
 > 👉 **[点击加入群聊（群号 498700382）](https://qm.qq.com/q/ueYTU8T3xK)** ｜ 也可以在 QQ 里**搜索群号 498700382** 找到我们。
 > 不方便用 QQ 的话，欢迎直接提 [Issue](https://github.com/KokuuWork/rswirelesscrafting/issues)。
 
-> 🧪 **当前版本 0.3.2**（2026-10-15）· **仍处于测试阶段**：Fabric 侧为首次移植，尚未完成完整真机验证。
-> 请在测试存档中使用并**先备份世界**；遇到问题欢迎来上面的 QQ 群反馈（附日志与复现步骤）。
+> 🧪 **已发布版本 0.3.2**（2026-10-15）· 正文里标 **🧪 预览** 的内容**尚未随任何正式版发布**，目前只在开发版（`0.4.0-SNAPSHOT`）里可用。
+> 🧪 **预览 = 已实现、正在验证、下一个正式版会一起带上**（不是画饼，也不是另一个分支）。
+>
+> ⚠️ 整体仍处于测试阶段：**Fabric 侧为首次移植，尚未完成完整真机验证**。请在测试存档中使用并**先备份世界**；
+> 遇到问题欢迎来上面的 QQ 群反馈（附日志与复现步骤）。
+
+> **图例**：内容一览里的 **🧪** 表示「已实现、尚未发版」（预览内容）。
 
 给 [Refined Storage 2](https://github.com/refinedmods/refinedstorage) 补上原版缺失的**无线合成**能力。
 
@@ -33,15 +38,15 @@
 | | 名称 | 作用 | 稀有度 |
 |---|---|---|---|
 | <img src="docs/images/item-grid.png" width="40" alt=""> | **无线合成终端**<br>`wireless_crafting_grid` | 远程访问网络并**远程合成**。潜行 + 右键打开插件装配界面。 | RARE |
-| <img src="docs/images/item-wireless-pattern-grid.png" width="40" alt=""> | **无线样板终端**<br>`wireless_pattern_grid` | 远程编写**自动化样板**（合成 / 处理 / 切石 / 锻造），不用跑回样板网格。 | EPIC |
-| <img src="docs/images/item-wireless-autocrafter-manager.png" width="40" alt=""> | **无线自动合成仓管理器**<br>`wireless_autocrafter_manager` | 远程管理**全网合成仓里的样板**：看有哪些、取出、换入，不用回基地。 | EPIC |
+| <img src="docs/images/item-wireless-pattern-grid.png" width="40" alt=""> | **无线样板终端** 🧪<br>`wireless_pattern_grid` | 远程编写**自动化样板**（合成 / 处理 / 切石 / 锻造），不用跑回样板网格。 | EPIC |
+| <img src="docs/images/item-wireless-autocrafter-manager.png" width="40" alt=""> | **无线自动合成仓管理器** 🧪<br>`wireless_autocrafter_manager` | 远程管理**全网合成仓里的样板**：看有哪些、取出、换入，不用回基地。 | EPIC |
 | <img src="docs/images/item-battery.png" width="40" alt=""> | **电池升级插件**<br>`battery_upgrade` | 每张提升 **+1000 FE** 电池容量（可叠加）。前期刚需。 | RARE |
 | <img src="docs/images/item-energy.png" width="40" alt=""> | **初级能耗插件**<br>`energy_upgrade` | **距离能量倍率减半**。也是高级能耗插件的原料。 | RARE |
 | <img src="docs/images/item-advanced-energy.png" width="40" alt=""> | **高级能耗插件**<br>`advanced_energy_upgrade` | **完全消除距离能量倍率**（跨维倍率保留）。也是远程输电插件的原料。 | EPIC |
 | <img src="docs/images/item-range.png" width="40" alt=""> | **距离升级插件**<br>`range_upgrade` | 同维度内**无视距离**。 | EPIC |
 | <img src="docs/images/item-interdimensional.png" width="40" alt=""> | **维度升级插件**<br>`interdimensional_upgrade` | 解锁**跨维度**访问。 | EPIC |
 | <img src="docs/images/item-remote-energy.png" width="40" alt=""> | **远程输电插件**<br>`remote_energy_upgrade` | **不再消耗终端自身电池**，直接花所绑定网络里的电。 | EPIC |
-| <img src="docs/images/item-wireless-amplifier.png" width="40" alt=""> | **无线增幅塔**<br>`wireless_amplifier` | 覆盖半径 **64 格内**的无线终端**距离耗电打对折**。接网络常驻耗电，跨维度不享受。 | — |
+| <img src="docs/images/item-wireless-amplifier.png" width="40" alt=""> | **无线增幅塔** 🧪<br>`wireless_amplifier` | 覆盖半径 **64 格内**的无线终端**距离耗电打对折**。接网络常驻耗电，跨维度不享受。 | — |
 | <img src="docs/images/item-terminal-charging-station.png" width="40" alt=""> | **终端充电站**<br>`terminal_charging_station` | 3 个有线槽位快充，5 格范围内自动无线补电（**全局 3 个设备名额**）。 | — |
 
 所有鼠标悬停说明都是活的：终端会显示**当前绑定的维度与坐标**、**已安装的插件**，以及**当前距离与收费倍率**（同维度显示格数，跨维度单独标注，与实际扣费完全一致）；每张插件会显示自己的效果、生效前提，以及从配置里实时读出的数值（电池插件显示容量加成，维度插件显示当前跨维度能量倍率，初级能耗插件显示除数）。
@@ -56,7 +61,7 @@
 
 > 这套装配界面取代了早期的「工作台无序合成永久改造」方案——那样装上去就拿不下来了。旧方案的自定义配方与序列化器已从代码中删除。
 
-## 无线样板终端
+## 无线样板终端 🧪 预览·未发布
 
 自动化做起来之后，最烦的一步不是合成，而是**改配方**——方块版的样板网格在基地里，矿场、下界、外岛想加一条产线就得来回跑。无线样板终端把这一步也搬到手上：**右键打开的是 RS 原汁原味的样板网格界面**（左侧资源栏、四种样板类型、JEI/REI 配方转移、样板复制全都在），但那座网格其实「装在你的终端里」。
 
@@ -67,13 +72,13 @@
 
 <img src="docs/images/recipe-wireless-pattern-grid.png" width="270" alt="无线样板终端配方">
 
-## 手持提示（HUD）
+## 手持提示（HUD） 🧪 预览·未发布
 
 **默认关闭**（它属于「看一眼就好」的信息，不该常驻在屏幕上）。想要的话在配置里把「手持提示（HUD）」打开：手持**已绑定**的无线终端时，物品栏上方显示一行小字 **电量 · 距离 · 收费倍率**——出发前就知道这一趟要花多少电，不用打开背包悬停。打开任意界面时自动让位。
 
 > 只认**手持**（主手 / 副手）。放饰品栏里不动手的时候不显示，避免屏幕上老是挂着一行字。
 
-## 无线自动合成仓管理器
+## 无线自动合成仓管理器 🧪 预览·未发布
 
 写样板已经能远程了（上一节），但「这块样板该放进哪个合成仓、从哪个仓里取出来」原本还得跑回基地开方块版管理器。这件终端补上最后一步：**远程管全网合成仓里的样板**。
 
@@ -84,7 +89,7 @@
 
 <img src="docs/images/recipe-wireless-autocrafter-manager.png" width="270" alt="无线自动合成仓管理器配方">
 
-## 无线增幅塔
+## 无线增幅塔 🧪 预览·未发布
 
 距离耗电原本是纯粹的惩罚——直到有了塔。**无线增幅塔**接在 RS 网络上、常驻耗电（默认 **128 FE/s**，红石信号可临时停机），它罩着的 **64 格**范围内，所有无线终端的**距离倍率打对折**：本来 256 格要 ×16，塔下面就只算 ×8。
 
@@ -413,15 +418,15 @@ Vanilla Refined Storage ships only a wireless *viewing* grid — you can browse 
 | | Item | Effect | Rarity |
 |---|---|---|---|
 | <img src="docs/images/item-grid.png" width="40" alt=""> | **Wireless Crafting Grid**<br>`wireless_crafting_grid` | Access your network remotely **and craft**. Sneak + right-click to open the upgrade panel. | rare |
-| <img src="docs/images/item-wireless-pattern-grid.png" width="40" alt=""> | **Wireless Pattern Terminal**<br>`wireless_pattern_grid` | Write **autocrafting patterns** (crafting / processing / stonecutter / smithing) remotely. | epic |
-| <img src="docs/images/item-wireless-autocrafter-manager.png" width="40" alt=""> | **Wireless Autocrafter Manager**<br>`wireless_autocrafter_manager` | Manage the patterns inside **every autocrafter** remotely. | epic |
+| <img src="docs/images/item-wireless-pattern-grid.png" width="40" alt=""> | **Wireless Pattern Terminal** 🧪<br>`wireless_pattern_grid` | Write **autocrafting patterns** (crafting / processing / stonecutter / smithing) remotely. | epic |
+| <img src="docs/images/item-wireless-autocrafter-manager.png" width="40" alt=""> | **Wireless Autocrafter Manager** 🧪<br>`wireless_autocrafter_manager` | Manage the patterns inside **every autocrafter** remotely. | epic |
 | <img src="docs/images/item-battery.png" width="40" alt=""> | **Battery Upgrade**<br>`battery_upgrade` | **+1000 FE** capacity each (stacks). The early-game must-have. | rare |
 | <img src="docs/images/item-energy.png" width="40" alt=""> | **Energy Upgrade**<br>`energy_upgrade` | **Halves** the distance energy multiplier. Ingredient of the Advanced Energy Upgrade. | rare |
 | <img src="docs/images/item-advanced-energy.png" width="40" alt=""> | **Advanced Energy Upgrade**<br>`advanced_energy_upgrade` | **Removes** the distance multiplier (cross-dimension still applies). Ingredient of the Remote Energy Upgrade. | epic |
 | <img src="docs/images/item-range.png" width="40" alt=""> | **Range Upgrade**<br>`range_upgrade` | **Unlimited range** within the same dimension. | epic |
 | <img src="docs/images/item-interdimensional.png" width="40" alt=""> | **Interdimensional Upgrade**<br>`interdimensional_upgrade` | **Cross-dimensional** access. | epic |
 | <img src="docs/images/item-remote-energy.png" width="40" alt=""> | **Remote Energy Upgrade**<br>`remote_energy_upgrade` | Draws power **from the bound network** instead of the terminal's own battery. | epic |
-| <img src="docs/images/item-wireless-amplifier.png" width="40" alt=""> | **Wireless Amplifier**<br>`wireless_amplifier` | **Halves** the distance multiplier for terminals inside a **64-block** radius. A permanent load on the network; never applies cross-dimension. | — |
+| <img src="docs/images/item-wireless-amplifier.png" width="40" alt=""> | **Wireless Amplifier** 🧪<br>`wireless_amplifier` | **Halves** the distance multiplier for terminals inside a **64-block** radius. A permanent load on the network; never applies cross-dimension. | — |
 | <img src="docs/images/item-terminal-charging-station.png" width="40" alt=""> | **Terminal Charging Station**<br>`terminal_charging_station` | 3 wired fast-charge slots, plus a 5-block wireless aura (**3 device slots total**). | — |
 
 Tooltips are live: the terminal shows the **bound dimension and coordinates**, its **installed upgrades**, and the **current distance and energy multiplier** (distance in blocks within a dimension, a separate label when cross-dimensional — always matching what the server bills); each card explains its effect, its prerequisite, and the values read from config in real time.
@@ -436,7 +441,7 @@ Cards are **not** baked into a crafting recipe. **Sneak + right-click** any wire
 
 > This replaced the earlier "shapeless crafting-table, permanent modification" design, where an installed card could never come back out. Those custom recipe classes have been deleted from the codebase.
 
-### Wireless Pattern Terminal
+### Wireless Pattern Terminal 🧪 preview (unreleased)
 
 Once your base is automated, the annoying part is not crafting — it is **editing recipes**: the block Pattern Grid lives back at base, so every new production line in a far-away outpost means a trip home. The Wireless Pattern Terminal brings that step to your hand: right-clicking it opens **RS's own Pattern Grid UI** (resource list, all four pattern types, JEI/REI recipe transfer, pattern copying — everything), but the grid itself "lives inside your terminal".
 
@@ -447,13 +452,13 @@ Once your base is automated, the annoying part is not crafting — it is **editi
 
 <img src="docs/images/recipe-wireless-pattern-grid.png" width="270" alt="Wireless pattern terminal recipe">
 
-### Held-item HUD
+### Held-item HUD 🧪 preview (unreleased)
 
 **Off by default** (it is a "nice to glance at" line and should not live on your screen). Turn on "Held-item HUD" in the config and holding a bound wireless terminal shows a single small line above the hotbar: **energy · distance · cost multiplier** — so you know what a trip will cost before you set out, without opening your inventory. It steps aside whenever a screen is open.
 
 > Held items only (main hand / offhand). Terminals worn in a trinket slot do not show it, so no line is permanently stuck on screen.
 
-### Wireless Autocrafter Manager
+### Wireless Autocrafter Manager 🧪 preview (unreleased)
 
 Writing patterns remotely is covered above; what still forced a trip home was deciding **which autocrafter a pattern belongs in**. This terminal closes that loop.
 
@@ -464,7 +469,7 @@ Writing patterns remotely is covered above; what still forced a trip home was de
 
 <img src="docs/images/recipe-wireless-autocrafter-manager.png" width="270" alt="Wireless autocrafter manager recipe">
 
-### Wireless Amplifier
+### Wireless Amplifier 🧪 preview (unreleased)
 
 The distance tariff used to be pure punishment — until the tower. The **Wireless Amplifier** sits on your RS network as a permanent load (**128 FE/s** by default, switchable off with redstone) and **halves the distance multiplier** for every wireless terminal inside its **64-block** radius: a spot that would cost ×16 at 256 blocks only costs ×8 under the tower.
 
