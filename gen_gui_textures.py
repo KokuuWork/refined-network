@@ -132,10 +132,36 @@ def terminal_charging_station_gui():
     return pixels
 
 
+def wireless_monitor_gui():
+    """
+    The monitor terminal: a column of rule slots, then the player inventory.
+
+    Menu coordinates (must match WirelessMonitorContainerMenu / Screen):
+        rule slots    y=18/36/54/72, x=8
+        divider       y=91
+        inventory     y=104
+        hotbar        y=158
+        size          176x182 (taller than the standard 166 - the rule rows need it)
+    """
+    pixels = canvas(176, 182)
+    frame(pixels)
+    for row in range(4):
+        slot(pixels, 7, 17 + row * 18)
+    for x in range(7, 176 - 7):
+        pixels[91][x] = BG_SHADE
+    for row in range(3):
+        for column in range(9):
+            slot(pixels, 7 + column * 18, 103 + row * 18)
+    for column in range(9):
+        slot(pixels, 7 + column * 18, 157)
+    return pixels
+
+
 def main():
     targets = [
         ("wireless_crafting_grid_upgrades.png", upgrades_gui()),
         ("terminal_charging_station.png", terminal_charging_station_gui()),
+        ("wireless_monitor.png", wireless_monitor_gui()),
     ]
     for name, pixels in targets:
         path = os.path.join(OUT, name)

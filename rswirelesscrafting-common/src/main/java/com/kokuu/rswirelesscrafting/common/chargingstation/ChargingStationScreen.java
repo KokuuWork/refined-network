@@ -2,6 +2,7 @@ package com.kokuu.rswirelesscrafting.common.chargingstation;
 
 import com.kokuu.rswirelesscrafting.common.ContentNames;
 import com.kokuu.rswirelesscrafting.common.ModIdentifierUtil;
+import com.kokuu.rswirelesscrafting.common.util.CompactNumber;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -174,7 +175,8 @@ public class ChargingStationScreen extends AbstractContainerScreen<ChargingStati
 
     private void drawBufferValue(final GuiGraphics graphics) {
         final Component text = Component.literal(
-            formatEnergy(menu.getDataValue(0)) + " / " + formatEnergy(menu.getDataValue(1)) + " FE"
+            CompactNumber.format(menu.getDataValue(0)) + " / "
+                + CompactNumber.format(menu.getDataValue(1)) + " FE"
         );
         graphics.drawString(
             font,
@@ -184,33 +186,6 @@ public class ChargingStationScreen extends AbstractContainerScreen<ChargingStati
             LABEL_COLOR,
             false
         );
-    }
-
-    /**
-     * 把 FE 数值压成紧凑的 K/M/G 后缀形式（如 1200000 → 1.2M），
-     * 避免缓冲电量很大时整串数字超出能量条宽度。
-     */
-    private static String formatEnergy(final int value) {
-        final long v = value;
-        if (v >= 1_000_000_000L) {
-            return formatScaled(v, 1_000_000_000L, 'G');
-        }
-        if (v >= 1_000_000L) {
-            return formatScaled(v, 1_000_000L, 'M');
-        }
-        if (v >= 1_000L) {
-            return formatScaled(v, 1_000L, 'K');
-        }
-        return Long.toString(v);
-    }
-
-    /**
-     * 一位小数 + 单位后缀（不足一位小数时省略小数点），避免依赖 locale 的字符串格式化。
-     */
-    private static String formatScaled(final long value, final long unit, final char suffix) {
-        final long whole = value / unit;
-        final long tenth = value % unit / (unit / 10);
-        return tenth == 0 ? whole + String.valueOf(suffix) : whole + "." + tenth + suffix;
     }
 
     @Override

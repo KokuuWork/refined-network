@@ -89,6 +89,50 @@ public final class ContentNames {
         "block",
         "wireless_amplifier.redstone"
     ).withStyle(ChatFormatting.DARK_GRAY);
+    public static final MutableComponent WIRELESS_MONITOR = createTranslation(
+        "item",
+        "wireless_monitor"
+    );
+    public static final MutableComponent WIRELESS_MONITOR_DESC = createTranslation(
+        "item",
+        "wireless_monitor.desc"
+    ).withStyle(ChatFormatting.GRAY);
+    public static final MutableComponent WIRELESS_MONITOR_NO_RULES = createTranslation(
+        "item",
+        "wireless_monitor.no_rules"
+    ).withStyle(ChatFormatting.DARK_GRAY);
+    public static final MutableComponent WIRELESS_MONITOR_RULES_TITLE = createTranslation(
+        "item",
+        "wireless_monitor.rules"
+    ).withStyle(ChatFormatting.DARK_GRAY);
+    public static final MutableComponent WIRELESS_MONITOR_FAILED = createTranslation(
+        "gui",
+        "wireless_monitor_failed"
+    ).withStyle(ChatFormatting.RED);
+    public static final MutableComponent MONITOR_EMPTY_HINT = createTranslation(
+        "gui",
+        "monitor_empty_hint"
+    );
+    public static final MutableComponent MONITOR_RULE_BELOW = createTranslation(
+        "gui",
+        "monitor_rule_below"
+    );
+    public static final MutableComponent MONITOR_RULE_ABOVE = createTranslation(
+        "gui",
+        "monitor_rule_above"
+    );
+    public static final String MONITOR_RULE_TOOLTIP_TRANSLATION_KEY = createTranslationKey(
+        "gui",
+        "monitor_rule_tooltip"
+    );
+    public static final String MONITOR_ALERT_BELOW_TRANSLATION_KEY = createTranslationKey(
+        "msg",
+        "monitor_alert_below"
+    );
+    public static final String MONITOR_ALERT_ABOVE_TRANSLATION_KEY = createTranslationKey(
+        "msg",
+        "monitor_alert_above"
+    );
     public static final MutableComponent WIRELESS_CONFIGURATION_CARD = createTranslation(
         "item",
         "wireless_configuration_card"

@@ -2,6 +2,9 @@ package com.kokuu.rswirelesscrafting.common;
 
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationContainerMenu;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationData;
+import com.kokuu.rswirelesscrafting.common.monitor.MonitorMenuData;
+import com.kokuu.rswirelesscrafting.common.monitor.MonitorRule;
+import com.kokuu.rswirelesscrafting.common.monitor.WirelessMonitorContainerMenu;
 import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.UpgradeMenuData;
 import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.WirelessCraftingGridContainerMenu;
 import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.WirelessCraftingGridData;
@@ -42,6 +45,13 @@ public abstract class AbstractModInitializer {
                 ChargingStationData.STREAM_CODEC
             )
         ));
+        Menus.INSTANCE.setWirelessMonitor(callback.register(
+            ContentIds.WIRELESS_MONITOR,
+            () -> extendedMenuTypeFactory.create(
+                WirelessMonitorContainerMenu::new,
+                MonitorMenuData.STREAM_CODEC
+            )
+        ));
         Menus.INSTANCE.setWirelessCraftingGridUpgrades(callback.register(
             ContentIds.WIRELESS_CRAFTING_GRID_UPGRADES,
             () -> extendedMenuTypeFactory.create(
@@ -63,6 +73,12 @@ public abstract class AbstractModInitializer {
             () -> DataComponentType.<CompoundTag>builder()
                 .persistent(CompoundTag.CODEC)
                 .networkSynchronized(ByteBufCodecs.COMPOUND_TAG)
+                .build()));
+        DataComponents.INSTANCE.setMonitorRules(callback.register(
+            createIdentifier("wireless_monitor_rules"),
+            () -> DataComponentType.<List<MonitorRule>>builder()
+                .persistent(MonitorRule.CODEC.listOf())
+                .networkSynchronized(ByteBufCodecs.collection(ArrayList::new, MonitorRule.STREAM_CODEC))
                 .build()));
         DataComponents.INSTANCE.setUpgrades(callback.register(
             ContentIds.UPGRADES,

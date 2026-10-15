@@ -155,5 +155,16 @@
   "msg.rswirelesscrafting.config_card.hint": "Right-click an RS block: copies if empty, pastes if loaded (sneak = bulk)",
   "msg.rswirelesscrafting.config_card.wrong_type": "The card holds settings for another block type",
   "msg.rswirelesscrafting.config_card.pasted_one": "Settings pasted",
-  "msg.rswirelesscrafting.config_card.pasted_batch": "Settings applied to %s blocks"
+  "msg.rswirelesscrafting.config_card.pasted_batch": "Settings applied to %s blocks",
+  "item.rswirelesscrafting.wireless_monitor": "Wireless Monitor Terminal",
+  "item.rswirelesscrafting.wireless_monitor.desc": "Watch a few resources remotely and get alerted when they run low or pile up",
+  "item.rswirelesscrafting.wireless_monitor.no_rules": "No targets yet: right-click to open it and drop items into the slots on the left",
+  "item.rswirelesscrafting.wireless_monitor.rules": "Monitoring:",
+  "gui.rswirelesscrafting.wireless_monitor_failed": "Could not open the Wireless Monitor Terminal: please send your log to the author (QQ group 498700382)",
+  "gui.rswirelesscrafting.monitor_empty_hint": "Drop the resource you want to watch into the slot on the left",
+  "gui.rswirelesscrafting.monitor_rule_below": "below the threshold",
+  "gui.rswirelesscrafting.monitor_rule_above": "above the threshold",
+  "gui.rswirelesscrafting.monitor_rule_tooltip": "Now: %s\\nLeft-click = raise the threshold one step - Right-click = lower it one step - Shift + click = switch below / above",
+  "msg.rswirelesscrafting.monitor_alert_below": "⚠ Low stock: %s down to %s (threshold %s)",
+  "msg.rswirelesscrafting.monitor_alert_above": "⚠ Piling up: %s at %s (threshold %s)"
 }

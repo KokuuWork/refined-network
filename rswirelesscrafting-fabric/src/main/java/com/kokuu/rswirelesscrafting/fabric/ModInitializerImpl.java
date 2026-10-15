@@ -18,6 +18,7 @@ import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlock;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockEntity;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockItem;
 import com.kokuu.rswirelesscrafting.common.configcard.WirelessConfigurationCardItem;
+import com.kokuu.rswirelesscrafting.common.monitor.WirelessMonitorItem;
 import com.kokuu.rswirelesscrafting.common.patterngrid.WirelessPatternGridItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.AdvancedEnergyUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.BatteryUpgradeItem;
@@ -200,6 +201,21 @@ public class ModInitializerImpl extends AbstractModInitializer implements Refine
         );
         Items.INSTANCE.setAdvancedEnergyUpgrade(
             callback.register(ContentIds.ADVANCED_ENERGY_UPGRADE, AdvancedEnergyUpgradeItem::new)
+        );
+        Items.INSTANCE.setWirelessMonitor(
+            callback.register(ContentIds.WIRELESS_MONITOR, () -> new WirelessMonitorItem(
+                new Item.Properties().stacksTo(1),
+                RefinedStorageApi.INSTANCE.getEnergyItemHelper(),
+                RefinedStorageApi.INSTANCE.getNetworkItemHelper()
+            ) {
+                @Override
+                public boolean allowComponentsUpdateAnimation(final Player player,
+                                                               final InteractionHand hand,
+                                                               final ItemStack oldStack,
+                                                               final ItemStack newStack) {
+                    return AbstractModInitializer.allowComponentsUpdateAnimation(oldStack, newStack);
+                }
+            })
         );
         Items.INSTANCE.setWirelessConfigurationCard(
             callback.register(ContentIds.WIRELESS_CONFIGURATION_CARD, () -> new WirelessConfigurationCardItem(

@@ -5,6 +5,7 @@ import com.kokuu.rswirelesscrafting.common.autocraftermanager.WirelessAutocrafte
 import com.kokuu.rswirelesscrafting.common.bridge.WirelessBridgeBlockItem;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockItem;
 import com.kokuu.rswirelesscrafting.common.configcard.WirelessConfigurationCardItem;
+import com.kokuu.rswirelesscrafting.common.monitor.WirelessMonitorItem;
 import com.kokuu.rswirelesscrafting.common.patterngrid.WirelessPatternGridItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.AdvancedEnergyUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.BatteryUpgradeItem;
@@ -48,6 +49,8 @@ public final class Items {
     private Supplier<WirelessBridgeBlockItem> wirelessBridge;
     @Nullable
     private Supplier<WirelessConfigurationCardItem> wirelessConfigurationCard;
+    @Nullable
+    private Supplier<WirelessMonitorItem> wirelessMonitor;
 
     private Items() {
     }
@@ -150,6 +153,14 @@ public final class Items {
 
     public void setWirelessConfigurationCard(final Supplier<WirelessConfigurationCardItem> supplier) {
         this.wirelessConfigurationCard = supplier;
+    }
+
+    public WirelessMonitorItem getWirelessMonitor() {
+        return requireNonNull(wirelessMonitor).get();
+    }
+
+    public void setWirelessMonitor(final Supplier<WirelessMonitorItem> supplier) {
+        this.wirelessMonitor = supplier;
     }
 
     public void setTerminalChargingStationBlockItem(final Supplier<ChargingStationBlockItem> supplier) {

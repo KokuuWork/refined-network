@@ -1,6 +1,7 @@
 package com.kokuu.rswirelesscrafting.common;
 
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationContainerMenu;
+import com.kokuu.rswirelesscrafting.common.monitor.WirelessMonitorContainerMenu;
 import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.WirelessCraftingGridContainerMenu;
 import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.WirelessCraftingGridUpgradeContainerMenu;
 
@@ -20,6 +21,8 @@ public final class Menus {
     private Supplier<MenuType<WirelessCraftingGridUpgradeContainerMenu>> wirelessCraftingGridUpgrades;
     @Nullable
     private Supplier<MenuType<ChargingStationContainerMenu>> chargingStation;
+    @Nullable
+    private Supplier<MenuType<WirelessMonitorContainerMenu>> wirelessMonitor;
 
     private Menus() {
     }
@@ -48,5 +51,13 @@ public final class Menus {
 
     public MenuType<ChargingStationContainerMenu> getChargingStation() {
         return requireNonNull(chargingStation).get();
+    }
+
+    public void setWirelessMonitor(final Supplier<MenuType<WirelessMonitorContainerMenu>> supplier) {
+        this.wirelessMonitor = supplier;
+    }
+
+    public MenuType<WirelessMonitorContainerMenu> getWirelessMonitor() {
+        return requireNonNull(wirelessMonitor).get();
     }
 }

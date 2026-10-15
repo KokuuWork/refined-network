@@ -155,5 +155,16 @@
   "msg.rswirelesscrafting.config_card.hint": "对着 RS 方块右键：没存过就复制，存过就粘贴（潜行 = 批量）",
   "msg.rswirelesscrafting.config_card.wrong_type": "卡里存的是另一种方块的设置",
   "msg.rswirelesscrafting.config_card.pasted_one": "设置已粘贴",
-  "msg.rswirelesscrafting.config_card.pasted_batch": "设置已刷给 %s 个方块"
+  "msg.rswirelesscrafting.config_card.pasted_batch": "设置已刷给 %s 个方块",
+  "item.rswirelesscrafting.wireless_monitor": "无线监控终端",
+  "item.rswirelesscrafting.wireless_monitor.desc": "远程盯着几样东西，缺料 / 堵料时主动提醒",
+  "item.rswirelesscrafting.wireless_monitor.no_rules": "还没有监控目标：右键打开界面，把物品放进左侧的槽",
+  "item.rswirelesscrafting.wireless_monitor.rules": "正在监控：",
+  "gui.rswirelesscrafting.wireless_monitor_failed": "无线监控终端打开失败：请把日志发给作者（QQ 群 498700382）",
+  "gui.rswirelesscrafting.monitor_empty_hint": "把要盯着的物品放进左边的槽",
+  "gui.rswirelesscrafting.monitor_rule_below": "低于阈值",
+  "gui.rswirelesscrafting.monitor_rule_above": "高于阈值",
+  "gui.rswirelesscrafting.monitor_rule_tooltip": "当前：%s\\n左键 = 阈值加大一档 · 右键 = 减小一档 · Shift + 点击 = 切换「低于 / 高于」",
+  "msg.rswirelesscrafting.monitor_alert_below": "⚠ 缺料：%s 只剩 %s（阈值 %s）",
+  "msg.rswirelesscrafting.monitor_alert_above": "⚠ 爆仓：%s 已积到 %s（阈值 %s）"
 }

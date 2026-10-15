@@ -9,6 +9,7 @@ import com.kokuu.rswirelesscrafting.common.ModIdentifierUtil;
 import com.kokuu.rswirelesscrafting.common.Platform;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationScreen;
 import com.kokuu.rswirelesscrafting.common.hud.WirelessTerminalHud;
+import com.kokuu.rswirelesscrafting.common.monitor.WirelessMonitorScreen;
 import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.WirelessCraftingGridUpgradeScreen;
 
 import com.mojang.blaze3d.platform.InputConstants;
@@ -54,6 +55,7 @@ public class ClientModInitializer extends AbstractClientModInitializer {
             WirelessCraftingGridUpgradeScreen::new
         );
         e.register(Menus.INSTANCE.getChargingStation(), ChargingStationScreen::new);
+        e.register(Menus.INSTANCE.getWirelessMonitor(), WirelessMonitorScreen::new);
     }
 
     @SubscribeEvent
@@ -91,6 +93,11 @@ public class ClientModInitializer extends AbstractClientModInitializer {
         );
         ItemProperties.register(
             Items.INSTANCE.getWirelessAutocrafterManager(),
+            NetworkItemPropertyFunction.NAME,
+            boundActive
+        );
+        ItemProperties.register(
+            Items.INSTANCE.getWirelessMonitor(),
             NetworkItemPropertyFunction.NAME,
             boundActive
         );

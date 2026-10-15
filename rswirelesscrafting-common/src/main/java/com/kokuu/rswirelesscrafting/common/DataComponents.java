@@ -1,5 +1,6 @@
 package com.kokuu.rswirelesscrafting.common;
 
+import com.kokuu.rswirelesscrafting.common.monitor.MonitorRule;
 import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.WirelessCraftingGridState;
 
 import java.util.List;
@@ -21,6 +22,8 @@ public final class DataComponents {
     private Supplier<DataComponentType<List<ItemStack>>> upgrades;
     @Nullable
     private Supplier<DataComponentType<CompoundTag>> patternGridState;
+    @Nullable
+    private Supplier<DataComponentType<List<MonitorRule>>> monitorRules;
 
     private DataComponents() {
     }
@@ -43,6 +46,16 @@ public final class DataComponents {
         @Nullable final Supplier<DataComponentType<CompoundTag>> supplier
     ) {
         this.patternGridState = supplier;
+    }
+
+    public DataComponentType<List<MonitorRule>> getMonitorRules() {
+        return requireNonNull(monitorRules).get();
+    }
+
+    public void setMonitorRules(
+        @Nullable final Supplier<DataComponentType<List<MonitorRule>>> supplier
+    ) {
+        this.monitorRules = supplier;
     }
 
     public DataComponentType<List<ItemStack>> getUpgrades() {

@@ -274,6 +274,12 @@ def load_assets():
                                                "cutouts", "gray.png")))
     assets["wireless_transmitter"] = transmitter
 
+    # The storage monitor is a plain casing with a screen face.
+    storage_monitor = read_png(os.path.join(RS_TEXTURES, "block", "machine_casing", "end.png"))
+    overlay(storage_monitor, read_png(os.path.join(RS_TEXTURES, "block", "storage_monitor",
+                                                   "front.png")))
+    assets["storage_monitor"] = storage_monitor
+
     # The autocrafter manager is likewise a casing plus a coloured cutout face.
     manager_icon = read_png(os.path.join(RS_TEXTURES, "block", "machine_casing", "end.png"))
     overlay(manager_icon, read_png(os.path.join(RS_TEXTURES, "block", "autocrafter_manager",
@@ -289,6 +295,8 @@ def load_assets():
         "pattern_on": "wireless_pattern_grid/active.png",
         "manager_off": "wireless_autocrafter_manager/inactive.png",
         "manager_on": "wireless_autocrafter_manager/active.png",
+        "monitor_off": "wireless_monitor/inactive.png",
+        "monitor_on": "wireless_monitor/active.png",
         "card": "wireless_configuration_card.png",
         "battery": "battery_upgrade.png",
         "range": "range_upgrade.png",
@@ -319,7 +327,7 @@ def load_assets():
 def items_figure(assets, path):
     order = ["grid_off", "grid_on", "pattern_off", "pattern_on", "manager_off", "manager_on",
              "battery", "energy", "advanced", "range", "interdim", "remote", "charging",
-             "amplifier", "bridge_on", "card"]
+             "amplifier", "bridge_on", "card", "monitor_on"]
     scale = 8
     cell = 16 * scale + 8          # slot size, leaving a 4px inset for the sprite
     gap = 16
@@ -422,6 +430,7 @@ def main():
                       ("manager_on", "item-wireless-autocrafter-manager.png"),
                       ("bridge_on", "item-wireless-bridge.png"),
                       ("card", "item-wireless-configuration-card.png"),
+                      ("monitor_on", "item-wireless-monitor.png"),
                       ("battery", "item-battery.png"),
                       ("energy", "item-energy.png"),
                       ("advanced", "item-advanced-energy.png"),
@@ -450,6 +459,10 @@ def main():
     recipe_figure(
         assets, os.path.join(OUT_DIR, "recipe-wireless-bridge.png"),
         [[Q, T, Q], [R, S, R], [Q, X, Q]], "bridge_on",
+    )
+    recipe_figure(
+        assets, os.path.join(OUT_DIR, "recipe-wireless-monitor.png"),
+        [[Q, A, Q], ["storage_monitor", "grid_off", "storage_monitor"], [Q, X, Q]], "monitor_on",
     )
     recipe_figure(
         assets, os.path.join(OUT_DIR, "recipe-battery.png"),

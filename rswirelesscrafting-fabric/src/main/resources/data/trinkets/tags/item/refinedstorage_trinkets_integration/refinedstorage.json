@@ -3,6 +3,7 @@
   "values": [
     "rswirelesscrafting:wireless_crafting_grid",
     "rswirelesscrafting:wireless_pattern_grid",
-    "rswirelesscrafting:wireless_autocrafter_manager"
+    "rswirelesscrafting:wireless_autocrafter_manager",
+    "rswirelesscrafting:wireless_monitor"
   ]
 }

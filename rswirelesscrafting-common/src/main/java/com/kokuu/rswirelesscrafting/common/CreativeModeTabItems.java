@@ -22,5 +22,6 @@ public final class CreativeModeTabItems {
         consumer.accept(Items.INSTANCE.getWirelessAmplifierBlockItem().getDefaultInstance());
         consumer.accept(Items.INSTANCE.getWirelessBridgeBlockItem().getDefaultInstance());
         consumer.accept(Items.INSTANCE.getWirelessConfigurationCard().getDefaultInstance());
+        consumer.accept(Items.INSTANCE.getWirelessMonitor().getDefaultInstance());
     }
 }

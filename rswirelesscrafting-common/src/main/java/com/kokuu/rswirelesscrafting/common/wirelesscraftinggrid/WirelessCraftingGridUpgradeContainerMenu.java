@@ -3,6 +3,7 @@ package com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid;
 import com.kokuu.rswirelesscrafting.common.Menus;
 import com.kokuu.rswirelesscrafting.common.upgrade.UpgradeContainer;
 import com.kokuu.rswirelesscrafting.common.upgrade.Upgrades;
+import com.kokuu.rswirelesscrafting.common.util.LockedSlot;
 
 import com.refinedmods.refinedstorage.common.api.support.slotreference.SlotReference;
 import net.minecraft.world.Container;
@@ -146,26 +147,6 @@ public class WirelessCraftingGridUpgradeContainerMenu extends AbstractContainerM
         @Override
         public int getMaxStackSize() {
             return 1;
-        }
-    }
-
-    /**
-     * 锁死的玩家背包槽位：看得见、拿不动、也放不进东西。
-     * 用来固定「正在被编辑的终端」，避免玩家在装配过程中把它移走。
-     */
-    private static class LockedSlot extends Slot {
-        LockedSlot(final Container container, final int slot, final int x, final int y) {
-            super(container, slot, x, y);
-        }
-
-        @Override
-        public boolean mayPickup(final Player player) {
-            return false;
-        }
-
-        @Override
-        public boolean mayPlace(final ItemStack stack) {
-            return false;
         }
     }
 }

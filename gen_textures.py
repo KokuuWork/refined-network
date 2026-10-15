@@ -544,6 +544,56 @@ def configuration_card_texture():
     return px
 
 
+# =================================================================== monitor
+#
+# Same shell as the other terminals; the screen shows a short watch list with one
+# row flagged (the amber mark) - "it is telling you something".
+
+MONITOR_ART = [
+    "............s...",
+    "............g...",
+    "............g...",
+    ".KKKKKKKKKKKKKK.",
+    ".KllllllllllmmK.",
+    ".KmmmmmmmmmmmmK.",
+    ".KmKKKKKKKKKKmK.",
+    ".KmKnnnnnnnnKmK.",
+    ".KmKKKKKKKKKKmK.",
+    ".KmKnnnnnAAAKmK.",
+    ".KmKKKKKKKKKKmK.",
+    ".KmKnnnnnnnnKmK.",
+    ".KmKKKKKKKKKKmK.",
+    ".KmmmmmsmsmmmmK.",
+    ".KddddddddddddK.",
+    ".KKKKKKKKKKKKKK.",
+]
+
+MONITOR_PALETTE_OFF = {
+    "K": rgb("#2E323B"),
+    "m": rgb("#5A6270"),
+    "l": rgb("#3F5C6B"),
+    "s": rgb("#3C414C"),
+    "g": rgb("#7A8090"),
+    "d": rgb("#3F444E"),
+    "n": rgb("#6E7784"),
+    "A": rgb("#3C414C"),
+}
+
+MONITOR_PALETTE_ON = dict(MONITOR_PALETTE_OFF)
+MONITOR_PALETTE_ON.update({
+    "l": rgb("#2E6E86"),
+    "s": rgb("#38BBDC"),
+    "n": rgb("#8E97A6"),
+    "A": rgb("#E0A030"),
+})
+
+
+def monitor_texture(active):
+    px = canvas()
+    paint(px, MONITOR_ART, MONITOR_PALETTE_ON if active else MONITOR_PALETTE_OFF)
+    return px
+
+
 # ====================================================================== driver
 
 def main():
@@ -553,6 +603,8 @@ def main():
         ("wireless_pattern_grid/inactive.png", pattern_grid_texture(False)),
         ("wireless_pattern_grid/active.png", pattern_grid_texture(True)),
         ("wireless_configuration_card.png", configuration_card_texture()),
+        ("wireless_monitor/inactive.png", monitor_texture(False)),
+        ("wireless_monitor/active.png", monitor_texture(True)),
         ("wireless_autocrafter_manager/inactive.png", manager_texture(False)),
         ("wireless_autocrafter_manager/active.png", manager_texture(True)),
         ("range_upgrade.png", range_texture()),

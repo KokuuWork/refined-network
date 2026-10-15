@@ -49,6 +49,7 @@
 | <img src="docs/images/item-wireless-amplifier.png" width="40" alt=""> | **无线增幅塔** 🧪<br>`wireless_amplifier` | 覆盖半径 **64 格内**的无线终端**距离耗电打对折**。接网络常驻耗电，跨维度不享受。 | — |
 | <img src="docs/images/item-wireless-bridge.png" width="40" alt=""> | **无线桥** 🧪<br>`wireless_bridge` | 未配对 = 基点、配对后 = 据点：把网络**延伸到远处**（可跨维度），自带区块保活（很贵）。 | — |
 | <img src="docs/images/item-wireless-configuration-card.png" width="40" alt=""> | **无线配置卡** 🧪<br>`wireless_configuration_card` | 就地复制设置，**批量**刷给一片同类方块；站进增幅塔覆盖可扩大范围。 | — |
+| <img src="docs/images/item-wireless-monitor.png" width="40" alt=""> | **无线监控终端** 🧪<br>`wireless_monitor` | 远程盯着几样东西，**缺料 / 爆仓时主动提醒**到聊天栏。 | EPIC |
 | <img src="docs/images/item-terminal-charging-station.png" width="40" alt=""> | **终端充电站**<br>`terminal_charging_station` | 3 个有线槽位快充，5 格范围内自动无线补电（**全局 3 个设备名额**）。 | — |
 
 所有鼠标悬停说明都是活的：终端会显示**当前绑定的维度与坐标**、**已安装的插件**，以及**当前距离与收费倍率**（同维度显示格数，跨维度单独标注，与实际扣费完全一致）；每张插件会显示自己的效果、生效前提，以及从配置里实时读出的数值（电池插件显示容量加成，维度插件显示当前跨维度能量倍率，初级能耗插件显示除数）。
@@ -146,6 +147,26 @@ RS 原版配置卡很好用，但得一个个方块点过去——一排机器�
 - **本版不搬升级卡**（原版卡粘贴时会顺带把升级卡挪过去）：我们没做，避免猜错它的消耗语义；要搬升级卡请用原版卡。
 
 配方：`QAQ / WCW / QAQ`（石英富集铁 / 高级处理器 / **无线访问点 ×2** / 原版配置卡）。
+
+## 无线监控终端 🧪 预览·未发布
+
+前面几件终端都是「你想用时点开」，这件不一样：**你不看它的时候它在看**。
+
+把要盯的物品放进界面左边的槽，调好阈值，之后**只要这件终端带在身上**，它就会一直替你看着网络——跌破阈值（缺料）或者涨过阈值（爆仓）时，直接在聊天栏提醒你。界面里每行还会实时显示**当前存量**，触发的那一行整行转红。
+
+**怎么用**
+- 右键打开界面；把物品放进左侧槽位 = 开始监控它，取出 = 取消。
+- **左键**点规则数字 = 阈值加大一档，**右键** = 减小一档（档位是对数的：0 / 1 / 8 / 16 / 64 / 256 / 1K / 4K / 16K / 64K）。
+- **Shift + 点击**数字 = 在「**低于**提醒」与「**高于**提醒」之间切换。
+- 规则**存在终端物品上**，关掉界面再打开还在；界面上会锁住终端所在的那一格，防止编辑途中被挪走。
+
+**两条设计说明**
+- **提醒不收费**，只有**打开界面**按 5 FE × 距离倍率计费。理由：提醒是被动读取，不像合成 / 造样板那样是玩家的主动操作；而且它的频率已经被限制住了（每 20 tick 检查一次，同一条规则触发后 60 秒内不重复提醒）。
+- **与 RS 的检测器（Detector）不是一回事**：RS 那个是方块版的等级发信器，必须接在网络里、红石线还得拉到用它的地方。我们做的是**远程 + 主动推送**——人在地底挖矿，基地缺料也能立刻知道。
+
+配方：`QAQ / TMT / QXQ`（石英富集铁 / 高级处理器 / **存储监控器 ×2** / 无线合成终端 / 网络接收器）。
+
+<img src="docs/images/recipe-wireless-monitor.png" width="270" alt="无线监控终端配方">
 
 ## 充电站
 
@@ -476,6 +497,7 @@ Vanilla Refined Storage ships only a wireless *viewing* grid — you can browse 
 | <img src="docs/images/item-wireless-amplifier.png" width="40" alt=""> | **Wireless Amplifier** 🧪<br>`wireless_amplifier` | **Halves** the distance multiplier for terminals inside a **64-block** radius. A permanent load on the network; never applies cross-dimension. | — |
 | <img src="docs/images/item-wireless-bridge.png" width="40" alt=""> | **Wireless Bridge** 🧪<br>`wireless_bridge` | Unpaired = anchor, paired = endpoint: extends the network **far away** (across dimensions) with chunk keeping (pricey). | — |
 | <img src="docs/images/item-wireless-configuration-card.png" width="40" alt=""> | **Wireless Configuration Card** 🧪<br>`wireless_configuration_card` | Copy settings, then **paste them in bulk**; standing inside an amplifier widens the range. | — |
+| <img src="docs/images/item-wireless-monitor.png" width="40" alt=""> | **Wireless Monitor Terminal** 🧪<br>`wireless_monitor` | Watch a few resources remotely and get **alerted when they run low or pile up**. | epic |
 | <img src="docs/images/item-terminal-charging-station.png" width="40" alt=""> | **Terminal Charging Station**<br>`terminal_charging_station` | 3 wired fast-charge slots, plus a 5-block wireless aura (**3 device slots total**). | — |
 
 Tooltips are live: the terminal shows the **bound dimension and coordinates**, its **installed upgrades**, and the **current distance and energy multiplier** (distance in blocks within a dimension, a separate label when cross-dimensional — always matching what the server bills); each card explains its effect, its prerequisite, and the values read from config in real time.
@@ -573,6 +595,26 @@ It **reuses RS's own configuration-card data component**, so the two cards under
 - **Upgrade cards are not transferred** (RS's card moves them across as well): we skipped that rather than guess its consumption semantics; use RS's card if you need it.
 
 Recipe: `QAQ / WCW / QAQ` (quartz enriched iron / advanced processor / **two wireless transmitters** / RS's configuration card).
+
+### Wireless Monitor Terminal 🧪 preview (unreleased)
+
+Every terminal so far is "open it when you need it". This one is different: **it watches while you are not looking.**
+
+Drop the resources you care about into the slots on the left, set a threshold, and from then on — **as long as the terminal is on you** — it keeps an eye on the network and tells you in chat when something drops below (running out) or climbs above (piling up). Each row also shows the **current amount** live, and a row that has tripped turns red.
+
+**How to use it**
+- Right-click to open it; put an item in a left-hand slot to start watching it, take it out to stop.
+- **Left-click** a rule's number to raise the threshold one step, **right-click** to lower it (the steps are logarithmic: 0 / 1 / 8 / 16 / 64 / 256 / 1K / 4K / 16K / 64K).
+- **Shift + click** the number to switch between **below** and **above**.
+- Rules are **stored on the item**, so they survive closing the UI; the slot holding the terminal is locked while editing so it cannot be moved mid-edit.
+
+**Two design notes**
+- **Alerts are free**; only **opening the UI** costs 5 FE × distance multiplier. Alerts are passive reads rather than a deliberate action like crafting or writing a pattern, and their rate is already bounded (checked every 20 ticks, and the same rule will not repeat within 60 seconds).
+- **This is not RS's Detector**: that one is a block-form level emitter which must sit on the network and have redstone run to wherever you need it. Ours is **remote and pushed to you** — you can be mining underground and still hear that the base ran out.
+
+Recipe: `QAQ / TMT / QXQ` (quartz enriched iron / advanced processor / **two storage monitors** / wireless crafting grid / network receiver).
+
+<img src="docs/images/recipe-wireless-monitor.png" width="270" alt="Wireless monitor terminal recipe">
 
 ### Charging Station
 
