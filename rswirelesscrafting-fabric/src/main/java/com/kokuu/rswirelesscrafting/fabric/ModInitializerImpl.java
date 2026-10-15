@@ -10,6 +10,7 @@ import com.kokuu.rswirelesscrafting.common.Platform;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlock;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockEntity;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockItem;
+import com.kokuu.rswirelesscrafting.common.patterngrid.WirelessPatternGridItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.AdvancedEnergyUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.BatteryUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.EnergyUpgradeItem;
@@ -103,6 +104,20 @@ public class ModInitializerImpl extends AbstractModInitializer implements Refine
     private void registerCustomItems(final RegistryCallback<Item> callback) {
         Items.INSTANCE.setWirelessCraftingGrid(
             callback.register(ContentIds.WIRELESS_CRAFTING_GRID, () -> new WirelessCraftingGridItem(
+                RefinedStorageApi.INSTANCE.getEnergyItemHelper(),
+                RefinedStorageApi.INSTANCE.getNetworkItemHelper()
+            ) {
+                @Override
+                public boolean allowComponentsUpdateAnimation(final Player player,
+                                                               final InteractionHand hand,
+                                                               final ItemStack oldStack,
+                                                               final ItemStack newStack) {
+                    return AbstractModInitializer.allowComponentsUpdateAnimation(oldStack, newStack);
+                }
+            })
+        );
+        Items.INSTANCE.setWirelessPatternGrid(
+            callback.register(ContentIds.WIRELESS_PATTERN_GRID, () -> new WirelessPatternGridItem(
                 RefinedStorageApi.INSTANCE.getEnergyItemHelper(),
                 RefinedStorageApi.INSTANCE.getNetworkItemHelper()
             ) {

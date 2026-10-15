@@ -1,6 +1,8 @@
 {
   "mod.rswirelesscrafting": "无线合成终端",
   "item.rswirelesscrafting.wireless_crafting_grid": "无线合成终端",
+  "item.rswirelesscrafting.wireless_pattern_grid": "无线样板终端",
+  "item.rswirelesscrafting.wireless_pattern_grid.desc": "远程编写自动化样板，不用回基地",
   "item.rswirelesscrafting.battery_upgrade": "电池升级插件",
   "item.rswirelesscrafting.range_upgrade": "距离升级插件",
   "item.rswirelesscrafting.interdimensional_upgrade": "维度升级插件",

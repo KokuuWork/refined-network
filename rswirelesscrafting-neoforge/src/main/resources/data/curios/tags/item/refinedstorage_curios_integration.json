@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "rswirelesscrafting:wireless_crafting_grid"
+    "rswirelesscrafting:wireless_crafting_grid",
+    "rswirelesscrafting:wireless_pattern_grid"
   ]
 }

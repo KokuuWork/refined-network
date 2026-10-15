@@ -125,6 +125,39 @@ def grid_texture(active):
     return px
 
 
+# Same body and antenna as the crafting terminal, but the screen shows a 3x2 block of
+# ghost pattern cells (plus an output row) instead of a crafting matrix.
+PATTERN_ART = [
+    "............s...",
+    "............g...",
+    "............g...",
+    ".KKKKKKKKKKKKKK.",
+    ".KllllllllllmmK.",
+    ".KmKKKKKKKKKKmK.",
+    ".KmKSSSSSSSSKmK.",
+    ".KmKSSnnnnSSKmK.",
+    ".KmKSSnnnnSSKmK.",
+    ".KmKSSSSSSSSKmK.",
+    ".KmKSSnnnnSSKmK.",
+    ".KmKSSnnnnSSKmK.",
+    ".KmKKKKKKKKKKmK.",
+    ".KmmmmmsmsmmmmK.",
+    ".KddddddddddddK.",
+    ".KKKKKKKKKKKKKK.",
+]
+
+
+def pattern_grid_texture(active):
+    px = canvas()
+    paint(px, PATTERN_ART, GRID_PALETTE_ON if active else GRID_PALETTE_OFF)
+    if active:
+        for x in range(3, 13):
+            px[4][x] = mix(px[4][x], GLOW, 0.18)
+        for y in range(5, 13):
+            px[y][2] = mix(px[y][2], GLOW, 0.18)
+    return px
+
+
 # ================================================================ hexagon cards
 
 # Symmetric pointed hexagon; RS uses the same silhouette for its upgrade cards.
@@ -352,6 +385,8 @@ def main():
     targets = [
         ("wireless_crafting_grid/inactive.png", grid_texture(False)),
         ("wireless_crafting_grid/active.png", grid_texture(True)),
+        ("wireless_pattern_grid/inactive.png", pattern_grid_texture(False)),
+        ("wireless_pattern_grid/active.png", pattern_grid_texture(True)),
         ("range_upgrade.png", range_texture()),
         ("battery_upgrade.png", battery_texture()),
         ("interdimensional_upgrade.png", interdimensional_texture()),

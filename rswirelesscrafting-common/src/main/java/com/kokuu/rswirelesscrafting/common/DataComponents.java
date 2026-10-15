@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 
 import static java.util.Objects.requireNonNull;
@@ -18,6 +19,8 @@ public final class DataComponents {
     private Supplier<DataComponentType<WirelessCraftingGridState>> wirelessCraftingGridState;
     @Nullable
     private Supplier<DataComponentType<List<ItemStack>>> upgrades;
+    @Nullable
+    private Supplier<DataComponentType<CompoundTag>> patternGridState;
 
     private DataComponents() {
     }
@@ -30,6 +33,16 @@ public final class DataComponents {
         @Nullable final Supplier<DataComponentType<WirelessCraftingGridState>> supplier
     ) {
         this.wirelessCraftingGridState = supplier;
+    }
+
+    public DataComponentType<CompoundTag> getPatternGridState() {
+        return requireNonNull(patternGridState).get();
+    }
+
+    public void setPatternGridState(
+        @Nullable final Supplier<DataComponentType<CompoundTag>> supplier
+    ) {
+        this.patternGridState = supplier;
     }
 
     public DataComponentType<List<ItemStack>> getUpgrades() {

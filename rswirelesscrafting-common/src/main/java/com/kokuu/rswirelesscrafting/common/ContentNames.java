@@ -17,6 +17,10 @@ public final class ContentNames {
         "item",
         "wireless_crafting_grid"
     );
+    public static final MutableComponent WIRELESS_PATTERN_GRID = createTranslation(
+        "item",
+        "wireless_pattern_grid"
+    );
     public static final MutableComponent RANGE_UPGRADE = createTranslation(
         "item",
         "range_upgrade"
@@ -45,6 +49,10 @@ public final class ContentNames {
         "block",
         "terminal_charging_station"
     );
+    public static final MutableComponent WIRELESS_PATTERN_GRID_DESC = createTranslation(
+        "item",
+        "wireless_pattern_grid.desc"
+    ).withStyle(ChatFormatting.GRAY);
     public static final MutableComponent WIRELESS_CRAFTING_GRID_UPGRADES_TITLE = createTranslation(
         "gui",
         "wireless_crafting_grid_upgrades"

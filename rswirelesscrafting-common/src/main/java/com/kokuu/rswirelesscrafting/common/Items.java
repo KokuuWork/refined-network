@@ -1,6 +1,7 @@
 package com.kokuu.rswirelesscrafting.common;
 
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockItem;
+import com.kokuu.rswirelesscrafting.common.patterngrid.WirelessPatternGridItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.AdvancedEnergyUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.BatteryUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.EnergyUpgradeItem;
@@ -19,6 +20,8 @@ public final class Items {
 
     @Nullable
     private Supplier<WirelessCraftingGridItem> wirelessCraftingGrid;
+    @Nullable
+    private Supplier<WirelessPatternGridItem> wirelessPatternGrid;
     @Nullable
     private Supplier<RangeUpgradeItem> rangeUpgrade;
     @Nullable
@@ -43,6 +46,14 @@ public final class Items {
 
     public void setWirelessCraftingGrid(final Supplier<WirelessCraftingGridItem> supplier) {
         this.wirelessCraftingGrid = supplier;
+    }
+
+    public WirelessPatternGridItem getWirelessPatternGrid() {
+        return requireNonNull(wirelessPatternGrid).get();
+    }
+
+    public void setWirelessPatternGrid(final Supplier<WirelessPatternGridItem> supplier) {
+        this.wirelessPatternGrid = supplier;
     }
 
     public RangeUpgradeItem getRangeUpgrade() {

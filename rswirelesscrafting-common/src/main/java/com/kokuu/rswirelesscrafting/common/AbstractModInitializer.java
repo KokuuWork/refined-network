@@ -14,6 +14,7 @@ import java.util.List;
 import com.refinedmods.refinedstorage.common.content.ExtendedMenuTypeFactory;
 import com.refinedmods.refinedstorage.common.content.RegistryCallback;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
@@ -56,6 +57,12 @@ public abstract class AbstractModInitializer {
             () -> DataComponentType.<WirelessCraftingGridState>builder()
                 .persistent(WirelessCraftingGridState.CODEC)
                 .networkSynchronized(WirelessCraftingGridState.STREAM_CODEC)
+                .build()));
+        DataComponents.INSTANCE.setPatternGridState(callback.register(
+            ContentIds.WIRELESS_PATTERN_GRID,
+            () -> DataComponentType.<CompoundTag>builder()
+                .persistent(CompoundTag.CODEC)
+                .networkSynchronized(ByteBufCodecs.COMPOUND_TAG)
                 .build()));
         DataComponents.INSTANCE.setUpgrades(callback.register(
             ContentIds.UPGRADES,

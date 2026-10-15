@@ -1,6 +1,8 @@
 {
   "mod.rswirelesscrafting": "Refined Storage - Wireless Crafting",
   "item.rswirelesscrafting.wireless_crafting_grid": "Wireless Crafting Grid",
+  "item.rswirelesscrafting.wireless_pattern_grid": "Wireless Pattern Terminal",
+  "item.rswirelesscrafting.wireless_pattern_grid.desc": "Write autocrafting patterns remotely",
   "item.rswirelesscrafting.battery_upgrade": "Battery Upgrade",
   "item.rswirelesscrafting.range_upgrade": "Range Upgrade",
   "item.rswirelesscrafting.interdimensional_upgrade": "Interdimensional Upgrade",
