@@ -264,8 +264,8 @@ public class ConfigImpl implements Config {
             builder.translation(translationKey("hud")).push("hud");
             enabled = builder
                 .translation(translationKey("hud.enabled"))
-                .comment("手持无线终端时显示「电量 · 距离 · 收费倍率」的小字提示。")
-                .define("enabled", true);
+                .comment("手持无线终端时是否在物品栏上方显示「电量 · 距离 · 收费倍率」。默认关闭。")
+                .define("enabled", false);
             builder.pop();
         }
 

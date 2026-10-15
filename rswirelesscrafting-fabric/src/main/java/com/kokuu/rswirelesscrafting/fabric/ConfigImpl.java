@@ -48,7 +48,7 @@ public class ConfigImpl implements ConfigData, Config {
     }
 
     private static class HudEntryEntryImpl implements HudEntry {
-        private boolean enabled = true;
+        private boolean enabled = false;
 
         @Override
         public boolean isEnabled() {

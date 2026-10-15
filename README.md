@@ -67,7 +67,7 @@
 
 ## 手持提示（HUD）
 
-手里拿着**已绑定**的无线终端时，物品栏上方会出现一行小字：**电量 · 距离 · 收费倍率**——出发前就知道这一趟要花多少电，不用打开背包悬停。打开任意界面（背包 / 箱子 / 设置）时自动让位；嫌碍事就把配置里 `hud.enabled` 改成 `false`，立即消失。
+**默认关闭**（它属于「看一眼就好」的信息，不该常驻在屏幕上）。想要的话在配置里把「手持提示（HUD）」打开：手持**已绑定**的无线终端时，物品栏上方显示一行小字 **电量 · 距离 · 收费倍率**——出发前就知道这一趟要花多少电，不用打开背包悬停。打开任意界面时自动让位。
 
 > 只认**手持**（主手 / 副手）。放饰品栏里不动手的时候不显示，避免屏幕上老是挂着一行字。
 
@@ -423,7 +423,7 @@ Once your base is automated, the annoying part is not crafting — it is **editi
 
 ### Held-item HUD
 
-While you **hold** a bound wireless terminal, a single small line appears above the hotbar: **energy · distance · cost multiplier** — so you know what a trip will cost before you set out, without opening your inventory. It steps aside whenever a screen is open (inventory, chest, settings); set `hud.enabled = false` in the config to get rid of it entirely.
+**Off by default** (it is a "nice to glance at" line and should not live on your screen). Turn on "Held-item HUD" in the config and holding a bound wireless terminal shows a single small line above the hotbar: **energy · distance · cost multiplier** — so you know what a trip will cost before you set out, without opening your inventory. It steps aside whenever a screen is open.
 
 > Held items only (main hand / offhand). Terminals worn in a trinket slot do not show it, so no line is permanently stuck on screen.
 
