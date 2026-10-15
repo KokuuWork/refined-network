@@ -73,6 +73,10 @@ public class WirelessCraftingGridItem extends AbstractNetworkEnergyItem {
         lines.add(ContentNames.WIRELESS_CRAFTING_GRID_DESC);
         lines.add(Component.empty());
         lines.add(createBoundLine(stack));
+        final Component distanceLine = createDistanceLine(stack, Platform.getClientPlayer());
+        if (distanceLine != null) {
+            lines.add(distanceLine);
+        }
         final List<ItemStack> upgrades = Upgrades.getUpgrades(stack);
         if (!upgrades.isEmpty()) {
             lines.add(createInstalledUpgradesLine(upgrades));
@@ -103,6 +107,44 @@ public class WirelessCraftingGridItem extends AbstractNetworkEnergyItem {
             line.append(upgrade.getHoverName().copy().withStyle(Upgrades.getColor(upgrade)));
         }
         return line;
+    }
+
+    /**
+     * 生成一行「距离 + 收费倍率」提示（实时，仅客户端有玩家上下文时）。
+     * 未绑定或无客户端玩家时返回 {@code null}（不显示），避免在服务端里报错或冗余。
+     * 倍率已包含距离 / 跨维度 / 能耗插件三者的叠加，与实际扣费完全一致。
+     */
+    @Nullable
+    public static Component createDistanceLine(final ItemStack stack, @Nullable final Player player) {
+        if (player == null) {
+            return null;
+        }
+        final GlobalPos location = stack.get(
+            com.refinedmods.refinedstorage.common.content.DataComponents.INSTANCE.getNetworkLocation()
+        );
+        if (location == null) {
+            return null;
+        }
+        final long multiplierPercent = ExtendedWirelessNetworkItemContext.distanceMultiplierPercent(stack, player);
+        if (!location.dimension().equals(player.level().dimension())) {
+            return Component.translatable(
+                ContentNames.WIRELESS_CRAFTING_GRID_DISTANCE_INTERDIMENSIONAL_TRANSLATION_KEY,
+                formatMultiplier(multiplierPercent)
+            ).withStyle(ChatFormatting.DARK_GRAY);
+        }
+        final double distance = ExtendedWirelessNetworkItemContext.distanceToBound(stack, player);
+        return Component.translatable(
+            ContentNames.WIRELESS_CRAFTING_GRID_DISTANCE_TRANSLATION_KEY,
+            Math.round(distance),
+            formatMultiplier(multiplierPercent)
+        ).withStyle(ChatFormatting.DARK_GRAY);
+    }
+
+    private static String formatMultiplier(final long percent) {
+        if (percent % 100 == 0) {
+            return Long.toString(percent / 100);
+        }
+        return Double.toString(percent / 100.0);
     }
 
     /**

@@ -5,6 +5,7 @@ import com.kokuu.rswirelesscrafting.common.ContentNames;
 import com.kokuu.rswirelesscrafting.common.Items;
 import com.kokuu.rswirelesscrafting.common.KeyMappings;
 import com.kokuu.rswirelesscrafting.common.Menus;
+import com.kokuu.rswirelesscrafting.common.Platform;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationScreen;
 import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.WirelessCraftingGridUpgradeScreen;
 
@@ -15,12 +16,14 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.item.ItemProperties;
 
 public class ClientModInitializerImpl extends AbstractClientModInitializer implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
+        Platform.setClientPlayerProvider(() -> Minecraft.getInstance().player);
         registerKeyMappings();
         registerMenuScreens();
         registerItemProperties();

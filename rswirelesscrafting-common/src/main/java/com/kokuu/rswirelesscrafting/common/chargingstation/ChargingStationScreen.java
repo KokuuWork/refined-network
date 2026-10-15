@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 
 /**
- * 终端充电站界面：一张 3×2 连接面板（上排 3 个有线槽、下排 3 个无线链接灯）+ 一条网络能量条。
+ * 终端充电站界面：一张 3×2 连接面板（上排 3 个有线槽、下排 3 个无线链接灯）+ 一条缓冲电量条。
  *
  * <p>灯的状态由服务端经 {@code ContainerData} 同步（见 {@link ChargingStationBlockEntity}）：
  * 有线槽「充电中」蓝灯呼吸闪烁、充满绿灯；无线链接「正在充电」时呼吸闪烁的亮灯。
@@ -20,13 +20,13 @@ public class ChargingStationScreen extends AbstractContainerScreen<ChargingStati
     private static final ResourceLocation TEXTURE =
         ModIdentifierUtil.createIdentifier("textures/gui/terminal_charging_station.png");
 
-    // 网络能量条的几何必须与 gen_gui_textures.py 里的 panel() 调用逐像素一致。
-    private static final Bar NETWORK_BAR = new Bar(26, 61, 124, 10);
+    // 缓冲电量条的几何必须与 gen_gui_textures.py 里的 panel() 调用逐像素一致。
+    private static final Bar BUFFER_BAR = new Bar(26, 61, 124, 10);
 
     private static final int CHARGING_COLOR = 0xFF40A8FF;
     private static final int FULL_COLOR = 0xFF4BE070;
     private static final int WIRELESS_COLOR = 0xFF34E0C8;
-    private static final int NETWORK_FILL_COLOR = 0xFF40A8FF;
+    private static final int BUFFER_FILL_COLOR = 0xFF40A8FF;
     private static final int LABEL_COLOR = 0x404040;
 
     public ChargingStationScreen(final ChargingStationContainerMenu menu,
@@ -36,25 +36,33 @@ public class ChargingStationScreen extends AbstractContainerScreen<ChargingStati
     }
 
     @Override
+    public void render(final GuiGraphics graphics, final int mouseX, final int mouseY, final float partialTick) {
+        // 1.21 起 AbstractContainerScreen.render 不再自动调用 renderTooltip，
+        // 必须像原版 ContainerScreen / RS AbstractBaseScreen 那样手动补一次，否则槽位 tooltip 不显示。
+        super.render(graphics, mouseX, mouseY, partialTick);
+        renderTooltip(graphics, mouseX, mouseY);
+    }
+
+    @Override
     protected void renderBg(final GuiGraphics graphics, final float partialTick, final int mouseX, final int mouseY) {
         // 注意：7 参 blit 假定纹理是 256x256，会把 176x166 的背景只画出左上角一小块；
         // 必须用带纹理尺寸的重载，按 1:1 铺满整张背景。
         graphics.blit(TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight, imageWidth, imageHeight);
-        renderNetworkBar(graphics);
+        renderBufferBar(graphics);
         renderConnectionPanel(graphics, partialTick);
     }
 
-    private void renderNetworkBar(final GuiGraphics graphics) {
+    private void renderBufferBar(final GuiGraphics graphics) {
         final int value = menu.getDataValue(0);
         final int max = Math.max(1, menu.getDataValue(1));
-        final int filled = (int) Math.min(NETWORK_BAR.width - 2L, (long) value * (NETWORK_BAR.width - 2) / max);
+        final int filled = (int) Math.min(BUFFER_BAR.width - 2L, (long) value * (BUFFER_BAR.width - 2) / max);
         if (filled > 0) {
             graphics.fill(
-                leftPos + NETWORK_BAR.x + 1,
-                topPos + NETWORK_BAR.y + 1,
-                leftPos + NETWORK_BAR.x + 1 + filled,
-                topPos + NETWORK_BAR.y + NETWORK_BAR.height - 1,
-                NETWORK_FILL_COLOR
+                leftPos + BUFFER_BAR.x + 1,
+                topPos + BUFFER_BAR.y + 1,
+                leftPos + BUFFER_BAR.x + 1 + filled,
+                topPos + BUFFER_BAR.y + BUFFER_BAR.height - 1,
+                BUFFER_FILL_COLOR
             );
         }
     }
@@ -161,21 +169,48 @@ public class ChargingStationScreen extends AbstractContainerScreen<ChargingStati
             LABEL_COLOR,
             false
         );
-        drawNetworkValue(graphics);
+        drawBufferValue(graphics);
     }
 
-    private void drawNetworkValue(final GuiGraphics graphics) {
+    private void drawBufferValue(final GuiGraphics graphics) {
         final Component text = Component.literal(
-            menu.getDataValue(0) + " / " + menu.getDataValue(1) + " FE"
+            formatEnergy(menu.getDataValue(0)) + " / " + formatEnergy(menu.getDataValue(1)) + " FE"
         );
         graphics.drawString(
             font,
             text,
-            NETWORK_BAR.x + NETWORK_BAR.width / 2 - font.width(text) / 2,
-            NETWORK_BAR.y + (NETWORK_BAR.height - 8) / 2,
+            BUFFER_BAR.x + BUFFER_BAR.width / 2 - font.width(text) / 2,
+            BUFFER_BAR.y + (BUFFER_BAR.height - 8) / 2,
             LABEL_COLOR,
             false
         );
+    }
+
+    /**
+     * 把 FE 数值压成紧凑的 K/M/G 后缀形式（如 1200000 → 1.2M），
+     * 避免缓冲电量很大时整串数字超出能量条宽度。
+     */
+    private static String formatEnergy(final int value) {
+        final long v = value;
+        if (v >= 1_000_000_000L) {
+            return formatScaled(v, 1_000_000_000L, 'G');
+        }
+        if (v >= 1_000_000L) {
+            return formatScaled(v, 1_000_000L, 'M');
+        }
+        if (v >= 1_000L) {
+            return formatScaled(v, 1_000L, 'K');
+        }
+        return Long.toString(v);
+    }
+
+    /**
+     * 一位小数 + 单位后缀（不足一位小数时省略小数点），避免依赖 locale 的字符串格式化。
+     */
+    private static String formatScaled(final long value, final long unit, final char suffix) {
+        final long whole = value / unit;
+        final long tenth = value % unit / (unit / 10);
+        return tenth == 0 ? whole + String.valueOf(suffix) : whole + "." + tenth + suffix;
     }
 
     @Override
@@ -191,10 +226,10 @@ public class ChargingStationScreen extends AbstractContainerScreen<ChargingStati
     protected void renderTooltip(final GuiGraphics graphics, final int mouseX, final int mouseY) {
         super.renderTooltip(graphics, mouseX, mouseY);
         if (isHovering(
-            NETWORK_BAR.x() - 4,
-            NETWORK_BAR.y() - 2,
-            NETWORK_BAR.width() + 8,
-            NETWORK_BAR.height() + 4,
+            BUFFER_BAR.x() - 4,
+            BUFFER_BAR.y() - 2,
+            BUFFER_BAR.width() + 8,
+            BUFFER_BAR.height() + 4,
             mouseX,
             mouseY
         )) {

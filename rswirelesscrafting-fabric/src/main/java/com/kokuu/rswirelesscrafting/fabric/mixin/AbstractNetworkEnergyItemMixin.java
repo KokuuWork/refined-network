@@ -117,6 +117,13 @@ public abstract class AbstractNetworkEnergyItemMixin {
         }
         tooltip.add(Component.empty());
         tooltip.add(WirelessCraftingGridItem.createBoundLine(stack));
+        final Component distanceLine = WirelessCraftingGridItem.createDistanceLine(
+            stack,
+            com.kokuu.rswirelesscrafting.common.Platform.getClientPlayer()
+        );
+        if (distanceLine != null) {
+            tooltip.add(distanceLine);
+        }
         final List<ItemStack> upgrades = Upgrades.getUpgrades(stack);
         if (!upgrades.isEmpty()) {
             tooltip.add(WirelessCraftingGridItem.createInstalledUpgradesLine(upgrades));

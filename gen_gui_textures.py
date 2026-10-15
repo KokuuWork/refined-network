@@ -87,7 +87,7 @@ def upgrades_gui():
         slot(pixels, 52 + index * 18, 30)
     # inventory label separator line
     for x in range(7, WIDTH - 7):
-        pixels[76][x] = BG_SHADE
+        pixels[82][x] = BG_SHADE
     for row in range(3):
         for column in range(9):
             slot(pixels, 7 + column * 18, 83 + row * 18)
@@ -123,7 +123,7 @@ def terminal_charging_station_gui():
         pixels[y][25] = accent
         pixels[y][150] = accent
     for x in range(7, WIDTH - 7):
-        pixels[76][x] = BG_SHADE
+        pixels[82][x] = BG_SHADE
     for row in range(3):
         for column in range(9):
             slot(pixels, 7 + column * 18, 83 + row * 18)

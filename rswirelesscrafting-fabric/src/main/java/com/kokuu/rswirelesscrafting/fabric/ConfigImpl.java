@@ -92,58 +92,16 @@ public class ConfigImpl implements ConfigData, Config {
     }
 
     private static class DistanceEnergyEntryEntryImpl implements DistanceEnergyEntry {
-        @ConfigEntry.BoundedDiscrete(min = 0, max = Integer.MAX_VALUE)
-        private int tier1Range = DefaultEnergyUsage.DISTANCE_TIER1_RANGE;
-        @ConfigEntry.BoundedDiscrete(min = 0, max = Integer.MAX_VALUE)
-        private int tier2Range = DefaultEnergyUsage.DISTANCE_TIER2_RANGE;
-        @ConfigEntry.BoundedDiscrete(min = 0, max = Integer.MAX_VALUE)
-        private int tier3Range = DefaultEnergyUsage.DISTANCE_TIER3_RANGE;
         @ConfigEntry.BoundedDiscrete(min = 1, max = Integer.MAX_VALUE)
-        private int tier1Multiplier = DefaultEnergyUsage.DISTANCE_TIER1_MULTIPLIER;
-        @ConfigEntry.BoundedDiscrete(min = 1, max = Integer.MAX_VALUE)
-        private int tier2Multiplier = DefaultEnergyUsage.DISTANCE_TIER2_MULTIPLIER;
-        @ConfigEntry.BoundedDiscrete(min = 1, max = Integer.MAX_VALUE)
-        private int tier3Multiplier = DefaultEnergyUsage.DISTANCE_TIER3_MULTIPLIER;
-        @ConfigEntry.BoundedDiscrete(min = 1, max = Integer.MAX_VALUE)
-        private int tier4Multiplier = DefaultEnergyUsage.DISTANCE_TIER4_MULTIPLIER;
+        private int baseRange = DefaultEnergyUsage.DISTANCE_BASE_RANGE;
         @ConfigEntry.BoundedDiscrete(min = 100, max = Integer.MAX_VALUE)
         private int interdimensionalMultiplier = DefaultEnergyUsage.INTERDIMENSIONAL_ENERGY_MULTIPLIER;
         @ConfigEntry.BoundedDiscrete(min = 1, max = Integer.MAX_VALUE)
         private int basicEnergyDivisor = DefaultEnergyUsage.BASIC_ENERGY_DIVISOR;
 
         @Override
-        public int getTier1Range() {
-            return tier1Range;
-        }
-
-        @Override
-        public int getTier2Range() {
-            return tier2Range;
-        }
-
-        @Override
-        public int getTier3Range() {
-            return tier3Range;
-        }
-
-        @Override
-        public int getTier1Multiplier() {
-            return tier1Multiplier;
-        }
-
-        @Override
-        public int getTier2Multiplier() {
-            return tier2Multiplier;
-        }
-
-        @Override
-        public int getTier3Multiplier() {
-            return tier3Multiplier;
-        }
-
-        @Override
-        public int getTier4Multiplier() {
-            return tier4Multiplier;
+        public int getBaseRange() {
+            return baseRange;
         }
 
         @Override

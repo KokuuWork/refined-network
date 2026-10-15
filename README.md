@@ -12,7 +12,7 @@
 
 给 [Refined Storage 2](https://github.com/refinedmods/refinedstorage) 补上原版缺失的**无线合成**能力。
 
-原版只有一个无线**查看**终端（`wireless_grid`）——你能远程看库存，但不能远程合成。本模组提供一个**无线合成终端**，用六张可插拔的**装配式升级插件**把它的续航、范围、维度与供能方式一路推到终局，再配一座**终端充电站**为所有 FE 终端补电。所有无线终端（含 RS 原生的无线终端与无线合成监视器）都遵循**按距离扣电**的分段价目表，离网络越远耗电越狠。
+原版只有一个无线**查看**终端（`wireless_grid`）——你能远程看库存，但不能远程合成。本模组提供一个**无线合成终端**，用六张可插拔的**装配式升级插件**把它的续航、范围、维度与供能方式一路推到终局，再配一座**终端充电站**为所有 FE 终端补电。所有无线终端（含 RS 原生的无线终端与无线合成监视器）都遵循**按距离扣电**的线性价目表，离网络越远耗电越狠。
 
 ![无线合成终端的未激活态与激活态，以及四张升级卡和终端充电站](docs/images/items.png)
 
@@ -53,7 +53,7 @@
 | **无线**（玩家在范围内自动补电） | **20 FE/s**（每个设备，半径 **5 格**），**45% 效率**：消耗 100 只给设备充 45，其余作传输损耗 |
 | 无线并发 | **全局 3 个设备名额**，按离站距离由近到远分配：3 名玩家各充 1 个、1 名玩家独占 3 个 |
 | 基础待机损耗 | **128 FE/s**（常驻，充电另算）——可用**红石信号**关掉无线充电并停扣待机损耗 |
-| 外部 FE 缓冲 | 10000 FE |
+| 内部电量缓冲 | **4000 FE**（默认，配置项 `externalCapacity` 可调） |
 
 界面是一张 **3×2 连接面板**：上排 3 个有线槽（放物品，充电中蓝灯呼吸闪烁、充满绿灯），下排 3 个无线链接灯（正在为某名玩家充电时呼吸闪烁）。
 
@@ -61,10 +61,10 @@
 
 | 供电来源 | 说明 |
 |---|---|
-| **RS 网络**（主来源） | 与 RS 其他机械一致：方块接入网络后，待机损耗直接从 `EnergyNetworkComponent` 抽取 |
-| **外部 FE 缓冲**（兜底） | 注册标准 `Capabilities.EnergyStorage.BLOCK` 能力，其他模组用标准 FE 输电的方块/管道可以给它供电，纯 FE 整合包里也能用 |
+| **RS 网络**（主来源） | 方块接入网络后，持续把网络电量**补进自己的内部缓冲**，补满即停 |
+| **外部 FE**（兜底） | 注册标准 `Capabilities.EnergyStorage.BLOCK` 能力，其他模组用标准 FE 输电的方块/管道可以直接往缓冲里供电，纯 FE 整合包里也能用 |
 
-取电优先级是**网络优先、缓冲兜底**；网络抽不出来（未联网或网络空）时才动内部缓冲。GUI 里的能量条显示网络存量。
+界面能量条显示的是**充电站自己的缓冲电量**；待机损耗与有线 / 无线充电一律从这块缓冲里出账，缓冲没满时自动找网络补。
 
 > 表里的速率一律是**每秒（FE/s）**。Minecraft 按 **20 tick = 1 秒** 结算，方块内部就把每秒额度摊到每 tick，除不尽的部分顺延到下一 tick，所以长期平均值精确、也不会漏电。折算成每 tick 是：有线 10、无线 1（每个设备）。
 >
@@ -78,16 +78,16 @@
 
 | 水平距离（玩家 ↔ 绑定网络） | 倍率（默认） |
 |---|---|
-| 0 – 10 格 | **×1** |
-| 10 – 100 格 | **×2** |
-| 100 – 1000 格 | **×4** |
-| 1000 格以上（需距离升级插件） | **×8** |
-| 跨维度（需维度升级插件） | **×1.5** |
+| 0 – 16 格（基础范围） | **×1** |
+| 16 格以上 | 按距离**线性增长**：倍率 = 距离 ÷ 16 |
+| 跨维度（需维度升级插件） | 固定 **×16** |
+
+线性示例：32 格 ×2、64 格 ×4、256 格 ×16、400 格 ×25、1000 格 ≈ ×62。距离越远收得越狠，几百格外单次动作轻松破百 FE。
 
 三段能耗插件就是为此准备的套娃链：
 
 - **初级能耗插件**：距离倍率**减半**（向上取整）；
-- **高级能耗插件**：距离倍率**归 1**（跨维度 ×1.5 仍保留）；
+- **高级能耗插件**：距离倍率**归 1**（跨维度 ×16 仍保留）；
 - **远程输电插件**：扣电直接**从绑定网络出账**，终端自身电池不再掉电，距离惩罚在实际上被网络电量抹平。
 
 套娃不浪费：`初级能耗插件 → 高级能耗插件 → 远程输电插件`，每一级都是上一级的合成原料。
@@ -96,11 +96,11 @@
 
 | 场景 | 电从哪来 | 单次动作耗电（默认） |
 |---|---|---|
-| 出厂状态 | 终端**自身电池**（容量 400 FE） | 开界面 5 · 合成 5 · 自动合成 10 · 清空矩阵 5 · 配方转移 5 |
+| 出厂状态 | 终端**自身电池**（容量 400 FE） | 开界面 5 · 合成 20 · 自动合成 40 · 清空矩阵 5 · 配方转移 5 |
 | 装了**电池升级插件** | 同上，但容量 **+1000 FE / 张** | 同上 |
 | 装了**远程输电插件** | **直接扣所绑定网络的能量**，终端自身电池不再掉电；网络无电或未绑定时自动回落成出厂行为 | 同上 |
 
-基础电池容量只有 **400 FE**，而距离倍率能把单次动作抬到几十甚至上百 FE——所以**电池升级插件是前期刚需**：不装它，走远一点终端很快就见底，只能反复跑回充电站。
+基础电池容量只有 **400 FE**，而距离倍率能把单次动作抬到几十甚至上百 FE——所以**电池升级插件是前期刚需**：不装它，走远一点终端很快就见底，只能反复跑回充电站。合成类动作（合成 20 / 自动合成 40）显著贵于查看（5），这正是合成终端相对普通无线终端的额外成本。
 
 ## 环境
 
@@ -133,6 +133,21 @@
 4. **打开**。右键终端即可打开合成界面（也可在按键设置里绑定快捷键）。
 5. **补电**。终端充电站摆在基地里，3 个槽位有线快充，5 格范围内的玩家自动无线补电——走过去就回电。
 
+### 饰品栏（可选）
+
+无线合成终端可以放进**饰品栏**，与 Refined Storage 原生无线终端**共用同一组槽位**：
+
+| 加载器 | 额外需要安装 |
+|---|---|
+| NeoForge | [Curios](https://modrinth.com/mod/curios) + [RS Curios Integration](https://modrinth.com/mod/refined-storage-curios-integration) |
+| Fabric | [Trinkets](https://modrinth.com/mod/trinkets) + [RS Trinkets Integration](https://modrinth.com/mod/refined-storage-trinkets-integration) |
+
+装好后终端会出现在整合模组提供的**两个专用槽位**里，按本模组的「打开无线合成终端」快捷键即可直接开启——饰品栏里的物品不支持右键打开，这是饰品栏模组的通用约定，RS 原生终端也一样。
+
+没装整合模组时本模组照常工作，只是没有饰品槽；**不需要它们也能玩**。
+
+> 兼容方式是**纯数据合并**：本模组只往整合模组的槽位 tag 里追加一条 `wireless_crafting_grid`，并用 `replace: false` 保证不会顶掉 RS 原生终端的条目。这与官方为 Quartz Arsenal 的无线合成终端做兼容用的是同一套做法。
+
 ## 配方
 
 八件内容大多定位为**后期到终局**：材料取自 Refined Storage 自带的无线设备与递归存储元件、原版最稀有的掉落。只有**电池升级插件**、**初级能耗插件**与**终端充电站**刻意压低到前中期——它们负责把曲线撑平，剩下的都是终局件。
@@ -159,7 +174,7 @@
 
 `P` 末影珍珠 · `C` 铜锭 · `R` 红石块 · `S` 基础处理器
 
-距离耗电 ×2 起跳后，这张插件把倍率**砍一半**。它是**高级能耗插件**的原料，前期做了到中期不会浪费。
+距离耗电从基础范围外开始爬升后，这张插件把倍率**砍一半**。它是**高级能耗插件**的原料，前期做了到中期不会浪费。
 
 ### 高级能耗插件
 
@@ -167,7 +182,7 @@
 
 `Q` 石英富集铁 · `P` 高级处理器 · `X` 4k存储方块 · `E` 初级能耗插件
 
-彻底**消除距离倍率**（跨维度 ×1.5 仍保留）。它又是**远程输电插件**的原料——套娃链 `初级能耗插件 → 高级能耗插件 → 远程输电插件` 每一环都回收上一环，投入不打水漂。
+彻底**消除距离倍率**（跨维度 ×16 仍保留）。它又是**远程输电插件**的原料——套娃链 `初级能耗插件 → 高级能耗插件 → 远程输电插件` 每一环都回收上一环，投入不打水漂。
 
 ### 距离升级插件
 
@@ -216,6 +231,18 @@
 
 跨维度访问要求网络变送器与接收器**两端区块都已加载**——这是 RS 原生隧道的固有约束，本模组如实保留，没有绕过。
 
+## 多人 / 专用服务器
+
+设计上所有判定都放在服务端，客户端只负责显示：
+
+- **扣电、距离倍率、跨维度、插件生效**全部在服务端算；客户端 tooltip 只是把同一套公式在玩家自己身上复算一遍用于展示。
+- **快捷键打开终端**走 RS 的 `useSlotReferencedItem`（内含 c2s 包），客户端无法伪造「我有终端」。
+- **插件装配界面**的槽位引用（`SlotReference`）由服务端创建，并且会把终端所在的那一格**锁死**——玩家不能在界面里把它拿走或换掉，避免改动写进已脱离背包的物品。
+- **充电站**的 tick 只在服务端运行；无线充电有全局 3 个设备名额，多人同时靠近时按离站距离由近到远分配，互不抢占。
+- **RS 权限管理器**照常生效：没有 `OPEN` 权限的玩家打不开终端。
+
+已知限制（不影响正确性，只影响显示）：配置注册为 NeoForge 的 `COMMON` 类型，**专用服务器不会把 `rswirelesscrafting-common.toml` 下发给客户端**。若服主改了默认数值（如距离基础范围、跨维度倍率），玩家 tooltip 上看到的倍率会是本地配置的数值，而实际扣费以服务端为准。两边都用默认值时完全一致。
+
 ## 架构
 
 ### 终端与升级插件
@@ -226,7 +253,7 @@
 
 RS 的距离/维度校验并不位于 `resolveNetwork`，而在 `NetworkItemPlayerValidator`。因此本模组采用「**标准逻辑优先、升级插件兜底放宽**」策略——先让 RS 原生校验跑完，仅在原生返回空时，才根据已安装的升级插件判断是否放宽。同时刻意**不干预 `force=true` 路径**，因为 RS 依赖该语义移除失效的网格 watcher。
 
-能量侧的扩展点是 `NetworkItemContext.isActive()` 与 `drainEnergy(long)`：距离倍率在这里按「分段价目表 × 能耗插件」算出并叠加到每次扣电上；装了远程输电插件时「有没有电」改由绑定网络回答，扣电也直接从 `EnergyNetworkComponent.extract` 出账。
+能量侧的扩展点是 `NetworkItemContext.isActive()` 与 `drainEnergy(long)`：距离倍率在这里按「距离线性价目 × 能耗插件」算出并叠加到每次扣电上；装了远程输电插件时「有没有电」改由绑定网络回答，扣电也直接从 `EnergyNetworkComponent.extract` 出账。
 
 ### 充电站
 
@@ -327,7 +354,7 @@ One block, two charging paths, two power sources. It works with **any FE termina
 | **Wireless** (players in range) | **20 FE/s** per device (radius **5 blocks**), at **45% efficiency**: drawing 100 only puts 45 into the device, the rest is lost |
 | Wireless concurrency | **3 device slots total**, assigned nearest-first: 3 players get 1 each, 1 player gets all 3 |
 | Base idle drain | **128 FE/s** (constant; charging billed separately) — a **redstone signal** shuts off wireless charging and pauses the idle drain |
-| External FE buffer | 10000 FE |
+| Internal energy buffer | **4000 FE** (default; configurable via `externalCapacity`) |
 
 The GUI is a **3×2 connection panel**: three wired slots up top (blue breathing light while charging, green when full) and three wireless link lights below (breathing while charging a player).
 
@@ -335,10 +362,10 @@ The GUI is a **3×2 connection panel**: three wired slots up top (blue breathing
 
 | Power source | Notes |
 |---|---|
-| **RS network** (primary) | Like every other RS machine: the idle drain comes straight out of the network's `EnergyNetworkComponent` |
-| **External FE buffer** (fallback) | Registers the standard `Capabilities.EnergyStorage.BLOCK` capability, so other mods' FE generators and cables can feed it — it works in pure-FE packs too |
+| **RS network** (primary) | The block tops its **internal buffer** up from the network and stops once full |
+| **External FE** (fallback) | Registers the standard `Capabilities.EnergyStorage.BLOCK` capability, so other mods' FE generators and cables can feed the buffer directly — it works in pure-FE packs too |
 
-Power is drawn **network first, buffer second**. The GUI shows the network energy bar.
+The GUI's energy bar shows the station's **own buffer**. Idle drain and both charging paths are billed against that buffer, which refills from the network whenever it is not full.
 
 > Every rate above is **per second (FE/s)**. Minecraft settles on **20 ticks = 1 second**, so the block spreads the per-second budget across the ticks of each second and carries the remainder over, which keeps the long-run average exact and never leaks energy. Per tick that works out to: wired 10, wireless 1 (per device).
 >
@@ -352,16 +379,16 @@ Every wireless terminal — this mod's grid and RS's own **wireless grid** and *
 
 | Horizontal distance (player ↔ bound network) | Multiplier (default) |
 |---|---|
-| 0 – 10 blocks | **×1** |
-| 10 – 100 blocks | **×2** |
-| 100 – 1000 blocks | **×4** |
-| over 1000 blocks (needs the Range Upgrade) | **×8** |
-| cross-dimensional (needs the Interdimensional Upgrade) | **×1.5** |
+| 0 – 16 blocks (base range) | **×1** |
+| beyond 16 blocks | grows **linearly**: multiplier = distance ÷ 16 |
+| cross-dimensional (needs the Interdimensional Upgrade) | fixed **×16** |
+
+Linear examples: 32 blocks ×2, 64 blocks ×4, 256 blocks ×16, 400 blocks ×25, 1000 blocks ≈ ×62. The further you are, the steeper the cost.
 
 Three energy upgrades form a non-wasteful nesting chain for this:
 
 - **Energy Upgrade**: halves the distance multiplier (rounding up);
-- **Advanced Energy Upgrade**: removes the distance multiplier (cross-dimension ×1.5 still applies);
+- **Advanced Energy Upgrade**: removes the distance multiplier (cross-dimension ×16 still applies);
 - **Remote Energy Upgrade**: pays the bill straight out of the bound network, so the terminal's battery never drains — the distance penalty is effectively absorbed by network power.
 
 `Energy Upgrade → Advanced Energy Upgrade → Remote Energy Upgrade`: each one is the crafting ingredient of the next.
@@ -370,16 +397,29 @@ Three energy upgrades form a non-wasteful nesting chain for this:
 
 | Situation | Where the power comes from | Cost per action (default) |
 |---|---|---|
-| Stock | The terminal's **own battery** (400 FE) | open 5 · craft 5 · autocraft 10 · clear matrix 5 · recipe transfer 5 |
+| Stock | The terminal's **own battery** (400 FE) | open 5 · craft 20 · autocraft 40 · clear matrix 5 · recipe transfer 5 |
 | **Battery Upgrade** installed | Same, but capacity **+1000 FE per card** | unchanged |
 | **Remote Energy Upgrade** installed | **Straight out of the bound network**; the terminal's battery is untouched. Falls back to stock behaviour if the network is empty or unbound. | unchanged |
 
-The base battery is only **400 FE**, while the distance multiplier can push a single action into the tens or hundreds of FE — so the **Battery Upgrade is an early-game necessity**: without it the terminal runs dry fast once you wander away, forcing you to trudge back to a charging station.
+The base battery is only **400 FE**, while the distance multiplier can push a single action into the tens or hundreds of FE — so the **Battery Upgrade is an early-game necessity**: without it the terminal runs dry fast once you wander away, forcing you to trudge back to a charging station. Crafting actions (craft 20 / autocraft 40) cost far more than viewing (5), which is the extra price of a crafting terminal over a plain viewing terminal.
 
 ### Requirements
 
 - Minecraft **1.21.1**; **NeoForge 21.1.x** or **Fabric 0.14.6+**; Refined Storage **2.0.7+** (verified on 2.0.9). On Fabric you also need Fabric API, Cloth Config and Team Reborn Energy (normally bundled with Refined Storage).
 - Pure addon — no forking; one narrow mixin (wrapping `AbstractNetworkEnergyItem.use` so distance energy and upgrade cards also apply to RS's own wireless terminals), no permanent changes to your world (terminals keep their data components if you uninstall; they come back when you reinstall)
+
+### Trinket / Curio slots (optional)
+
+The wireless crafting grid fits into a **trinket slot**, sharing the same two slots as Refined Storage's own wireless terminals:
+
+| Loader | Install additionally |
+|---|---|
+| NeoForge | [Curios](https://modrinth.com/mod/curios) + [RS Curios Integration](https://modrinth.com/mod/refined-storage-curios-integration) |
+| Fabric | [Trinkets](https://modrinth.com/mod/trinkets) + [RS Trinkets Integration](https://modrinth.com/mod/refined-storage-trinkets-integration) |
+
+Once installed the terminal appears in the two dedicated slots and opens with this mod's "open wireless crafting grid" keybinding — items in trinket slots are not right-clickable, which is the usual trinket-mod convention and applies to stock RS terminals as well. Without the integration mod everything still works, you simply have no trinket slot.
+
+> This is a **pure data merge**: the mod appends a single `wireless_crafting_grid` entry to the integration's slot tag with `replace: false`, so Refined Storage's own terminals keep their entries. It's the same approach the official integrations use for Quartz Arsenal's wireless crafting grid.
 
 ### Recipes
 
@@ -412,11 +452,23 @@ The **Terminal Charging Station** is priced like RS's ordinary machines — quar
 
 Cross-dimensional access requires both the Transmitter and Receiver chunks to be loaded — an inherent constraint of RS's native link, faithfully preserved rather than worked around.
 
+### Multiplayer / dedicated servers
+
+Everything that decides anything runs server-side; the client only renders:
+
+- **Energy drain, distance tariff, cross-dimension handling and card effects** are all computed on the server. The client tooltip merely re-runs the same formula for the local player to display it.
+- **The hotkey** goes through RS's `useSlotReferencedItem` (which contains a c2s packet), so a client cannot fake "I have a terminal".
+- **The upgrade panel's** `SlotReference` is created server-side, and the slot holding the terminal is **locked** — the player cannot pick it up or swap it out while the panel is open, so edits can never land on a stack that already left the inventory.
+- **The Charging Station** only ticks on the server. Its three wireless device slots are a global quota: when several players stand nearby they are assigned nearest-first and never steal each other's slot.
+- **RS's Security Manager** still applies — players without the `OPEN` permission cannot open the terminal.
+
+Known limitation (display only, not correctness): the config is registered as a NeoForge `COMMON` config, and **dedicated servers do not push `rswirelesscrafting-common.toml` to clients**. If an admin changes the defaults (base range, cross-dimension multiplier, …), players will see their own local values in the tooltip while the server bills by its own config. With default values on both sides everything matches.
+
 ### How it works
 
 **Grid and cards.** The core extension point is overriding `AbstractNetworkEnergyItem.use(ServerPlayer, ItemStack, SlotReference)` to inject a custom `ExtendedWirelessNetworkItemContext`. To make distance energy and upgrade cards work on RS's own wireless terminals (wireless grid, wireless crafting monitor) too, a single narrow mixin (`AbstractNetworkEnergyItemMixin`) wraps the very same 3-arg `use` and opens the same upgrade panel on sneak-right-click — this is the only place that touches RS classes, and it only wraps a parent method without changing any logic branch. RS's distance/dimension check lives in `NetworkItemPlayerValidator`, not in `resolveNetwork`, so upgrades apply as a **fallback relaxation** — the standard resolution runs first, and only when it comes back empty do the installed cards get a say. The `force=true` path is deliberately left untouched, since RS relies on that semantic to remove stale grid watchers. On the energy side, `isActive()` and `drainEnergy(long)` are overridden so the distance tariff is computed and applied to every drain, and the bound network answers "is there power?" and pays the bill when the Remote Energy Upgrade is installed.
 
-**Charging Station.** RS 2.0.7 exposes no public block base class (blocks live in an internal, un-annotated module), so the block extends vanilla `BaseEntityBlock` and uses vanilla `getTicker`. Note that `BaseEntityBlock` returns `RenderShape.INVISIBLE` by default — vanilla's own block entities such as chests and furnaces draw themselves — so a block entity block that wants an ordinary json model has to override `getRenderShape()` and return `RenderShape.MODEL`, or it renders as nothing at all and you see straight through it. Fixed in 0.1.9. The block entity extends the STABLE-annotated `AbstractNetworkNodeContainerBlockEntity<T extends NetworkNode>`, with a minimal `ChargingStationNetworkNode` declaring the idle draw; RS's default six-way connection strategy means `createMainContainer` needs no override at all. Each tick it tops up the three wired slots, then scans nearby players (nearest first) and hands out three device slots round-robin — three players charge one device each, a single player charges all three. The six panel lights (3 wired + 3 wireless) are computed server-side and synced through `ContainerData`; the client drives the blue breathing pulse off `level.getGameTime()`, so it's purely visual with no extra packets. Item charging uses each loader's generic energy capability (NeoForge `Capabilities.EnergyStorage.ITEM`, Fabric Team Reborn Energy) rather than RS's `PlatformImpl.getEnergyStorage` (which only recognises RS's own adapter), which is what makes it compatible with other mods' FE items.
+**Charging Station.** RS 2.0.7 exposes no public block base class (blocks live in an internal, un-annotated module), so the block extends vanilla `BaseEntityBlock` and uses vanilla `getTicker`. Note that `BaseEntityBlock` returns `RenderShape.INVISIBLE` by default — vanilla's own block entities such as chests and furnaces draw themselves — so a block entity block that wants an ordinary json model has to override `getRenderShape()` and return `RenderShape.MODEL`, or it renders as nothing at all and you see straight through it. Fixed in 0.1.9. The block entity extends the STABLE-annotated `AbstractNetworkNodeContainerBlockEntity<T extends NetworkNode>`, with a minimal `ChargingStationNetworkNode` declaring the idle draw; RS's default six-way connection strategy means `createMainContainer` needs no override at all. Each tick it tops up the three wired slots, and every 10 ticks it scans nearby players (nearest first) and hands out three device slots round-robin — three players charge one device each, a single player charges all three. The scan is deliberately throttled: on a busy server, walking every nearby player's inventory every tick for every station is a real hot spot, and charging the 10-tick budget in one go gives the same rate for a tenth of the cost. The block's powered/wireless states are also rate-limited to one write per 10 ticks, so a nearly-empty network (where the buffer flickers between "empty" and "a few FE") can't turn into a block-update and redstone-neighbour storm. The six panel lights (3 wired + 3 wireless) are computed server-side and synced through `ContainerData`; the client drives the blue breathing pulse off `level.getGameTime()`, so it's purely visual with no extra packets. Item charging uses each loader's generic energy capability (NeoForge `Capabilities.EnergyStorage.ITEM`, Fabric Team Reborn Energy) rather than RS's `PlatformImpl.getEnergyStorage` (which only recognises RS's own adapter), which is what makes it compatible with other mods' FE items.
 
 **GUI backgrounds.** The custom screens use 176×166 backgrounds, so they must draw with the explicit-texture-size `blit` overload — the 7-arg `blit(loc, x, y, u, v, w, h)` silently assumes a 256×256 texture, which magnifies only the top-left corner of the background and made the slots look misaligned with an "invisible" inventory. Fixed in 0.1.10.
 

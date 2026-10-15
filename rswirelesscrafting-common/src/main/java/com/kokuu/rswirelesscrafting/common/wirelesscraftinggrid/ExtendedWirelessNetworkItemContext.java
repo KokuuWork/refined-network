@@ -18,6 +18,7 @@ import com.refinedmods.refinedstorage.common.networking.WirelessTransmitterBlock
 import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
@@ -26,7 +27,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
  *
  * <ul>
  *   <li><b>距离耗电</b>：无线终端离绑定网络越远，每次动作消耗的能量越高
- *       （分段 ×1 / ×2 / ×4 / ×8，跨维度 ×1.5；初级能耗插件减半、高级能耗插件归 1）；</li>
+ *       （距离 ≤ 基础范围时 ×1，超出后按距离线性增长，跨维度 ×16；初级能耗插件减半、
+ *       高级能耗插件归 1）；</li>
  *   <li><b>卡片放宽</b>：范围插件（同维无限）、维度插件（跨维隧道）绕过 RS 原生距离/维度校验；</li>
  *   <li><b>远程输电</b>：远程输电插件直接从所绑定网络抽电，而不是扣物品电池。</li>
  * </ul>
@@ -52,8 +54,6 @@ public class ExtendedWirelessNetworkItemContext implements NetworkItemContext {
     private final boolean rangeUpgrade;
     private final boolean interdimensional;
     private final boolean remoteEnergy;
-    private final boolean basicEnergy;
-    private final boolean advancedEnergy;
     private final NetworkItemContext standard;
 
     public ExtendedWirelessNetworkItemContext(final ItemStack stack,
@@ -61,17 +61,13 @@ public class ExtendedWirelessNetworkItemContext implements NetworkItemContext {
                                               final SlotReference slotReference,
                                               final boolean rangeUpgrade,
                                               final boolean interdimensional,
-                                              final boolean remoteEnergy,
-                                              final boolean basicEnergy,
-                                              final boolean advancedEnergy) {
+                                              final boolean remoteEnergy) {
         this.stack = stack;
         this.player = player;
         this.slotReference = slotReference;
         this.rangeUpgrade = rangeUpgrade;
         this.interdimensional = interdimensional;
         this.remoteEnergy = remoteEnergy;
-        this.basicEnergy = basicEnergy;
-        this.advancedEnergy = advancedEnergy;
         this.standard = RefinedStorageApi.INSTANCE
             .getNetworkItemHelper()
             .createContext(stack, player, slotReference);
@@ -89,9 +85,7 @@ public class ExtendedWirelessNetworkItemContext implements NetworkItemContext {
             slotReference,
             Upgrades.hasRangeUpgrade(stack),
             Upgrades.hasInterdimensionalUpgrade(stack),
-            Upgrades.hasRemoteEnergyUpgrade(stack),
-            Upgrades.hasEnergyUpgrade(stack),
-            Upgrades.hasAdvancedEnergyUpgrade(stack)
+            Upgrades.hasRemoteEnergyUpgrade(stack)
         );
     }
 
@@ -149,7 +143,7 @@ public class ExtendedWirelessNetworkItemContext implements NetworkItemContext {
 
     @Override
     public void drainEnergy(final long amount) {
-        final long cost = Math.max(1L, amount * distanceMultiplierPercent() / 100);
+        final long cost = Math.max(1L, amount * distanceMultiplierPercent(stack, player) / 100);
         if (remoteEnergy && payFromNetwork(cost)) {
             return;
         }
@@ -158,45 +152,59 @@ public class ExtendedWirelessNetworkItemContext implements NetworkItemContext {
 
     /**
      * 计算「距离 + 维度 + 能耗插件」叠加后的能量倍率（百分比整数）。
+     * {@link #drainEnergy} 与 tooltip 共用这一处，保证显示与实际扣费完全一致。
      *
      * <ul>
      *   <li>跨维度 → 直接套 {@code interdimensionalMultiplier}，距离失去意义；</li>
-     *   <li>同维度 → 按水平距离落入 10 / 100 / 1000 格分段，取 ×1 / ×2 / ×4 / ×8；</li>
+     *   <li>同维度 → 距离 ≤ 基础范围时 ×1，超出后按距离线性增长（倍率 = 距离 / 基础范围）；</li>
      *   <li>初级能耗插件 → 距离倍率减半（向上取整，最低 100%）；</li>
      *   <li>高级能耗插件 → 距离倍率归 100%（跨维度倍率仍保留）。</li>
      * </ul>
+     *
+     * @param stack 待计算倍率的设备物品（读取绑定位置与已装配插件）
+     * @param player 使用者，用于计算与绑定位置的距离
      */
-    private long distanceMultiplierPercent() {
+    public static long distanceMultiplierPercent(final ItemStack stack, final Player player) {
         final GlobalPos location = stack.get(DataComponents.INSTANCE.getNetworkLocation());
         final Config.DistanceEnergyEntry config = Platform.getConfig().getDistanceEnergy();
         if (location != null && !location.dimension().equals(player.level().dimension())) {
             return config.getInterdimensionalMultiplier();
         }
-        final long multiplier = location == null ? 100L : distanceTierMultiplier(config, location);
-        if (advancedEnergy) {
+        final long multiplier = location == null ? 100L : linearDistanceMultiplier(config, location, player);
+        if (Upgrades.hasAdvancedEnergyUpgrade(stack)) {
             return 100L;
         }
-        if (basicEnergy) {
+        if (Upgrades.hasEnergyUpgrade(stack)) {
             final int divisor = Math.max(1, config.getBasicEnergyDivisor());
             return Math.max(100L, (multiplier + divisor - 1) / divisor);
         }
         return multiplier;
     }
 
-    private int distanceTierMultiplier(final Config.DistanceEnergyEntry config, final GlobalPos location) {
+    /**
+     * 玩家与设备绑定位置的水平距离（格）；未绑定返回 -1，供 tooltip 显示。
+     */
+    public static double distanceToBound(final ItemStack stack, final Player player) {
+        final GlobalPos location = stack.get(DataComponents.INSTANCE.getNetworkLocation());
+        if (location == null) {
+            return -1;
+        }
+        final double dx = player.getX() - (location.pos().getX() + 0.5);
+        final double dz = player.getZ() - (location.pos().getZ() + 0.5);
+        return Math.sqrt(dx * dx + dz * dz);
+    }
+
+    private static long linearDistanceMultiplier(final Config.DistanceEnergyEntry config,
+                                                 final GlobalPos location,
+                                                 final Player player) {
         final double dx = player.getX() - (location.pos().getX() + 0.5);
         final double dz = player.getZ() - (location.pos().getZ() + 0.5);
         final double distance = Math.sqrt(dx * dx + dz * dz);
-        if (distance <= config.getTier1Range()) {
-            return config.getTier1Multiplier();
+        final int baseRange = Math.max(1, config.getBaseRange());
+        if (distance <= baseRange) {
+            return 100L;
         }
-        if (distance <= config.getTier2Range()) {
-            return config.getTier2Multiplier();
-        }
-        if (distance <= config.getTier3Range()) {
-            return config.getTier3Multiplier();
-        }
-        return config.getTier4Multiplier();
+        return Math.max(100L, Math.round(100.0 * distance / baseRange));
     }
 
     /**

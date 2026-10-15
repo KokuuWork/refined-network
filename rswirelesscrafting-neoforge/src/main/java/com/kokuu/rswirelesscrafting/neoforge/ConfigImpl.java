@@ -126,42 +126,17 @@ public class ConfigImpl implements Config {
     }
 
     private class DistanceEnergyEntryImpl implements DistanceEnergyEntry {
-        private final ModConfigSpec.IntValue tier1Range;
-        private final ModConfigSpec.IntValue tier2Range;
-        private final ModConfigSpec.IntValue tier3Range;
-        private final ModConfigSpec.IntValue tier1Multiplier;
-        private final ModConfigSpec.IntValue tier2Multiplier;
-        private final ModConfigSpec.IntValue tier3Multiplier;
-        private final ModConfigSpec.IntValue tier4Multiplier;
+        private final ModConfigSpec.IntValue baseRange;
         private final ModConfigSpec.IntValue interdimensionalMultiplier;
         private final ModConfigSpec.IntValue basicEnergyDivisor;
 
         DistanceEnergyEntryImpl() {
             builder.translation(translationKey("distanceEnergy")).push("distanceEnergy");
-            tier1Range = builder
-                .translation(translationKey("distanceEnergy.tier1Range"))
-                .comment("Upper bound (blocks) of the nearest distance tier.")
-                .defineInRange("tier1Range", DefaultEnergyUsage.DISTANCE_TIER1_RANGE, 0, Integer.MAX_VALUE);
-            tier2Range = builder
-                .translation(translationKey("distanceEnergy.tier2Range"))
-                .comment("Upper bound (blocks) of the second distance tier.")
-                .defineInRange("tier2Range", DefaultEnergyUsage.DISTANCE_TIER2_RANGE, 0, Integer.MAX_VALUE);
-            tier3Range = builder
-                .translation(translationKey("distanceEnergy.tier3Range"))
-                .comment("Upper bound (blocks) of the third distance tier; beyond it is the last tier.")
-                .defineInRange("tier3Range", DefaultEnergyUsage.DISTANCE_TIER3_RANGE, 0, Integer.MAX_VALUE);
-            tier1Multiplier = builder
-                .translation(translationKey("distanceEnergy.tier1Multiplier"))
-                .defineInRange("tier1Multiplier", DefaultEnergyUsage.DISTANCE_TIER1_MULTIPLIER, 1, Integer.MAX_VALUE);
-            tier2Multiplier = builder
-                .translation(translationKey("distanceEnergy.tier2Multiplier"))
-                .defineInRange("tier2Multiplier", DefaultEnergyUsage.DISTANCE_TIER2_MULTIPLIER, 1, Integer.MAX_VALUE);
-            tier3Multiplier = builder
-                .translation(translationKey("distanceEnergy.tier3Multiplier"))
-                .defineInRange("tier3Multiplier", DefaultEnergyUsage.DISTANCE_TIER3_MULTIPLIER, 1, Integer.MAX_VALUE);
-            tier4Multiplier = builder
-                .translation(translationKey("distanceEnergy.tier4Multiplier"))
-                .defineInRange("tier4Multiplier", DefaultEnergyUsage.DISTANCE_TIER4_MULTIPLIER, 1, Integer.MAX_VALUE);
+            baseRange = builder
+                .translation(translationKey("distanceEnergy.baseRange"))
+                .comment("Base range (blocks): within this distance energy usage is unchanged (x1). "
+                    + "Beyond it, the multiplier grows linearly with distance (multiplier = distance / baseRange).")
+                .defineInRange("baseRange", DefaultEnergyUsage.DISTANCE_BASE_RANGE, 1, Integer.MAX_VALUE);
             interdimensionalMultiplier = builder
                 .translation(translationKey("distanceEnergy.interdimensionalMultiplier"))
                 .comment("Energy multiplier (percent) applied when the device is used across dimensions.")
@@ -175,38 +150,8 @@ public class ConfigImpl implements Config {
         }
 
         @Override
-        public int getTier1Range() {
-            return tier1Range.get();
-        }
-
-        @Override
-        public int getTier2Range() {
-            return tier2Range.get();
-        }
-
-        @Override
-        public int getTier3Range() {
-            return tier3Range.get();
-        }
-
-        @Override
-        public int getTier1Multiplier() {
-            return tier1Multiplier.get();
-        }
-
-        @Override
-        public int getTier2Multiplier() {
-            return tier2Multiplier.get();
-        }
-
-        @Override
-        public int getTier3Multiplier() {
-            return tier3Multiplier.get();
-        }
-
-        @Override
-        public int getTier4Multiplier() {
-            return tier4Multiplier.get();
+        public int getBaseRange() {
+            return baseRange.get();
         }
 
         @Override

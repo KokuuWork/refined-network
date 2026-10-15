@@ -216,7 +216,7 @@ modid 占位 `rswirelesscrafting`，包名建议 `com.yourname.rswirelesscraftin
   | 清空矩阵 | 5 |
   | 配方转移 | 5 |
 - **距离**：同维度有效距离 = `max(发射器范围, extendedRange)`，`extendedRange` 默认 **64 格**（可配）。插**范围卡**→ 同维度无限范围。跨维度走隧道（需维度卡），天然无距离概念（见 §7）。
-- 跨维度时以上能量消耗 ×1.5（见 §7.5）。
+- 跨维度时以上能量消耗 ×16（见 §7.5）。
 - 配方：`refinedstorage:crafting_grids` 标签为合成核心，外围石英富集铁 + 高级处理器 + 机器外壳：
 
   ```
@@ -382,7 +382,7 @@ public class WirelessCraftingGridItem extends AbstractNetworkEnergyItem {
 - `getStorage()/getAutocrafting()/getSecurity()` 均经 `context.resolveNetwork()` 取组件。
 - `startExtractTransaction` 用 `DirectCommitExtractTransaction`/`SnapshotExtractTransaction`。
 - `isGridActive()` = 能量>0（或 `!isEnergyRequired()`）且 `context.isActive()`。
-- 所有会耗能的操作（open/craft/autocraft/clear/transfer）调 `context.drainEnergy(...)`，跨维度时先 ×1.5（见 §7.5）。
+- 所有会耗能的操作（open/craft/autocraft/clear/transfer）调 `context.drainEnergy(...)`，跨维度时先 ×16（见 §7.5）。
 
 ### 6.4 `ExtendedWirelessNetworkItemContext`（本 mod 唯一创新点）
 
@@ -503,7 +503,7 @@ public class ExtendedWirelessNetworkItemContext implements NetworkItemContext {
 
 ### 7.5 能量加成
 
-- 所有 `drainEnergy(amount)` 在**跨维度**（走隧道）时统一 ×1.5，向上取整；同维度（含范围卡无限距离）走标准耗能，不加价。
+- 所有 `drainEnergy(amount)` 都乘一个距离倍率：同维度按「距离 ≤ 基础范围（16 格）×1，超出后线性增长（倍率 = 距离 ÷ 16）」；**跨维度**（走隧道）时统一 ×16。初级能耗插件减半、高级能耗插件归 1（跨维度 ×16 不受能耗插件影响）。
 
 ---
 
@@ -676,7 +676,7 @@ public void drainEnergy(final long amount) {
 }
 ```
 
-`payFromNetwork` 用 `EnergyNetworkComponent.extract(cost) >= cost` 判断「网络是否足额支付」，**抽不满就整笔回落给物品电池**（不半途改道），保证「网络无电 / 未绑定」时行为与未装卡完全一致。跨维度 ×1.5 的倍率在**两条路径上都生效**（`isInterdimensional()` 要求「插了维度卡**且**绑定维度 ≠ 玩家当前维度」）。
+`payFromNetwork` 用 `EnergyNetworkComponent.extract(cost) >= cost` 判断「网络是否足额支付」，**抽不满就整笔回落给物品电池**（不半途改道），保证「网络无电 / 未绑定」时行为与未装卡完全一致。跨维度 ×16 的倍率在**两条路径上都生效**（`isInterdimensional()` 要求「插了维度卡**且**绑定维度 ≠ 玩家当前维度」）。
 
 **过渡设计**：电池卡刻意定价在 RS 存储元件递归链的**入门级**（1k 存储方块 + 红石块），前期即可量产；同时它是输电卡的配方原料，所以前期投入不会被浪费。
 
@@ -934,19 +934,20 @@ graphics.blit(TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight, imageWidt
 
 ### 19.2 距离耗电价目表
 
-配置在 `distanceEnergy` 节（新增，替代原 `interdimensionalEnergyMultiplier` / `extendedRange`）：
+配置在 `distanceEnergy` 节（`baseRange` + `interdimensionalMultiplier` + `basicEnergyDivisor`）：
 
 | 水平距离 | 倍率（默认） |
 |---|---|
-| 0–10 格 | ×1（`tier1Multiplier`=100） |
-| 10–100 格 | ×2（200） |
-| 100–1000 格 | ×4（400） |
-| >1000 格（需距离插件） | ×8（800） |
-| 跨维度（需维度插件） | ×1.5（`interdimensionalMultiplier`=150） |
+| 0–16 格（基础范围 `baseRange`） | ×1 |
+| >16 格 | 按距离**线性增长**：倍率 = 距离 ÷ 16 |
+| 跨维度（需维度插件） | 固定 ×16（`interdimensionalMultiplier`=1600） |
+
+线性示例：32 格 ×2、64 格 ×4、256 格 ×16、400 格 ×25、1000 格 ≈ ×62。不再用阶梯分段，距离越远收得越狠。
 
 - 跨维度时距离失去意义，直接套 `interdimensionalMultiplier`，**不叠加**距离档位。
-- **初级能耗插件**：距离倍率 `÷ basicEnergyDivisor`（默认 2，向上取整，最低 100%）；**高级能耗插件**：距离倍率归 100%（跨维度 ×1.5 仍保留）；能耗插件**不影响**跨维度倍率。
+- **初级能耗插件**：距离倍率 `÷ basicEnergyDivisor`（默认 2，向上取整，最低 100%）；**高级能耗插件**：距离倍率归 100%（跨维度 ×16 仍保留）；能耗插件**不影响**跨维度倍率。
 - 最终 `cost = max(1, base × multiplier% / 100)`；远程输电插件时这笔 `cost` 直接从绑定网络的 `EnergyNetworkComponent.extract` 出账，抽不出才回落物品电池。
+- 合成类动作基础耗电更贵：手动合成 20 FE、自动合成 40 FE（打开/清空/配方转移仍 5 FE），体现合成终端相对普通查看终端的额外成本。
 
 ### 19.3 基础容量 1000 → 400
 

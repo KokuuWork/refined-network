@@ -26,25 +26,13 @@ public interface Config {
     /**
      * 无线设备「按距离扣电」的价目表。
      *
-     * <p>同一维度内，设备与绑定网络的水平距离落入某个分段，就按该分段的倍率（百分比整数）
-     * 乘到每次动作的基础耗电上；跨维度时距离失去意义，改为套用 {@link #getInterdimensionalMultiplier()}。
-     * 四段倍率默认 ×1 / ×2 / ×4 / ×8，越远越贵；「初级能耗插件」把距离倍率减半、
-     * 「高级能耗插件」把距离倍率归 1（均不影响跨维度倍率）。
+     * <p>同一维度内，设备与绑定网络的水平距离小于等于 {@link #getBaseRange()} 时耗电不变（×1），
+     * 超出后按距离<b>线性</b>增长——倍率 = 距离 / 基础范围（百分比取整），距离越远收得越狠；
+     * 跨维度时距离失去意义，改为套用 {@link #getInterdimensionalMultiplier()}。
+     * 「初级能耗插件」把距离倍率减半、「高级能耗插件」把距离倍率归 1（均不影响跨维度倍率）。
      */
     interface DistanceEnergyEntry {
-        int getTier1Range();
-
-        int getTier2Range();
-
-        int getTier3Range();
-
-        int getTier1Multiplier();
-
-        int getTier2Multiplier();
-
-        int getTier3Multiplier();
-
-        int getTier4Multiplier();
+        int getBaseRange();
 
         int getInterdimensionalMultiplier();
 

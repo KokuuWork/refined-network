@@ -5,6 +5,7 @@ import com.kokuu.rswirelesscrafting.common.ContentNames;
 import com.kokuu.rswirelesscrafting.common.Items;
 import com.kokuu.rswirelesscrafting.common.KeyMappings;
 import com.kokuu.rswirelesscrafting.common.Menus;
+import com.kokuu.rswirelesscrafting.common.Platform;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationScreen;
 import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.WirelessCraftingGridUpgradeScreen;
 
@@ -12,6 +13,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.refinedmods.refinedstorage.common.grid.screen.CraftingGridScreen;
 import com.refinedmods.refinedstorage.common.support.network.item.NetworkItemPropertyFunction;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
@@ -26,6 +28,7 @@ public class ClientModInitializer extends AbstractClientModInitializer {
     public static void onClientSetup(final FMLClientSetupEvent e) {
         NeoForge.EVENT_BUS.addListener(ClientModInitializer::onKeyInput);
         NeoForge.EVENT_BUS.addListener(ClientModInitializer::onMouseInput);
+        Platform.setClientPlayerProvider(() -> Minecraft.getInstance().player);
         e.enqueueWork(ClientModInitializer::registerItemProperties);
     }
 

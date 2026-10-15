@@ -56,6 +56,14 @@ public final class ContentNames {
         "item",
         "wireless_crafting_grid.bound"
     );
+    public static final String WIRELESS_CRAFTING_GRID_DISTANCE_TRANSLATION_KEY = createTranslationKey(
+        "item",
+        "wireless_crafting_grid.distance"
+    );
+    public static final String WIRELESS_CRAFTING_GRID_DISTANCE_INTERDIMENSIONAL_TRANSLATION_KEY = createTranslationKey(
+        "item",
+        "wireless_crafting_grid.distance_interdimensional"
+    );
     public static final MutableComponent WIRELESS_CRAFTING_GRID_DESC = createTranslation(
         "item",
         "wireless_crafting_grid.desc"

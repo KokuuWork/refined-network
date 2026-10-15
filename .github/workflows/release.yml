@@ -32,17 +32,44 @@ jobs:
 
       - name: Read mod version
         id: mod
+        env:
+          TAG_NAME: ${{ github.event.inputs.tag || github.ref_name }}
         run: |
           version="$(grep -oP '^version = "\K[^"]+' rswirelesscrafting-neoforge/build.gradle.kts | head -1)"
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "Built mod version: $version"
+          # 预发布判定：tag 里带 -beta / -alpha / -rc 就标记为 Prerelease，并在标题上标注 Beta
+          case "$TAG_NAME" in
+            *-beta*|*-alpha*|*-rc*)
+              echo "prerelease=true" >> "$GITHUB_OUTPUT"
+              echo "name=rswirelesscrafting $version (Beta)" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "prerelease=false" >> "$GITHUB_OUTPUT"
+              echo "name=rswirelesscrafting $version" >> "$GITHUB_OUTPUT"
+              ;;
+          esac
+
+      # 仓库根目录存在 RELEASE_NOTES.md 时用它作为发布说明，否则退回 GitHub 自动生成
+      - name: Read release notes
+        id: notes
+        run: |
+          if [ -f RELEASE_NOTES.md ]; then
+            {
+              echo 'body<<RELEASE_NOTES_EOF'
+              cat RELEASE_NOTES.md
+              echo 'RELEASE_NOTES_EOF'
+            } >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.inputs.tag || github.ref_name }}
-          name: "rswirelesscrafting ${{ steps.mod.outputs.version }}"
-          generate_release_notes: true
+          name: ${{ steps.mod.outputs.name }}
+          body: ${{ steps.notes.outputs.body }}
+          prerelease: ${{ steps.mod.outputs.prerelease == 'true' }}
+          generate_release_notes: ${{ steps.notes.outputs.body == '' }}
           # Exact filename rather than a glob: excluding *-sources.jar via "!"
           # negation is not honoured reliably by this action.
           files: |

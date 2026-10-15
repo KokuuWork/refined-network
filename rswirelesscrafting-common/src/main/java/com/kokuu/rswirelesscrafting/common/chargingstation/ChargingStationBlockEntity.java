@@ -47,8 +47,10 @@ import net.minecraft.world.level.block.state.BlockState;
  * （{@code 200 FE/s → 10 FE/t}、{@code 20 FE/s → 1 FE/t}）。除不尽的部分交给
  * {@link RateMeter} 累积到下一 tick，配成 7 这种数也不会漏电。
  *
- * <p>能量来源优先用接入的 RS 网络（{@link EnergyNetworkComponent}），取不到电时回落到
- * 内部 FE 缓冲（由其他模组以标准 Forge Energy 输入）。
+ * <p>能量模型是「网络 → 内部缓冲 → 充电动作」：充电站自带一个内部 FE 缓冲（容量
+ * {@code externalCapacity}，界面展示的就是它），未满时按固定速率从接入的 RS 网络
+ * （{@link EnergyNetworkComponent}）补电；网络之外的模组也能以标准 Forge Energy 直接
+ * 充进同一缓冲。
  *
  * <p><b>基础待机损耗</b>：只要无线充电模块在运行，就按 {@code energyUsage} 每秒常驻扣电
  * （充电耗电另算）。可被两处开关关掉：① 配置总闸 {@code idleEnergyUsageEnabled}；
@@ -65,13 +67,24 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
     private static final int WIRELESS_LINK_COUNT = 3;
     private static final int DATA_SIZE = 10;
     private static final int WIRED_EFFICIENCY_PERCENT = 100;
+    // 缓冲从网络补电的速率（FE/s）：略高于满负荷（待机 128 + 有线 600 + 无线 60 ≈ 788），
+    // 正常供电时缓冲常满，网络断电后缓冲掉电、恢复供电再慢慢补回。
+    private static final long BUFFER_FILL_RATE_PER_SECOND = 1000;
     private static final String EXTERNAL_ENERGY_TAG = "ExternalEnergy";
     private static final String ITEMS_TAG = "Items";
+    // 无线充电每 10 tick 扫描一次（扫描一次就按 10 tick 的量充，效果与每 tick 相同、开销降 90%）。
+    // 服务器上玩家多、充电站多时，每 tick 全量遍历附近玩家背包会成为热点。
+    private static final int WIRELESS_SCAN_INTERVAL = 10;
+    // 方块状态（通电 / 无线）两次写入之间的最小间隔（tick）。
+    // 网络只剩几 FE 时缓冲会在「空 / 有一点点」之间抖动，无限流就会每 tick 广播一次方块更新，
+    // 连带邻居红石更新，多人环境下是实打实的包风暴。
+    private static final int BLOCK_STATE_UPDATE_INTERVAL = 10;
 
     private final NonNullList<ItemStack> items = NonNullList.withSize(WIRED_SLOT_COUNT, ItemStack.EMPTY);
     private final RateMeter[] wiredMeters = {new RateMeter(), new RateMeter(), new RateMeter()};
     private final RateMeter wirelessMeter = new RateMeter();
     private final RateMeter idleMeter = new RateMeter();
+    private final RateMeter bufferFillMeter = new RateMeter();
     private final ChargeStatus[] wiredStatus = {
         ChargeStatus.IDLE, ChargeStatus.IDLE, ChargeStatus.IDLE
     };
@@ -81,6 +94,8 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
     private long externalEnergy;
     private long networkStored;
     private long networkCapacity;
+    private int wirelessScanCountdown;
+    private int blockStateCooldown;
 
     private final ContainerData containerData = new ChargingStationDataSlots();
 
@@ -106,6 +121,7 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
         }
         final Config.ChargingStationEntry config = entry();
         refreshNetworkEnergy();
+        refillBufferFromNetwork();
         final boolean wirelessEnabled = !isRedstoneDisabling();
         final boolean powered = networkStored > 0 || externalEnergy > 0;
         updateBlockState(powered, wirelessEnabled);
@@ -113,11 +129,18 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
             consumeEnergy(idleMeter.next(config.getEnergyUsage()));
         }
         chargeWiredSlots(config);
-        if (wirelessEnabled) {
-            chargeWireless(serverLevel, config);
-        } else {
+        if (!wirelessEnabled) {
+            // 未扫描的 tick 保留上一次的链接灯状态，避免灯闪烁。
             clearWirelessLinks();
+            wirelessScanCountdown = 0;
+            return;
         }
+        if (wirelessScanCountdown > 0) {
+            wirelessScanCountdown--;
+            return;
+        }
+        wirelessScanCountdown = WIRELESS_SCAN_INTERVAL;
+        chargeWireless(serverLevel, config, WIRELESS_SCAN_INTERVAL);
     }
 
     /**
@@ -136,6 +159,11 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
         if (level == null) {
             return;
         }
+        if (blockStateCooldown > 0) {
+            // 冷却中：不写方块（抖动期的中间态直接跳过），冷却结束后自然补上最新状态。
+            blockStateCooldown--;
+            return;
+        }
         final BlockState state = getBlockState();
         final boolean poweredChanged = state.getValue(ChargingStationBlock.POWERED) != powered;
         final boolean wirelessChanged = state.getValue(ChargingStationBlock.WIRELESS) != wirelessEnabled;
@@ -145,6 +173,7 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
                 state.setValue(ChargingStationBlock.POWERED, powered)
                     .setValue(ChargingStationBlock.WIRELESS, wirelessEnabled)
             );
+            blockStateCooldown = BLOCK_STATE_UPDATE_INTERVAL;
         }
     }
 
@@ -158,6 +187,35 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
         final EnergyNetworkComponent energy = network.getComponent(EnergyNetworkComponent.class);
         networkStored = energy.getStored();
         networkCapacity = energy.getCapacity();
+    }
+
+    /**
+     * 缓冲未满时按 {@link #BUFFER_FILL_RATE_PER_SECOND} 的速率从网络抽电补进内部缓冲。
+     * 充电站的能量来源是「网络 → 内部缓冲 → 充电动作」，缓冲是界面展示的唯一电量池。
+     */
+    private void refillBufferFromNetwork() {
+        final long missing = externalCapacity - externalEnergy;
+        if (missing <= 0) {
+            return;
+        }
+        final Network network = mainNetworkNode.getNetwork();
+        if (network == null) {
+            return;
+        }
+        final EnergyNetworkComponent energy = network.getComponent(EnergyNetworkComponent.class);
+        if (energy.getStored() <= 0) {
+            return;
+        }
+        final long budget = bufferFillMeter.next(BUFFER_FILL_RATE_PER_SECOND);
+        if (budget <= 0) {
+            return;
+        }
+        final long extracted = energy.extract(Math.min(budget, missing));
+        if (extracted > 0) {
+            externalEnergy += extracted;
+            setChanged();
+        }
+        networkStored = energy.getStored();
     }
 
     // ------------------------------------------------------------ 有线充电
@@ -183,9 +241,17 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
 
     // ------------------------------------------------------------ 无线充电
 
-    private void chargeWireless(final ServerLevel serverLevel, final Config.ChargingStationEntry config) {
+    /**
+     * @param intervalTicks 距上次扫描过了多少 tick；本轮按这个时长一次性发放充电额度，
+     *                      所以降频不会改变实际充电速率。
+     */
+    private void chargeWireless(final ServerLevel serverLevel,
+                                final Config.ChargingStationEntry config,
+                                final int intervalTicks) {
         final int radius = config.getWirelessRadius();
-        final long perDeviceBudget = wirelessMeter.next(config.getWirelessChargeRate());
+        final long perDeviceBudget = wirelessMeter.next(
+            config.getWirelessChargeRate() * intervalTicks
+        );
         clearWirelessLinks();
         if (radius <= 0 || perDeviceBudget <= 0) {
             return;
@@ -346,34 +412,18 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
     // ------------------------------------------------------------ 能量账本
 
     private long availableEnergy() {
-        long available = externalEnergy;
-        final Network network = mainNetworkNode.getNetwork();
-        if (network != null) {
-            available += Math.max(0, network.getComponent(EnergyNetworkComponent.class).getStored());
-        }
-        return available;
+        return externalEnergy;
     }
 
     /**
-     * 优先扣网络能量，不足部分由内部 FE 缓冲补齐。
+     * 从内部缓冲扣电。缓冲未满时会由 {@link #refillBufferFromNetwork()} 从网络补回。
      */
     private void consumeEnergy(final long amount) {
-        if (amount <= 0) {
+        if (amount <= 0 || externalEnergy <= 0) {
             return;
         }
-        long remaining = amount;
-        final Network network = mainNetworkNode.getNetwork();
-        if (network != null) {
-            final EnergyNetworkComponent energy = network.getComponent(EnergyNetworkComponent.class);
-            if (energy.getStored() > 0) {
-                remaining -= energy.extract(remaining);
-                networkStored = energy.getStored();
-            }
-        }
-        if (remaining > 0 && externalEnergy > 0) {
-            externalEnergy -= Math.min(remaining, externalEnergy);
-            setChanged();
-        }
+        externalEnergy -= Math.min(amount, externalEnergy);
+        setChanged();
     }
 
     // -------------------------------------------------- 外部 FE 输入（兼容层）
@@ -503,7 +553,9 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
     @Override
     protected void loadAdditional(final CompoundTag tag, final HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-        externalEnergy = tag.getLong(EXTERNAL_ENERGY_TAG);
+        // 旧存档可能在容量下调前（externalCapacity 10000→4000）存入了更大的能量值，
+        // 这里必须 clamp 到当前容量，否则界面会显示「超容量」的异常电量。
+        externalEnergy = Math.min(tag.getLong(EXTERNAL_ENERGY_TAG), externalCapacity);
         final CompoundTag itemsTag = tag.getCompound(ITEMS_TAG);
         for (int i = 0; i < items.size(); i++) {
             final int slot = i;
@@ -539,17 +591,18 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
     }
 
     /**
-     * 同步给界面的实时数值：网络存量 / 网络容量 / 外部 FE 缓冲 / 缓冲上限，
-     * 以及 3 个有线槽状态（{@link ChargeStatus#ordinal()}）与 3 条无线链接的开关（0/1）。
+     * 同步给界面的实时数值：内部缓冲存量 / 缓冲容量（界面能量条）、网络存量 / 网络容量
+     * （暂不展示，保留），以及 3 个有线槽状态（{@link ChargeStatus#ordinal()}）与
+     * 3 条无线链接的开关（0/1）。
      */
     private class ChargingStationDataSlots implements ContainerData {
         @Override
         public int get(final int index) {
             return switch (index) {
-                case 0 -> (int) Math.min(networkStored, Integer.MAX_VALUE);
-                case 1 -> (int) Math.min(networkCapacity, Integer.MAX_VALUE);
-                case 2 -> (int) Math.min(externalEnergy, Integer.MAX_VALUE);
-                case 3 -> (int) Math.min(externalCapacity, Integer.MAX_VALUE);
+                case 0 -> (int) Math.min(externalEnergy, Integer.MAX_VALUE);
+                case 1 -> (int) Math.min(externalCapacity, Integer.MAX_VALUE);
+                case 2 -> (int) Math.min(networkStored, Integer.MAX_VALUE);
+                case 3 -> (int) Math.min(networkCapacity, Integer.MAX_VALUE);
                 case 4, 5, 6 -> wiredStatus[index - 4].ordinal();
                 case 7, 8, 9 -> wirelessActive[index - 7] ? 1 : 0;
                 default -> 0;

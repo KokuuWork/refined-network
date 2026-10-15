@@ -4,22 +4,22 @@ import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationDefaul
 
 public final class DefaultEnergyUsage {
     public static final long WIRELESS_CRAFTING_GRID_CAPACITY = 400;
+    // 合成终端的「合成」类动作扣费显著高于「查看 / 清空 / 配方转移」，
+    // 体现合成终端（区别于普通无线终端）的额外成本。
     public static final long WIRELESS_CRAFTING_GRID_OPEN = 5;
-    public static final long WIRELESS_CRAFTING_GRID_CRAFTING = 5;
-    public static final long WIRELESS_CRAFTING_GRID_AUTOCRAFTING = 10;
+    public static final long WIRELESS_CRAFTING_GRID_CRAFTING = 20;
+    public static final long WIRELESS_CRAFTING_GRID_AUTOCRAFTING = 40;
     public static final long WIRELESS_CRAFTING_GRID_CLEAR_MATRIX = 5;
     public static final long WIRELESS_CRAFTING_GRID_RECIPE_TRANSFER = 5;
     public static final long BATTERY_UPGRADE_CAPACITY = 1000;
 
-    // 无线设备「按距离扣电」的分段价目表。倍率都是百分比整数。
-    public static final int DISTANCE_TIER1_RANGE = 10;
-    public static final int DISTANCE_TIER2_RANGE = 100;
-    public static final int DISTANCE_TIER3_RANGE = 1000;
-    public static final int DISTANCE_TIER1_MULTIPLIER = 100;
-    public static final int DISTANCE_TIER2_MULTIPLIER = 200;
-    public static final int DISTANCE_TIER3_MULTIPLIER = 400;
-    public static final int DISTANCE_TIER4_MULTIPLIER = 800;
-    public static final int INTERDIMENSIONAL_ENERGY_MULTIPLIER = 150;
+    // 无线设备「按距离扣电」：距离 ≤ 基础范围时耗电不变（×1），超出后按距离线性增长——
+    // 倍率 = 距离 / 基础范围（百分比取整）。距离越远越贵，让能耗插件 / 远程输电插件真正有价值。
+    // 例：基础范围 16 格时，32 格 = ×2、64 格 = ×4、256 格 = ×16、400 格 = ×25、1000 格 ≈ ×62。
+    public static final int DISTANCE_BASE_RANGE = 16;
+    // 跨维度是「超远距离」的等价物，固定按 ×16 大幅加价（能耗插件不减免跨维度倍率），
+    // 让远程输电插件（直接抽网络电、不扣物品电池）在跨维度时成为必需品。
+    public static final int INTERDIMENSIONAL_ENERGY_MULTIPLIER = 1600;
     public static final int BASIC_ENERGY_DIVISOR = 2;
 
     // 终端充电站（单档）。三个速率都是每秒（FE/s），方块内部按 20 tick/s 分摊，
@@ -27,6 +27,8 @@ public final class DefaultEnergyUsage {
     // 待机损耗提到 128 FE/s（约 6.4 FE/t）：有惩罚感，红石开关才有省电意义；
     // 充电耗电在 chargeItem 里另算，不与待机混在一起。无线充电只有 45% 效率
     // （消耗 100 只给设备充 45，其余作传输损耗），有线充电 100% 无损耗。
+    // 充电站自带内部 FE 缓冲（externalCapacity），未满时按固定速率从网络补电；
+    // 界面显示的是这个缓冲电量，而非整个网络的能量。
     public static final ChargingStationDefaults CHARGING_STATION = new ChargingStationDefaults(
         128,   // 基础待机损耗 FE/s
         true,  // 待机损耗开关（配置总闸，默认开）
@@ -34,7 +36,7 @@ public final class DefaultEnergyUsage {
         20,    // 无线充电 FE/s（= 1 FE/t，每个设备）
         45,    // 无线充电效率（%，消耗 100 充 45）
         5,     // 无线半径（格）
-        10000  // 内部 FE 缓冲
+        4000   // 内部 FE 缓冲容量（主电量池，界面显示的就是它）
     );
 
     private DefaultEnergyUsage() {
