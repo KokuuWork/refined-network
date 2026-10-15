@@ -351,6 +351,7 @@ public class ConfigImpl implements Config {
         private final ModConfigSpec.BooleanValue enabled;
         private final ModConfigSpec.LongValue energyUsage;
         private final ModConfigSpec.BooleanValue chunkLoading;
+        private final ModConfigSpec.LongValue chunkLoadingEnergyUsage;
 
         BridgeEntryImpl(final ModConfigSpec.Builder builder) {
             final String path = "wirelessBridge";
@@ -368,6 +369,15 @@ public class ConfigImpl implements Config {
                 .translation(translationKey(path + ".chunkLoading"))
                 .comment("Let a paired endpoint keep both ends chunk-loaded.")
                 .define("chunkLoading", defaults.chunkLoading());
+            chunkLoadingEnergyUsage = builder
+                .translation(translationKey(path + ".chunkLoadingEnergyUsage"))
+                .comment("Extra drain per held chunk, in FE per second (a pair usually holds two).")
+                .defineInRange(
+                    "chunkLoadingEnergyUsage",
+                    defaults.chunkLoadingEnergyUsage(),
+                    0,
+                    Long.MAX_VALUE
+                );
             builder.pop();
         }
 
@@ -384,6 +394,11 @@ public class ConfigImpl implements Config {
         @Override
         public boolean isChunkLoadingEnabled() {
             return chunkLoading.get();
+        }
+
+        @Override
+        public long getChunkLoadingEnergyUsage() {
+            return chunkLoadingEnergyUsage.get();
         }
     }
 }

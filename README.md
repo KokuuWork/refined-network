@@ -116,11 +116,13 @@
 - **自带区块保活**：配对后**两端**区块自动强加载（可配开关）。RS 原生那对「网络变送器 / 网络接收器」要你自己保证两端加载，这是桥和它的主要区别。
 - **跨维度免配对卡**：记的是坐标而不是视线，所以在下界、末地也能配对。
 - **看得见的状态**：亮 = 已接入，灭 = 没连上（或还是基点）。直接右键它会告诉你连向哪里。
-- **常驻耗电** 64 FE/s（每座桥，可配）。
+- **耗电是明码计价的**：桥本身 **64 FE/s**，**区块保活另算 16 FE/s × 每个被保活的区块**（配对通常保两端 = 2 个）。所以一座配对好的桥 ≈ 96 FE/s，可配。
+- **红石开关**：给据点一个红石信号就**临时挂起**——停止搬运、停止耗电，但区块照旧保活（方块灯灭，右键会告诉你「已挂起」）。
 
-**两条要留意的**（诚实写在前面）
-- 区块保活**不会**因为没电而撤销——否则断电会让远端区块卸载、桥再也回不来。所以网络没电时桥保持加载但停止搬运，只有拆方块 / 解绑才释放。
-- 拆掉据点、或**卸载本模组之前，请先拆掉已配对的据点**，否则区块强加载记录会留在存档里。
+**三条要留意的**（诚实写在前面）
+- **欠费 / 挂起时断的是「链路」，不是「区块」**。区块一旦被放掉，远端方块实体就不再 tick，谁也放不掉它、也永远接不回来（死锁）。所以省钱只能靠断开搬运；供电恢复后下一秒会自动接上。
+- 已经保活的区块，只有**解绑或拆掉据点**才释放。配置里的开关是「准入」开关：关掉后不再新保活，但**不会**把已经保活的区块放掉——同样是为了不制造死锁。
+- 卸载本模组之前，**请先拆掉已配对的据点**，否则区块强加载记录会留在存档里。
 
 配方：`QWQ / RSR / QXQ`（石英富集铁 / 无线访问点 / **网络接收器 ×2** —— 桥的两端 / 下界之星 / 64k 存储方块）。
 
@@ -520,11 +522,13 @@ There is a blunter answer to the distance tariff: **do not let the network be th
 - **Keeps chunks loaded**: once paired, **both ends** stay force-loaded (configurable). RS's own transmitter/receiver pair makes you handle that yourself — that is the main difference.
 - **No network card needed across dimensions**: it stores a position, not a line of sight, so pairing works from the Nether or the End.
 - **Visibly obvious**: lit = connected, dark = not connected (or still an anchor). Right-clicking it tells you where it points.
-- **Constant drain** of 64 FE/s per bridge (configurable).
+- **Energy is itemised**: the bridge itself is **64 FE/s**, and **chunk keeping is billed separately at 16 FE/s per held chunk** (a pair usually holds two — both ends), so a paired bridge is roughly 96 FE/s. All configurable.
+- **Redstone switch**: a redstone signal on the endpoint **suspends** it — no hauling, no drain, chunks stay kept (the block goes dark and right-clicking says "suspended").
 
-**Two honest caveats**
-- Chunk keeping is **never** revoked because of low power — otherwise a blackout would unload the far end and the bridge could never recover. With no power the bridge stays loaded but stops carrying; only breaking the block or unbinding releases it.
-- Break your paired endpoints (or at least unbind them) **before uninstalling this mod**, otherwise the force-load records stay in the save.
+**Three honest caveats**
+- **When unpaid or suspended the link drops, not the chunks.** Once a chunk is released the far block entity stops ticking and can never ask for it back (a deadlock). So saving power can only mean stopping the haul; the link reconnects by itself a second after power returns.
+- A chunk already being kept is only released by **unbinding or breaking the endpoint**. The config switch is an *admission* switch: it stops new keeping but never drops a chunk that is already held — again to avoid a deadlock.
+- Break (or at least unbind) paired endpoints **before uninstalling this mod**, otherwise the force-load records stay in the save.
 
 Recipe: `QWQ / RSR / QXQ` (quartz enriched iron / wireless transmitter / **two network receivers** — the two ends of the bridge / nether star / 64k storage block).
 

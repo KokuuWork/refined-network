@@ -104,5 +104,7 @@ public interface Config {
         long getEnergyUsage();
 
         boolean isChunkLoadingEnabled();
+
+        long getChunkLoadingEnergyUsage();
     }
 }

@@ -36,6 +36,11 @@ public class WirelessBridgeBlockItem extends BlockItem {
             ContentNames.BRIDGE_ENERGY_TRANSLATION_KEY,
             entry.getEnergyUsage()
         ).withStyle(ChatFormatting.DARK_GRAY));
+        lines.add(Component.translatable(
+            ContentNames.BRIDGE_CHUNK_ENERGY_TRANSLATION_KEY,
+            entry.getChunkLoadingEnergyUsage()
+        ).withStyle(ChatFormatting.DARK_GRAY));
         lines.add(ContentNames.WIRELESS_BRIDGE_CHUNK_HINT);
+        lines.add(ContentNames.WIRELESS_BRIDGE_REDSTONE_HINT);
     }
 }

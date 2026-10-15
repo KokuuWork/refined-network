@@ -117,6 +117,18 @@ public final class ContentNames {
         "block",
         "wireless_bridge.energy"
     );
+    public static final String BRIDGE_CHUNK_ENERGY_TRANSLATION_KEY = createTranslationKey(
+        "block",
+        "wireless_bridge.energy.chunk"
+    );
+    public static final MutableComponent WIRELESS_BRIDGE_REDSTONE_HINT = createTranslation(
+        "block",
+        "wireless_bridge.hint.redstone"
+    ).withStyle(ChatFormatting.DARK_GRAY);
+    public static final MutableComponent BRIDGE_SUSPENDED = createTranslation(
+        "msg",
+        "bridge.suspended"
+    ).withStyle(ChatFormatting.YELLOW);
     public static final String BRIDGE_STATUS_ANCHOR_TRANSLATION_KEY = createTranslationKey(
         "msg",
         "bridge.status.anchor"

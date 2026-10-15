@@ -236,6 +236,8 @@ public class ConfigImpl implements ConfigData, Config {
         @ConfigEntry.BoundedDiscrete(min = 0L, max = Long.MAX_VALUE)
         private long energyUsage = DefaultEnergyUsage.BRIDGE.energyUsage();
         private boolean chunkLoading = DefaultEnergyUsage.BRIDGE.chunkLoading();
+        @ConfigEntry.BoundedDiscrete(min = 0L, max = Long.MAX_VALUE)
+        private long chunkLoadingEnergyUsage = DefaultEnergyUsage.BRIDGE.chunkLoadingEnergyUsage();
 
         @Override
         public boolean isEnabled() {
@@ -250,6 +252,11 @@ public class ConfigImpl implements ConfigData, Config {
         @Override
         public boolean isChunkLoadingEnabled() {
             return chunkLoading;
+        }
+
+        @Override
+        public long getChunkLoadingEnergyUsage() {
+            return chunkLoadingEnergyUsage;
         }
     }
 }

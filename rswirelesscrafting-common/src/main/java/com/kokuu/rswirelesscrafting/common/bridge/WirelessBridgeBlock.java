@@ -122,7 +122,9 @@ public class WirelessBridgeBlock extends BaseEntityBlock {
             Component.translatable(
                 ContentNames.BRIDGE_STATUS_ENDPOINT_TRANSLATION_KEY,
                 target.pos().toShortString(),
-                bridge.isLinked() ? ContentNames.BRIDGE_ONLINE : ContentNames.BRIDGE_OFFLINE
+                bridge.isSuspended()
+                    ? ContentNames.BRIDGE_SUSPENDED
+                    : (bridge.isLinked() ? ContentNames.BRIDGE_ONLINE : ContentNames.BRIDGE_OFFLINE)
             ),
             false
         );

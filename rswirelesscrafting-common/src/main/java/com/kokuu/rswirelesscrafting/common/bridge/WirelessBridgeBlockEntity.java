@@ -3,6 +3,7 @@ package com.kokuu.rswirelesscrafting.common.bridge;
 import com.kokuu.rswirelesscrafting.common.BlockEntities;
 import com.kokuu.rswirelesscrafting.common.Config;
 import com.kokuu.rswirelesscrafting.common.Platform;
+import com.kokuu.rswirelesscrafting.common.link.BoundTargetResolver;
 import com.kokuu.rswirelesscrafting.common.link.LinkRegistry;
 import com.kokuu.rswirelesscrafting.common.link.NetworkAttachment;
 import com.kokuu.rswirelesscrafting.common.util.RateMeter;
@@ -38,9 +39,12 @@ import net.minecraft.world.level.block.state.BlockState;
  * 否则玩家一离开，远端区块卸载、桥就断了。RS 原生那对「网络变送器 / 网络接收器」要求玩家
  * 自己保证两端加载，这是我们和它的主要区别。
  *
- * <p><b>🚨 关于电的一条铁律</b>：<b>绝不会因为没电而断开</b>。断开 → 区块释放 → 方块实体不再 tick
- * → 再也没机会重新连上（死锁）。所以耗电是「能扣多少扣多少」的常驻负载，桥本身只在
- * 拆掉 / 解绑时释放区块。
+ * <p><b>🚨 关于电的一条铁律</b>：欠费 / 红石挂起时**断的是链路，不是区块**。
+ * 区块一旦被放掉，远端方块实体就不再 tick，谁也放不掉它也已经回不来了（死锁）——
+ * 所以「省钱」只能靠断开搬运，不能靠撤销保活。恢复供电后下一秒会自动接上。
+ *
+ * <p><b>耗电</b>= 桥本身（默认 64 FE/s）+ **每保活一个区块的附加**（默认 16 FE/s，配对通常保两端 = 2 个）。
+ * 保区块这件事是**明码计价**的，同时在开关上还留了配置总闸与红石挂起两条路。
  *
  * <p><b>一个已知边界</b>：据点如果**正好贴着线缆**，RS 的图会把它连到身边那张网络上，
  * 而这里又把它挂到基点的网络上，两边会轮流改写节点归属（每秒翻转一次）。实际用法里据点都在
@@ -62,6 +66,7 @@ public class WirelessBridgeBlockEntity extends AbstractNetworkNodeContainerBlock
     private NetworkAttachment attachment;
     private int syncCountdown;
     private boolean linked;
+    private boolean suspended;
     private boolean holdingOwnChunk;
     private boolean holdingTargetChunk;
 
@@ -111,28 +116,75 @@ public class WirelessBridgeBlockEntity extends AbstractNetworkNodeContainerBlock
             return;
         }
         final Config.BridgeEntry config = Platform.getConfig().getBridge();
-        if (!config.isEnabled() || target == null) {
-            // 基点（或功能被配置关掉）：什么都没连，确保不占着区块。
+        if (target == null) {
             release(serverLevel);
             setLinked(false);
+            suspended = false;
             return;
+        }
+        // 区块保活**只看配置与配对状态**，绝不看电、也绝不看红石：
+        // 一旦因为欠费/挂起把区块放掉，远端方块实体就不再 tick，桥永远回不来（死锁）。
+        // 所以「省钱」只能靠断链路，不能靠撤区块。
+        if (config.isChunkLoadingEnabled()) {
+            acquire(serverLevel);
         }
         if (syncCountdown-- <= 0) {
             syncCountdown = SYNC_INTERVAL - 1;
             sync(serverLevel, config);
         }
-        consume();
+        consume(config);
     }
 
     /**
-     * 对齐一次：两端区块保活 + 把自己挂到基点的网络上。
+     * 对齐一次：判断要不要（能不能）维持链路。区块保活不在这里处理。
      */
     private void sync(final ServerLevel serverLevel, final Config.BridgeEntry config) {
-        if (config.isChunkLoadingEnabled()) {
-            acquire(serverLevel);
+        suspended = serverLevel.hasNeighborSignal(worldPosition);
+        if (!config.isEnabled() || suspended) {
+            // 总开关关掉 / 红石挂起：断开链路（省电），区块照旧保活。
+            detachLink();
+            setLinked(false);
+            return;
+        }
+        final Network anchorNetwork = BoundTargetResolver.resolveNetwork(serverLevel, target).orElse(null);
+        if (anchorNetwork == null || !canAfford(anchorNetwork, config)) {
+            // 那边连不上、或网络付不起这一档：断开链路，等它恢复。
+            // 「先看余额再挂」而不是「挂了再扣」，避免欠费那一秒反复挂断。
+            detachLink();
+            setLinked(false);
+            return;
         }
         attachment(serverLevel).ensureAttached();
         setLinked(attachment(serverLevel).isAttached());
+    }
+
+    private boolean canAfford(final Network anchorNetwork, final Config.BridgeEntry config) {
+        return anchorNetwork.getComponent(EnergyNetworkComponent.class).getStored() >= perTick(config);
+    }
+
+    /**
+     * 每秒总耗电 = 桥本身 + 每保活一个区块的附加。
+     */
+    private long energyPerSecond(final Config.BridgeEntry config) {
+        long total = config.getEnergyUsage();
+        if (holdingOwnChunk) {
+            total += config.getChunkLoadingEnergyUsage();
+        }
+        if (holdingTargetChunk) {
+            total += config.getChunkLoadingEnergyUsage();
+        }
+        return total;
+    }
+
+    private long perTick(final Config.BridgeEntry config) {
+        return Math.max(1L, energyPerSecond(config) / 20L);
+    }
+
+    private void detachLink() {
+        final NetworkAttachment existing = attachment;
+        if (existing != null) {
+            existing.detach();
+        }
     }
 
     private NetworkAttachment attachment(final ServerLevel serverLevel) {
@@ -181,18 +233,25 @@ public class WirelessBridgeBlockEntity extends AbstractNetworkNodeContainerBlock
     }
 
     /**
-     * 常驻耗电：能扣多少扣多少，**绝不因为欠费而断开**（见类注释里的死锁说明）。
+     * 常驻耗电：只按当前**真正持有**的区块计数，能扣多少扣多少，扣不出来也不撤区块。
      */
-    private void consume() {
+    private void consume(final Config.BridgeEntry config) {
         final Network network = mainNetworkNode.getNetwork();
         if (network == null) {
             return;
         }
-        final long amount = meter.next(Platform.getConfig().getBridge().getEnergyUsage());
+        final long amount = meter.next(energyPerSecond(config));
         if (amount > 0) {
             network.getComponent(EnergyNetworkComponent.class).extract(amount);
             setChanged();
         }
+    }
+
+    /**
+     * 是否被红石信号临时挂起（挂起 = 不搬东西、不耗电，但区块照旧保活）。
+     */
+    public boolean isSuspended() {
+        return suspended;
     }
 
     private void setLinked(final boolean value) {

@@ -55,7 +55,8 @@ public final class DefaultEnergyUsage {
     // 这个决策里，而且按距离计费需要把物品侧的距离公式复制一份到方块侧，容易两边分叉。
     public static final BridgeDefaults BRIDGE = new BridgeDefaults(
         64,    // 每座桥常驻耗电 FE/s
-        true   // 据点自动保活两端区块
+        true,  // 据点自动保活两端区块
+        16     // 每个被保活的区块附加 FE/s（配对时两端共 2 个）
     );
 
     private DefaultEnergyUsage() {
