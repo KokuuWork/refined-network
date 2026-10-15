@@ -17,7 +17,7 @@
 > 👉 **[点击加入群聊（群号 498700382）](https://qm.qq.com/q/ueYTU8T3xK)** ｜ 也可以在 QQ 里**搜索群号 498700382** 找到我们。
 > 不方便用 QQ 的话，欢迎直接提 [Issue](https://github.com/KokuuWork/rswirelesscrafting/issues)。
 
-> 🧪 **当前版本 0.3.1**（2026-10-15）· **仍处于测试阶段**：Fabric 侧为首次移植，尚未完成完整真机验证。
+> 🧪 **当前版本 0.3.2**（2026-10-15）· **仍处于测试阶段**：Fabric 侧为首次移植，尚未完成完整真机验证。
 > 请在测试存档中使用并**先备份世界**；遇到问题欢迎来上面的 QQ 群反馈（附日志与复现步骤）。
 
 给 [Refined Storage 2](https://github.com/refinedmods/refinedstorage) 补上原版缺失的**无线合成**能力。
@@ -132,7 +132,7 @@
 1. 装好 Fabric 1.21.1、Fabric API 与 Refined Storage。
 2. 把 `rswirelesscrafting-fabric-<version>.jar` 丢进 `mods/`，并确保已装 Cloth Config 与 Team Reborn Energy（通常随 Refined Storage 一并提供）。
 
-两种加载器的 jar 都从 [Releases](https://github.com/KokuuWork/rswirelesscrafting/releases/latest) 下载，**二选一**（功能与配置完全一致，不要同时放进 `mods/`）。当前 0.3.1 对应 `rswirelesscrafting-neoforge-0.3.1.jar` / `rswirelesscrafting-fabric-0.3.1.jar`。
+两种加载器的 jar 都从 [Releases](https://github.com/KokuuWork/rswirelesscrafting/releases/latest) 下载，**二选一**（功能与配置完全一致，不要同时放进 `mods/`）。当前 0.3.2 对应 `rswirelesscrafting-neoforge-0.3.2.jar` / `rswirelesscrafting-fabric-0.3.2.jar`。
 
 > **升级注意**：NeoForge 只会更新配置文件的**注释**、不会覆盖你已经改过的值。跨版本升级后如果发现
 > `config/rswirelesscrafting-common.toml` 里「注释写的默认值」和「实际值」不一致，删掉该文件让它重新生成即可。
@@ -324,7 +324,9 @@ export JAVA_HOME="/path/to/jdk-21"
 
 ## 更新日志
 
-最新 **0.3.1**（2026-10-15）：**Fabric 移植**、**饰品栏兼容**（Curios / Trinkets）、距离耗电改**线性**（16 格内 ×1，超出按距离 ÷ 16）、跨维度 **×16**、合成 **20 FE** / 自动合成 **40 FE**、充电站改显自身缓冲并改为全局 3 设备名额、GUI 与 tooltip 修复、多人三项修复。
+最新 **0.3.2**（2026-10-15，修复版）：修掉远程输电插件在网络电量不足时的**双重收费**、无线充电实际间隔 11 tick（速率被压低约 9%），并修正无线名额的过时文案。
+
+上一版 **0.3.1**（2026-10-15）：**Fabric 移植**、**饰品栏兼容**（Curios / Trinkets）、距离耗电改**线性**（16 格内 ×1，超出按距离 ÷ 16）、跨维度 **×16**、合成 **20 FE** / 自动合成 **40 FE**、充电站改显自身缓冲并改为全局 3 设备名额、GUI 与 tooltip 修复、多人三项修复。
 
 完整记录见 [CHANGELOG.md](CHANGELOG.md)。
 
@@ -342,7 +344,7 @@ export JAVA_HOME="/path/to/jdk-21"
 > number **498700382** inside QQ.
 > No QQ? Open an [Issue](https://github.com/KokuuWork/rswirelesscrafting/issues) instead.
 
-> 🧪 **Current version 0.3.1** (2026-10-15) · **still a testing build**: the Fabric port is brand new and has not gone
+> 🧪 **Current version 0.3.2** (2026-10-15) · **still a testing build**: the Fabric port is brand new and has not gone
 > through full in-game verification yet. Use it in a test world and **back up your saves** first; bug reports are
 > welcome in [Issues](https://github.com/KokuuWork/rswirelesscrafting/issues).
 

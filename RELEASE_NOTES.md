@@ -2,14 +2,14 @@
      发新版时直接改写本文件即可；没有本文件时发布会退回 GitHub 自动生成的说明。 -->
 
 > 🧪 **测试版声明 / Testing build**
-> 本版本作为 **0.3.1 正式版**发布，但**仍处于测试阶段** —— 尤其是**首次移植的 Fabric 侧**尚未完成完整真机验证。
+> 本版本 **0.3.2** 是 0.3.1 的修复版，但**仍处于测试阶段** —— 尤其是**首次移植的 Fabric 侧**尚未完成完整真机验证。
 > 建议在测试存档中使用，**务必先备份世界**；遇到问题**优先来 QQ 群 498700382**（👉 [点击加入](https://qm.qq.com/q/ueYTU8T3xK)），
 > 或在 [Issues](https://github.com/KokuuWork/rswirelesscrafting/issues) 反馈（附日志 + 复现步骤）。
 
 > 🧪 **Testing build**
-> Released as **0.3.1**, but it is still a **testing build** — the brand-new **Fabric** port has not gone through
-> full in-game verification yet. Use it in a test world and **back up your saves** first. Bug reports are very
-> welcome in [Issues](https://github.com/KokuuWork/rswirelesscrafting/issues) (please include logs + repro steps).
+> **0.3.2** is a bug-fix release on top of 0.3.1, but it is still a **testing build** — the brand-new **Fabric** port
+> has not gone through full in-game verification yet. Use it in a test world and **back up your saves** first.
+> Bug reports are very welcome in [Issues](https://github.com/KokuuWork/rswirelesscrafting/issues) (logs + repro steps).
 
 ---
 
@@ -31,10 +31,11 @@
 
 | 加载器 Loader | 文件 File | 说明 Notes |
 | --- | --- | --- |
-| **NeoForge** | `rswirelesscrafting-neoforge-0.3.1.jar` | Minecraft 1.21.1 |
-| **Fabric** | `rswirelesscrafting-fabric-0.3.1.jar` | Minecraft 1.21.1，需 Fabric API |
+| **NeoForge** | `rswirelesscrafting-neoforge-0.3.2.jar` | Minecraft 1.21.1 |
+| **Fabric** | `rswirelesscrafting-fabric-0.3.2.jar` | Minecraft 1.21.1，需 Fabric API |
 
 两个 jar **二选一**，按你的加载器下载；不要同时放进 mods 目录。
+**从 0.3.1 升级**：直接替换 jar 即可，配置与存档兼容（配置文件有新增/改默认值时，删掉 `config/rswirelesscrafting-common.toml` 让它重新生成）。
 
 **前置依赖 Requirements**
 
@@ -48,7 +49,13 @@
 
 ## 本次更新内容 / What's in this build
 
-### 新增
+### 修复（0.3.2）
+
+- **远程输电插件不再双重收费**：网络电量不足以支付单次动作时，原先会把网络剩余电量先抽走、再回落到终端电池扣一次（RS 的 `extract` 不足额也会抽走剩余）。现在先查余额、够才抽电，网络没电时才完整回落终端电池。
+- **无线充电速率修正**：扫描倒数的重置值少算一个 tick，实际每 11 tick 才扫一次（额度却按 10 tick 发放），速率被压低约 9%。现在精确每 10 tick 一次，**20 FE/s 名副其实**。
+- 修正终端充电站 tooltip 里过时的无线名额描述：中英均改为「全场共 3 个设备名额」。
+
+### 0.3.1 的主要内容（本版一并包含）
 
 - **Fabric 移植**：新增 `rswirelesscrafting-fabric` 模块，完整支持 **1.21.1 + Fabric**（配置走 Cloth Config，能量走 Team Reborn Energy）。common 模块零改动，与 NeoForge 侧共用同一份逻辑。
 - **饰品栏兼容**（可选、纯数据驱动）：终端可放进 Curios / Trinkets 饰品槽，与 RS 原生无线终端共用同一组槽位，用本模组的快捷键即可从饰品栏直接打开。
@@ -61,7 +68,7 @@
 - 充电站改显**自身内部缓冲电量**（默认 4000 FE），未满时自动从 RS 网络补电。
 - **无线充电改为全局 3 个设备名额**（3 人各充 1 个，或 1 人独占 3 个）。
 
-### 修复
+### 修复（0.3.1）
 
 - 充电站与插件装配界面：能量数字改 K/M/G 紧凑格式，不再溢出；「物品栏」标签不再被横线划穿；**槽位悬停提示恢复正常**（MC 1.21 起需手动调用 `renderTooltip`）。
 - 旧存档缓冲电量超过新容量时自动 clamp。
