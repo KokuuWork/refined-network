@@ -67,6 +67,7 @@ public class WirelessBridgeBlockEntity extends AbstractNetworkNodeContainerBlock
     private int syncCountdown;
     private boolean linked;
     private boolean suspended;
+    private boolean unpaid;
     private boolean holdingOwnChunk;
     private boolean holdingTargetChunk;
 
@@ -120,6 +121,7 @@ public class WirelessBridgeBlockEntity extends AbstractNetworkNodeContainerBlock
             release(serverLevel);
             setLinked(false);
             suspended = false;
+            unpaid = false;
             return;
         }
         // 区块保活**只看配置与配对状态**，绝不看电、也绝不看红石：
@@ -142,18 +144,27 @@ public class WirelessBridgeBlockEntity extends AbstractNetworkNodeContainerBlock
         suspended = serverLevel.hasNeighborSignal(worldPosition);
         if (!config.isEnabled() || suspended) {
             // 总开关关掉 / 红石挂起：断开链路（省电），区块照旧保活。
+            unpaid = false;
             detachLink();
             setLinked(false);
             return;
         }
         final Network anchorNetwork = BoundTargetResolver.resolveNetwork(serverLevel, target).orElse(null);
-        if (anchorNetwork == null || !canAfford(anchorNetwork, config)) {
-            // 那边连不上、或网络付不起这一档：断开链路，等它恢复。
-            // 「先看余额再挂」而不是「挂了再扣」，避免欠费那一秒反复挂断。
+        if (anchorNetwork == null) {
+            unpaid = false;
             detachLink();
             setLinked(false);
             return;
         }
+        if (!canAfford(anchorNetwork, config)) {
+            // 付不起这一档：断开链路，等它恢复。「先看余额再挂」而不是「挂了再扣」，
+            // 避免欠费那一秒反复挂断。状态单独标出来，玩家右键就知道是「欠费」不是「没连上」。
+            unpaid = true;
+            detachLink();
+            setLinked(false);
+            return;
+        }
+        unpaid = false;
         attachment(serverLevel).ensureAttached();
         setLinked(attachment(serverLevel).isAttached());
     }
@@ -245,6 +256,13 @@ public class WirelessBridgeBlockEntity extends AbstractNetworkNodeContainerBlock
             network.getComponent(EnergyNetworkComponent.class).extract(amount);
             setChanged();
         }
+    }
+
+    /**
+     * 是否因为付不起运行费而停运（区块仍在保活，供电恢复即自动接上）。
+     */
+    public boolean isUnpaid() {
+        return unpaid;
     }
 
     /**

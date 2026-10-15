@@ -124,7 +124,7 @@
   "block.rswirelesscrafting.wireless_bridge.desc": "Extends your network to a distant place, across dimensions, with chunk keeping",
   "block.rswirelesscrafting.wireless_bridge.hint.anchor": "Unpaired = anchor: put it on the network and it waits to be pointed at",
   "block.rswirelesscrafting.wireless_bridge.hint.endpoint": "Paired = endpoint: the network is extended here, so RS buses work next to it",
-  "block.rswirelesscrafting.wireless_bridge.hint.chunk": "Keeps chunks loaded: once paired, both ends stay force-loaded",
+  "block.rswirelesscrafting.wireless_bridge.hint.chunk": "Keeps chunks loaded: both ends stay force-loaded once paired - pricey, but cheaper than building your own loader",
   "block.rswirelesscrafting.wireless_bridge.hint.usage": "Sneak + right-click: set anchor / unbind",
   "block.rswirelesscrafting.wireless_bridge.energy": "Bridge drain: %s FE/s (each)",
   "msg.rswirelesscrafting.bridge.status.anchor": "Wireless bridge (anchor): %s",
@@ -134,7 +134,7 @@
   "msg.rswirelesscrafting.bridge.offline": "not connected (check the anchor and chunk loading)",
   "msg.rswirelesscrafting.bridge.anchor_set": "Anchor recorded: sneak + right-click another bridge far away to pair it",
   "msg.rswirelesscrafting.bridge.unbound": "Unbound, back to being an anchor",
-  "block.rswirelesscrafting.wireless_bridge.energy.chunk": "Chunk keeping: %s FE/s per chunk",
+  "block.rswirelesscrafting.wireless_bridge.energy.chunk": "Chunk keeping: %s FE/s per chunk (a luxury)",
   "block.rswirelesscrafting.wireless_bridge.hint.redstone": "A redstone signal suspends it: no hauling, no drain, chunks stay kept",
   "msg.rswirelesscrafting.bridge.suspended": "suspended by redstone - chunks are still kept",
   "text.autoconfig.rswirelesscrafting.option.wirelessBridge": "Wireless Bridge",
@@ -146,5 +146,6 @@
   "text.autoconfig.rswirelesscrafting.option.wirelessBridge.chunkLoading": "Keep chunks loaded",
   "text.autoconfig.rswirelesscrafting.option.wirelessBridge.chunkLoading.tooltip": "Force-load both ends once paired.",
   "text.autoconfig.rswirelesscrafting.option.wirelessBridge.chunkLoadingEnergyUsage": "Chunk keeping drain (FE/s each)",
-  "text.autoconfig.rswirelesscrafting.option.wirelessBridge.chunkLoadingEnergyUsage.tooltip": "Extra drain per held chunk; a pair usually holds two."
+  "text.autoconfig.rswirelesscrafting.option.wirelessBridge.chunkLoadingEnergyUsage.tooltip": "Extra drain per held chunk (deliberately expensive by default); a pair usually holds two. Set 0 for free chunk keeping.",
+  "msg.rswirelesscrafting.bridge.unpaid": "unpaid and idle (chunks are still kept - it reconnects once the network has power)"
 }

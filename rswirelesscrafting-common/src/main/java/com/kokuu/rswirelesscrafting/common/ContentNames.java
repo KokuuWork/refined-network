@@ -125,6 +125,10 @@ public final class ContentNames {
         "block",
         "wireless_bridge.hint.redstone"
     ).withStyle(ChatFormatting.DARK_GRAY);
+    public static final MutableComponent BRIDGE_UNPAID = createTranslation(
+        "msg",
+        "bridge.unpaid"
+    ).withStyle(ChatFormatting.RED);
     public static final MutableComponent BRIDGE_SUSPENDED = createTranslation(
         "msg",
         "bridge.suspended"

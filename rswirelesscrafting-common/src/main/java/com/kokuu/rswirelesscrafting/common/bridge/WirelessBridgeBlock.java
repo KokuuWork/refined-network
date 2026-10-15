@@ -106,6 +106,16 @@ public class WirelessBridgeBlock extends BaseEntityBlock {
         player.displayClientMessage(ContentNames.BRIDGE_ANCHOR_SET, false);
     }
 
+    private static Component statusOf(final WirelessBridgeBlockEntity bridge) {
+        if (bridge.isSuspended()) {
+            return ContentNames.BRIDGE_SUSPENDED;
+        }
+        if (bridge.isUnpaid()) {
+            return ContentNames.BRIDGE_UNPAID;
+        }
+        return bridge.isLinked() ? ContentNames.BRIDGE_ONLINE : ContentNames.BRIDGE_OFFLINE;
+    }
+
     private static void report(final ServerPlayer player, final WirelessBridgeBlockEntity bridge) {
         final GlobalPos target = bridge.getTarget();
         if (target == null) {
@@ -122,9 +132,7 @@ public class WirelessBridgeBlock extends BaseEntityBlock {
             Component.translatable(
                 ContentNames.BRIDGE_STATUS_ENDPOINT_TRANSLATION_KEY,
                 target.pos().toShortString(),
-                bridge.isSuspended()
-                    ? ContentNames.BRIDGE_SUSPENDED
-                    : (bridge.isLinked() ? ContentNames.BRIDGE_ONLINE : ContentNames.BRIDGE_OFFLINE)
+                statusOf(bridge)
             ),
             false
         );
