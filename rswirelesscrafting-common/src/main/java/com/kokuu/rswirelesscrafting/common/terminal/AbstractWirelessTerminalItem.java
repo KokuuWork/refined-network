@@ -129,6 +129,15 @@ public abstract class AbstractWirelessTerminalItem extends AbstractNetworkEnergy
         return RefinedStorageApi.INSTANCE.asItemEnergyStorage(energyStorage, stack);
     }
 
+    /**
+     * 读回终端物品当前的存量电量（与 {@link #createEnergyStorage} 同一套包装，故数值一致）。
+     */
+    public static long getStoredEnergy(final ItemStack stack) {
+        return RefinedStorageApi.INSTANCE
+            .asItemEnergyStorage(new EnergyStorageImpl(getEnergyCapacity(stack)), stack)
+            .getStored();
+    }
+
     public static long getEnergyCapacity(final ItemStack stack) {
         final long base = Platform.getConfig().getWirelessCraftingGrid().getEnergyCapacity();
         final long perUpgrade = Platform.getConfig().getWirelessCraftingGrid().getBatteryUpgradeCapacity();

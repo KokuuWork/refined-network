@@ -46,7 +46,7 @@
   "item.rswirelesscrafting.dimension.overworld": "Overworld",
   "item.rswirelesscrafting.dimension.nether": "The Nether",
   "item.rswirelesscrafting.dimension.end": "The End",
-  "key.rswirelesscrafting.open_wireless_crafting_grid": "Open Wireless Crafting Grid",
+  "key.rswirelesscrafting.open_wireless_crafting_grid": "Open wireless terminal (crafting / pattern)",
   "text.autoconfig.rswirelesscrafting.title": "Refined Storage - Wireless Crafting Configuration",
   "rswirelesscrafting.configuration.title": "Refined Storage - Wireless Crafting Configuration",
   "rswirelesscrafting.configuration.section.rswirelesscrafting.common.toml": "Refined Storage - Wireless Crafting Configuration",

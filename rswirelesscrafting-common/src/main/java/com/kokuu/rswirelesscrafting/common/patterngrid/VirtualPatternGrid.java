@@ -30,24 +30,48 @@ import net.minecraft.world.level.block.Blocks;
  *       于是左侧资源栏、配方候选排序、存储读写全部走正常路径。</li>
  * </ul>
  *
- * <p>生命周期与一次开界面等长：界面打开时构造、状态从物品读入；之后任何编辑都经
- * {@link #setChanged()} 写回物品；界面关闭后对象被丢弃（它从未注册进世界，不会泄漏）。
+ * <p><b>扣电与回滚</b>：不需要给 RS 的菜单打 mixin —— 所有编辑最终都会触发 {@link #setChanged()}，
+ * 于是这里对「输出槽里是否冒出了新样板」做一次前后指纹比对：冒出来了就扣一次造样板的电，
+ * 付不起就把状态回滚到上一次保存的样子（样板从输出槽消失），两个加载器行为完全一致。
+ *
+ * <p>生命周期与一次开界面等长：界面打开时构造、状态从物品读入；之后每次编辑都写回物品；
+ * 界面关闭后对象被丢弃（它从未注册进世界，不会泄漏）。
  */
 public class VirtualPatternGrid extends PatternGridBlockEntity {
+    /**
+     * RS 存档里样板输出槽的键名（{@code PatternGridBlockEntity} 的同名私有常量）。
+     */
+    private static final String TAG_PATTERN_OUTPUT = "pattern_output";
+
     private final ItemStack stack;
     private final HolderLookup.Provider registries;
+    private final WirelessPatternGridSession session;
+    /**
+     * 「空输出槽」的序列化指纹：只有与它不同，才说明这次真的产出了样板。
+     */
+    private final String emptyOutputFingerprint;
+    private String outputFingerprint;
+    private CompoundTag lastSavedState;
     /**
      * 灌入存档状态期间置位：{@code loadAdditional} 内部会触发 {@code setChanged}，
      * 若不拦住就会把「只加载了一半」的状态写回物品，把剩下的数据冲掉。
      */
     private boolean loading;
 
-    public VirtualPatternGrid(final ItemStack stack, final Level level, @Nullable final Network network) {
+    public VirtualPatternGrid(final ItemStack stack,
+                              final Level level,
+                              @Nullable final Network network,
+                              final WirelessPatternGridSession session) {
         super(BlockPos.ZERO, Blocks.AIR.defaultBlockState());
         this.stack = stack;
         this.registries = level.registryAccess();
+        this.session = session;
+        this.emptyOutputFingerprint = outputFingerprintOf(serialize());
         setLevel(level);
         loadState();
+        // 载入之后的输出槽状态作为基线：玩家上次没取走的样板不会被重复计费。
+        this.outputFingerprint = outputFingerprintOf(serialize());
+        this.lastSavedState = serialize();
         mainNetworkNode.setNetwork(network);
     }
 
@@ -65,16 +89,44 @@ public class VirtualPatternGrid extends PatternGridBlockEntity {
     }
 
     /**
-     * 所有编辑（摆配方、放样板、切类型、清空）最终都会走到这里。
-     * 这里既不能走原版实现（会加载区块），也正好是「把状态写回物品」的天然时机。
+     * 所有编辑（摆配方、放样板、切类型、清空、产出样板）最终都会走到这里。
+     * 这里既不能走原版实现（会加载区块），也正好是「写回物品 + 结算造样板」的天然时机。
      */
     @Override
     public void setChanged() {
         if (loading) {
             return;
         }
+        final CompoundTag state = serialize();
+        final String fingerprint = outputFingerprintOf(state);
+        final boolean produced = !fingerprint.equals(outputFingerprint)
+            && !fingerprint.equals(emptyOutputFingerprint);
+        if (produced && !session.tryChargeCreatePattern()) {
+            // 电量不足：这次动作当作没发生，把上一次保存的状态恢复回去。
+            restore(lastSavedState);
+            return;
+        }
+        outputFingerprint = fingerprint;
+        lastSavedState = state;
+        stack.set(DataComponents.INSTANCE.getPatternGridState(), state);
+    }
+
+    private CompoundTag serialize() {
         final CompoundTag tag = new CompoundTag();
         saveAdditional(tag, registries);
-        stack.set(DataComponents.INSTANCE.getPatternGridState(), tag);
+        return tag;
+    }
+
+    private void restore(final CompoundTag state) {
+        loading = true;
+        try {
+            loadAdditional(state, registries);
+        } finally {
+            loading = false;
+        }
+    }
+
+    private static String outputFingerprintOf(final CompoundTag state) {
+        return state.getCompound(TAG_PATTERN_OUTPUT).toString();
     }
 }

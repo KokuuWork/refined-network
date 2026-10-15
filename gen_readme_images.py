@@ -243,6 +243,7 @@ def load_assets():
         "advanced_processor": "item/advanced_processor.png",
         "basic_processor": "item/basic_processor.png",
         "machine_casing": "block/machine_casing/side.png",
+        "blank_pattern": "item/pattern/empty.png",
         "1k_storage_block": "block/storage_block/1k_storage_block.png",
         "4k_storage_block": "block/storage_block/4k_storage_block.png",
         "64k_storage_block": "block/storage_block/64k_storage_block.png",
@@ -276,6 +277,8 @@ def load_assets():
     for key, path in {
         "grid_off": "wireless_crafting_grid/inactive.png",
         "grid_on": "wireless_crafting_grid/active.png",
+        "pattern_off": "wireless_pattern_grid/inactive.png",
+        "pattern_on": "wireless_pattern_grid/active.png",
         "battery": "battery_upgrade.png",
         "range": "range_upgrade.png",
         "interdim": "interdimensional_upgrade.png",
@@ -294,8 +297,8 @@ def load_assets():
 # ================================================================== figures
 
 def items_figure(assets, path):
-    order = ["grid_off", "grid_on", "battery", "energy", "advanced", "range",
-             "interdim", "remote", "charging"]
+    order = ["grid_off", "grid_on", "pattern_off", "pattern_on", "battery", "energy",
+             "advanced", "range", "interdim", "remote", "charging"]
     scale = 8
     cell = 16 * scale + 8          # slot size, leaving a 4px inset for the sprite
     gap = 16
@@ -364,6 +367,7 @@ Q = "quartz_enriched_iron"
 A = "advanced_processor"
 M = "machine_casing"
 G = "crafting_grid"
+PT = "blank_pattern"
 H = "heart_of_the_sea"
 T = "wireless_transmitter"
 R = "network_receiver"
@@ -392,6 +396,7 @@ def main():
 
     items_figure(assets, os.path.join(OUT_DIR, "items.png"))
     for key, name in (("grid_on", "item-grid.png"),
+                      ("pattern_on", "item-wireless-pattern-grid.png"),
                       ("battery", "item-battery.png"),
                       ("energy", "item-energy.png"),
                       ("advanced", "item-advanced-energy.png"),
@@ -404,6 +409,10 @@ def main():
     recipe_figure(
         assets, os.path.join(OUT_DIR, "recipe-grid.png"),
         [[Q, A, Q], [E, G, E], [Q, M, Q]], "grid_off",
+    )
+    recipe_figure(
+        assets, os.path.join(OUT_DIR, "recipe-wireless-pattern-grid.png"),
+        [[Q, A, Q], [PT, "grid_off", PT], [Q, M, Q]], "pattern_off",
     )
     recipe_figure(
         assets, os.path.join(OUT_DIR, "recipe-battery.png"),

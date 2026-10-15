@@ -22,7 +22,7 @@
 
 给 [Refined Storage 2](https://github.com/refinedmods/refinedstorage) 补上原版缺失的**无线合成**能力。
 
-原版只有一个无线**查看**终端（`wireless_grid`）——你能远程看库存，但不能远程合成。本模组提供一个**无线合成终端**，用六张可插拔的**装配式升级插件**把它的续航、范围、维度与供能方式一路推到终局，再配一座**终端充电站**为所有 FE 终端补电。所有无线终端（含 RS 原生的无线终端与无线自动合成监视器）都遵循**按距离扣电**的线性价目表，离网络越远耗电越狠。
+原版只有一个无线**查看**终端（`wireless_grid`）——你能远程看库存，但不能远程合成。本模组提供一个**无线合成终端**与一个**无线样板终端**（远程编写自动化样板），用六张可插拔的**装配式升级插件**把它们的续航、范围、维度与供能方式一路推到终局，再配一座**终端充电站**为所有 FE 终端补电。所有无线终端（含 RS 原生的无线终端与无线自动合成监视器）都遵循**按距离扣电**的线性价目表，离网络越远耗电越狠。
 
 ![无线合成终端的未激活态与激活态，以及四张升级卡和终端充电站](docs/images/items.png)
 
@@ -33,6 +33,7 @@
 | | 名称 | 作用 | 稀有度 |
 |---|---|---|---|
 | <img src="docs/images/item-grid.png" width="40" alt=""> | **无线合成终端**<br>`wireless_crafting_grid` | 远程访问网络并**远程合成**。潜行 + 右键打开插件装配界面。 | RARE |
+| <img src="docs/images/item-wireless-pattern-grid.png" width="40" alt=""> | **无线样板终端**<br>`wireless_pattern_grid` | 远程编写**自动化样板**（合成 / 处理 / 切石 / 锻造），不用跑回样板网格。 | EPIC |
 | <img src="docs/images/item-battery.png" width="40" alt=""> | **电池升级插件**<br>`battery_upgrade` | 每张提升 **+1000 FE** 电池容量（可叠加）。前期刚需。 | RARE |
 | <img src="docs/images/item-energy.png" width="40" alt=""> | **初级能耗插件**<br>`energy_upgrade` | **距离能量倍率减半**。也是高级能耗插件的原料。 | RARE |
 | <img src="docs/images/item-advanced-energy.png" width="40" alt=""> | **高级能耗插件**<br>`advanced_energy_upgrade` | **完全消除距离能量倍率**（跨维倍率保留）。也是远程输电插件的原料。 | EPIC |
@@ -52,6 +53,17 @@
 - 拆下来的插件原样回到背包，不会蒸发。
 
 > 这套装配界面取代了早期的「工作台无序合成永久改造」方案——那样装上去就拿不下来了。旧方案的自定义配方与序列化器已从代码中删除。
+
+## 无线样板终端
+
+自动化做起来之后，最烦的一步不是合成，而是**改配方**——方块版的样板网格在基地里，矿场、下界、外岛想加一条产线就得来回跑。无线样板终端把这一步也搬到手上：**右键打开的是 RS 原汁原味的样板网格界面**（左侧资源栏、四种样板类型、JEI/REI 配方转移、样板复制全都在），但那座网格其实「装在你的终端里」。
+
+- 界面与消耗：开界面 **5 FE × 距离倍率**；**产出一张样板 40 FE × 距离倍率**（按自动合成档计价，因为它服务的是自动化本身）。电量不足时样板不会产出（终端没电就配不了样板）。
+- 「网格」本身是虚拟的：没有方块、不占区块、不用给它接线，登录进去就是它绑定的那张网络。
+- 编辑状态**存在终端物品里**：配方区、样板类型、模糊模式、输出槽里没取走的样板，关掉界面再打开原样还在。
+- 配方见下方「配方」一节，属终局件——它需要先有一台无线合成终端。
+
+<img src="docs/images/recipe-wireless-pattern-grid.png" width="270" alt="无线样板终端配方">
 
 ## 充电站
 
@@ -110,6 +122,8 @@
 | 装了**电池升级插件** | 同上，但容量 **+1000 FE / 张** | 同上 |
 | 装了**远程输电插件** | **直接扣所绑定网络的能量**，终端自身电池不再掉电；网络无电或未绑定时自动回落成出厂行为 | 同上 |
 
+> 无线样板终端同价目：开界面 5 · **产出一张样板 40**。它的「创建样板」按钮按下时会先查电量，付不起就当作没发生。
+
 基础电池容量只有 **400 FE**，而距离倍率能把单次动作抬到几十甚至上百 FE——所以**电池升级插件是前期刚需**：不装它，走远一点终端很快就见底，只能反复跑回充电站。合成类动作（合成 20 / 自动合成 40）显著贵于查看（5），这正是合成终端相对普通无线终端的额外成本。
 
 ## 环境
@@ -164,7 +178,7 @@
 
 ## 配方
 
-八件内容大多定位为**后期到终局**：材料取自 Refined Storage 自带的无线设备与递归存储元件、原版最稀有的掉落。只有**电池升级插件**、**初级能耗插件**与**终端充电站**刻意压低到前中期——它们负责把曲线撑平，剩下的都是终局件。
+九件内容大多定位为**后期到终局**：材料取自 Refined Storage 自带的无线设备与递归存储元件、原版最稀有的掉落。只有**电池升级插件**、**初级能耗插件**与**终端充电站**刻意压低到前中期——它们负责把曲线撑平，剩下的都是终局件。
 
 ### 无线合成终端
 
@@ -173,6 +187,14 @@
 `Q` 石英富集铁 · `A` 高级处理器 · `P` 末影珍珠 · `G` `refinedstorage:crafting_grids` 标签（任意合成网格）· `M` 机器外壳
 
 合计约 14 石英铁 + 2 末影珍珠 + 2 高级处理器 + 1 合成网格，约为 RS 自带「无线终端」的 **2.3 倍**——多出来的是「可合成」这份能力。
+
+### 无线样板终端
+
+<img src="docs/images/recipe-wireless-pattern-grid.png" width="270" alt="无线样板终端配方">
+
+`Q` 石英富集铁 · `A` 高级处理器 · `T` 空白样板 · `P` 无线合成终端 · `M` 机器外壳
+
+它是**唯一一件「用终端造终端」**的配方：中心那格要放一台做好的无线合成终端，前后用**空白样板**（RS 的样板基底）夹住——语义直白：这台终端是「写样板的终端」。定价与合成终端同档，属终局。
 
 ### 电池升级插件（前期刚需）
 
@@ -350,7 +372,7 @@ export JAVA_HOME="/path/to/jdk-21"
 
 An addon for **[Refined Storage 2](https://github.com/refinedmods/refinedstorage)** that adds the wireless **crafting** grid the base mod never had.
 
-Vanilla Refined Storage ships only a wireless *viewing* grid — you can browse your network remotely, but not craft on it. This mod adds a **Wireless Crafting Grid**, six swappable **upgrade cards** that extend its endurance, range, dimensions and power source all the way to endgame, plus a **Terminal Charging Station** that recharges every FE-based terminal. Every wireless terminal (including RS's own wireless grid and wireless autocrafting monitor) follows a **distance-based energy tariff** — the further you are from the network, the more each action costs.
+Vanilla Refined Storage ships only a wireless *viewing* grid — you can browse your network remotely, but not craft on it. This mod adds a **Wireless Crafting Grid** and a **Wireless Pattern Terminal** (write autocrafting patterns remotely), six swappable **upgrade cards** that extend their endurance, range, dimensions and power source all the way to endgame, plus a **Terminal Charging Station** that recharges every FE-based terminal. Every wireless terminal (including RS's own wireless grid and wireless autocrafting monitor) follows a **distance-based energy tariff** — the further you are from the network, the more each action costs.
 
 <img src="docs/images/items.png" width="620" alt="Wireless crafting grid (inactive and active), the six upgrade cards, and the terminal charging station">
 
@@ -361,6 +383,7 @@ Vanilla Refined Storage ships only a wireless *viewing* grid — you can browse 
 | | Item | Effect | Rarity |
 |---|---|---|---|
 | <img src="docs/images/item-grid.png" width="40" alt=""> | **Wireless Crafting Grid**<br>`wireless_crafting_grid` | Access your network remotely **and craft**. Sneak + right-click to open the upgrade panel. | rare |
+| <img src="docs/images/item-wireless-pattern-grid.png" width="40" alt=""> | **Wireless Pattern Terminal**<br>`wireless_pattern_grid` | Write **autocrafting patterns** (crafting / processing / stonecutter / smithing) remotely. | epic |
 | <img src="docs/images/item-battery.png" width="40" alt=""> | **Battery Upgrade**<br>`battery_upgrade` | **+1000 FE** capacity each (stacks). The early-game must-have. | rare |
 | <img src="docs/images/item-energy.png" width="40" alt=""> | **Energy Upgrade**<br>`energy_upgrade` | **Halves** the distance energy multiplier. Ingredient of the Advanced Energy Upgrade. | rare |
 | <img src="docs/images/item-advanced-energy.png" width="40" alt=""> | **Advanced Energy Upgrade**<br>`advanced_energy_upgrade` | **Removes** the distance multiplier (cross-dimension still applies). Ingredient of the Remote Energy Upgrade. | epic |
@@ -380,6 +403,17 @@ Cards are **not** baked into a crafting recipe. **Sneak + right-click** any wire
 - Removed cards return to your inventory intact.
 
 > This replaced the earlier "shapeless crafting-table, permanent modification" design, where an installed card could never come back out. Those custom recipe classes have been deleted from the codebase.
+
+### Wireless Pattern Terminal
+
+Once your base is automated, the annoying part is not crafting — it is **editing recipes**: the block Pattern Grid lives back at base, so every new production line in a far-away outpost means a trip home. The Wireless Pattern Terminal brings that step to your hand: right-clicking it opens **RS's own Pattern Grid UI** (resource list, all four pattern types, JEI/REI recipe transfer, pattern copying — everything), but the grid itself "lives inside your terminal".
+
+- Costs: opening the UI is **5 FE × distance multiplier**; **producing one pattern is 40 FE × distance multiplier** (priced like autocrafting, because that is what it feeds). With too little energy no pattern is produced — no power, no pattern.
+- The grid is virtual: no block, no chunk loading, no cables. You log into whatever network the terminal is bound to.
+- The editing state is **stored on the item**: matrix, pattern type, fuzzy mode and any pattern still sitting in the output slot all survive closing and reopening the UI.
+- It is an endgame craft (see Recipes) — you need a Wireless Crafting Grid first.
+
+<img src="docs/images/recipe-wireless-pattern-grid.png" width="270" alt="Wireless pattern terminal recipe">
 
 ### Charging Station
 
@@ -437,6 +471,8 @@ Three energy upgrades form a non-wasteful nesting chain for this:
 | Stock | The terminal's **own battery** (400 FE) | open 5 · craft 20 · autocraft 40 · clear matrix 5 · recipe transfer 5 |
 | **Battery Upgrade** installed | Same, but capacity **+1000 FE per card** | unchanged |
 | **Remote Energy Upgrade** installed | **Straight out of the bound network**; the terminal's battery is untouched. Falls back to stock behaviour if the network is empty or unbound. | unchanged |
+
+The Wireless Pattern Terminal shares the same tariff: open 5, **produce one pattern 40**. Its "create pattern" button checks your energy first — if you cannot pay, nothing happens.
 
 The base battery is only **400 FE**, while the distance multiplier can push a single action into the tens or hundreds of FE — so the **Battery Upgrade is an early-game necessity**: without it the terminal runs dry fast once you wander away, forcing you to trudge back to a charging station. Crafting actions (craft 20 / autocraft 40) cost far more than viewing (5), which is the extra price of a crafting terminal over a plain viewing terminal.
 

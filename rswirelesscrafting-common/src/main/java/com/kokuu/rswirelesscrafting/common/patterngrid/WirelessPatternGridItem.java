@@ -73,7 +73,8 @@ public class WirelessPatternGridItem extends AbstractWirelessTerminalItem {
         final VirtualPatternGrid grid = new VirtualPatternGrid(
             resolved.get(),
             player.level(),
-            network.orElse(null)
+            network.orElse(null),
+            new WirelessPatternGridSession(resolved.get(), context)
         );
         com.refinedmods.refinedstorage.common.Platform.INSTANCE.getMenuOpener().openMenu(
             player,

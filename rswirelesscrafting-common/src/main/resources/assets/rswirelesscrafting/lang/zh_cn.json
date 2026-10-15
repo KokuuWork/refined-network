@@ -46,7 +46,7 @@
   "item.rswirelesscrafting.dimension.overworld": "主世界",
   "item.rswirelesscrafting.dimension.nether": "下界",
   "item.rswirelesscrafting.dimension.end": "末地",
-  "key.rswirelesscrafting.open_wireless_crafting_grid": "打开无线合成终端",
+  "key.rswirelesscrafting.open_wireless_crafting_grid": "打开无线终端（合成 / 样板）",
   "text.autoconfig.rswirelesscrafting.title": "无线合成终端 配置",
   "rswirelesscrafting.configuration.title": "无线合成终端 配置",
   "rswirelesscrafting.configuration.section.rswirelesscrafting.common.toml": "无线合成终端 配置",
