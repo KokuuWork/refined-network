@@ -48,6 +48,20 @@ public class MonitorRuleContainer implements Container {
     }
 
     /**
+     * 换动作：提醒 ↔ 自动补货。切到补货时方向会被强制回「低于」（见
+     * {@link MonitorRule#withAction}）。
+     */
+    public void cycleAction(final int slot) {
+        final List<MonitorRule> rules = rules();
+        final MonitorRule rule = rules.get(slot);
+        if (rule.isEmpty()) {
+            return;
+        }
+        rules.set(slot, rule.withAction(rule.action().next()));
+        MonitorRules.set(stack, rules);
+    }
+
+    /**
      * 切换「低于阈值提醒」与「高于阈值提醒」。
      */
     public void toggleDirection(final int slot) {

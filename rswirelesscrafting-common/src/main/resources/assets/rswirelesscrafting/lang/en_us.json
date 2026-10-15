@@ -166,5 +166,13 @@
   "gui.rswirelesscrafting.monitor_rule_above": "above the threshold",
   "gui.rswirelesscrafting.monitor_rule_tooltip": "Now: %s\\nLeft-click = raise the threshold one step - Right-click = lower it one step - Shift + click = switch below / above",
   "msg.rswirelesscrafting.monitor_alert_below": "⚠ Low stock: %s down to %s (threshold %s)",
-  "msg.rswirelesscrafting.monitor_alert_above": "⚠ Piling up: %s at %s (threshold %s)"
+  "msg.rswirelesscrafting.monitor_alert_above": "⚠ Piling up: %s at %s (threshold %s)",
+  "gui.rswirelesscrafting.monitor_action_alert": "Alert",
+  "gui.rswirelesscrafting.monitor_action_restock": "Restock",
+  "gui.rswirelesscrafting.monitor_rule_restock": "restocking to the target",
+  "gui.rswirelesscrafting.monitor_target_tooltip": "Target: %s\nLeft-click = raise the target one step - Right-click = lower it one step",
+  "gui.rswirelesscrafting.monitor_mode_tooltip": "Action: %s\nClick to switch: \"Alert\" just says so in chat; \"Restock\" starts a crafting job by itself when you drop below the target (billed at the autocrafting rate)",
+  "msg.rswirelesscrafting.monitor_restock_started": "⚙ Restocking: %s %s -> %s",
+  "msg.rswirelesscrafting.monitor_restock_no_pattern": "⚠ Cannot restock %s: no pattern produces it",
+  "msg.rswirelesscrafting.monitor_restock_missing": "⚠ Restock stuck: %s is missing materials"
 }

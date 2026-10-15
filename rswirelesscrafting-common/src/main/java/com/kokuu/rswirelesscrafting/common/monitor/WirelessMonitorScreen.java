@@ -32,6 +32,7 @@ public class WirelessMonitorScreen extends AbstractContainerScreen<WirelessMonit
     private static final int VALUE_COLOR = 0x2A2A2A;
     private static final int ALERT_COLOR = 0xC62828;
     private static final int RULE_COLOR = 0x3C5A78;
+    private static final int RESTOCK_COLOR = 0x1D7A64;
     private static final int EMPTY_HINT_COLOR = 0x9A9A9A;
 
     public WirelessMonitorScreen(final WirelessMonitorContainerMenu menu,
@@ -112,12 +113,35 @@ public class WirelessMonitorScreen extends AbstractContainerScreen<WirelessMonit
             triggered ? ALERT_COLOR : RULE_COLOR,
             false
         );
+        drawMode(graphics, slot, y);
     }
 
     /**
-     * 规则文字：{@code < 256} 或 {@code > 256}。符号即方向，一眼可读。
+     * 行动作区：提醒 / 补货。补货是「维持到目标」，所以用箭头而不是不等号。
+     */
+    private void drawMode(final GuiGraphics graphics, final int slot, final int y) {
+        final Component label = menu.isRestock(slot)
+            ? ContentNames.MONITOR_ACTION_RESTOCK
+            : ContentNames.MONITOR_ACTION_ALERT;
+        final int center = WirelessMonitorContainerMenu.MODE_X + WirelessMonitorContainerMenu.MODE_WIDTH / 2;
+        graphics.drawString(
+            font,
+            label,
+            center - font.width(label) / 2,
+            y,
+            menu.isRestock(slot) ? RESTOCK_COLOR : RULE_COLOR,
+            false
+        );
+    }
+
+    /**
+     * 规则文字：提醒时是 {@code < 256} / {@code > 256}（符号即方向）；
+     * 补货时是 {@code → 512}（箭头表示「补到这个数」）。
      */
     private String monitorRuleText(final int slot) {
+        if (menu.isRestock(slot)) {
+            return "→ " + CompactNumber.format(menu.getThreshold(slot));
+        }
         return (menu.isAlertWhenBelow(slot) ? "< " : "> ")
             + CompactNumber.format(menu.getThreshold(slot));
     }
@@ -145,10 +169,14 @@ public class WirelessMonitorScreen extends AbstractContainerScreen<WirelessMonit
         final int slot = rowAt(mouseX, mouseY);
         if (slot >= 0 && menu.hasRule(slot)) {
             final int relX = (int) mouseX - leftPos;
-            if (relX >= WirelessMonitorContainerMenu.THRESHOLD_X
-                && relX < WirelessMonitorContainerMenu.THRESHOLD_X
-                    + WirelessMonitorContainerMenu.THRESHOLD_WIDTH) {
+            if (inRange(relX, WirelessMonitorContainerMenu.THRESHOLD_X,
+                WirelessMonitorContainerMenu.THRESHOLD_WIDTH)) {
                 sendButton(slot, button);
+                return true;
+            }
+            if (inRange(relX, WirelessMonitorContainerMenu.MODE_X,
+                WirelessMonitorContainerMenu.MODE_WIDTH)) {
+                sendAction(slot, WirelessMonitorContainerMenu.ACTION_TOGGLE_MODE);
                 return true;
             }
         }
@@ -167,9 +195,20 @@ public class WirelessMonitorScreen extends AbstractContainerScreen<WirelessMonit
                 ? WirelessMonitorContainerMenu.ACTION_THRESHOLD_DOWN
                 : WirelessMonitorContainerMenu.ACTION_THRESHOLD_UP;
         }
+        sendAction(slot, action);
+    }
+
+    private void sendAction(final int slot, final int action) {
         if (minecraft != null && minecraft.gameMode != null) {
-            minecraft.gameMode.handleInventoryButtonClick(menu.containerId, slot * 3 + action);
+            minecraft.gameMode.handleInventoryButtonClick(
+                menu.containerId,
+                slot * WirelessMonitorContainerMenu.ACTION_COUNT + action
+            );
         }
+    }
+
+    private static boolean inRange(final int value, final int start, final int width) {
+        return value >= start && value < start + width;
     }
 
     @Override
@@ -180,18 +219,36 @@ public class WirelessMonitorScreen extends AbstractContainerScreen<WirelessMonit
             return;
         }
         final int relX = (int) mouseX - leftPos;
-        if (relX < WirelessMonitorContainerMenu.THRESHOLD_X
-            || relX >= WirelessMonitorContainerMenu.THRESHOLD_X
-                + WirelessMonitorContainerMenu.THRESHOLD_WIDTH) {
+        if (inRange(relX, WirelessMonitorContainerMenu.MODE_X,
+            WirelessMonitorContainerMenu.MODE_WIDTH)) {
+            graphics.renderTooltip(
+                font,
+                Component.translatable(
+                    ContentNames.MONITOR_MODE_TOOLTIP_TRANSLATION_KEY,
+                    menu.isRestock(slot)
+                        ? ContentNames.MONITOR_ACTION_RESTOCK
+                        : ContentNames.MONITOR_ACTION_ALERT
+                ),
+                mouseX,
+                mouseY
+            );
+            return;
+        }
+        if (!inRange(relX, WirelessMonitorContainerMenu.THRESHOLD_X,
+            WirelessMonitorContainerMenu.THRESHOLD_WIDTH)) {
             return;
         }
         graphics.renderTooltip(
             font,
             Component.translatable(
-                ContentNames.MONITOR_RULE_TOOLTIP_TRANSLATION_KEY,
-                menu.isAlertWhenBelow(slot)
-                    ? ContentNames.MONITOR_RULE_BELOW
-                    : ContentNames.MONITOR_RULE_ABOVE
+                menu.isRestock(slot)
+                    ? ContentNames.MONITOR_TARGET_TOOLTIP_TRANSLATION_KEY
+                    : ContentNames.MONITOR_RULE_TOOLTIP_TRANSLATION_KEY,
+                menu.isRestock(slot)
+                    ? ContentNames.MONITOR_RULE_RESTOCK
+                    : (menu.isAlertWhenBelow(slot)
+                        ? ContentNames.MONITOR_RULE_BELOW
+                        : ContentNames.MONITOR_RULE_ABOVE)
             ),
             mouseX,
             mouseY

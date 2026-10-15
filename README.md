@@ -64,7 +64,7 @@
 | <img src="docs/images/item-wireless-amplifier.png" width="40" alt=""> | **无线增幅塔** 🧪<br>`wireless_amplifier` | 覆盖半径 **64 格内**的无线终端**距离耗电打对折**。接网络常驻耗电，跨维度不享受。 | — |
 | <img src="docs/images/item-wireless-bridge.png" width="40" alt=""> | **无线桥** 🧪<br>`wireless_bridge` | 未配对 = 基点、配对后 = 据点：把网络**延伸到远处**（可跨维度），自带区块保活（很贵）。 | — |
 | <img src="docs/images/item-wireless-configuration-card.png" width="40" alt=""> | **无线配置卡** 🧪<br>`wireless_configuration_card` | 就地复制设置，**批量**刷给一片同类方块；站进增幅塔覆盖可扩大范围。 | — |
-| <img src="docs/images/item-wireless-monitor.png" width="40" alt=""> | **无线监控终端** 🧪<br>`wireless_monitor` | 远程盯着几样东西，**缺料 / 爆仓时主动提醒**到聊天栏。 | EPIC |
+| <img src="docs/images/item-wireless-monitor.png" width="40" alt=""> | **无线监控终端** 🧪<br>`wireless_monitor` | 远程盯着几样东西：**越线提醒**，或直接**自动补货**（低于目标就发起合成）。 | EPIC |
 
 > 上面这六件（加上「手持提示 HUD」）**在开发版里已经能玩**，只是还没随任何正式版发布；
 > 等真机测试通过，它们会和已上线的部分一起进下一个正式版。
@@ -167,19 +167,36 @@ RS 原版配置卡很好用，但得一个个方块点过去——一排机器�
 
 ## 无线监控终端 🧪 预览·未发布
 
-前面几件终端都是「你想用时点开」，这件不一样：**你不看它的时候它在看**。
+前面几件终端都是「你想用时点开」，这件不一样：**你不看它的时候它在看——而且它能动手。**
 
-把要盯的物品放进界面左边的槽，调好阈值，之后**只要这件终端带在身上**，它就会一直替你看着网络——跌破阈值（缺料）或者涨过阈值（爆仓）时，直接在聊天栏提醒你。界面里每行还会实时显示**当前存量**，触发的那一行整行转红。
+把要盯的物品放进界面左边的槽、设好数字、选好动作，之后**只要这件终端带在身上**，它就一直替你看着那张网络。界面里每行实时显示**当前存量**，触发的那一行整行转红。
+
+**一行规则 = 一个物品 + 一个数字 + 一个动作**
+
+| 动作 | 触发条件 | 做什么 |
+|---|---|---|
+| **提醒** | 低于 / 高于数字 | 在聊天栏说一声（缺料告警 / 爆仓告警） |
+| **补货** | 低于数字 | **自动发起合成**，把库存补回这个数字 —— **这是 RS2 本体没有的能力** |
 
 **怎么用**
 - 右键打开界面；把物品放进左侧槽位 = 开始监控它，取出 = 取消。
-- **左键**点规则数字 = 阈值加大一档，**右键** = 减小一档（档位是对数的：0 / 1 / 8 / 16 / 64 / 256 / 1K / 4K / 16K / 64K）。
-- **Shift + 点击**数字 = 在「**低于**提醒」与「**高于**提醒」之间切换。
+- **左键**点数字 = 加大一档，**右键** = 减小一档（档位是对数的：0 / 1 / 8 / 16 / 64 / 256 / 1K / 4K / 16K / 64K）。
+- **Shift + 点击**数字 = 在「**低于**」与「**高于**」之间切换（只有「提醒」动作有意义）。
+- **点击右侧的「提醒 / 补货」** = 切换动作。切到「补货」时方向会强制回到「低于」，因为「高于目标就补货」讲不通。
 - 规则**存在终端物品上**，关掉界面再打开还在；界面上会锁住终端所在的那一格，防止编辑途中被挪走。
+
+**「补货」为什么值得单独说一段**
+
+RS2 原本没有任何「保持库存」机制——唯一的近似物是构造器上的一个策略，只在**构造器自己去拉物品**且缺料时才触发，而且**只补 1 个**。这件终端把它变成了正经的自动化：给网络设目标库存，缺了自动下单补回来，你出门在外它照样跑。
+
+- **不会重复下单、也不会重复收费**：同类任务已经在跑时，RS 会告诉我们「已经在做了」，这时**既不下单也不扣费**；只有真的建起新订单才按**自动合成档**（40 FE × 距离倍率）收费。
+- **没电就静静等着**：网络供电恢复后自动继续，不报警、不刷屏。
+- **补不了会明确告诉你**：网络里没有能产出它的样板、或者材料不足，都会在聊天栏说一次（带冷却）。
+- 老存档里的规则没有「动作」字段，会被当作「提醒」——不会因为这次更新失效。
 
 **两条设计说明**
 - **提醒不收费**，只有**打开界面**按 5 FE × 距离倍率计费。理由：提醒是被动读取，不像合成 / 造样板那样是玩家的主动操作；而且它的频率已经被限制住了（每 20 tick 检查一次，同一条规则触发后 60 秒内不重复提醒）。
-- **与 RS 的检测器（Detector）不是一回事**：RS 那个是方块版的等级发信器，必须接在网络里、红石线还得拉到用它的地方。我们做的是**远程 + 主动推送**——人在地底挖矿，基地缺料也能立刻知道。
+- **与 RS 的检测器（Detector）不是一回事**：RS 那个是方块版的等级发信器，必须接在网络里、红石线还得拉到用它的地方，而且它**只能出红石信号、不能发起合成**。我们做的是**远程 + 主动执行**——人在地底挖矿，基地缺料它会自己补上。
 
 配方：`QAQ / TMT / QXQ`（石英富集铁 / 高级处理器 / **存储监控器 ×2** / 无线合成终端 / 网络接收器）。
 
@@ -543,7 +560,7 @@ Six further **🧪 unreleased** additions — a **Wireless Pattern Terminal**, a
 | <img src="docs/images/item-wireless-amplifier.png" width="40" alt=""> | **Wireless Amplifier** 🧪<br>`wireless_amplifier` | **Halves** the distance multiplier for terminals inside a **64-block** radius. A permanent load on the network; never applies cross-dimension. | — |
 | <img src="docs/images/item-wireless-bridge.png" width="40" alt=""> | **Wireless Bridge** 🧪<br>`wireless_bridge` | Unpaired = anchor, paired = endpoint: extends the network **far away** (across dimensions) with chunk keeping (pricey). | — |
 | <img src="docs/images/item-wireless-configuration-card.png" width="40" alt=""> | **Wireless Configuration Card** 🧪<br>`wireless_configuration_card` | Copy settings, then **paste them in bulk**; standing inside an amplifier widens the range. | — |
-| <img src="docs/images/item-wireless-monitor.png" width="40" alt=""> | **Wireless Monitor Terminal** 🧪<br>`wireless_monitor` | Watch a few resources remotely and get **alerted when they run low or pile up**. | epic |
+| <img src="docs/images/item-wireless-monitor.png" width="40" alt=""> | **Wireless Monitor Terminal** 🧪<br>`wireless_monitor` | Watch a few resources remotely: **alert on a threshold**, or have it **restock itself** (start a craft when you drop below the target). | epic |
 
 > Those six (plus the held-item HUD) **are playable in the dev build** — they simply have not been shipped
 > in any release yet. Once they pass in-game testing they will go out with the next release, alongside the
@@ -647,19 +664,36 @@ Recipe: `QAQ / WCW / QAQ` (quartz enriched iron / advanced processor / **two wir
 
 ### Wireless Monitor Terminal 🧪 preview (unreleased)
 
-Every terminal so far is "open it when you need it". This one is different: **it watches while you are not looking.**
+Every terminal so far is "open it when you need it". This one is different: **it watches while you are not looking — and it can act.**
 
-Drop the resources you care about into the slots on the left, set a threshold, and from then on — **as long as the terminal is on you** — it keeps an eye on the network and tells you in chat when something drops below (running out) or climbs above (piling up). Each row also shows the **current amount** live, and a row that has tripped turns red.
+Drop the resources you care about into the slots on the left, set a number, pick an action, and from then on — **as long as the terminal is on you** — it keeps an eye on that network. Each row shows the **current amount** live, and a row that has tripped turns red.
+
+**One rule = an item + a number + an action**
+
+| Action | Triggers when | What it does |
+|---|---|---|
+| **Alert** | below / above the number | says so in chat (low stock / piling up) |
+| **Restock** | below the number | **starts a crafting job by itself** to bring the stock back to that number — **something RS2 cannot do on its own** |
 
 **How to use it**
 - Right-click to open it; put an item in a left-hand slot to start watching it, take it out to stop.
-- **Left-click** a rule's number to raise the threshold one step, **right-click** to lower it (the steps are logarithmic: 0 / 1 / 8 / 16 / 64 / 256 / 1K / 4K / 16K / 64K).
-- **Shift + click** the number to switch between **below** and **above**.
+- **Left-click** a number to raise it one step, **right-click** to lower it (the steps are logarithmic: 0 / 1 / 8 / 16 / 64 / 256 / 1K / 4K / 16K / 64K).
+- **Shift + click** the number to switch between **below** and **above** (only meaningful for the Alert action).
+- **Click the "Alert / Restock" label** at the right of a row to switch actions. Switching to Restock forces the direction back to *below* — "restock when above the target" makes no sense.
 - Rules are **stored on the item**, so they survive closing the UI; the slot holding the terminal is locked while editing so it cannot be moved mid-edit.
+
+**Why "Restock" deserves its own paragraph**
+
+RS2 has no way to keep a stock level at all — its closest relative is a constructor strategy that only fires when the **constructor itself** pulls an item, and then it crafts exactly **one**. This terminal turns that into real automation: set a target stock, and it orders more whenever you fall short, even while you are away from base.
+
+- **It neither double-orders nor double-charges**: when a job for the same resource is already running, RS tells us so — we then **neither order again nor charge**. Only a genuinely new job is billed, at the **autocrafting rate** (40 FE × distance multiplier).
+- **No power, no problem**: with the network flat it simply waits and resumes once power returns — silently, no chat spam.
+- **When it cannot restock, you are told**: no pattern produces that item, or materials are missing — either way you get one message (rate-limited).
+- Rules from older saves have no action field and are treated as **Alert**, so nothing breaks on update.
 
 **Two design notes**
 - **Alerts are free**; only **opening the UI** costs 5 FE × distance multiplier. Alerts are passive reads rather than a deliberate action like crafting or writing a pattern, and their rate is already bounded (checked every 20 ticks, and the same rule will not repeat within 60 seconds).
-- **This is not RS's Detector**: that one is a block-form level emitter which must sit on the network and have redstone run to wherever you need it. Ours is **remote and pushed to you** — you can be mining underground and still hear that the base ran out.
+- **This is not RS's Detector**: that one is a block-form level emitter which must sit on the network and have redstone run to wherever you need it — and it can only emit a redstone signal, never start a craft. Ours is **remote and acts on its own** — you can be mining underground and the base restocks itself.
 
 Recipe: `QAQ / TMT / QXQ` (quartz enriched iron / advanced processor / **two storage monitors** / wireless crafting grid / network receiver).
 

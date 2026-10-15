@@ -2,7 +2,6 @@ package com.kokuu.rswirelesscrafting.common.monitor;
 
 import com.kokuu.rswirelesscrafting.common.ContentNames;
 import com.kokuu.rswirelesscrafting.common.Platform;
-import com.kokuu.rswirelesscrafting.common.notify.NotifyCenter;
 import com.kokuu.rswirelesscrafting.common.terminal.AbstractWirelessTerminalItem;
 import com.kokuu.rswirelesscrafting.common.virtual.VirtualTerminalSession;
 
@@ -32,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * 而监控终端是**你不看它的时候它在看**——所以它有两套入口：
  * <ul>
  *   <li>右键打开界面（计费与其它终端同一档：开界面 5 FE × 距离倍率），配置关注列表；</li>
- *   <li>被玩家带着时，每 {@link NotifyCenter} 的节奏检查一次规则，命中就在聊天栏提醒。</li>
+ *   <li>被玩家带着时，{@link MonitorEngine} 按自己的节奏检查规则并执行动作（提醒 / 自动补货）。</li>
  * </ul>
  *
  * <p>提醒通道刻意用最朴素的办法（服务端直接说话），不引入自定义数据包；界面交互也全部
@@ -92,7 +91,7 @@ public class WirelessMonitorItem extends AbstractWirelessTerminalItem {
                               final int slotId,
                               final boolean isSelected) {
         if (level instanceof ServerLevel && entity instanceof ServerPlayer player) {
-            NotifyCenter.tickTerminal(player, stack);
+            MonitorEngine.tickTerminal(player, stack);
         }
     }
 
@@ -109,9 +108,13 @@ public class WirelessMonitorItem extends AbstractWirelessTerminalItem {
         }
         final MutableComponent list = ContentNames.WIRELESS_MONITOR_RULES_TITLE.copy();
         for (final MonitorRule rule : rules) {
-            list.append(Component.literal("\n  · "))
-                .append(rule.item().getHoverName())
-                .append(Component.literal(" " + (rule.alertWhenBelow() ? "< " : "> ")))
+            list.append(Component.literal("\n  · ")).append(rule.item().getHoverName());
+            list.append(Component.literal(" ")).append(rule.isRestock()
+                ? ContentNames.MONITOR_RULE_RESTOCK.copy().withStyle(ChatFormatting.GREEN)
+                : (rule.alertWhenBelow()
+                    ? ContentNames.MONITOR_RULE_BELOW.copy()
+                    : ContentNames.MONITOR_RULE_ABOVE.copy()));
+            list.append(Component.literal(" "))
                 .append(Component.literal(Long.toString(rule.threshold())).withStyle(ChatFormatting.YELLOW));
         }
         lines.add(list);

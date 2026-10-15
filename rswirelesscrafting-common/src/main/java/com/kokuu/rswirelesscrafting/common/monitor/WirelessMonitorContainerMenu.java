@@ -46,9 +46,14 @@ public class WirelessMonitorContainerMenu extends AbstractContainerMenu {
     public static final int ROW_Y = 18;
     public static final int ROW_HEIGHT = 18;
     public static final int SLOT_X = 8;
-    public static final int AMOUNT_RIGHT = 72;
-    public static final int THRESHOLD_X = 76;
-    public static final int THRESHOLD_WIDTH = 44;
+    /** 当前存量右对齐到这条线。 */
+    public static final int AMOUNT_RIGHT = 62;
+    /** 阈值 / 目标数字区。 */
+    public static final int THRESHOLD_X = 66;
+    public static final int THRESHOLD_WIDTH = 48;
+    /** 动作区（「提醒」/「补货」），点一下切换。 */
+    public static final int MODE_X = 118;
+    public static final int MODE_WIDTH = 50;
 
     // 点击动作（界面与菜单共用，必须一致）：0 = 阈值加大、1 = 阈值减小、2 = 切换「低于 / 高于」。
     /** 阈值加大一档。 */
@@ -57,8 +62,10 @@ public class WirelessMonitorContainerMenu extends AbstractContainerMenu {
     public static final int ACTION_THRESHOLD_DOWN = 1;
     /** 在「低于提醒 / 高于提醒」之间切换。 */
     public static final int ACTION_TOGGLE_DIRECTION = 2;
+    /** 切换动作（提醒 ↔ 自动补货）。 */
+    public static final int ACTION_TOGGLE_MODE = 3;
     /** 每行可用的动作数量（按钮 id = 行号 × 本值 + 动作）。 */
-    public static final int ACTION_COUNT = 3;
+    public static final int ACTION_COUNT = 4;
 
     private static final int INVENTORY_X = 8;
     private static final int INVENTORY_Y = 104;
@@ -68,6 +75,7 @@ public class WirelessMonitorContainerMenu extends AbstractContainerMenu {
     private static final int REFRESH_INTERVAL = 10;
     private static final int FLAG_BELOW = 1;
     private static final int FLAG_PRESENT = 2;
+    private static final int FLAG_RESTOCK = 4;
     private final SlotReference slotReference;
     private final Inventory playerInventory;
     /**
@@ -150,6 +158,13 @@ public class WirelessMonitorContainerMenu extends AbstractContainerMenu {
         return (data.get(slot * DATA_PER_RULE + 2) & FLAG_PRESENT) != 0;
     }
 
+    /**
+     * 这一行的动作是不是「自动补货」（否则就是只提醒）。
+     */
+    public boolean isRestock(final int slot) {
+        return (data.get(slot * DATA_PER_RULE + 2) & FLAG_RESTOCK) != 0;
+    }
+
     public long getStoredAmount(final int slot) {
         return data.get(slot * DATA_PER_RULE + 3) & 0xFFFFFFFFL;
     }
@@ -184,6 +199,9 @@ public class WirelessMonitorContainerMenu extends AbstractContainerMenu {
             if (!rule.isEmpty()) {
                 flags |= FLAG_PRESENT;
             }
+            if (rule.isRestock()) {
+                flags |= FLAG_RESTOCK;
+            }
             data.set(slot * DATA_PER_RULE + 2, flags);
             final long stored = !rule.isEmpty() && storages != null
                 ? storages.get(ItemResource.ofItemStack(rule.item()))
@@ -212,6 +230,7 @@ public class WirelessMonitorContainerMenu extends AbstractContainerMenu {
             case ACTION_THRESHOLD_UP -> rules.cycleThreshold(slot, true);
             case ACTION_THRESHOLD_DOWN -> rules.cycleThreshold(slot, false);
             case ACTION_TOGGLE_DIRECTION -> rules.toggleDirection(slot);
+            case ACTION_TOGGLE_MODE -> rules.cycleAction(slot);
             default -> {
                 return false;
             }

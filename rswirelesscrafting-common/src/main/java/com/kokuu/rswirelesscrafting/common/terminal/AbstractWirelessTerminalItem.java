@@ -3,6 +3,7 @@ package com.kokuu.rswirelesscrafting.common.terminal;
 import com.kokuu.rswirelesscrafting.common.ContentNames;
 import com.kokuu.rswirelesscrafting.common.DimensionNames;
 import com.kokuu.rswirelesscrafting.common.Platform;
+import com.kokuu.rswirelesscrafting.common.link.BoundTargetResolver;
 import com.kokuu.rswirelesscrafting.common.upgrade.Upgrades;
 import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.ExtendedWirelessNetworkItemContext;
 import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.WirelessCraftingGridUpgradeMenuProvider;
@@ -10,6 +11,9 @@ import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.WirelessCrafting
 import java.util.List;
 import javax.annotation.Nullable;
 
+import com.refinedmods.refinedstorage.api.core.Action;
+import com.refinedmods.refinedstorage.api.network.Network;
+import com.refinedmods.refinedstorage.api.network.energy.EnergyNetworkComponent;
 import com.refinedmods.refinedstorage.api.network.energy.EnergyStorage;
 import com.refinedmods.refinedstorage.api.network.impl.energy.EnergyStorageImpl;
 import com.refinedmods.refinedstorage.common.api.RefinedStorageApi;
@@ -130,12 +134,101 @@ public abstract class AbstractWirelessTerminalItem extends AbstractNetworkEnergy
     }
 
     /**
+     * 取这个终端物品的能量视图（与其他动作走同一套包装，所以读、扣、显示三者数值一致）。
+     */
+    public static EnergyStorage energyStorageOf(final ItemStack stack) {
+        return RefinedStorageApi.INSTANCE
+            .asItemEnergyStorage(new EnergyStorageImpl(getEnergyCapacity(stack)), stack);
+    }
+
+    /**
      * 读回终端物品当前的存量电量（与 {@link #createEnergyStorage} 同一套包装，故数值一致）。
      */
     public static long getStoredEnergy(final ItemStack stack) {
-        return RefinedStorageApi.INSTANCE
-            .asItemEnergyStorage(new EnergyStorageImpl(getEnergyCapacity(stack)), stack)
-            .getStored();
+        return energyStorageOf(stack).getStored();
+    }
+
+    /**
+     * 一次动作（{@code baseCost} 为基础价，已含跨维度倍率）折算后的实际费用。
+     * 距离 / 跨维度 / 能耗插件的叠加全部由
+     * {@link ExtendedWirelessNetworkItemContext#distanceMultiplierPercent} 一处负责，
+     * 与 tooltip 显示的数字完全相同。
+     */
+    public static long actionCost(final ItemStack stack, final Player player, final long baseCost) {
+        final long percent = ExtendedWirelessNetworkItemContext.distanceMultiplierPercent(stack, player);
+        return Math.max(1L, baseCost * percent / 100);
+    }
+
+    /**
+     * 这笔动作费付得起吗（只看余额，不扣）。给「先把订单建起来、成了再收钱」这种顺序用。
+     */
+    public static boolean canAffordEnergy(final ItemStack stack, final Player player, final long baseCost) {
+        if (!RefinedStorageApi.INSTANCE.isEnergyRequired()) {
+            return true;
+        }
+        final long cost = actionCost(stack, player, baseCost);
+        if (Upgrades.hasRemoteEnergyUpgrade(stack) && networkCovers(stack, player, cost)) {
+            return true;
+        }
+        // 没装远程输电插件、或网络付不起 → 兜底看终端电池（与 drainEnergy 的回落口径一致）。
+        return energyStorageOf(stack).getStored() >= cost;
+    }
+
+    /**
+     * 扣一笔动作费：装了远程输电插件优先花网络电，否则（或网络不够）扣终端电池；付不起返回 false。
+     *
+     * <p>后台自动动作（如监控终端的自动补货）也走这里，所以扣费口径与玩家手动开界面完全一致。
+     */
+    public static boolean tryConsumeEnergy(final ItemStack stack, final Player player, final long baseCost) {
+        if (!RefinedStorageApi.INSTANCE.isEnergyRequired()) {
+            return true;
+        }
+        final long cost = actionCost(stack, player, baseCost);
+        if (Upgrades.hasRemoteEnergyUpgrade(stack) && payFromNetwork(stack, player, cost)) {
+            return true;
+        }
+        return payFromStorage(stack, cost);
+    }
+
+    /**
+     * 网络余额够不够付这笔（只看不动）。
+     */
+    private static boolean networkCovers(final ItemStack stack, final Player player, final long cost) {
+        final Network network = boundNetwork(stack, player);
+        if (network == null) {
+            return false;
+        }
+        return network.getComponent(EnergyNetworkComponent.class).getStored() >= cost;
+    }
+
+    /**
+     * 远程输电插件的付费路径：先看余额再抽电——{@code extract} 在不足时也会把剩下的抽走，
+     * 直接抽会变成网络白扣一份。
+     */
+    private static boolean payFromNetwork(final ItemStack stack, final Player player, final long cost) {
+        final Network network = boundNetwork(stack, player);
+        if (network == null) {
+            return false;
+        }
+        final EnergyNetworkComponent energy = network.getComponent(EnergyNetworkComponent.class);
+        return energy.getStored() >= cost && energy.extract(cost) >= cost;
+    }
+
+    private static boolean payFromStorage(final ItemStack stack, final long cost) {
+        final EnergyStorage storage = energyStorageOf(stack);
+        if (storage.getStored() < cost) {
+            return false;
+        }
+        return storage.extract(cost, Action.EXECUTE) >= cost;
+    }
+
+    @Nullable
+    private static Network boundNetwork(final ItemStack stack, final Player player) {
+        final GlobalPos bound = getBoundLocation(stack);
+        if (bound == null) {
+            return null;
+        }
+        return BoundTargetResolver.resolveNetwork(player.level(), bound).orElse(null);
     }
 
     public static long getEnergyCapacity(final ItemStack stack) {

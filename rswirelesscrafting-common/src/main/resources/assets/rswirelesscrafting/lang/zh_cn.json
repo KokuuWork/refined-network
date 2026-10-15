@@ -166,5 +166,13 @@
   "gui.rswirelesscrafting.monitor_rule_above": "高于阈值",
   "gui.rswirelesscrafting.monitor_rule_tooltip": "当前：%s\\n左键 = 阈值加大一档 · 右键 = 减小一档 · Shift + 点击 = 切换「低于 / 高于」",
   "msg.rswirelesscrafting.monitor_alert_below": "⚠ 缺料：%s 只剩 %s（阈值 %s）",
-  "msg.rswirelesscrafting.monitor_alert_above": "⚠ 爆仓：%s 已积到 %s（阈值 %s）"
+  "msg.rswirelesscrafting.monitor_alert_above": "⚠ 爆仓：%s 已积到 %s（阈值 %s）",
+  "gui.rswirelesscrafting.monitor_action_alert": "提醒",
+  "gui.rswirelesscrafting.monitor_action_restock": "补货",
+  "gui.rswirelesscrafting.monitor_rule_restock": "补货至目标",
+  "gui.rswirelesscrafting.monitor_target_tooltip": "当前目标：%s\n左键 = 目标加大一档 · 右键 = 减小一档",
+  "gui.rswirelesscrafting.monitor_mode_tooltip": "当前动作：%s\n点击切换：「提醒」只在聊天栏说一声；「补货」会在低于目标时自动发起合成（按自动合成档收费）",
+  "msg.rswirelesscrafting.monitor_restock_started": "⚙ 补货中：%s %s → %s",
+  "msg.rswirelesscrafting.monitor_restock_no_pattern": "⚠ 无法补货：%s 没有能产出它的样板",
+  "msg.rswirelesscrafting.monitor_restock_missing": "⚠ 补货卡住：%s 材料不足"
 }

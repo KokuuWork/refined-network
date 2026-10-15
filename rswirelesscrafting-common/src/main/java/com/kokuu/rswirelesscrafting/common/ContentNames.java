@@ -113,6 +113,38 @@ public final class ContentNames {
         "gui",
         "monitor_empty_hint"
     );
+    public static final MutableComponent MONITOR_ACTION_ALERT = createTranslation(
+        "gui",
+        "monitor_action_alert"
+    );
+    public static final MutableComponent MONITOR_ACTION_RESTOCK = createTranslation(
+        "gui",
+        "monitor_action_restock"
+    );
+    public static final MutableComponent MONITOR_RULE_RESTOCK = createTranslation(
+        "gui",
+        "monitor_rule_restock"
+    );
+    public static final String MONITOR_TARGET_TOOLTIP_TRANSLATION_KEY = createTranslationKey(
+        "gui",
+        "monitor_target_tooltip"
+    );
+    public static final String MONITOR_MODE_TOOLTIP_TRANSLATION_KEY = createTranslationKey(
+        "gui",
+        "monitor_mode_tooltip"
+    );
+    public static final String MONITOR_RESTOCK_STARTED_TRANSLATION_KEY = createTranslationKey(
+        "msg",
+        "monitor_restock_started"
+    );
+    public static final String MONITOR_RESTOCK_NO_PATTERN_TRANSLATION_KEY = createTranslationKey(
+        "msg",
+        "monitor_restock_no_pattern"
+    );
+    public static final String MONITOR_RESTOCK_MISSING_TRANSLATION_KEY = createTranslationKey(
+        "msg",
+        "monitor_restock_missing"
+    );
     public static final MutableComponent MONITOR_RULE_BELOW = createTranslation(
         "gui",
         "monitor_rule_below"
