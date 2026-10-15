@@ -135,11 +135,13 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
             wirelessScanCountdown = 0;
             return;
         }
+        // 倒数到 0 才扫描。注意重置值必须是 INTERVAL - 1：倒数那一次本身也占一个 tick，
+        // 写成 INTERVAL 会让实际间隔变成 11 tick、充电速率被悄悄压低约 9%。
         if (wirelessScanCountdown > 0) {
             wirelessScanCountdown--;
             return;
         }
-        wirelessScanCountdown = WIRELESS_SCAN_INTERVAL;
+        wirelessScanCountdown = WIRELESS_SCAN_INTERVAL - 1;
         chargeWireless(serverLevel, config, WIRELESS_SCAN_INTERVAL);
     }
 

@@ -32,7 +32,7 @@
   "block.rswirelesscrafting.charging_station.help": "Keeps an internal buffer topped up from the network to charge slots and nearby players",
   "block.rswirelesscrafting.charging_station.wired": "Wired charging: 3 slots at %s FE/s each (lossless)",
   "block.rswirelesscrafting.charging_station.wireless": "Wireless charging: %s FE/s within %s blocks at %s%% efficiency",
-  "block.rswirelesscrafting.charging_station.wireless_capacity": "Wireless: up to 3 devices per player, up to 3 players",
+  "block.rswirelesscrafting.charging_station.wireless_capacity": "Wireless: 3 device slots in total (1 each for 3 players, or all 3 for one player)",
   "block.rswirelesscrafting.charging_station.idle": "Base idle drain: %s FE/s (charging billed separately)",
   "block.rswirelesscrafting.charging_station.idle_disabled": "Base idle drain: disabled (config)",
   "block.rswirelesscrafting.charging_station.redstone": "Redstone: shuts off wireless charging and pauses the idle drain",

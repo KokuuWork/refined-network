@@ -32,7 +32,7 @@
   "block.rswirelesscrafting.charging_station.help": "自带能量缓冲，未满时从网络补电，为槽位与附近玩家的终端充电",
   "block.rswirelesscrafting.charging_station.wired": "有线充电：3 个槽位，各 %s FE/s（无损耗）",
   "block.rswirelesscrafting.charging_station.wireless": "无线充电：%s FE/s（半径 %s 格，效率 %s%%）",
-  "block.rswirelesscrafting.charging_station.wireless_capacity": "无线：每名玩家最多 3 个设备、最多 3 名玩家",
+  "block.rswirelesscrafting.charging_station.wireless_capacity": "无线：全场共 3 个设备名额（3 人各 1 个，或 1 人独占 3 个）",
   "block.rswirelesscrafting.charging_station.idle": "基础待机损耗：%s FE/s（充电另算）",
   "block.rswirelesscrafting.charging_station.idle_disabled": "基础待机损耗：已关闭（配置）",
   "block.rswirelesscrafting.charging_station.redstone": "红石信号：关闭无线充电并停扣待机损耗",

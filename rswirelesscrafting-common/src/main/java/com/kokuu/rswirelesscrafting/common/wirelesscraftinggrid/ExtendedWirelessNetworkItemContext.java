@@ -208,11 +208,21 @@ public class ExtendedWirelessNetworkItemContext implements NetworkItemContext {
     }
 
     /**
-     * @return 网络是否足额支付了这笔能量；否（未绑定 / 网络无电）时由调用方回落到物品电池。
+     * 远程输电插件的付费路径：先查网络余额，够才抽电。
+     * {@code extract} 在电量不足时也会把剩下的那点抽走；若直接判 {@code extract(cost) >= cost}
+     * 再回落电池，网络就被白扣一份，玩家会被网络与终端电池双重收费。
+     *
+     * @return 网络是否足额支付了这笔能量；否（未绑定 / 电量不足）时由调用方回落到物品电池
      */
     private boolean payFromNetwork(final long cost) {
-        return resolveNetwork()
-            .map(network -> network.getComponent(EnergyNetworkComponent.class).extract(cost) >= cost)
-            .orElse(false);
+        final Optional<Network> network = resolveNetwork();
+        if (network.isEmpty()) {
+            return false;
+        }
+        final EnergyNetworkComponent energy = network.get().getComponent(EnergyNetworkComponent.class);
+        if (energy.getStored() < cost) {
+            return false;
+        }
+        return energy.extract(cost) >= cost;
     }
 }
