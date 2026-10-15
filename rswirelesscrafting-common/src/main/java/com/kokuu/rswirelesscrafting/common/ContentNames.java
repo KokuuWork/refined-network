@@ -53,6 +53,42 @@ public final class ContentNames {
         "item",
         "wireless_pattern_grid.desc"
     ).withStyle(ChatFormatting.GRAY);
+    public static final MutableComponent WIRELESS_AMPLIFIER = createTranslation(
+        "block",
+        "wireless_amplifier"
+    );
+    public static final MutableComponent WIRELESS_AMPLIFIER_DESC = createTranslation(
+        "block",
+        "wireless_amplifier.desc"
+    ).withStyle(ChatFormatting.GRAY);
+    public static final String AMPLIFIER_STATUS_TRANSLATION_KEY = createTranslationKey(
+        "block",
+        "wireless_amplifier.status"
+    );
+    public static final MutableComponent AMPLIFIER_ACTIVE = createTranslation(
+        "block",
+        "wireless_amplifier.status.active"
+    ).withStyle(ChatFormatting.GREEN);
+    public static final MutableComponent AMPLIFIER_INACTIVE = createTranslation(
+        "block",
+        "wireless_amplifier.status.inactive"
+    ).withStyle(ChatFormatting.GRAY);
+    public static final String AMPLIFIER_RADIUS_TRANSLATION_KEY = createTranslationKey(
+        "block",
+        "wireless_amplifier.radius"
+    );
+    public static final String AMPLIFIER_MULTIPLIER_TRANSLATION_KEY = createTranslationKey(
+        "block",
+        "wireless_amplifier.multiplier"
+    );
+    public static final String AMPLIFIER_ENERGY_TRANSLATION_KEY = createTranslationKey(
+        "block",
+        "wireless_amplifier.energy"
+    );
+    public static final MutableComponent AMPLIFIER_REDSTONE_HINT = createTranslation(
+        "block",
+        "wireless_amplifier.redstone"
+    ).withStyle(ChatFormatting.DARK_GRAY);
     public static final MutableComponent WIRELESS_PATTERN_GRID_FAILED = createTranslation(
         "gui",
         "wireless_pattern_grid_failed"

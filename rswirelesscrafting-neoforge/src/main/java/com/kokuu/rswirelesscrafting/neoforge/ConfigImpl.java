@@ -2,6 +2,7 @@ package com.kokuu.rswirelesscrafting.neoforge;
 
 import com.kokuu.rswirelesscrafting.common.Config;
 import com.kokuu.rswirelesscrafting.common.DefaultEnergyUsage;
+import com.kokuu.rswirelesscrafting.common.amplifier.AmplifierDefaults;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationDefaults;
 
 import net.neoforged.neoforge.common.ModConfigSpec;
@@ -14,6 +15,7 @@ public class ConfigImpl implements Config {
     private final WirelessCraftingGridEntry wirelessCraftingGrid;
     private final DistanceEnergyEntry distanceEnergy;
     private final ChargingStationEntry chargingStation;
+    private final AmplifierEntryImpl amplifier = new AmplifierEntryImpl();
     private final HudEntryImpl hud = new HudEntryImpl();
 
     public ConfigImpl() {
@@ -23,6 +25,7 @@ public class ConfigImpl implements Config {
             "chargingStation",
             DefaultEnergyUsage.CHARGING_STATION
         );
+        amplifier.define();
         spec = builder.build();
     }
 
@@ -48,6 +51,11 @@ public class ConfigImpl implements Config {
     @Override
     public HudEntry getHud() {
         return hud;
+    }
+
+    @Override
+    public AmplifierEntry getAmplifier() {
+        return amplifier;
     }
 
     private static String translationKey(final String value) {
@@ -272,6 +280,62 @@ public class ConfigImpl implements Config {
         @Override
         public boolean isEnabled() {
             return enabled.get();
+        }
+    }
+
+    private class AmplifierEntryImpl implements AmplifierEntry {
+        private final ModConfigSpec.BooleanValue enabled;
+        private final ModConfigSpec.LongValue energyUsage;
+        private final ModConfigSpec.IntValue radius;
+        private final ModConfigSpec.IntValue multiplierPercent;
+
+        AmplifierEntryImpl() {
+            final String path = "wirelessAmplifier";
+            final AmplifierDefaults defaults = DefaultEnergyUsage.AMPLIFIER;
+            builder.translation(translationKey(path)).push(path);
+            enabled = builder
+                .translation(translationKey(path + ".enabled"))
+                .comment("Master switch for the Wireless Amplifier block.")
+                .define("enabled", true);
+            energyUsage = builder
+                .translation(translationKey(path + ".energyUsage"))
+                .comment("Constant energy drain of an active amplifier, in FE per second. "
+                    + "The tower is a permanent load on the network.")
+                .defineInRange("energyUsage", defaults.energyUsage(), 0, Long.MAX_VALUE);
+            radius = builder
+                .translation(translationKey(path + ".radius"))
+                .comment("Radius (in blocks, horizontal) the amplifier covers.")
+                .defineInRange("radius", defaults.radius(), 0, 256);
+            multiplierPercent = builder
+                .translation(translationKey(path + ".multiplierPercent"))
+                .comment("Distance energy multiplier inside the covered area, in percent "
+                    + "(50 = half price). Cross-dimensional access is never discounted.")
+                .defineInRange("multiplierPercent", defaults.multiplierPercent(), 1, 100);
+            builder.pop();
+        }
+
+        void define() {
+            // 配置项在构造器里定义（配置 spec 必须在 build 前登记完），这里只是显式化调用点。
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return enabled.get();
+        }
+
+        @Override
+        public long getEnergyUsage() {
+            return energyUsage.get();
+        }
+
+        @Override
+        public int getRadius() {
+            return radius.get();
+        }
+
+        @Override
+        public int getMultiplierPercent() {
+            return multiplierPercent.get();
         }
     }
 }

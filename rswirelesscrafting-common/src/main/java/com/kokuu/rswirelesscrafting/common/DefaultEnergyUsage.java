@@ -1,5 +1,6 @@
 package com.kokuu.rswirelesscrafting.common;
 
+import com.kokuu.rswirelesscrafting.common.amplifier.AmplifierDefaults;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationDefaults;
 
 public final class DefaultEnergyUsage {
@@ -37,6 +38,15 @@ public final class DefaultEnergyUsage {
         45,    // 无线充电效率（%，消耗 100 充 45）
         5,     // 无线半径（格）
         4000   // 内部 FE 缓冲容量（主电量池，界面显示的就是它）
+    );
+
+    // 无线增幅塔：接在网络上的常驻负载（128 FE/s ≈ 6.4 FE/t），覆盖 64 格范围内的无线终端
+    // 距离倍率打对折。跨维度不受影响——那条线留给维度升级卡，不给塔打折。
+    // 贵、常驻耗电、范围有限，是「要不要在矿场建塔」这个决策的三条腿。
+    public static final AmplifierDefaults AMPLIFIER = new AmplifierDefaults(
+        128,   // 常驻耗电 FE/s
+        64,    // 覆盖半径（格）
+        50     // 覆盖范围内的距离倍率（%，50 = 打对折）
     );
 
     private DefaultEnergyUsage() {

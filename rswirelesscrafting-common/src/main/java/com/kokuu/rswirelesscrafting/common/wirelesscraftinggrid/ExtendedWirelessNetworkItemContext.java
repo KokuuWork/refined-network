@@ -2,6 +2,7 @@ package com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid;
 
 import com.kokuu.rswirelesscrafting.common.Config;
 import com.kokuu.rswirelesscrafting.common.Platform;
+import com.kokuu.rswirelesscrafting.common.amplifier.AmplifierRegistry;
 import com.kokuu.rswirelesscrafting.common.upgrade.Upgrades;
 
 import java.util.Optional;
@@ -170,7 +171,16 @@ public class ExtendedWirelessNetworkItemContext implements NetworkItemContext {
         if (location != null && !location.dimension().equals(player.level().dimension())) {
             return config.getInterdimensionalMultiplier();
         }
-        final long multiplier = location == null ? 100L : linearDistanceMultiplier(config, location, player);
+        // 同维度才吃增幅塔：先算原始距离倍率，再看玩家头顶有没有激活的塔罩着。
+        // 跨维度上面已经提前返回，这里不用管。
+        final long multiplier = location == null
+            ? 100L
+            : AmplifierRegistry.applyAmplifier(
+                player.level(),
+                player.getX(),
+                player.getZ(),
+                linearDistanceMultiplier(config, location, player)
+            );
         if (Upgrades.hasAdvancedEnergyUpgrade(stack)) {
             return 100L;
         }

@@ -18,5 +18,6 @@ public final class CreativeModeTabItems {
         consumer.accept(Items.INSTANCE.getEnergyUpgrade().getDefaultInstance());
         consumer.accept(Items.INSTANCE.getAdvancedEnergyUpgrade().getDefaultInstance());
         consumer.accept(Items.INSTANCE.getTerminalChargingStationBlockItem().getDefaultInstance());
+        consumer.accept(Items.INSTANCE.getWirelessAmplifierBlockItem().getDefaultInstance());
     }
 }

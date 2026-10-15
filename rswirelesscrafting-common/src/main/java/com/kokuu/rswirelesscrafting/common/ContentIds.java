@@ -17,7 +17,8 @@ public final class ContentIds {
     public static final ResourceLocation ADVANCED_ENERGY_UPGRADE = createIdentifier("advanced_energy_upgrade");
     public static final ResourceLocation TERMINAL_CHARGING_STATION =
         createIdentifier("terminal_charging_station");
-    // 充电站方块实体类型与界面共用同一个 id。
+    public static final ResourceLocation WIRELESS_AMPLIFIER = createIdentifier("wireless_amplifier");
+    // 增幅塔方块与方块实体类型共用同一个 id；充电站方块实体类型与界面也共用同一个 id。
     public static final ResourceLocation CHARGING_STATION = createIdentifier("charging_station");
     public static final ResourceLocation UPGRADES = createIdentifier("upgrades");
 

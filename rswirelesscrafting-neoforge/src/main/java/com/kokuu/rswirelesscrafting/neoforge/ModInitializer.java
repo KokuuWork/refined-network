@@ -7,6 +7,9 @@ import com.kokuu.rswirelesscrafting.common.ContentIds;
 import com.kokuu.rswirelesscrafting.common.CreativeModeTabItems;
 import com.kokuu.rswirelesscrafting.common.Items;
 import com.kokuu.rswirelesscrafting.common.Platform;
+import com.kokuu.rswirelesscrafting.common.amplifier.AmplifierBlock;
+import com.kokuu.rswirelesscrafting.common.amplifier.AmplifierBlockEntity;
+import com.kokuu.rswirelesscrafting.common.amplifier.AmplifierBlockItem;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlock;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockEntity;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockItem;
@@ -104,6 +107,13 @@ public class ModInitializer extends AbstractModInitializer {
                 .strength(2.5F, 7.0F)
                 .sound(SoundType.METAL))
         ));
+        Blocks.INSTANCE.setWirelessAmplifier(callback.register(
+            ContentIds.WIRELESS_AMPLIFIER,
+            () -> new AmplifierBlock(BlockBehaviour.Properties.of()
+                .mapColor(MapColor.METAL)
+                .strength(3.0F, 9.0F)
+                .sound(SoundType.METAL))
+        ));
         blockRegistry.register(eventBus);
 
         final RegistryCallback<BlockEntityType<?>> blockEntityCallback =
@@ -113,6 +123,13 @@ public class ModInitializer extends AbstractModInitializer {
             () -> BlockEntityType.Builder.of(
                 ChargingStationBlockEntity::new,
                 Blocks.INSTANCE.getTerminalChargingStation()
+            ).build(null)
+        ));
+        BlockEntities.INSTANCE.setWirelessAmplifier(blockEntityCallback.register(
+            ContentIds.WIRELESS_AMPLIFIER,
+            () -> BlockEntityType.Builder.of(
+                AmplifierBlockEntity::new,
+                Blocks.INSTANCE.getWirelessAmplifier()
             ).build(null)
         ));
         blockEntityTypeRegistry.register(eventBus);
@@ -168,6 +185,12 @@ public class ModInitializer extends AbstractModInitializer {
         );
         Items.INSTANCE.setAdvancedEnergyUpgrade(
             callback.register(ContentIds.ADVANCED_ENERGY_UPGRADE, AdvancedEnergyUpgradeItem::new)
+        );
+        Items.INSTANCE.setWirelessAmplifierBlockItem(
+            callback.register(ContentIds.WIRELESS_AMPLIFIER, () -> new AmplifierBlockItem(
+                Blocks.INSTANCE.getWirelessAmplifier(),
+                new Item.Properties()
+            ))
         );
         Items.INSTANCE.setTerminalChargingStationBlockItem(
             callback.register(

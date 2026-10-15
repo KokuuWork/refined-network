@@ -9,6 +9,21 @@ public interface Config {
 
     HudEntry getHud();
 
+    AmplifierEntry getAmplifier();
+
+    /**
+     * 无线增幅塔：覆盖半径内的无线终端距离倍率打折，塔本身接网络常驻耗电。
+     */
+    interface AmplifierEntry {
+        boolean isEnabled();
+
+        long getEnergyUsage();
+
+        int getRadius();
+
+        int getMultiplierPercent();
+    }
+
     /**
      * 手持无线终端时的常驻小字提示（电量 · 距离 · 收费倍率）。
      */

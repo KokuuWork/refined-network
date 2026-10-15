@@ -4,6 +4,7 @@ import com.kokuu.rswirelesscrafting.common.BlockEntities;
 import com.kokuu.rswirelesscrafting.common.Config;
 import com.kokuu.rswirelesscrafting.common.ContentNames;
 import com.kokuu.rswirelesscrafting.common.Platform;
+import com.kokuu.rswirelesscrafting.common.util.RateMeter;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -566,29 +567,6 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
                 ItemStack.parse(registries, itemsTag.getCompound(key))
                     .ifPresent(stack -> items.set(slot, stack));
             }
-        }
-    }
-
-    /**
-     * 把配置里的「每秒」额度摊到每 tick 上。
-     *
-     * <p>Minecraft 是每秒 20 tick，而 {@code 每秒额度 / 20} 常常除不尽。直接整除会持续漏掉
-     * 那一小截，所以这里把余数留在 {@code carry} 里顺延到下一 tick，长期平均恰好等于配置值。
-     */
-    private static final class RateMeter {
-        private static final long TICKS_PER_SECOND = 20;
-
-        private long carry;
-
-        /**
-         * 推进一 tick。
-         *
-         * @return 本 tick 可用的额度
-         */
-        long next(final long perSecond) {
-            final long total = carry + Math.max(0, perSecond);
-            carry = total % TICKS_PER_SECOND;
-            return total / TICKS_PER_SECOND;
         }
     }
 

@@ -1,0 +1,6 @@
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "all": "rswirelesscrafting:block/wireless_amplifier_active"
+  }
+}

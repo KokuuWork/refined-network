@@ -158,6 +158,47 @@ def pattern_grid_texture(active):
     return px
 
 
+# =============================================================== amplifier tower
+
+# A lattice mast with three signal arcs on top and a widening base: "this block throws
+# signal around". Drawn on a 16x16 canvas and used as a cube_all texture.
+AMPLIFIER_ART = [
+    "................",
+    "......A.A.......",
+    ".....A...A......",
+    "......A.A.......",
+    ".......m........",
+    ".......m........",
+    "......AmA.......",
+    ".......m........",
+    ".......m........",
+    ".......m........",
+    ".......m........",
+    "......mmm.......",
+    ".....mMMMm......",
+    "....mMMMMMm.....",
+    "...MMMMMMMMM....",
+    "..MMMMMMMMMMM...",
+]
+
+AMPLIFIER_PALETTE_OFF = {
+    "A": rgb("#3C414C"),   # signal arcs, unpowered
+    "m": rgb("#7A8090"),   # mast
+    "M": rgb("#5A6270"),   # base plating
+}
+
+AMPLIFIER_PALETTE_ON = dict(AMPLIFIER_PALETTE_OFF)
+AMPLIFIER_PALETTE_ON.update({
+    "A": rgb("#38BBDC"),   # signal arcs, lit
+})
+
+
+def amplifier_texture(active):
+    px = canvas()
+    paint(px, AMPLIFIER_ART, AMPLIFIER_PALETTE_ON if active else AMPLIFIER_PALETTE_OFF)
+    return px
+
+
 # ================================================================ hexagon cards
 
 # Symmetric pointed hexagon; RS uses the same silhouette for its upgrade cards.
@@ -402,6 +443,15 @@ def main():
     block_out = os.path.join(HERE, "rswirelesscrafting-common", "src", "main", "resources",
                              "assets", "rswirelesscrafting", "textures", "block")
     os.makedirs(block_out, exist_ok=True)
+    amplifier_textures = [
+        ("wireless_amplifier.png", amplifier_texture(False)),
+        ("wireless_amplifier_active.png", amplifier_texture(True)),
+    ]
+    for name, pixels in amplifier_textures:
+        path = os.path.join(block_out, name)
+        write_png(path, pixels)
+        print("wrote", path)
+
     station_textures = [
         ("terminal_charging_station.png", terminal_charging_station_texture(True, True)),
         ("terminal_charging_station_wireless_off.png", terminal_charging_station_texture(True, False)),

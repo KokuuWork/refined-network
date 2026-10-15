@@ -23,6 +23,9 @@ public class ConfigImpl implements ConfigData, Config {
     @ConfigEntry.Gui.CollapsibleObject
     private HudEntryEntryImpl hud = new HudEntryEntryImpl();
 
+    @ConfigEntry.Gui.CollapsibleObject
+    private AmplifierEntryEntryImpl wirelessAmplifier = new AmplifierEntryEntryImpl();
+
     public static ConfigImpl get() {
         return AutoConfig.getConfigHolder(ConfigImpl.class).getConfig();
     }
@@ -45,6 +48,11 @@ public class ConfigImpl implements ConfigData, Config {
     @Override
     public HudEntry getHud() {
         return hud;
+    }
+
+    @Override
+    public AmplifierEntry getAmplifier() {
+        return wirelessAmplifier;
     }
 
     private static class HudEntryEntryImpl implements HudEntry {
@@ -182,6 +190,36 @@ public class ConfigImpl implements ConfigData, Config {
         @Override
         public long getExternalCapacity() {
             return externalCapacity;
+        }
+    }
+
+    private static class AmplifierEntryEntryImpl implements AmplifierEntry {
+        private boolean enabled = true;
+        @ConfigEntry.BoundedDiscrete(min = 0L, max = Long.MAX_VALUE)
+        private long energyUsage = DefaultEnergyUsage.AMPLIFIER.energyUsage();
+        @ConfigEntry.BoundedDiscrete(min = 0L, max = 256L)
+        private int radius = DefaultEnergyUsage.AMPLIFIER.radius();
+        @ConfigEntry.BoundedDiscrete(min = 1L, max = 100L)
+        private int multiplierPercent = DefaultEnergyUsage.AMPLIFIER.multiplierPercent();
+
+        @Override
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        @Override
+        public long getEnergyUsage() {
+            return energyUsage;
+        }
+
+        @Override
+        public int getRadius() {
+            return radius;
+        }
+
+        @Override
+        public int getMultiplierPercent() {
+            return multiplierPercent;
         }
     }
 }
