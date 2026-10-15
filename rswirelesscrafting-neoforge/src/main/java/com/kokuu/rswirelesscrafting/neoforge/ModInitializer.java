@@ -11,6 +11,9 @@ import com.kokuu.rswirelesscrafting.common.amplifier.AmplifierBlock;
 import com.kokuu.rswirelesscrafting.common.amplifier.AmplifierBlockEntity;
 import com.kokuu.rswirelesscrafting.common.amplifier.AmplifierBlockItem;
 import com.kokuu.rswirelesscrafting.common.autocraftermanager.WirelessAutocrafterManagerItem;
+import com.kokuu.rswirelesscrafting.common.bridge.WirelessBridgeBlock;
+import com.kokuu.rswirelesscrafting.common.bridge.WirelessBridgeBlockEntity;
+import com.kokuu.rswirelesscrafting.common.bridge.WirelessBridgeBlockItem;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlock;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockEntity;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockItem;
@@ -108,6 +111,13 @@ public class ModInitializer extends AbstractModInitializer {
                 .strength(2.5F, 7.0F)
                 .sound(SoundType.METAL))
         ));
+        Blocks.INSTANCE.setWirelessBridge(callback.register(
+            ContentIds.WIRELESS_BRIDGE,
+            () -> new WirelessBridgeBlock(BlockBehaviour.Properties.of()
+                .mapColor(MapColor.METAL)
+                .strength(3.0F, 9.0F)
+                .sound(SoundType.METAL))
+        ));
         Blocks.INSTANCE.setWirelessAmplifier(callback.register(
             ContentIds.WIRELESS_AMPLIFIER,
             () -> new AmplifierBlock(BlockBehaviour.Properties.of()
@@ -124,6 +134,13 @@ public class ModInitializer extends AbstractModInitializer {
             () -> BlockEntityType.Builder.of(
                 ChargingStationBlockEntity::new,
                 Blocks.INSTANCE.getTerminalChargingStation()
+            ).build(null)
+        ));
+        BlockEntities.INSTANCE.setWirelessBridge(blockEntityCallback.register(
+            ContentIds.WIRELESS_BRIDGE,
+            () -> BlockEntityType.Builder.of(
+                WirelessBridgeBlockEntity::new,
+                Blocks.INSTANCE.getWirelessBridge()
             ).build(null)
         ));
         BlockEntities.INSTANCE.setWirelessAmplifier(blockEntityCallback.register(
@@ -199,6 +216,12 @@ public class ModInitializer extends AbstractModInitializer {
         );
         Items.INSTANCE.setAdvancedEnergyUpgrade(
             callback.register(ContentIds.ADVANCED_ENERGY_UPGRADE, AdvancedEnergyUpgradeItem::new)
+        );
+        Items.INSTANCE.setWirelessBridgeBlockItem(
+            callback.register(ContentIds.WIRELESS_BRIDGE, () -> new WirelessBridgeBlockItem(
+                Blocks.INSTANCE.getWirelessBridge(),
+                new Item.Properties()
+            ))
         );
         Items.INSTANCE.setWirelessAmplifierBlockItem(
             callback.register(ContentIds.WIRELESS_AMPLIFIER, () -> new AmplifierBlockItem(

@@ -89,6 +89,62 @@ public final class ContentNames {
         "block",
         "wireless_amplifier.redstone"
     ).withStyle(ChatFormatting.DARK_GRAY);
+    public static final MutableComponent WIRELESS_BRIDGE = createTranslation(
+        "block",
+        "wireless_bridge"
+    );
+    public static final MutableComponent WIRELESS_BRIDGE_DESC = createTranslation(
+        "block",
+        "wireless_bridge.desc"
+    ).withStyle(ChatFormatting.GRAY);
+    public static final MutableComponent WIRELESS_BRIDGE_ANCHOR_HINT = createTranslation(
+        "block",
+        "wireless_bridge.hint.anchor"
+    ).withStyle(ChatFormatting.GRAY);
+    public static final MutableComponent WIRELESS_BRIDGE_ENDPOINT_HINT = createTranslation(
+        "block",
+        "wireless_bridge.hint.endpoint"
+    ).withStyle(ChatFormatting.GRAY);
+    public static final MutableComponent WIRELESS_BRIDGE_CHUNK_HINT = createTranslation(
+        "block",
+        "wireless_bridge.hint.chunk"
+    ).withStyle(ChatFormatting.DARK_GRAY);
+    public static final MutableComponent WIRELESS_BRIDGE_USAGE_HINT = createTranslation(
+        "block",
+        "wireless_bridge.hint.usage"
+    ).withStyle(ChatFormatting.DARK_GRAY);
+    public static final String BRIDGE_ENERGY_TRANSLATION_KEY = createTranslationKey(
+        "block",
+        "wireless_bridge.energy"
+    );
+    public static final String BRIDGE_STATUS_ANCHOR_TRANSLATION_KEY = createTranslationKey(
+        "msg",
+        "bridge.status.anchor"
+    );
+    public static final String BRIDGE_STATUS_ENDPOINT_TRANSLATION_KEY = createTranslationKey(
+        "msg",
+        "bridge.status.endpoint"
+    );
+    public static final MutableComponent BRIDGE_ANCHOR_HINT = createTranslation(
+        "msg",
+        "bridge.anchor_hint"
+    );
+    public static final MutableComponent BRIDGE_ONLINE = createTranslation(
+        "msg",
+        "bridge.online"
+    ).withStyle(ChatFormatting.GREEN);
+    public static final MutableComponent BRIDGE_OFFLINE = createTranslation(
+        "msg",
+        "bridge.offline"
+    ).withStyle(ChatFormatting.RED);
+    public static final MutableComponent BRIDGE_ANCHOR_SET = createTranslation(
+        "msg",
+        "bridge.anchor_set"
+    ).withStyle(ChatFormatting.GREEN);
+    public static final MutableComponent BRIDGE_UNBOUND = createTranslation(
+        "msg",
+        "bridge.unbound"
+    ).withStyle(ChatFormatting.YELLOW);
     public static final MutableComponent WIRELESS_AUTOCRAFTER_MANAGER = createTranslation(
         "item",
         "wireless_autocrafter_manager"

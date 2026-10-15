@@ -1,12 +1,14 @@
 package com.kokuu.rswirelesscrafting.common.link;
 
 import java.util.Optional;
+import javax.annotation.Nullable;
 
 import com.refinedmods.refinedstorage.api.network.Network;
 import com.refinedmods.refinedstorage.common.api.support.network.InWorldNetworkNodeContainer;
 import com.refinedmods.refinedstorage.common.api.support.network.NetworkNodeContainerProvider;
 import com.refinedmods.refinedstorage.common.api.support.network.item.NetworkItemTargetBlockEntity;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
@@ -31,17 +33,20 @@ public final class BoundTargetResolver {
     /**
      * 解析绑定位置上的网络。
      *
-     * <p><b>只处理同维度</b>：跨维度不走这条路（那是无线桥的活，那边靠链路注册表两端配对）。
+     * <p><b>支持跨维度</b>：目标在别的维度时经服务端取那个维度的世界。无线桥的据点正是靠这条
+     * 跨维度连回基地的（前提是两端的区块都活着——那是桥自己负责保活的）。
+     * 客户端没有服务端实例，跨维度时返回空，正好客户端也不需要做这件事。
      *
-     * @param level  绑定方块所在的世界（调用方已确认它与 {@code target} 同维度）
+     * @param level  发起方的世界
      * @param target 绑定位置
-     * @return 该位置上的网络；方块不见了 / 不是 RS 网络方块 / 孤岛网络（没有控制器）时为空
+     * @return 该位置上的网络；方块不见了 / 不是 RS 网络方块 / 孤岛网络（没有控制器）/ 那个维度没加载时为空
      */
     public static Optional<Network> resolveNetwork(final Level level, final GlobalPos target) {
-        if (!level.dimension().equals(target.dimension())) {
+        final Level targetLevel = levelOf(level, target);
+        if (targetLevel == null) {
             return Optional.empty();
         }
-        final BlockEntity blockEntity = level.getBlockEntity(target.pos());
+        final BlockEntity blockEntity = targetLevel.getBlockEntity(target.pos());
         if (blockEntity instanceof NetworkItemTargetBlockEntity itemTarget) {
             return Optional.ofNullable(itemTarget.getNetworkForItem());
         }
@@ -61,10 +66,24 @@ public final class BoundTargetResolver {
      * 该位置现在是否还有「能给出网络」的方块（用于判断绑定是否失效）。
      */
     public static boolean isTargetPresent(final Level level, final GlobalPos target) {
-        if (!level.dimension().equals(target.dimension())) {
+        final Level targetLevel = levelOf(level, target);
+        if (targetLevel == null) {
             return false;
         }
-        return level.getBlockEntity(target.pos()) instanceof NetworkItemTargetBlockEntity
-            || level.getBlockEntity(target.pos()) instanceof NetworkNodeContainerProvider;
+        final BlockEntity blockEntity = targetLevel.getBlockEntity(target.pos());
+        return blockEntity instanceof NetworkItemTargetBlockEntity
+            || blockEntity instanceof NetworkNodeContainerProvider;
+    }
+
+    /**
+     * 拿到 {@code target} 所在的世界：同维度就用自己，跨维度则问服务端要（拿不到就是空的）。
+     */
+    @Nullable
+    private static Level levelOf(final Level level, final GlobalPos target) {
+        if (level.dimension().equals(target.dimension())) {
+            return level;
+        }
+        final MinecraftServer server = level.getServer();
+        return server == null ? null : server.getLevel(target.dimension());
     }
 }

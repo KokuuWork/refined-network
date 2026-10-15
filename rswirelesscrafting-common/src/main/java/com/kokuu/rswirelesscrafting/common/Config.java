@@ -9,6 +9,9 @@ public interface Config {
 
     HudEntry getHud();
 
+    BridgeEntry getBridge();
+
+
     AmplifierEntry getAmplifier();
 
     /**
@@ -90,5 +93,16 @@ public interface Config {
         int getWirelessRadius();
 
         long getExternalCapacity();
+    }
+
+    /**
+     * 无线桥：把 RS 网络延伸到远处（可跨维度），据点自带区块保活。
+     */
+    interface BridgeEntry {
+        boolean isEnabled();
+
+        long getEnergyUsage();
+
+        boolean isChunkLoadingEnabled();
     }
 }

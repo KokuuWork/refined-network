@@ -3,6 +3,7 @@ package com.kokuu.rswirelesscrafting.neoforge;
 import com.kokuu.rswirelesscrafting.common.Config;
 import com.kokuu.rswirelesscrafting.common.DefaultEnergyUsage;
 import com.kokuu.rswirelesscrafting.common.amplifier.AmplifierDefaults;
+import com.kokuu.rswirelesscrafting.common.bridge.BridgeDefaults;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationDefaults;
 
 import net.neoforged.neoforge.common.ModConfigSpec;
@@ -17,6 +18,7 @@ public class ConfigImpl implements Config {
     private final ChargingStationEntry chargingStation;
     private final AmplifierEntryImpl amplifier = new AmplifierEntryImpl();
     private final HudEntryImpl hud = new HudEntryImpl();
+    private final BridgeEntry bridge;
 
     public ConfigImpl() {
         wirelessCraftingGrid = new WirelessCraftingGridEntryImpl();
@@ -26,6 +28,7 @@ public class ConfigImpl implements Config {
             DefaultEnergyUsage.CHARGING_STATION
         );
         amplifier.define();
+        bridge = new BridgeEntryImpl(builder);
         spec = builder.build();
     }
 
@@ -56,6 +59,11 @@ public class ConfigImpl implements Config {
     @Override
     public AmplifierEntry getAmplifier() {
         return amplifier;
+    }
+
+    @Override
+    public BridgeEntry getBridge() {
+        return bridge;
     }
 
     private static String translationKey(final String value) {
@@ -336,6 +344,46 @@ public class ConfigImpl implements Config {
         @Override
         public int getMultiplierPercent() {
             return multiplierPercent.get();
+        }
+    }
+
+    private class BridgeEntryImpl implements BridgeEntry {
+        private final ModConfigSpec.BooleanValue enabled;
+        private final ModConfigSpec.LongValue energyUsage;
+        private final ModConfigSpec.BooleanValue chunkLoading;
+
+        BridgeEntryImpl(final ModConfigSpec.Builder builder) {
+            final String path = "wirelessBridge";
+            final BridgeDefaults defaults = DefaultEnergyUsage.BRIDGE;
+            builder.translation(translationKey(path)).push(path);
+            enabled = builder
+                .translation(translationKey(path + ".enabled"))
+                .comment("Master switch for the Wireless Bridge block.")
+                .define("enabled", true);
+            energyUsage = builder
+                .translation(translationKey(path + ".energyUsage"))
+                .comment("Constant drain of one bridge, in FE per second (a pair counts as two).")
+                .defineInRange("energyUsage", defaults.energyUsage(), 0, Long.MAX_VALUE);
+            chunkLoading = builder
+                .translation(translationKey(path + ".chunkLoading"))
+                .comment("Let a paired endpoint keep both ends chunk-loaded.")
+                .define("chunkLoading", defaults.chunkLoading());
+            builder.pop();
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return enabled.get();
+        }
+
+        @Override
+        public long getEnergyUsage() {
+            return energyUsage.get();
+        }
+
+        @Override
+        public boolean isChunkLoadingEnabled() {
+            return chunkLoading.get();
         }
     }
 }

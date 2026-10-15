@@ -11,6 +11,9 @@ import com.kokuu.rswirelesscrafting.common.amplifier.AmplifierBlock;
 import com.kokuu.rswirelesscrafting.common.amplifier.AmplifierBlockEntity;
 import com.kokuu.rswirelesscrafting.common.amplifier.AmplifierBlockItem;
 import com.kokuu.rswirelesscrafting.common.autocraftermanager.WirelessAutocrafterManagerItem;
+import com.kokuu.rswirelesscrafting.common.bridge.WirelessBridgeBlock;
+import com.kokuu.rswirelesscrafting.common.bridge.WirelessBridgeBlockEntity;
+import com.kokuu.rswirelesscrafting.common.bridge.WirelessBridgeBlockItem;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlock;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockEntity;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockItem;
@@ -89,6 +92,13 @@ public class ModInitializerImpl extends AbstractModInitializer implements Refine
                 .sound(SoundType.METAL))
         ));
 
+        Blocks.INSTANCE.setWirelessBridge(blockCallback.register(
+            ContentIds.WIRELESS_BRIDGE,
+            () -> new WirelessBridgeBlock(BlockBehaviour.Properties.of()
+                .mapColor(MapColor.METAL)
+                .strength(3.0F, 9.0F)
+                .sound(SoundType.METAL))
+        ));
         Blocks.INSTANCE.setWirelessAmplifier(blockCallback.register(
             ContentIds.WIRELESS_AMPLIFIER,
             () -> new AmplifierBlock(BlockBehaviour.Properties.of()
@@ -99,6 +109,14 @@ public class ModInitializerImpl extends AbstractModInitializer implements Refine
 
         final DirectRegistryCallback<BlockEntityType<?>> blockEntityCallback =
             new DirectRegistryCallback<>(BuiltInRegistries.BLOCK_ENTITY_TYPE);
+        BlockEntities.INSTANCE.setWirelessBridge(blockEntityCallback.register(
+            ContentIds.WIRELESS_BRIDGE,
+            () -> new BlockEntityType<>(
+                WirelessBridgeBlockEntity::new,
+                Set.of(Blocks.INSTANCE.getWirelessBridge()),
+                null
+            )
+        ));
         BlockEntities.INSTANCE.setWirelessAmplifier(blockEntityCallback.register(
             ContentIds.WIRELESS_AMPLIFIER,
             () -> new BlockEntityType<>(
@@ -181,6 +199,12 @@ public class ModInitializerImpl extends AbstractModInitializer implements Refine
         );
         Items.INSTANCE.setAdvancedEnergyUpgrade(
             callback.register(ContentIds.ADVANCED_ENERGY_UPGRADE, AdvancedEnergyUpgradeItem::new)
+        );
+        Items.INSTANCE.setWirelessBridgeBlockItem(
+            callback.register(ContentIds.WIRELESS_BRIDGE, () -> new WirelessBridgeBlockItem(
+                Blocks.INSTANCE.getWirelessBridge(),
+                new Item.Properties()
+            ))
         );
         Items.INSTANCE.setWirelessAmplifierBlockItem(
             callback.register(ContentIds.WIRELESS_AMPLIFIER, () -> new AmplifierBlockItem(

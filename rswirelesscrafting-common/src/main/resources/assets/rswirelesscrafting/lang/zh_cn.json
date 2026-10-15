@@ -119,5 +119,19 @@
   "item.rswirelesscrafting.wireless_autocrafter_manager": "无线自动合成仓管理器",
   "item.rswirelesscrafting.wireless_autocrafter_manager.desc": "远程管理全网合成仓里的样板",
   "gui.rswirelesscrafting.wireless_autocrafter_manager_failed": "无线自动合成仓管理器打开失败：请把日志发给作者（QQ 群 498700382）",
-  "gui.rswirelesscrafting.terminal_not_enough_energy": "终端电量不足，无法打开（先给它充电）"
+  "gui.rswirelesscrafting.terminal_not_enough_energy": "终端电量不足，无法打开（先给它充电）",
+  "block.rswirelesscrafting.wireless_bridge": "无线桥",
+  "block.rswirelesscrafting.wireless_bridge.desc": "把网络延伸到远处，可跨维度；自带区块保活",
+  "block.rswirelesscrafting.wireless_bridge.hint.anchor": "未配对 = 基点：接在网络里，等着被指向",
+  "block.rswirelesscrafting.wireless_bridge.hint.endpoint": "配对后 = 据点：网络延伸到这里，旁边贴 RS 总线就能用",
+  "block.rswirelesscrafting.wireless_bridge.hint.chunk": "自带区块保活：配对后两端区块自动强加载",
+  "block.rswirelesscrafting.wireless_bridge.hint.usage": "潜行 + 右键：记下基点 / 解绑",
+  "block.rswirelesscrafting.wireless_bridge.energy": "常驻耗电：%s FE/s（每座桥）",
+  "msg.rswirelesscrafting.bridge.status.anchor": "无线桥（基点）：%s",
+  "msg.rswirelesscrafting.bridge.status.endpoint": "无线桥（据点）→ %s：%s",
+  "msg.rswirelesscrafting.bridge.anchor_hint": "未配对 · 潜行 + 右键把它记为基点",
+  "msg.rswirelesscrafting.bridge.online": "已接入网络",
+  "msg.rswirelesscrafting.bridge.offline": "未接入（检查基点是否在网络里、区块是否加载）",
+  "msg.rswirelesscrafting.bridge.anchor_set": "已记为基点：去远处潜行 + 右键另一座无线桥即可配对",
+  "msg.rswirelesscrafting.bridge.unbound": "已解绑，变回基点"
 }

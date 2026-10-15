@@ -53,6 +53,10 @@ public final class NetworkAttachment {
      *
      * @return 现在是否挂在网络上
      */
+    public GlobalPos getTarget() {
+        return target;
+    }
+
     public boolean ensureAttached() {
         final Network network = BoundTargetResolver.resolveNetwork(level, target).orElse(null);
         if (network == null) {

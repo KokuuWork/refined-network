@@ -1,6 +1,7 @@
 package com.kokuu.rswirelesscrafting.common;
 
 import com.kokuu.rswirelesscrafting.common.amplifier.AmplifierBlockEntity;
+import com.kokuu.rswirelesscrafting.common.bridge.WirelessBridgeBlockEntity;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockEntity;
 
 import java.util.function.Supplier;
@@ -17,6 +18,8 @@ public final class BlockEntities {
     private Supplier<BlockEntityType<ChargingStationBlockEntity>> chargingStation;
     @Nullable
     private Supplier<BlockEntityType<AmplifierBlockEntity>> wirelessAmplifier;
+    @Nullable
+    private Supplier<BlockEntityType<WirelessBridgeBlockEntity>> wirelessBridge;
 
     private BlockEntities() {
     }
@@ -35,5 +38,13 @@ public final class BlockEntities {
 
     public void setWirelessAmplifier(final Supplier<BlockEntityType<AmplifierBlockEntity>> supplier) {
         this.wirelessAmplifier = supplier;
+    }
+
+    public BlockEntityType<WirelessBridgeBlockEntity> getWirelessBridge() {
+        return requireNonNull(wirelessBridge).get();
+    }
+
+    public void setWirelessBridge(final Supplier<BlockEntityType<WirelessBridgeBlockEntity>> supplier) {
+        this.wirelessBridge = supplier;
     }
 }

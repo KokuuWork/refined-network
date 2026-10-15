@@ -26,6 +26,9 @@ public class ConfigImpl implements ConfigData, Config {
     @ConfigEntry.Gui.CollapsibleObject
     private AmplifierEntryEntryImpl wirelessAmplifier = new AmplifierEntryEntryImpl();
 
+    @ConfigEntry.Gui.CollapsibleObject
+    private BridgeEntryEntryImpl wirelessBridge = new BridgeEntryEntryImpl();
+
     public static ConfigImpl get() {
         return AutoConfig.getConfigHolder(ConfigImpl.class).getConfig();
     }
@@ -53,6 +56,11 @@ public class ConfigImpl implements ConfigData, Config {
     @Override
     public AmplifierEntry getAmplifier() {
         return wirelessAmplifier;
+    }
+
+    @Override
+    public BridgeEntry getBridge() {
+        return wirelessBridge;
     }
 
     private static class HudEntryEntryImpl implements HudEntry {
@@ -220,6 +228,28 @@ public class ConfigImpl implements ConfigData, Config {
         @Override
         public int getMultiplierPercent() {
             return multiplierPercent;
+        }
+    }
+
+    private static class BridgeEntryEntryImpl implements BridgeEntry {
+        private boolean enabled = true;
+        @ConfigEntry.BoundedDiscrete(min = 0L, max = Long.MAX_VALUE)
+        private long energyUsage = DefaultEnergyUsage.BRIDGE.energyUsage();
+        private boolean chunkLoading = DefaultEnergyUsage.BRIDGE.chunkLoading();
+
+        @Override
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        @Override
+        public long getEnergyUsage() {
+            return energyUsage;
+        }
+
+        @Override
+        public boolean isChunkLoadingEnabled() {
+            return chunkLoading;
         }
     }
 }

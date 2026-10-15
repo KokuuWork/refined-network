@@ -468,6 +468,45 @@ def manager_texture(active):
     return px
 
 
+# ==================================================================== bridge
+#
+# Two arcs leaning towards each other over a plinth: a link between two places.
+
+BRIDGE_ART = [
+    "................",
+    "................",
+    "..A..........A..",
+    "..AA........AA..",
+    "...AA......AA...",
+    "....AA....AA....",
+    ".....AA..AA.....",
+    "......AAAA......",
+    ".......AA.......",
+    ".......AA.......",
+    ".......mm.......",
+    "....mMMMMMm.....",
+    "...MMMMMMMMM....",
+    "..MMMMMMMMMMM...",
+    "..MMMMMMMMMMM...",
+    "................",
+]
+
+BRIDGE_PALETTE_OFF = {
+    "A": rgb("#3C414C"),
+    "m": rgb("#7A8090"),
+    "M": rgb("#5A6270"),
+}
+
+BRIDGE_PALETTE_ON = dict(BRIDGE_PALETTE_OFF)
+BRIDGE_PALETTE_ON.update({"A": rgb("#38BBDC")})
+
+
+def bridge_texture(linked):
+    px = canvas()
+    paint(px, BRIDGE_ART, BRIDGE_PALETTE_ON if linked else BRIDGE_PALETTE_OFF)
+    return px
+
+
 # ====================================================================== driver
 
 def main():
@@ -498,6 +537,15 @@ def main():
         ("wireless_amplifier_active.png", amplifier_texture(True)),
     ]
     for name, pixels in amplifier_textures:
+        path = os.path.join(block_out, name)
+        write_png(path, pixels)
+        print("wrote", path)
+
+    bridge_textures = [
+        ("wireless_bridge.png", bridge_texture(False)),
+        ("wireless_bridge_linked.png", bridge_texture(True)),
+    ]
+    for name, pixels in bridge_textures:
         path = os.path.join(block_out, name)
         write_png(path, pixels)
         print("wrote", path)

@@ -119,5 +119,19 @@
   "item.rswirelesscrafting.wireless_autocrafter_manager": "Wireless Autocrafter Manager",
   "item.rswirelesscrafting.wireless_autocrafter_manager.desc": "Manage the patterns in every autocrafter remotely",
   "gui.rswirelesscrafting.wireless_autocrafter_manager_failed": "Could not open the Wireless Autocrafter Manager: please send your log to the author (QQ group 498700382)",
-  "gui.rswirelesscrafting.terminal_not_enough_energy": "Not enough energy in the terminal to open it"
+  "gui.rswirelesscrafting.terminal_not_enough_energy": "Not enough energy in the terminal to open it",
+  "block.rswirelesscrafting.wireless_bridge": "Wireless Bridge",
+  "block.rswirelesscrafting.wireless_bridge.desc": "Extends your network to a distant place, across dimensions, with chunk keeping",
+  "block.rswirelesscrafting.wireless_bridge.hint.anchor": "Unpaired = anchor: put it on the network and it waits to be pointed at",
+  "block.rswirelesscrafting.wireless_bridge.hint.endpoint": "Paired = endpoint: the network is extended here, so RS buses work next to it",
+  "block.rswirelesscrafting.wireless_bridge.hint.chunk": "Keeps chunks loaded: once paired, both ends stay force-loaded",
+  "block.rswirelesscrafting.wireless_bridge.hint.usage": "Sneak + right-click: set anchor / unbind",
+  "block.rswirelesscrafting.wireless_bridge.energy": "Constant drain: %s FE/s (per bridge)",
+  "msg.rswirelesscrafting.bridge.status.anchor": "Wireless bridge (anchor): %s",
+  "msg.rswirelesscrafting.bridge.status.endpoint": "Wireless bridge (endpoint) -> %s: %s",
+  "msg.rswirelesscrafting.bridge.anchor_hint": "unpaired - sneak + right-click to make it an anchor",
+  "msg.rswirelesscrafting.bridge.online": "connected to the network",
+  "msg.rswirelesscrafting.bridge.offline": "not connected (check the anchor and chunk loading)",
+  "msg.rswirelesscrafting.bridge.anchor_set": "Anchor recorded: sneak + right-click another bridge far away to pair it",
+  "msg.rswirelesscrafting.bridge.unbound": "Unbound, back to being an anchor"
 }

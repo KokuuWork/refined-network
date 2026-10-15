@@ -1,6 +1,7 @@
 package com.kokuu.rswirelesscrafting.common;
 
 import com.kokuu.rswirelesscrafting.common.amplifier.AmplifierDefaults;
+import com.kokuu.rswirelesscrafting.common.bridge.BridgeDefaults;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationDefaults;
 
 public final class DefaultEnergyUsage {
@@ -47,6 +48,14 @@ public final class DefaultEnergyUsage {
         128,   // 常驻耗电 FE/s
         64,    // 覆盖半径（格）
         50     // 覆盖范围内的距离倍率（%，50 = 打对折）
+    );
+
+    // 无线桥：一对方块把网络延伸到远处（可跨维度、自带区块保活）。耗电按「每座桥」常驻计，
+    // 配对的两端各算一座。刻意不做「按距离加倍」——距离的代价已经体现在「要不要在那边建一座桥」
+    // 这个决策里，而且按距离计费需要把物品侧的距离公式复制一份到方块侧，容易两边分叉。
+    public static final BridgeDefaults BRIDGE = new BridgeDefaults(
+        64,    // 每座桥常驻耗电 FE/s
+        true   // 据点自动保活两端区块
     );
 
     private DefaultEnergyUsage() {

@@ -100,6 +100,30 @@
 
 <img src="docs/images/recipe-wireless-amplifier.png" width="270" alt="无线增幅塔配方">
 
+## 无线桥 🧪 预览·未发布
+
+距离耗电还有一个更彻底的解法：**别让网络离你这么远**。无线桥是**一个方块、两种身份**：
+
+- **没配对时它是「基点」**：接在 RS 网络里，什么都不做，只是「等着被指向」。
+- **配对之后它是「据点」**：把自己挂到基点那张网络上——**网络就延伸到了这里**。于是旁边贴 RS 原生的外部存储 / 输入总线 / 输出总线就都能用，和拉一根线过来等价；**跨维度也一样**。
+
+**怎么配对**（不用任何配对物品）：
+1. 在主基地选中你网络里的一座桥，**潜行 + 右键**它 → 它成为基点（聊天栏会确认）。
+2. 跑到远处（哪怕在别的维度）放另一座桥，**潜行 + 右键**它 → 配对完成，方块点亮。
+3. 想拆掉这层关系：对据点**潜行 + 右键**即解绑。
+
+**它替你做的事**
+- **自带区块保活**：配对后**两端**区块自动强加载（可配开关）。RS 原生那对「网络变送器 / 网络接收器」要你自己保证两端加载，这是桥和它的主要区别。
+- **跨维度免配对卡**：记的是坐标而不是视线，所以在下界、末地也能配对。
+- **看得见的状态**：亮 = 已接入，灭 = 没连上（或还是基点）。直接右键它会告诉你连向哪里。
+- **常驻耗电** 64 FE/s（每座桥，可配）。
+
+**两条要留意的**（诚实写在前面）
+- 区块保活**不会**因为没电而撤销——否则断电会让远端区块卸载、桥再也回不来。所以网络没电时桥保持加载但停止搬运，只有拆方块 / 解绑才释放。
+- 拆掉据点、或**卸载本模组之前，请先拆掉已配对的据点**，否则区块强加载记录会留在存档里。
+
+配方：`QWQ / RSR / QXQ`（石英富集铁 / 无线访问点 / **网络接收器 ×2** —— 桥的两端 / 下界之星 / 64k 存储方块）。
+
 ## 充电站
 
 一座方块，两条充电路径，两种供电来源。**兼容 RS 的任意 FE 终端**（无线查看终端、无线合成终端、便携终端……），因为它走的是通用的 NeoForge 能量能力，而不是 RS 内部的适配器。
@@ -479,6 +503,30 @@ The distance tariff used to be pure punishment — until the tower. The **Wirele
 - It is expensive (a Wireless Transmitter, a Nether Star and two 64k Storage Blocks) and it **never stops drawing power** — do not spam them.
 
 <img src="docs/images/recipe-wireless-amplifier.png" width="270" alt="Wireless amplifier recipe">
+
+### Wireless Bridge 🧪 preview (unreleased)
+
+There is a blunter answer to the distance tariff: **do not let the network be that far away**. The Wireless Bridge is **one block with two roles**:
+
+- **Unpaired it is an anchor**: put it on your RS network; it does nothing but wait to be pointed at.
+- **Paired it is an endpoint**: it attaches itself to the anchor's network, so **the network is extended to this spot**. RS's own external storage, importers and exporters work right next to it — equivalent to running a cable there. **Across dimensions too.**
+
+**Pairing** (no pairing item involved):
+1. In your base, **sneak + right-click** a bridge on the network — it becomes the anchor (the chat confirms).
+2. Place another bridge far away (even in another dimension) and **sneak + right-click** it — paired, and the block lights up.
+3. To break the link, **sneak + right-click** the endpoint to unbind it.
+
+**What it does for you**
+- **Keeps chunks loaded**: once paired, **both ends** stay force-loaded (configurable). RS's own transmitter/receiver pair makes you handle that yourself — that is the main difference.
+- **No network card needed across dimensions**: it stores a position, not a line of sight, so pairing works from the Nether or the End.
+- **Visibly obvious**: lit = connected, dark = not connected (or still an anchor). Right-clicking it tells you where it points.
+- **Constant drain** of 64 FE/s per bridge (configurable).
+
+**Two honest caveats**
+- Chunk keeping is **never** revoked because of low power — otherwise a blackout would unload the far end and the bridge could never recover. With no power the bridge stays loaded but stops carrying; only breaking the block or unbinding releases it.
+- Break your paired endpoints (or at least unbind them) **before uninstalling this mod**, otherwise the force-load records stay in the save.
+
+Recipe: `QWQ / RSR / QXQ` (quartz enriched iron / wireless transmitter / **two network receivers** — the two ends of the bridge / nether star / 64k storage block).
 
 ### Charging Station
 
