@@ -231,3 +231,32 @@ RefinedStorageApi.INSTANCE.createNetworkNodeContainer(blockEntity, networkNode)
 
 空间存储 · 频道限制 · 无线权限管理器 · 无线流体终端 · 再加插件卡 / 新存储元件 / 新线缆 / 新机器。
 理由见 README「内容地图」：这个 mod 的身份是「**远程有代价，代价可以用基建投资改善**」，与这条无关的东西加进来就是杂物箱。
+
+---
+
+## 8. 完成状态与发版清单（2026-10-15）
+
+六件内容**全部实现完毕**，全部落在 `0.4.0-SNAPSHOT`（**未发版**）：
+
+| # | 内容 | 代码位置 | 状态 |
+|---|---|---|---|
+| ① | 无线自动合成仓管理器 | `common/autocraftermanager/` | ✅ 已实现（复用 RS 公开 `createMenu`，零反射） |
+| ② | 无线监控终端 | `common/monitor/` + `common/notify/` | ✅ 已实现（本模组第一个自写界面） |
+| ③⑤⑥ | 无线桥（一个方块两种身份，含保区块 / 计费 / 红石） | `common/bridge/` | ✅ 已实现 |
+| ④ | 无线配置卡 | `common/configcard/` | ✅ 已实现（复用 RS 组件，与原版卡互通） |
+| — | Layer 0 骨架 | `common/link/` `common/virtual/` `common/notify/` | ✅ 每块都有真实消费者了 |
+
+**尚未真机验证**：以上全部只经过编译期与源码级审查。方向性判断（RS API 用法、虚拟方块实体、
+`stillValid` 注入、`clickMenuButton` / `ContainerData` 通道、区块强加载）都是对着
+`reference/rs2-v2.0.7` 逐条核实的，但**没有一次运行时证据**；Fabric 侧更是从未启动过。
+
+**发版前清单（0.4.0 转正时逐条做）**
+
+1. 两个 `build.gradle.kts` 的 `version`：`0.4.0-SNAPSHOT` → `0.4.0`。
+2. README：去掉全部 **🧪** 标记；把「内容一览」的两张表（✅ 已上线 / 🧪 未上线）**合并回一张**。
+3. README 顶部「两批内容」对照表整块删除，换回单条「当前版本 0.4.0」声明。
+4. `RELEASE_NOTES.md` 按 0.4.0 重写（顶部 QQ 群区块保留）；`CHANGELOG.md` 的
+   `## [0.4.0] - 未发布（开发中）` 改成带日期的正式标题。
+5. 打 tag 前先 `git pull --rebase origin main`（用户会自己往 main 推东西）。
+6. 用户升级时要提醒：**旧 jar 必须删掉**（同名不同版本会 duplicate mod 报错）。
+7. Fabric 侧若仍未真机启动过，README 里「Fabric 首次移植未完整验证」那句**继续保留**。

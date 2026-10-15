@@ -17,40 +17,57 @@
 > 👉 **[点击加入群聊（群号 498700382）](https://qm.qq.com/q/ueYTU8T3xK)** ｜ 也可以在 QQ 里**搜索群号 498700382** 找到我们。
 > 不方便用 QQ 的话，欢迎直接提 [Issue](https://github.com/KokuuWork/rswirelesscrafting/issues)。
 
-> 🧪 **已发布版本 0.3.2**（2026-10-15）· 正文里标 **🧪 预览** 的内容**尚未随任何正式版发布**，目前只在开发版（`0.4.0-SNAPSHOT`）里可用。
-> 🧪 **预览 = 已实现、正在验证、下一个正式版会一起带上**（不是画饼，也不是另一个分支）。
+> 🚦 **这个模组的正文分成两批内容，请先分清你要的是哪一批**（截至 2026-10-15）
+>
+> | | 包含什么 | 怎么拿到 |
+> |---|---|---|
+> | ✅ **已上线** | 无线合成终端 · 6 张升级插件 · 终端充电站 · 按距离扣电 · 饰品栏兼容 | [Releases](https://github.com/KokuuWork/rswirelesscrafting/releases/latest) 下载 **0.3.2** |
+> | 🧪 **未上线（预览）** | 无线样板终端 · 无线自动合成仓管理器 · 无线增幅塔 · 无线桥 · 无线配置卡 · 无线监控终端 · 手持提示 HUD | 只有开发版 `0.4.0-SNAPSHOT`，**需要自己从源码构建**（见「从源码构建」） |
+>
+> **🧪 未上线 = 已经写好、还没发版**，不是画饼，也不是另一个分支——代码就在 `main` 上，等测试通过后会
+> 和已上线内容一起打进下一个正式版。**正文与内容一览里凡是标 🧪 的都属未上线，没标的都是下载就能用。**
 >
 > ⚠️ 整体仍处于测试阶段：**Fabric 侧为首次移植，尚未完成完整真机验证**。请在测试存档中使用并**先备份世界**；
 > 遇到问题欢迎来上面的 QQ 群反馈（附日志与复现步骤）。
 
-> **图例**：内容一览里的 **🧪** 表示「已实现、尚未发版」（预览内容）。
-
 给 [Refined Storage 2](https://github.com/refinedmods/refinedstorage) 补上原版缺失的**无线合成**能力。
 
-原版只有一个无线**查看**终端（`wireless_grid`）——你能远程看库存，但不能远程合成。本模组提供一个**无线合成终端**与一个**无线样板终端**（远程编写自动化样板），用六张可插拔的**装配式升级插件**把它们的续航、范围、维度与供能方式一路推到终局，再配一座**终端充电站**为所有 FE 终端补电。所有无线终端（含 RS 原生的无线终端与无线自动合成监视器）都遵循**按距离扣电**的线性价目表，离网络越远耗电越狠。
+原版只有一个无线**查看**终端（`wireless_grid`）——你能远程看库存，但不能远程合成。本模组提供一个**无线合成终端**（远程访问网络并**远程合成**），用六张可插拔的**装配式升级插件**把它的续航、范围、维度与供能方式一路推到终局，再配一座**终端充电站**为所有 FE 终端补电。
+
+另有六件 **🧪 未上线**的扩展——**无线样板终端**（远程写样板）、**自动合成仓管理器**、**增幅塔**、**无线桥**、**无线配置卡**、**监控终端**——目前**只在开发版里**，见文首那张对照表。所有无线终端（含 RS 原生的无线终端与无线自动合成监视器）都遵循**按距离扣电**的线性价目表，离网络越远耗电越狠。
 
 ![无线合成终端的未激活态与激活态，以及四张升级卡和终端充电站](docs/images/items.png)
 
-> 上图中第 1、2 个图标是同一件**无线合成终端**的两种状态：未绑定（灰）与已接入网络（亮）。
+> 上图中第 1、2 个图标是同一件**无线合成终端**的两种状态：未绑定（灰）与已接入网络（亮）。图中也画了**未上线**的几件（🧪），完整区分见下方「内容一览」。
 
 ## 内容一览
+
+### ✅ 已上线（从 [Releases](https://github.com/KokuuWork/rswirelesscrafting/releases/latest) 下载 0.3.2 即可用）
 
 | | 名称 | 作用 | 稀有度 |
 |---|---|---|---|
 | <img src="docs/images/item-grid.png" width="40" alt=""> | **无线合成终端**<br>`wireless_crafting_grid` | 远程访问网络并**远程合成**。潜行 + 右键打开插件装配界面。 | RARE |
-| <img src="docs/images/item-wireless-pattern-grid.png" width="40" alt=""> | **无线样板终端** 🧪<br>`wireless_pattern_grid` | 远程编写**自动化样板**（合成 / 处理 / 切石 / 锻造），不用跑回样板网格。 | EPIC |
-| <img src="docs/images/item-wireless-autocrafter-manager.png" width="40" alt=""> | **无线自动合成仓管理器** 🧪<br>`wireless_autocrafter_manager` | 远程管理**全网合成仓里的样板**：看有哪些、取出、换入，不用回基地。 | EPIC |
 | <img src="docs/images/item-battery.png" width="40" alt=""> | **电池升级插件**<br>`battery_upgrade` | 每张提升 **+1000 FE** 电池容量（可叠加）。前期刚需。 | RARE |
 | <img src="docs/images/item-energy.png" width="40" alt=""> | **初级能耗插件**<br>`energy_upgrade` | **距离能量倍率减半**。也是高级能耗插件的原料。 | RARE |
 | <img src="docs/images/item-advanced-energy.png" width="40" alt=""> | **高级能耗插件**<br>`advanced_energy_upgrade` | **完全消除距离能量倍率**（跨维倍率保留）。也是远程输电插件的原料。 | EPIC |
 | <img src="docs/images/item-range.png" width="40" alt=""> | **距离升级插件**<br>`range_upgrade` | 同维度内**无视距离**。 | EPIC |
 | <img src="docs/images/item-interdimensional.png" width="40" alt=""> | **维度升级插件**<br>`interdimensional_upgrade` | 解锁**跨维度**访问。 | EPIC |
 | <img src="docs/images/item-remote-energy.png" width="40" alt=""> | **远程输电插件**<br>`remote_energy_upgrade` | **不再消耗终端自身电池**，直接花所绑定网络里的电。 | EPIC |
+| <img src="docs/images/item-terminal-charging-station.png" width="40" alt=""> | **终端充电站**<br>`terminal_charging_station` | 3 个有线槽位快充，5 格范围内自动无线补电（**全局 3 个设备名额**）。 | — |
+
+### 🧪 未上线（预览，目前只在开发版 `0.4.0-SNAPSHOT` 里）
+
+| | 名称 | 作用 | 稀有度 |
+|---|---|---|---|
+| <img src="docs/images/item-wireless-pattern-grid.png" width="40" alt=""> | **无线样板终端** 🧪<br>`wireless_pattern_grid` | 远程编写**自动化样板**（合成 / 处理 / 切石 / 锻造），不用跑回样板网格。 | EPIC |
+| <img src="docs/images/item-wireless-autocrafter-manager.png" width="40" alt=""> | **无线自动合成仓管理器** 🧪<br>`wireless_autocrafter_manager` | 远程管理**全网合成仓里的样板**：看有哪些、取出、换入，不用回基地。 | EPIC |
 | <img src="docs/images/item-wireless-amplifier.png" width="40" alt=""> | **无线增幅塔** 🧪<br>`wireless_amplifier` | 覆盖半径 **64 格内**的无线终端**距离耗电打对折**。接网络常驻耗电，跨维度不享受。 | — |
 | <img src="docs/images/item-wireless-bridge.png" width="40" alt=""> | **无线桥** 🧪<br>`wireless_bridge` | 未配对 = 基点、配对后 = 据点：把网络**延伸到远处**（可跨维度），自带区块保活（很贵）。 | — |
 | <img src="docs/images/item-wireless-configuration-card.png" width="40" alt=""> | **无线配置卡** 🧪<br>`wireless_configuration_card` | 就地复制设置，**批量**刷给一片同类方块；站进增幅塔覆盖可扩大范围。 | — |
 | <img src="docs/images/item-wireless-monitor.png" width="40" alt=""> | **无线监控终端** 🧪<br>`wireless_monitor` | 远程盯着几样东西，**缺料 / 爆仓时主动提醒**到聊天栏。 | EPIC |
-| <img src="docs/images/item-terminal-charging-station.png" width="40" alt=""> | **终端充电站**<br>`terminal_charging_station` | 3 个有线槽位快充，5 格范围内自动无线补电（**全局 3 个设备名额**）。 | — |
+
+> 上面这六件（加上「手持提示 HUD」）**在开发版里已经能玩**，只是还没随任何正式版发布；
+> 等真机测试通过，它们会和已上线的部分一起进下一个正式版。
 
 所有鼠标悬停说明都是活的：终端会显示**当前绑定的维度与坐标**、**已安装的插件**，以及**当前距离与收费倍率**（同维度显示格数，跨维度单独标注，与实际扣费完全一致）；每张插件会显示自己的效果、生效前提，以及从配置里实时读出的数值（电池插件显示容量加成，维度插件显示当前跨维度能量倍率，初级能耗插件显示除数）。
 
@@ -225,7 +242,7 @@ RS 原版配置卡很好用，但得一个个方块点过去——一排机器�
 | 装了**电池升级插件** | 同上，但容量 **+1000 FE / 张** | 同上 |
 | 装了**远程输电插件** | **直接扣所绑定网络的能量**，终端自身电池不再掉电；网络无电或未绑定时自动回落成出厂行为 | 同上 |
 
-> 无线样板终端同价目：开界面 5 · **产出一张样板 40**。它的「创建样板」按钮按下时会先查电量，付不起就当作没发生。
+> 🧪 未上线的**无线样板终端**同价目：开界面 5 · **产出一张样板 40**。它的「创建样板」按钮按下时会先查电量，付不起就当作没发生。
 
 基础电池容量只有 **400 FE**，而距离倍率能把单次动作抬到几十甚至上百 FE——所以**电池升级插件是前期刚需**：不装它，走远一点终端很快就见底，只能反复跑回充电站。合成类动作（合成 20 / 自动合成 40）显著贵于查看（5），这正是合成终端相对普通无线终端的额外成本。
 
@@ -250,6 +267,12 @@ RS 原版配置卡很好用，但得一个个方块点过去——一排机器�
 2. 把 `rswirelesscrafting-fabric-<version>.jar` 丢进 `mods/`，并确保已装 Cloth Config 与 Team Reborn Energy（通常随 Refined Storage 一并提供）。
 
 两种加载器的 jar 都从 [Releases](https://github.com/KokuuWork/rswirelesscrafting/releases/latest) 下载，**二选一**（功能与配置完全一致，不要同时放进 `mods/`）。当前 0.3.2 对应 `rswirelesscrafting-neoforge-0.3.2.jar` / `rswirelesscrafting-fabric-0.3.2.jar`。
+
+> 🧪 **想玩未上线的预览内容？**（无线样板终端 / 管理器 / 增幅塔 / 无线桥 / 配置卡 / 监控终端 / HUD）
+> 它们**不在 Release 里**，只能自己构建开发版：`main` 分支的版本号是 `0.4.0-SNAPSHOT`，步骤见
+> [从源码构建](#从源码构建)。构建产物文件名同样是 `rswirelesscrafting-<loader>-0.4.0-SNAPSHOT.jar`。
+>
+> **两个版本的 jar 不要同时放进 `mods/`**，也不要在同一个实例里混装。
 
 > **升级注意**：NeoForge 只会更新配置文件的**注释**、不会覆盖你已经改过的值。跨版本升级后如果发现
 > `config/rswirelesscrafting-common.toml` 里「注释写的默认值」和「实际值」不一致，删掉该文件让它重新生成即可。
@@ -291,7 +314,7 @@ RS 原版配置卡很好用，但得一个个方块点过去——一排机器�
 
 合计约 14 石英铁 + 2 末影珍珠 + 2 高级处理器 + 1 合成网格，约为 RS 自带「无线终端」的 **2.3 倍**——多出来的是「可合成」这份能力。
 
-### 无线样板终端
+### 无线样板终端 🧪
 
 <img src="docs/images/recipe-wireless-pattern-grid.png" width="270" alt="无线样板终端配方">
 
@@ -449,7 +472,9 @@ export JAVA_HOME="/path/to/jdk-21"
 
 ## 更新日志
 
-最新 **0.3.2**（2026-10-15，修复版）：修掉远程输电插件在网络电量不足时的**双重收费**、无线充电实际间隔 11 tick（速率被压低约 9%），并修正无线名额的过时文案。
+**未发布 · 0.4.0（开发中，预览）**：无线样板终端、无线自动合成仓管理器、无线增幅塔、无线桥（跨维度延伸网络 + 区块保活）、无线配置卡、无线监控终端、手持提示 HUD。**这些只存在于开发版 `0.4.0-SNAPSHOT`，尚未随任何正式版发布。**
+
+最新已发布 **0.3.2**（2026-10-15，修复版）：修掉远程输电插件在网络电量不足时的**双重收费**、无线充电实际间隔 11 tick（速率被压低约 9%），并修正无线名额的过时文案。
 
 上一版 **0.3.1**（2026-10-15）：**Fabric 移植**、**饰品栏兼容**（Curios / Trinkets）、距离耗电改**线性**（16 格内 ×1，超出按距离 ÷ 16）、跨维度 **×16**、合成 **20 FE** / 自动合成 **40 FE**、充电站改显自身缓冲并改为全局 3 设备名额、GUI 与 tooltip 修复、多人三项修复。
 
@@ -469,36 +494,60 @@ export JAVA_HOME="/path/to/jdk-21"
 > number **498700382** inside QQ.
 > No QQ? Open an [Issue](https://github.com/KokuuWork/rswirelesscrafting/issues) instead.
 
-> 🧪 **Current version 0.3.2** (2026-10-15) · **still a testing build**: the Fabric port is brand new and has not gone
-> through full in-game verification yet. Use it in a test world and **back up your saves** first; bug reports are
-> welcome in [Issues](https://github.com/KokuuWork/rswirelesscrafting/issues).
+> 🚦 **This readme covers two batches of content — know which one you want** (as of 2026-10-15)
+>
+> | | What is in it | How to get it |
+> |---|---|---|
+> | ✅ **Released** | Wireless Crafting Grid · the six upgrade cards · Terminal Charging Station · distance-based energy tariff · trinket support | Download **0.3.2** from [Releases](https://github.com/KokuuWork/rswirelesscrafting/releases/latest) |
+> | 🧪 **Unreleased (preview)** | Wireless Pattern Terminal · Wireless Autocrafter Manager · Wireless Amplifier · Wireless Bridge · Wireless Configuration Card · Wireless Monitor Terminal · held-item HUD | Only in the dev build `0.4.0-SNAPSHOT`, which you have to **build from source** (see *Building*) |
+>
+> **🧪 unreleased means written but not shipped** — it is not vapourware and not a side branch; the code is on
+> `main` and will land in the next release together with the released parts once it has been verified in game.
+> **Anything marked 🧪 below is unreleased; anything unmarked is available right now from a release download.**
+>
+> ⚠️ As a whole this is still a testing build: **the Fabric port is brand new and has not gone through full in-game
+> verification yet**. Use it in a test world and **back up your saves** first; bug reports are welcome in
+> [Issues](https://github.com/KokuuWork/rswirelesscrafting/issues).
 
 An addon for **[Refined Storage 2](https://github.com/refinedmods/refinedstorage)** that adds the wireless **crafting** grid the base mod never had.
 
-Vanilla Refined Storage ships only a wireless *viewing* grid — you can browse your network remotely, but not craft on it. This mod adds a **Wireless Crafting Grid** and a **Wireless Pattern Terminal** (write autocrafting patterns remotely), six swappable **upgrade cards** that extend their endurance, range, dimensions and power source all the way to endgame, plus a **Terminal Charging Station** that recharges every FE-based terminal. Every wireless terminal (including RS's own wireless grid and wireless autocrafting monitor) follows a **distance-based energy tariff** — the further you are from the network, the more each action costs.
+Vanilla Refined Storage ships only a wireless *viewing* grid — you can browse your network remotely, but not craft on it. This mod adds a **Wireless Crafting Grid** (access your network **and craft** remotely), six swappable **upgrade cards** that extend its endurance, range, dimensions and power source all the way to endgame, plus a **Terminal Charging Station** that recharges every FE-based terminal.
+
+Six further **🧪 unreleased** additions — a **Wireless Pattern Terminal**, a **Wireless Autocrafter Manager**, a **Wireless Amplifier**, a **Wireless Bridge**, a **Wireless Configuration Card** and a **Wireless Monitor Terminal** — currently exist **only in the dev build**; see the table at the top. Every wireless terminal (including RS's own wireless grid and wireless autocrafting monitor) follows a **distance-based energy tariff** — the further you are from the network, the more each action costs.
 
 <img src="docs/images/items.png" width="620" alt="Wireless crafting grid (inactive and active), the six upgrade cards, and the terminal charging station">
 
-> The first two icons are the *same* item — the **Wireless Crafting Grid** — in its unbound (dim) and network-connected (lit) states.
+> The first two icons are the *same* item — the **Wireless Crafting Grid** — in its unbound (dim) and network-connected (lit) states. The sheet also shows the **unreleased** additions (🧪); see *Contents* below for the exact split.
 
 ### Contents
+
+#### ✅ Released (download 0.3.2 from [Releases](https://github.com/KokuuWork/rswirelesscrafting/releases/latest))
 
 | | Item | Effect | Rarity |
 |---|---|---|---|
 | <img src="docs/images/item-grid.png" width="40" alt=""> | **Wireless Crafting Grid**<br>`wireless_crafting_grid` | Access your network remotely **and craft**. Sneak + right-click to open the upgrade panel. | rare |
-| <img src="docs/images/item-wireless-pattern-grid.png" width="40" alt=""> | **Wireless Pattern Terminal** 🧪<br>`wireless_pattern_grid` | Write **autocrafting patterns** (crafting / processing / stonecutter / smithing) remotely. | epic |
-| <img src="docs/images/item-wireless-autocrafter-manager.png" width="40" alt=""> | **Wireless Autocrafter Manager** 🧪<br>`wireless_autocrafter_manager` | Manage the patterns inside **every autocrafter** remotely. | epic |
 | <img src="docs/images/item-battery.png" width="40" alt=""> | **Battery Upgrade**<br>`battery_upgrade` | **+1000 FE** capacity each (stacks). The early-game must-have. | rare |
 | <img src="docs/images/item-energy.png" width="40" alt=""> | **Energy Upgrade**<br>`energy_upgrade` | **Halves** the distance energy multiplier. Ingredient of the Advanced Energy Upgrade. | rare |
 | <img src="docs/images/item-advanced-energy.png" width="40" alt=""> | **Advanced Energy Upgrade**<br>`advanced_energy_upgrade` | **Removes** the distance multiplier (cross-dimension still applies). Ingredient of the Remote Energy Upgrade. | epic |
 | <img src="docs/images/item-range.png" width="40" alt=""> | **Range Upgrade**<br>`range_upgrade` | **Unlimited range** within the same dimension. | epic |
 | <img src="docs/images/item-interdimensional.png" width="40" alt=""> | **Interdimensional Upgrade**<br>`interdimensional_upgrade` | **Cross-dimensional** access. | epic |
 | <img src="docs/images/item-remote-energy.png" width="40" alt=""> | **Remote Energy Upgrade**<br>`remote_energy_upgrade` | Draws power **from the bound network** instead of the terminal's own battery. | epic |
+| <img src="docs/images/item-terminal-charging-station.png" width="40" alt=""> | **Terminal Charging Station**<br>`terminal_charging_station` | 3 wired fast-charge slots, plus a 5-block wireless aura (**3 device slots total**). | — |
+
+#### 🧪 Unreleased (preview — dev build `0.4.0-SNAPSHOT` only)
+
+| | Item | Effect | Rarity |
+|---|---|---|---|
+| <img src="docs/images/item-wireless-pattern-grid.png" width="40" alt=""> | **Wireless Pattern Terminal** 🧪<br>`wireless_pattern_grid` | Write **autocrafting patterns** (crafting / processing / stonecutter / smithing) remotely. | epic |
+| <img src="docs/images/item-wireless-autocrafter-manager.png" width="40" alt=""> | **Wireless Autocrafter Manager** 🧪<br>`wireless_autocrafter_manager` | Manage the patterns inside **every autocrafter** remotely. | epic |
 | <img src="docs/images/item-wireless-amplifier.png" width="40" alt=""> | **Wireless Amplifier** 🧪<br>`wireless_amplifier` | **Halves** the distance multiplier for terminals inside a **64-block** radius. A permanent load on the network; never applies cross-dimension. | — |
 | <img src="docs/images/item-wireless-bridge.png" width="40" alt=""> | **Wireless Bridge** 🧪<br>`wireless_bridge` | Unpaired = anchor, paired = endpoint: extends the network **far away** (across dimensions) with chunk keeping (pricey). | — |
 | <img src="docs/images/item-wireless-configuration-card.png" width="40" alt=""> | **Wireless Configuration Card** 🧪<br>`wireless_configuration_card` | Copy settings, then **paste them in bulk**; standing inside an amplifier widens the range. | — |
 | <img src="docs/images/item-wireless-monitor.png" width="40" alt=""> | **Wireless Monitor Terminal** 🧪<br>`wireless_monitor` | Watch a few resources remotely and get **alerted when they run low or pile up**. | epic |
-| <img src="docs/images/item-terminal-charging-station.png" width="40" alt=""> | **Terminal Charging Station**<br>`terminal_charging_station` | 3 wired fast-charge slots, plus a 5-block wireless aura (**3 device slots total**). | — |
+
+> Those six (plus the held-item HUD) **are playable in the dev build** — they simply have not been shipped
+> in any release yet. Once they pass in-game testing they will go out with the next release, alongside the
+> released parts above.
 
 Tooltips are live: the terminal shows the **bound dimension and coordinates**, its **installed upgrades**, and the **current distance and energy multiplier** (distance in blocks within a dimension, a separate label when cross-dimensional — always matching what the server bills); each card explains its effect, its prerequisite, and the values read from config in real time.
 
@@ -673,7 +722,7 @@ Three energy upgrades form a non-wasteful nesting chain for this:
 | **Battery Upgrade** installed | Same, but capacity **+1000 FE per card** | unchanged |
 | **Remote Energy Upgrade** installed | **Straight out of the bound network**; the terminal's battery is untouched. Falls back to stock behaviour if the network is empty or unbound. | unchanged |
 
-The Wireless Pattern Terminal shares the same tariff: open 5, **produce one pattern 40**. Its "create pattern" button checks your energy first — if you cannot pay, nothing happens.
+The 🧪 unreleased Wireless Pattern Terminal shares the same tariff: open 5, **produce one pattern 40**. Its "create pattern" button checks your energy first — if you cannot pay, nothing happens.
 
 The base battery is only **400 FE**, while the distance multiplier can push a single action into the tens or hundreds of FE — so the **Battery Upgrade is an early-game necessity**: without it the terminal runs dry fast once you wander away, forcing you to trudge back to a charging station. Crafting actions (craft 20 / autocraft 40) cost far more than viewing (5), which is the extra price of a crafting terminal over a plain viewing terminal.
 
@@ -683,6 +732,10 @@ The base battery is only **400 FE**, while the distance multiplier can push a si
 - Optional, for a trinket slot: Curios + RS Curios Integration (NeoForge) or Trinkets + RS Trinkets Integration (Fabric).
 - Pure addon — no forking; one narrow mixin (wrapping `AbstractNetworkEnergyItem.use` so distance energy and upgrade cards also apply to RS's own wireless terminals), no permanent changes to your world (terminals keep their data components if you uninstall; they come back when you reinstall).
 - Download from [Releases](https://github.com/KokuuWork/rswirelesscrafting/releases/latest) — pick **one** jar for your loader, never both. When upgrading, delete `config/rswirelesscrafting-common.toml` if its commented defaults no longer match the actual values.
+
+> 🧪 **Want the unreleased preview content?** (pattern terminal / manager / amplifier / bridge / configuration
+> card / monitor terminal / HUD) It is **not in any release** — the `main` branch is versioned `0.4.0-SNAPSHOT`
+> and you have to build it yourself (see *Building*). Never mix the release jar and the dev jar in one instance.
 
 ### Trinket / Curio slots (optional)
 
