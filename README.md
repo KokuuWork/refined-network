@@ -40,6 +40,7 @@
 | <img src="docs/images/item-range.png" width="40" alt=""> | **距离升级插件**<br>`range_upgrade` | 同维度内**无视距离**。 | EPIC |
 | <img src="docs/images/item-interdimensional.png" width="40" alt=""> | **维度升级插件**<br>`interdimensional_upgrade` | 解锁**跨维度**访问。 | EPIC |
 | <img src="docs/images/item-remote-energy.png" width="40" alt=""> | **远程输电插件**<br>`remote_energy_upgrade` | **不再消耗终端自身电池**，直接花所绑定网络里的电。 | EPIC |
+| <img src="docs/images/item-wireless-amplifier.png" width="40" alt=""> | **无线增幅塔**<br>`wireless_amplifier` | 覆盖半径 **64 格内**的无线终端**距离耗电打对折**。接网络常驻耗电，跨维度不享受。 | — |
 | <img src="docs/images/item-terminal-charging-station.png" width="40" alt=""> | **终端充电站**<br>`terminal_charging_station` | 3 个有线槽位快充，5 格范围内自动无线补电（**全局 3 个设备名额**）。 | — |
 
 所有鼠标悬停说明都是活的：终端会显示**当前绑定的维度与坐标**、**已安装的插件**，以及**当前距离与收费倍率**（同维度显示格数，跨维度单独标注，与实际扣费完全一致）；每张插件会显示自己的效果、生效前提，以及从配置里实时读出的数值（电池插件显示容量加成，维度插件显示当前跨维度能量倍率，初级能耗插件显示除数）。
@@ -70,6 +71,17 @@
 **默认关闭**（它属于「看一眼就好」的信息，不该常驻在屏幕上）。想要的话在配置里把「手持提示（HUD）」打开：手持**已绑定**的无线终端时，物品栏上方显示一行小字 **电量 · 距离 · 收费倍率**——出发前就知道这一趟要花多少电，不用打开背包悬停。打开任意界面时自动让位。
 
 > 只认**手持**（主手 / 副手）。放饰品栏里不动手的时候不显示，避免屏幕上老是挂着一行字。
+
+## 无线增幅塔
+
+距离耗电原本是纯粹的惩罚——直到有了塔。**无线增幅塔**接在 RS 网络上、常驻耗电（默认 **128 FE/s**，红石信号可临时停机），它罩着的 **64 格**范围内，所有无线终端的**距离倍率打对折**：本来 256 格要 ×16，塔下面就只算 ×8。
+
+- **只影响同维度**：跨维度那笔固定 ×16 不给折扣——那条线留给维度升级卡，不然维度卡就没意义了。
+- **是否在罩着，一眼可见**：塔在工作时信号弧亮青色，没接网络或被红石关掉就变暗；右键还能直接问它「你现在什么状态、半径多少、几折」。
+- 它是**空间决策**：矿场、下界前哨、远海岛——值得为它们各建一座塔，还是就靠能耗插件硬扛？这就是这个 mod 想让你玩的取舍。
+- 塔本身很贵（无线访问点 + 下界之星 + 2 个 64k 存储方块），而且**永远挂在网络上耗电**，别乱摆。
+
+<img src="docs/images/recipe-wireless-amplifier.png" width="270" alt="无线增幅塔配方">
 
 ## 充电站
 
@@ -396,6 +408,7 @@ Vanilla Refined Storage ships only a wireless *viewing* grid — you can browse 
 | <img src="docs/images/item-range.png" width="40" alt=""> | **Range Upgrade**<br>`range_upgrade` | **Unlimited range** within the same dimension. | epic |
 | <img src="docs/images/item-interdimensional.png" width="40" alt=""> | **Interdimensional Upgrade**<br>`interdimensional_upgrade` | **Cross-dimensional** access. | epic |
 | <img src="docs/images/item-remote-energy.png" width="40" alt=""> | **Remote Energy Upgrade**<br>`remote_energy_upgrade` | Draws power **from the bound network** instead of the terminal's own battery. | epic |
+| <img src="docs/images/item-wireless-amplifier.png" width="40" alt=""> | **Wireless Amplifier**<br>`wireless_amplifier` | **Halves** the distance multiplier for terminals inside a **64-block** radius. A permanent load on the network; never applies cross-dimension. | — |
 | <img src="docs/images/item-terminal-charging-station.png" width="40" alt=""> | **Terminal Charging Station**<br>`terminal_charging_station` | 3 wired fast-charge slots, plus a 5-block wireless aura (**3 device slots total**). | — |
 
 Tooltips are live: the terminal shows the **bound dimension and coordinates**, its **installed upgrades**, and the **current distance and energy multiplier** (distance in blocks within a dimension, a separate label when cross-dimensional — always matching what the server bills); each card explains its effect, its prerequisite, and the values read from config in real time.
@@ -426,6 +439,17 @@ Once your base is automated, the annoying part is not crafting — it is **editi
 **Off by default** (it is a "nice to glance at" line and should not live on your screen). Turn on "Held-item HUD" in the config and holding a bound wireless terminal shows a single small line above the hotbar: **energy · distance · cost multiplier** — so you know what a trip will cost before you set out, without opening your inventory. It steps aside whenever a screen is open.
 
 > Held items only (main hand / offhand). Terminals worn in a trinket slot do not show it, so no line is permanently stuck on screen.
+
+### Wireless Amplifier
+
+The distance tariff used to be pure punishment — until the tower. The **Wireless Amplifier** sits on your RS network as a permanent load (**128 FE/s** by default, switchable off with redstone) and **halves the distance multiplier** for every wireless terminal inside its **64-block** radius: a spot that would cost ×16 at 256 blocks only costs ×8 under the tower.
+
+- **Same dimension only**: the fixed ×16 cross-dimension price is never discounted — that line belongs to the Interdimensional Upgrade, otherwise the upgrade loses its point.
+- **You can see whether it covers you**: the signal arcs glow cyan while it is working and dim when it has no network or is switched off by redstone; right-clicking it tells you its state, radius and discount.
+- It turns distance into a **spatial decision**: is a far-away mine, a Nether outpost or a distant island worth its own tower, or do you just eat the cost with energy upgrades? That trade-off is what this mod wants you to play with.
+- It is expensive (a Wireless Transmitter, a Nether Star and two 64k Storage Blocks) and it **never stops drawing power** — do not spam them.
+
+<img src="docs/images/recipe-wireless-amplifier.png" width="270" alt="Wireless amplifier recipe">
 
 ### Charging Station
 

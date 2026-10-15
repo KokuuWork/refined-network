@@ -291,6 +291,9 @@ def load_assets():
     assets["charging"] = read_png(
         os.path.join(OWN_TEXTURES, "..", "block", "terminal_charging_station.png")
     )
+    assets["amplifier"] = read_png(
+        os.path.join(OWN_TEXTURES, "..", "block", "wireless_amplifier_active.png")
+    )
     return assets
 
 
@@ -298,7 +301,7 @@ def load_assets():
 
 def items_figure(assets, path):
     order = ["grid_off", "grid_on", "pattern_off", "pattern_on", "battery", "energy",
-             "advanced", "range", "interdim", "remote", "charging"]
+             "advanced", "range", "interdim", "remote", "charging", "amplifier"]
     scale = 8
     cell = 16 * scale + 8          # slot size, leaving a 4px inset for the sprite
     gap = 16
@@ -397,6 +400,7 @@ def main():
     items_figure(assets, os.path.join(OUT_DIR, "items.png"))
     for key, name in (("grid_on", "item-grid.png"),
                       ("pattern_on", "item-wireless-pattern-grid.png"),
+                      ("amplifier", "item-wireless-amplifier.png"),
                       ("battery", "item-battery.png"),
                       ("energy", "item-energy.png"),
                       ("advanced", "item-advanced-energy.png"),
@@ -413,6 +417,10 @@ def main():
     recipe_figure(
         assets, os.path.join(OUT_DIR, "recipe-wireless-pattern-grid.png"),
         [[Q, A, Q], [PT, "grid_off", PT], [Q, M, Q]], "pattern_off",
+    )
+    recipe_figure(
+        assets, os.path.join(OUT_DIR, "recipe-wireless-amplifier.png"),
+        [[Q, "wireless_transmitter", Q], [X, S, X], [Q, M, Q]], "amplifier",
     )
     recipe_figure(
         assets, os.path.join(OUT_DIR, "recipe-battery.png"),
