@@ -11,6 +11,7 @@ import com.kokuu.rswirelesscrafting.common.upgrade.AdvancedEnergyUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.BatteryUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.EnergyUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.InterdimensionalUpgradeItem;
+import com.kokuu.rswirelesscrafting.common.upgrade.OverclockUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.RangeUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.RemoteEnergyUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.WirelessCraftingGridItem;
@@ -41,6 +42,8 @@ public final class Items {
     private Supplier<EnergyUpgradeItem> energyUpgrade;
     @Nullable
     private Supplier<AdvancedEnergyUpgradeItem> advancedEnergyUpgrade;
+    @Nullable
+    private Supplier<OverclockUpgradeItem> overclockUpgrade;
     @Nullable
     private Supplier<ChargingStationBlockItem> terminalChargingStation;
     @Nullable
@@ -125,6 +128,14 @@ public final class Items {
 
     public void setAdvancedEnergyUpgrade(final Supplier<AdvancedEnergyUpgradeItem> supplier) {
         this.advancedEnergyUpgrade = supplier;
+    }
+
+    public OverclockUpgradeItem getOverclockUpgrade() {
+        return requireNonNull(overclockUpgrade).get();
+    }
+
+    public void setOverclockUpgrade(final Supplier<OverclockUpgradeItem> supplier) {
+        this.overclockUpgrade = supplier;
     }
 
     public ChargingStationBlockItem getTerminalChargingStationBlockItem() {

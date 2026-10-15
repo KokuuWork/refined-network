@@ -65,6 +65,7 @@
 | <img src="docs/images/item-wireless-bridge.png" width="40" alt=""> | **无线桥** 🧪<br>`wireless_bridge` | 未配对 = 基点、配对后 = 据点：把网络**延伸到远处**（可跨维度），自带区块保活（很贵）。 | — |
 | <img src="docs/images/item-wireless-configuration-card.png" width="40" alt=""> | **无线配置卡** 🧪<br>`wireless_configuration_card` | 就地复制设置，**批量**刷给一片同类方块；站进增幅塔覆盖可扩大范围。 | — |
 | <img src="docs/images/item-wireless-monitor.png" width="40" alt=""> | **无线监控终端** 🧪<br>`wireless_monitor` | 远程盯着几样东西：**越线提醒**，或直接**自动补货**（低于目标就发起合成）。 | EPIC |
+| <img src="docs/images/item-overclock-upgrade.png" width="40" alt=""> | **超频升级卡** 🧪<br>`overclock_upgrade` | 插进 **RS 原版自动合成器**，每张把等待间隔**折半**（最多 4 张）。 | EPIC |
 
 > 上面这六件（加上「手持提示 HUD」）**在开发版里已经能玩**，只是还没随任何正式版发布；
 > 等真机测试通过，它们会和已上线的部分一起进下一个正式版。
@@ -80,6 +81,27 @@
 - 拆下来的插件原样回到背包，不会蒸发。
 
 > 这套装配界面取代了早期的「工作台无序合成永久改造」方案——那样装上去就拿不下来了。旧方案的自定义配方与序列化器已从代码中删除。
+
+## 超频升级卡 🧪 预览·未发布
+
+这件不是终端，而是一张**插进 RS 原版自动合成器**的升级卡：每张把合成器的**等待间隔折半**，最多 4 张。
+
+**为什么 RS 本来做不到这件事**
+
+RS 自带的速度升级卡有硬上限——4 张封顶（间隔压到 2 tick）。再塞第 5 张，它的档位表会掉进 `default -> 0` 分支，而那个 **0** 紧接着会撞上 `ticks % tickRate`，直接**除零崩游戏**。所以「更快」在 RS 里没有出口，我们只能绕开它的档位表。
+
+**怎么绕的**
+
+这张卡不去动 RS 的速度档位表，而是在它判断「这一 tick 能不能推进」的那一刻（`canStep` 读 `tickRate` 的瞬间）**把读到的间隔折半**。
+
+- 只替换**这一个值**——机器是否激活、是否轮到链式合成器，那些判断**原样保留**。所以它只会让**本来就在工作的**合成器变快，不会让没电的机器凭空动起来。
+- 注册用 RS **公开的**升级注册表，所以「槽位接受它、工具提示列出它、耗电算进总账」全由 RS 自己负责，我们不碰它的槽位逻辑。
+- **绝不会制造 0 间隔**：折算结果最低是 1（= 每 tick 推进），所以那个除零陷阱绕不过去也不会踩到。
+- 代价明码标在卡上：每张 **+32 FE/t**，由 RS 计进合成器的总耗电。
+
+**一个诚实的说明**：为了保证「RS 将来改了字段名也**不会崩游戏**」，注入声明了允许失败——最坏情况是这张卡**没有效果**（而不是开不起游戏）。我们选择让它在出问题时安静地失效。
+
+配方：`QAQ / SXS / QAQ`（石英富集铁 / 高级处理器 / **RS 的速度升级卡 ×2** / 下界之星）——它是「速度升级卡的升级版」，所以以速度卡为原料。
 
 ## 无线样板终端 🧪 预览·未发布
 
@@ -561,6 +583,7 @@ Six further **🧪 unreleased** additions — a **Wireless Pattern Terminal**, a
 | <img src="docs/images/item-wireless-bridge.png" width="40" alt=""> | **Wireless Bridge** 🧪<br>`wireless_bridge` | Unpaired = anchor, paired = endpoint: extends the network **far away** (across dimensions) with chunk keeping (pricey). | — |
 | <img src="docs/images/item-wireless-configuration-card.png" width="40" alt=""> | **Wireless Configuration Card** 🧪<br>`wireless_configuration_card` | Copy settings, then **paste them in bulk**; standing inside an amplifier widens the range. | — |
 | <img src="docs/images/item-wireless-monitor.png" width="40" alt=""> | **Wireless Monitor Terminal** 🧪<br>`wireless_monitor` | Watch a few resources remotely: **alert on a threshold**, or have it **restock itself** (start a craft when you drop below the target). | epic |
+| <img src="docs/images/item-overclock-upgrade.png" width="40" alt=""> | **Overclock Upgrade** 🧪<br>`overclock_upgrade` | Plugs into **RS's own autocrafter** and **halves** its waiting interval per card (up to 4). | epic |
 
 > Those six (plus the held-item HUD) **are playable in the dev build** — they simply have not been shipped
 > in any release yet. Once they pass in-game testing they will go out with the next release, alongside the
@@ -577,6 +600,27 @@ Cards are **not** baked into a crafting recipe. **Sneak + right-click** any wire
 - Removed cards return to your inventory intact.
 
 > This replaced the earlier "shapeless crafting-table, permanent modification" design, where an installed card could never come back out. Those custom recipe classes have been deleted from the codebase.
+
+### Overclock Upgrade 🧪 preview (unreleased)
+
+This is not a terminal but an upgrade card that plugs into **RS's own autocrafter**: each card **halves** the waiting interval, up to 4.
+
+**Why RS cannot do this itself**
+
+RS's own speed upgrade has a hard ceiling of 4 cards (interval down to 2 ticks). A fifth card makes its table fall into the `default -> 0` branch — and that **0** immediately meets `ticks % tickRate`, which is a **division by zero that crashes the game**. So "faster" has no outlet in RS; we have to go around its table.
+
+**How it goes around**
+
+Instead of touching that table, the card **halves the value of `tickRate` at the moment it is read** (inside `canStep`, when RS decides whether it may advance this tick).
+
+- Only that **single value** is replaced — whether the machine is active, whether it is a chained autocrafter's turn, all of that is **left untouched**. So it only speeds up crafters that are **already working**; it will not make an unpowered machine move.
+- Registration goes through RS's **public** upgrade registry, so "the slot accepts it, the tooltip lists it, the energy is accounted for" is all RS's own doing — we never touch its slot logic.
+- It **can never produce a 0 interval**: the halving bottoms out at 1 (= advance every tick), so the division-by-zero trap is unreachable.
+- The cost is printed on the card: **+32 FE/t** each, counted by RS into the crafter's total drain.
+
+**One honest note**: to guarantee that a future RS rename **cannot break the game**, the injection is declared as allowed-to-fail — the worst case is that this card **does nothing**, rather than the game not starting. We deliberately chose quiet failure over a loud crash.
+
+Recipe: `QAQ / SXS / QAQ` (quartz enriched iron / advanced processor / **two RS speed upgrades** / nether star) — it is the upgrade *of* that card, so that card is its ingredient.
 
 ### Wireless Pattern Terminal 🧪 preview (unreleased)
 

@@ -24,6 +24,8 @@ import com.kokuu.rswirelesscrafting.common.upgrade.AdvancedEnergyUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.BatteryUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.EnergyUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.InterdimensionalUpgradeItem;
+import com.kokuu.rswirelesscrafting.common.upgrade.OverclockUpgradeItem;
+import com.kokuu.rswirelesscrafting.common.upgrade.OverclockUpgrades;
 import com.kokuu.rswirelesscrafting.common.upgrade.RangeUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.RemoteEnergyUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.WirelessCraftingGridItem;
@@ -82,6 +84,8 @@ public class ModInitializerImpl extends AbstractModInitializer implements Refine
             }
         });
         registerDataComponents(new DirectRegistryCallback<>(BuiltInRegistries.DATA_COMPONENT_TYPE));
+        // 把超频卡登记为「原版自动合成器可用的升级」（公开 API）。Fabric 的注册是即时的。
+        OverclockUpgrades.register();
     }
 
     private void registerBlocks() {
@@ -183,6 +187,9 @@ public class ModInitializerImpl extends AbstractModInitializer implements Refine
                     return AbstractModInitializer.allowComponentsUpdateAnimation(oldStack, newStack);
                 }
             })
+        );
+        Items.INSTANCE.setOverclockUpgrade(
+            callback.register(ContentIds.OVERCLOCK_UPGRADE, OverclockUpgradeItem::new)
         );
         Items.INSTANCE.setBatteryUpgrade(
             callback.register(ContentIds.BATTERY_UPGRADE, BatteryUpgradeItem::new)

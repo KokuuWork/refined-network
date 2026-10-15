@@ -21,6 +21,22 @@ public final class ContentNames {
         "item",
         "wireless_pattern_grid"
     );
+    public static final MutableComponent OVERCLOCK_UPGRADE = createTranslation(
+        "item",
+        "overclock_upgrade"
+    );
+    public static final MutableComponent OVERCLOCK_UPGRADE_DESC = createTranslation(
+        "item",
+        "overclock_upgrade.desc"
+    ).withStyle(ChatFormatting.GRAY);
+    public static final MutableComponent OVERCLOCK_UPGRADE_EFFECT = createTranslation(
+        "item",
+        "overclock_upgrade.effect"
+    ).withStyle(ChatFormatting.GRAY);
+    public static final MutableComponent OVERCLOCK_UPGRADE_HINT = createTranslation(
+        "item",
+        "overclock_upgrade.hint"
+    ).withStyle(ChatFormatting.DARK_GRAY);
     public static final MutableComponent RANGE_UPGRADE = createTranslation(
         "item",
         "range_upgrade"

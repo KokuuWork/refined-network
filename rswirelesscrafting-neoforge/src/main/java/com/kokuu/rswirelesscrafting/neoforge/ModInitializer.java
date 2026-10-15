@@ -24,6 +24,8 @@ import com.kokuu.rswirelesscrafting.common.upgrade.AdvancedEnergyUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.BatteryUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.EnergyUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.InterdimensionalUpgradeItem;
+import com.kokuu.rswirelesscrafting.common.upgrade.OverclockUpgradeItem;
+import com.kokuu.rswirelesscrafting.common.upgrade.OverclockUpgrades;
 import com.kokuu.rswirelesscrafting.common.upgrade.RangeUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.RemoteEnergyUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.WirelessCraftingGridItem;
@@ -56,6 +58,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
@@ -93,6 +96,9 @@ public class ModInitializer extends AbstractModInitializer {
             modContainer.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
         }
         registerContent(eventBus);
+        // 升级注册必须等物品真正登记完（DeferredRegister 要等注册事件触发），所以放到 setup 阶段。
+        eventBus.addListener((final FMLCommonSetupEvent event) ->
+            event.enqueueWork(OverclockUpgrades::register));
         eventBus.addListener(this::registerCapabilities);
         eventBus.addListener(this::registerCreativeModeTabListener);
     }
@@ -200,6 +206,9 @@ public class ModInitializer extends AbstractModInitializer {
                     return AbstractModInitializer.allowComponentsUpdateAnimation(oldStack, newStack);
                 }
             })
+        );
+        Items.INSTANCE.setOverclockUpgrade(
+            callback.register(ContentIds.OVERCLOCK_UPGRADE, OverclockUpgradeItem::new)
         );
         Items.INSTANCE.setBatteryUpgrade(
             callback.register(ContentIds.BATTERY_UPGRADE, BatteryUpgradeItem::new)

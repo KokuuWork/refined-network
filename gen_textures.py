@@ -228,6 +228,25 @@ def hex_card(edge, light, dark):
     return px
 
 
+def overclock_texture():
+    """Two stacked chevrons pointing up: 'faster'. Warm copper, because it runs hot."""
+    px = hex_card(rgb("#3A1410"), rgb("#C4522A"), rgb("#8A2F1A"))
+    glyph, hot = rgb("#FFC48A"), rgb("#FFF0D8")
+    rows = [
+        "..AA..",
+        ".AAAA.",
+        "AA..AA",
+        "..AA..",
+        ".AAAA.",
+        "AA..AA",
+    ]
+    for i, row in enumerate(rows):
+        for j, ch in enumerate(row):
+            if ch == "A":
+                put(px, 5 + j, 4 + i, glyph if i < 3 else hot)
+    return px
+
+
 def range_texture():
     """Concentric signal rings: the card's whole effect is 'ignore distance'."""
     px = hex_card(rgb("#12303C"), rgb("#3E93B4"), rgb("#1B4457"))
@@ -608,6 +627,7 @@ def main():
         ("wireless_autocrafter_manager/inactive.png", manager_texture(False)),
         ("wireless_autocrafter_manager/active.png", manager_texture(True)),
         ("range_upgrade.png", range_texture()),
+        ("overclock_upgrade.png", overclock_texture()),
         ("battery_upgrade.png", battery_texture()),
         ("interdimensional_upgrade.png", interdimensional_texture()),
         ("remote_energy_upgrade.png", remote_energy_texture()),

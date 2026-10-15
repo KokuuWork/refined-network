@@ -13,6 +13,7 @@ public final class CreativeModeTabItems {
         consumer.accept(Items.INSTANCE.getWirelessPatternGrid().getDefaultInstance());
         consumer.accept(Items.INSTANCE.getWirelessAutocrafterManager().getDefaultInstance());
         consumer.accept(Items.INSTANCE.getBatteryUpgrade().getDefaultInstance());
+        consumer.accept(Items.INSTANCE.getOverclockUpgrade().getDefaultInstance());
         consumer.accept(Items.INSTANCE.getRangeUpgrade().getDefaultInstance());
         consumer.accept(Items.INSTANCE.getInterdimensionalUpgrade().getDefaultInstance());
         consumer.accept(Items.INSTANCE.getRemoteEnergyUpgrade().getDefaultInstance());

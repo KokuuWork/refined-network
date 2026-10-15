@@ -174,5 +174,9 @@
   "gui.rswirelesscrafting.monitor_mode_tooltip": "Action: %s\nClick to switch: \"Alert\" just says so in chat; \"Restock\" starts a crafting job by itself when you drop below the target (billed at the autocrafting rate)",
   "msg.rswirelesscrafting.monitor_restock_started": "⚙ Restocking: %s %s -> %s",
   "msg.rswirelesscrafting.monitor_restock_no_pattern": "⚠ Cannot restock %s: no pattern produces it",
-  "msg.rswirelesscrafting.monitor_restock_missing": "⚠ Restock stuck: %s is missing materials"
+  "msg.rswirelesscrafting.monitor_restock_missing": "⚠ Restock stuck: %s is missing materials",
+  "item.rswirelesscrafting.overclock_upgrade": "Overclock Upgrade",
+  "item.rswirelesscrafting.overclock_upgrade.desc": "Speeds up RS's own autocrafter",
+  "item.rswirelesscrafting.overclock_upgrade.effect": "Each card halves the waiting interval (up to 4)",
+  "item.rswirelesscrafting.overclock_upgrade.hint": "Works only on RS's own autocrafter; each card adds 32 FE/t"
 }

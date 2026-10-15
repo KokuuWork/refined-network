@@ -174,5 +174,9 @@
   "gui.rswirelesscrafting.monitor_mode_tooltip": "当前动作：%s\n点击切换：「提醒」只在聊天栏说一声；「补货」会在低于目标时自动发起合成（按自动合成档收费）",
   "msg.rswirelesscrafting.monitor_restock_started": "⚙ 补货中：%s %s → %s",
   "msg.rswirelesscrafting.monitor_restock_no_pattern": "⚠ 无法补货：%s 没有能产出它的样板",
-  "msg.rswirelesscrafting.monitor_restock_missing": "⚠ 补货卡住：%s 材料不足"
+  "msg.rswirelesscrafting.monitor_restock_missing": "⚠ 补货卡住：%s 材料不足",
+  "item.rswirelesscrafting.overclock_upgrade": "超频升级卡",
+  "item.rswirelesscrafting.overclock_upgrade.desc": "插进 RS 原版自动合成器，让它跑得更快",
+  "item.rswirelesscrafting.overclock_upgrade.effect": "每张把合成器的等待间隔折半（最多 4 张）",
+  "item.rswirelesscrafting.overclock_upgrade.hint": "只对 RS 原版的自动合成器生效；每张额外耗电 32 FE/t"
 }
