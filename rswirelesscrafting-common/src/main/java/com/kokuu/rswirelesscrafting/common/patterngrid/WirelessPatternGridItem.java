@@ -84,13 +84,17 @@ public class WirelessPatternGridItem extends AbstractWirelessTerminalItem {
                 fail(player, new IllegalStateException("RS 的样板网格菜单服务端构造不可用"));
                 return;
             }
-            // 开界面本身就要钱：与无线合成终端同口径，按距离倍率结算。
-            context.drainEnergy(Platform.getConfig().getWirelessCraftingGrid().getOpenEnergyUsage());
+            // 开界面本身就要钱：与无线合成终端同口径、按距离倍率结算；付不起一分不扣。
+            final VirtualTerminalSession session = new VirtualTerminalSession(resolved.get(), context);
+            if (!session.tryCharge(Platform.getConfig().getWirelessCraftingGrid().getOpenEnergyUsage())) {
+                player.displayClientMessage(ContentNames.TERMINAL_NOT_ENOUGH_ENERGY, false);
+                return;
+            }
             final VirtualPatternGrid grid = new VirtualPatternGrid(
                 resolved.get(),
                 player.level(),
                 network.orElse(null),
-                new VirtualTerminalSession(resolved.get(), context)
+                session
             );
             com.refinedmods.refinedstorage.common.Platform.INSTANCE.getMenuOpener().openMenu(
                 player,

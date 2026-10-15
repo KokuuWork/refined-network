@@ -115,5 +115,9 @@
   "text.autoconfig.rswirelesscrafting.option.wirelessAmplifier.radius": "Coverage radius (blocks)",
   "text.autoconfig.rswirelesscrafting.option.wirelessAmplifier.radius.tooltip": "Horizontal radius in blocks.",
   "text.autoconfig.rswirelesscrafting.option.wirelessAmplifier.multiplierPercent": "Distance multiplier inside (%)",
-  "text.autoconfig.rswirelesscrafting.option.wirelessAmplifier.multiplierPercent.tooltip": "50 halves the distance multiplier inside the area; cross-dimensional access is never discounted."
+  "text.autoconfig.rswirelesscrafting.option.wirelessAmplifier.multiplierPercent.tooltip": "50 halves the distance multiplier inside the area; cross-dimensional access is never discounted.",
+  "item.rswirelesscrafting.wireless_autocrafter_manager": "Wireless Autocrafter Manager",
+  "item.rswirelesscrafting.wireless_autocrafter_manager.desc": "Manage the patterns in every autocrafter remotely",
+  "gui.rswirelesscrafting.wireless_autocrafter_manager_failed": "Could not open the Wireless Autocrafter Manager: please send your log to the author (QQ group 498700382)",
+  "gui.rswirelesscrafting.terminal_not_enough_energy": "Not enough energy in the terminal to open it"
 }

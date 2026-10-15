@@ -63,5 +63,10 @@ public class ClientModInitializerImpl extends AbstractClientModInitializer imple
             NetworkItemPropertyFunction.NAME,
             boundActive
         );
+        ItemProperties.register(
+            Items.INSTANCE.getWirelessAutocrafterManager(),
+            NetworkItemPropertyFunction.NAME,
+            boundActive
+        );
     }
 }

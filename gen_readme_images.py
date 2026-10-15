@@ -274,11 +274,21 @@ def load_assets():
                                                "cutouts", "gray.png")))
     assets["wireless_transmitter"] = transmitter
 
+    # The autocrafter manager is likewise a casing plus a coloured cutout face.
+    manager_icon = read_png(os.path.join(RS_TEXTURES, "block", "machine_casing", "end.png"))
+    overlay(manager_icon, read_png(os.path.join(RS_TEXTURES, "block", "autocrafter_manager",
+                                                   "back.png")))
+    overlay(manager_icon, read_png(os.path.join(RS_TEXTURES, "block", "autocrafter_manager",
+                                                "cutouts", "gray.png")))
+    assets["autocrafter_manager"] = manager_icon
+
     for key, path in {
         "grid_off": "wireless_crafting_grid/inactive.png",
         "grid_on": "wireless_crafting_grid/active.png",
         "pattern_off": "wireless_pattern_grid/inactive.png",
         "pattern_on": "wireless_pattern_grid/active.png",
+        "manager_off": "wireless_autocrafter_manager/inactive.png",
+        "manager_on": "wireless_autocrafter_manager/active.png",
         "battery": "battery_upgrade.png",
         "range": "range_upgrade.png",
         "interdim": "interdimensional_upgrade.png",
@@ -300,8 +310,9 @@ def load_assets():
 # ================================================================== figures
 
 def items_figure(assets, path):
-    order = ["grid_off", "grid_on", "pattern_off", "pattern_on", "battery", "energy",
-             "advanced", "range", "interdim", "remote", "charging", "amplifier"]
+    order = ["grid_off", "grid_on", "pattern_off", "pattern_on", "manager_off", "manager_on",
+             "battery", "energy", "advanced", "range", "interdim", "remote", "charging",
+             "amplifier"]
     scale = 8
     cell = 16 * scale + 8          # slot size, leaving a 4px inset for the sprite
     gap = 16
@@ -401,6 +412,7 @@ def main():
     for key, name in (("grid_on", "item-grid.png"),
                       ("pattern_on", "item-wireless-pattern-grid.png"),
                       ("amplifier", "item-wireless-amplifier.png"),
+                      ("manager_on", "item-wireless-autocrafter-manager.png"),
                       ("battery", "item-battery.png"),
                       ("energy", "item-energy.png"),
                       ("advanced", "item-advanced-energy.png"),
@@ -421,6 +433,10 @@ def main():
     recipe_figure(
         assets, os.path.join(OUT_DIR, "recipe-wireless-amplifier.png"),
         [[Q, "wireless_transmitter", Q], [X, S, X], [Q, M, Q]], "amplifier",
+    )
+    recipe_figure(
+        assets, os.path.join(OUT_DIR, "recipe-wireless-autocrafter-manager.png"),
+        [[Q, T, Q], ["pattern_off", "autocrafter_manager", "pattern_off"], [Q, S, Q]], "manager_on",
     )
     recipe_figure(
         assets, os.path.join(OUT_DIR, "recipe-battery.png"),

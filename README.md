@@ -34,6 +34,7 @@
 |---|---|---|---|
 | <img src="docs/images/item-grid.png" width="40" alt=""> | **无线合成终端**<br>`wireless_crafting_grid` | 远程访问网络并**远程合成**。潜行 + 右键打开插件装配界面。 | RARE |
 | <img src="docs/images/item-wireless-pattern-grid.png" width="40" alt=""> | **无线样板终端**<br>`wireless_pattern_grid` | 远程编写**自动化样板**（合成 / 处理 / 切石 / 锻造），不用跑回样板网格。 | EPIC |
+| <img src="docs/images/item-wireless-autocrafter-manager.png" width="40" alt=""> | **无线自动合成仓管理器**<br>`wireless_autocrafter_manager` | 远程管理**全网合成仓里的样板**：看有哪些、取出、换入，不用回基地。 | EPIC |
 | <img src="docs/images/item-battery.png" width="40" alt=""> | **电池升级插件**<br>`battery_upgrade` | 每张提升 **+1000 FE** 电池容量（可叠加）。前期刚需。 | RARE |
 | <img src="docs/images/item-energy.png" width="40" alt=""> | **初级能耗插件**<br>`energy_upgrade` | **距离能量倍率减半**。也是高级能耗插件的原料。 | RARE |
 | <img src="docs/images/item-advanced-energy.png" width="40" alt=""> | **高级能耗插件**<br>`advanced_energy_upgrade` | **完全消除距离能量倍率**（跨维倍率保留）。也是远程输电插件的原料。 | EPIC |
@@ -71,6 +72,17 @@
 **默认关闭**（它属于「看一眼就好」的信息，不该常驻在屏幕上）。想要的话在配置里把「手持提示（HUD）」打开：手持**已绑定**的无线终端时，物品栏上方显示一行小字 **电量 · 距离 · 收费倍率**——出发前就知道这一趟要花多少电，不用打开背包悬停。打开任意界面时自动让位。
 
 > 只认**手持**（主手 / 副手）。放饰品栏里不动手的时候不显示，避免屏幕上老是挂着一行字。
+
+## 无线自动合成仓管理器
+
+写样板已经能远程了（上一节），但「这块样板该放进哪个合成仓、从哪个仓里取出来」原本还得跑回基地开方块版管理器。这件终端补上最后一步：**远程管全网合成仓里的样板**。
+
+- 界面就是 RS 原版的自动合成仓管理器：按名字分组的仓、每个仓的样板槽、搜索模式全在，**本模组一行界面代码都没写**（菜单类型是 RS 自己的，客户端直接命中它已注册的界面）。
+- 交互是真的：槽位直接对着**真实合成仓**的样板容器，取出来就进你背包，不会被吞。
+- 耗电：开界面 **5 FE × 距离倍率**，与其它终端同一档。界面内移动样板不另计费——按次拦样板槽需要再给 RS 菜单加一处注入，而「哪些槽位算钱」是菜单特有的语义，先不做，避免造一个猜出来的抽象。
+- 配方要两台**无线样板终端**夹住方块版管理器，属终局。
+
+<img src="docs/images/recipe-wireless-autocrafter-manager.png" width="270" alt="无线自动合成仓管理器配方">
 
 ## 无线增幅塔
 
@@ -402,6 +414,7 @@ Vanilla Refined Storage ships only a wireless *viewing* grid — you can browse 
 |---|---|---|---|
 | <img src="docs/images/item-grid.png" width="40" alt=""> | **Wireless Crafting Grid**<br>`wireless_crafting_grid` | Access your network remotely **and craft**. Sneak + right-click to open the upgrade panel. | rare |
 | <img src="docs/images/item-wireless-pattern-grid.png" width="40" alt=""> | **Wireless Pattern Terminal**<br>`wireless_pattern_grid` | Write **autocrafting patterns** (crafting / processing / stonecutter / smithing) remotely. | epic |
+| <img src="docs/images/item-wireless-autocrafter-manager.png" width="40" alt=""> | **Wireless Autocrafter Manager**<br>`wireless_autocrafter_manager` | Manage the patterns inside **every autocrafter** remotely. | epic |
 | <img src="docs/images/item-battery.png" width="40" alt=""> | **Battery Upgrade**<br>`battery_upgrade` | **+1000 FE** capacity each (stacks). The early-game must-have. | rare |
 | <img src="docs/images/item-energy.png" width="40" alt=""> | **Energy Upgrade**<br>`energy_upgrade` | **Halves** the distance energy multiplier. Ingredient of the Advanced Energy Upgrade. | rare |
 | <img src="docs/images/item-advanced-energy.png" width="40" alt=""> | **Advanced Energy Upgrade**<br>`advanced_energy_upgrade` | **Removes** the distance multiplier (cross-dimension still applies). Ingredient of the Remote Energy Upgrade. | epic |
@@ -439,6 +452,17 @@ Once your base is automated, the annoying part is not crafting — it is **editi
 **Off by default** (it is a "nice to glance at" line and should not live on your screen). Turn on "Held-item HUD" in the config and holding a bound wireless terminal shows a single small line above the hotbar: **energy · distance · cost multiplier** — so you know what a trip will cost before you set out, without opening your inventory. It steps aside whenever a screen is open.
 
 > Held items only (main hand / offhand). Terminals worn in a trinket slot do not show it, so no line is permanently stuck on screen.
+
+### Wireless Autocrafter Manager
+
+Writing patterns remotely is covered above; what still forced a trip home was deciding **which autocrafter a pattern belongs in**. This terminal closes that loop.
+
+- It opens **RS's own Autocrafter Manager UI** — crafters grouped by name, each one's pattern slots, search mode — with **not a single line of screen code in this mod** (the menu type is RS's, so the client lands on RS's registered screen).
+- The interaction is real: the slots point at the **actual autocrafters'** pattern containers, so taking a pattern out really puts it in your inventory.
+- Energy: opening it costs **5 FE × distance multiplier**, the same tier as every other terminal. Moving patterns inside is not billed per move — hooking pattern-slot edits would need another injection into RS's menu, and "which slots cost money" is menu-specific semantics; better to wait for a real need than to invent an abstraction.
+- Crafting it takes two **Wireless Pattern Terminals** around a block-form manager — endgame content.
+
+<img src="docs/images/recipe-wireless-autocrafter-manager.png" width="270" alt="Wireless autocrafter manager recipe">
 
 ### Wireless Amplifier
 

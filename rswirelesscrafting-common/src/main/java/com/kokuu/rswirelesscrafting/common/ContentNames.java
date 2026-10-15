@@ -89,6 +89,22 @@ public final class ContentNames {
         "block",
         "wireless_amplifier.redstone"
     ).withStyle(ChatFormatting.DARK_GRAY);
+    public static final MutableComponent WIRELESS_AUTOCRAFTER_MANAGER = createTranslation(
+        "item",
+        "wireless_autocrafter_manager"
+    );
+    public static final MutableComponent WIRELESS_AUTOCRAFTER_MANAGER_DESC = createTranslation(
+        "item",
+        "wireless_autocrafter_manager.desc"
+    ).withStyle(ChatFormatting.GRAY);
+    public static final MutableComponent WIRELESS_AUTOCRAFTER_MANAGER_FAILED = createTranslation(
+        "gui",
+        "wireless_autocrafter_manager_failed"
+    ).withStyle(ChatFormatting.RED);
+    public static final MutableComponent TERMINAL_NOT_ENOUGH_ENERGY = createTranslation(
+        "gui",
+        "terminal_not_enough_energy"
+    ).withStyle(ChatFormatting.RED);
     public static final MutableComponent WIRELESS_PATTERN_GRID_FAILED = createTranslation(
         "gui",
         "wireless_pattern_grid_failed"

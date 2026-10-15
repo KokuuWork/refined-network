@@ -7,6 +7,8 @@ import static com.kokuu.rswirelesscrafting.common.ModIdentifierUtil.createIdenti
 public final class ContentIds {
     public static final ResourceLocation WIRELESS_CRAFTING_GRID = createIdentifier("wireless_crafting_grid");
     public static final ResourceLocation WIRELESS_PATTERN_GRID = createIdentifier("wireless_pattern_grid");
+    public static final ResourceLocation WIRELESS_AUTOCRAFTER_MANAGER =
+        createIdentifier("wireless_autocrafter_manager");
     public static final ResourceLocation WIRELESS_CRAFTING_GRID_UPGRADES =
         createIdentifier("wireless_crafting_grid_upgrades");
     public static final ResourceLocation RANGE_UPGRADE = createIdentifier("range_upgrade");

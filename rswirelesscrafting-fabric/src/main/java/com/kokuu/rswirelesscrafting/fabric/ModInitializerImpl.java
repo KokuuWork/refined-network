@@ -10,6 +10,7 @@ import com.kokuu.rswirelesscrafting.common.Platform;
 import com.kokuu.rswirelesscrafting.common.amplifier.AmplifierBlock;
 import com.kokuu.rswirelesscrafting.common.amplifier.AmplifierBlockEntity;
 import com.kokuu.rswirelesscrafting.common.amplifier.AmplifierBlockItem;
+import com.kokuu.rswirelesscrafting.common.autocraftermanager.WirelessAutocrafterManagerItem;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlock;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockEntity;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockItem;
@@ -123,6 +124,20 @@ public class ModInitializerImpl extends AbstractModInitializer implements Refine
     private void registerCustomItems(final RegistryCallback<Item> callback) {
         Items.INSTANCE.setWirelessCraftingGrid(
             callback.register(ContentIds.WIRELESS_CRAFTING_GRID, () -> new WirelessCraftingGridItem(
+                RefinedStorageApi.INSTANCE.getEnergyItemHelper(),
+                RefinedStorageApi.INSTANCE.getNetworkItemHelper()
+            ) {
+                @Override
+                public boolean allowComponentsUpdateAnimation(final Player player,
+                                                               final InteractionHand hand,
+                                                               final ItemStack oldStack,
+                                                               final ItemStack newStack) {
+                    return AbstractModInitializer.allowComponentsUpdateAnimation(oldStack, newStack);
+                }
+            })
+        );
+        Items.INSTANCE.setWirelessAutocrafterManager(
+            callback.register(ContentIds.WIRELESS_AUTOCRAFTER_MANAGER, () -> new WirelessAutocrafterManagerItem(
                 RefinedStorageApi.INSTANCE.getEnergyItemHelper(),
                 RefinedStorageApi.INSTANCE.getNetworkItemHelper()
             ) {

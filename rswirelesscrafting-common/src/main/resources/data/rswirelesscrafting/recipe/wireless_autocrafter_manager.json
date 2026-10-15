@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "QBQ",
+    "TMT",
+    "QXQ"
+  ],
+  "key": {
+    "Q": {
+      "item": "refinedstorage:quartz_enriched_iron"
+    },
+    "B": {
+      "item": "refinedstorage:wireless_transmitter"
+    },
+    "T": {
+      "item": "rswirelesscrafting:wireless_pattern_grid"
+    },
+    "M": {
+      "item": "refinedstorage:autocrafter_manager"
+    },
+    "X": {
+      "item": "minecraft:nether_star"
+    }
+  },
+  "result": {
+    "id": "rswirelesscrafting:wireless_autocrafter_manager"
+  }
+}

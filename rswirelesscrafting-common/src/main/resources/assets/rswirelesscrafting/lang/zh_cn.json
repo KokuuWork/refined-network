@@ -115,5 +115,9 @@
   "text.autoconfig.rswirelesscrafting.option.wirelessAmplifier.radius": "覆盖半径（格）",
   "text.autoconfig.rswirelesscrafting.option.wirelessAmplifier.radius.tooltip": "水平半径，半径内生效。",
   "text.autoconfig.rswirelesscrafting.option.wirelessAmplifier.multiplierPercent": "范围内距离倍率（%）",
-  "text.autoconfig.rswirelesscrafting.option.wirelessAmplifier.multiplierPercent.tooltip": "50 表示半径内的距离倍率打对折；跨维度不享受折扣。"
+  "text.autoconfig.rswirelesscrafting.option.wirelessAmplifier.multiplierPercent.tooltip": "50 表示半径内的距离倍率打对折；跨维度不享受折扣。",
+  "item.rswirelesscrafting.wireless_autocrafter_manager": "无线自动合成仓管理器",
+  "item.rswirelesscrafting.wireless_autocrafter_manager.desc": "远程管理全网合成仓里的样板",
+  "gui.rswirelesscrafting.wireless_autocrafter_manager_failed": "无线自动合成仓管理器打开失败：请把日志发给作者（QQ 群 498700382）",
+  "gui.rswirelesscrafting.terminal_not_enough_energy": "终端电量不足，无法打开（先给它充电）"
 }

@@ -420,6 +420,54 @@ def terminal_charging_station_texture(powered=True, wireless=True):
     return px
 
 
+# ============================================================ autocrafter manager
+#
+# 与其它终端共用外壳，屏幕上是 2x2 组「合成仓格子」（每组 2x2 个点）——
+# 一眼看出「这个管的是好几个仓」，而不是一块样板。
+
+MANAGER_ART = [
+    "............s...",
+    "............g...",
+    "............g...",
+    ".KKKKKKKKKKKKKK.",
+    ".KllllllllllmmK.",
+    ".KmmmmmmmmmmmmK.",
+    ".KmKKKKKKKKKKmK.",
+    ".KmKnKnKKnKnKmK.",
+    ".KmKKKKKKKKKKmK.",
+    ".KmKKKKKKKKKKmK.",
+    ".KmKnKnKKnKnKmK.",
+    ".KmKKKKKKKKKKmK.",
+    ".KmKKKKKKKKKKmK.",
+    ".KmmmmmsmsmmmmK.",
+    ".KddddddddddddK.",
+    ".KKKKKKKKKKKKKK.",
+]
+
+MANAGER_PALETTE_OFF = {
+    "K": rgb("#2E323B"),
+    "m": rgb("#5A6270"),
+    "l": rgb("#3F5C6B"),
+    "n": rgb("#6E7784"),
+    "s": rgb("#3C414C"),
+    "g": rgb("#7A8090"),
+    "d": rgb("#3F444E"),
+}
+
+MANAGER_PALETTE_ON = dict(MANAGER_PALETTE_OFF)
+MANAGER_PALETTE_ON.update({
+    "l": rgb("#2E6E86"),
+    "n": rgb("#38BBDC"),
+    "s": rgb("#38BBDC"),
+})
+
+
+def manager_texture(active):
+    px = canvas()
+    paint(px, MANAGER_ART, MANAGER_PALETTE_ON if active else MANAGER_PALETTE_OFF)
+    return px
+
+
 # ====================================================================== driver
 
 def main():
@@ -428,6 +476,8 @@ def main():
         ("wireless_crafting_grid/active.png", grid_texture(True)),
         ("wireless_pattern_grid/inactive.png", pattern_grid_texture(False)),
         ("wireless_pattern_grid/active.png", pattern_grid_texture(True)),
+        ("wireless_autocrafter_manager/inactive.png", manager_texture(False)),
+        ("wireless_autocrafter_manager/active.png", manager_texture(True)),
         ("range_upgrade.png", range_texture()),
         ("battery_upgrade.png", battery_texture()),
         ("interdimensional_upgrade.png", interdimensional_texture()),
