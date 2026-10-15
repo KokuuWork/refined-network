@@ -7,8 +7,12 @@
 ![NeoForge](https://img.shields.io/badge/NeoForge-21.1.x-E8892B)
 ![Fabric](https://img.shields.io/badge/Fabric-1.21.1-AAA)
 ![Refined Storage](https://img.shields.io/badge/Refined_Storage-2.0.7%2B-3E7BB6)
+[![Downloads](https://img.shields.io/github/downloads/KokuuWork/rswirelesscrafting/total?label=downloads)](https://github.com/KokuuWork/rswirelesscrafting/releases)
 
 **简体中文** | [English](#english)
+
+> 🧪 **当前版本 0.3.1**（2026-10-15）· **仍处于测试阶段**：Fabric 侧为首次移植，尚未完成完整真机验证。
+> 请在测试存档中使用并**先备份世界**；遇到问题欢迎提 [Issue](https://github.com/KokuuWork/rswirelesscrafting/issues)（附日志与复现步骤）。
 
 给 [Refined Storage 2](https://github.com/refinedmods/refinedstorage) 补上原版缺失的**无线合成**能力。
 
@@ -29,9 +33,9 @@
 | <img src="docs/images/item-range.png" width="40" alt=""> | **距离升级插件**<br>`range_upgrade` | 同维度内**无视距离**。 | EPIC |
 | <img src="docs/images/item-interdimensional.png" width="40" alt=""> | **维度升级插件**<br>`interdimensional_upgrade` | 解锁**跨维度**访问。 | EPIC |
 | <img src="docs/images/item-remote-energy.png" width="40" alt=""> | **远程输电插件**<br>`remote_energy_upgrade` | **不再消耗终端自身电池**，直接花所绑定网络里的电。 | EPIC |
-| <img src="docs/images/item-terminal-charging-station.png" width="40" alt=""> | **终端充电站**<br>`terminal_charging_station` | 3 个有线槽位快充，5 格范围内自动无线补电（最多 3 名玩家）。 | — |
+| <img src="docs/images/item-terminal-charging-station.png" width="40" alt=""> | **终端充电站**<br>`terminal_charging_station` | 3 个有线槽位快充，5 格范围内自动无线补电（**全局 3 个设备名额**）。 | — |
 
-所有鼠标悬停说明都是活的：终端会显示**当前绑定的维度与坐标**和**已安装的插件**；每张插件会显示自己的效果、生效前提，以及从配置里实时读出的数值（电池插件显示容量加成，维度插件显示当前跨维度能量倍率，初级能耗插件显示除数）。
+所有鼠标悬停说明都是活的：终端会显示**当前绑定的维度与坐标**、**已安装的插件**，以及**当前距离与收费倍率**（同维度显示格数，跨维度单独标注，与实际扣费完全一致）；每张插件会显示自己的效果、生效前提，以及从配置里实时读出的数值（电池插件显示容量加成，维度插件显示当前跨维度能量倍率，初级能耗插件显示除数）。
 
 ## 升级插件是装配式的，可随时插拔
 
@@ -107,8 +111,9 @@
 | | 要求 |
 |---|---|
 | Minecraft | **1.21.1** |
-| 模组加载器 | NeoForge **21.1.x** ｜ Fabric **0.14.6+** |
-| 前置 | Refined Storage **2.0.7+**（已在 2.0.9 上实测运行）；Fabric 侧另需 **Fabric API** + **Cloth Config** + **Team Reborn Energy** |
+| 加载器 | NeoForge **21.1.x**（1.21.1）｜ Fabric Loader **0.14.6+** |
+| 前置 | Refined Storage **2.0.7+**（已在 2.0.9 上实测运行）；Fabric 侧另需 **Fabric API ≥ 0.101.0** + **Cloth Config** + **Team Reborn Energy** |
+| 可选（饰品栏） | NeoForge：**Curios** + RS Curios Integration ｜ Fabric：**Trinkets** + RS Trinkets Integration |
 | 构建 | JDK **21** + Gradle 8.14.4 |
 
 ## 安装
@@ -121,7 +126,10 @@
 1. 装好 Fabric 1.21.1、Fabric API 与 Refined Storage。
 2. 把 `rswirelesscrafting-fabric-<version>.jar` 丢进 `mods/`，并确保已装 Cloth Config 与 Team Reborn Energy（通常随 Refined Storage 一并提供）。
 
-两种加载器的 jar 都从 [Releases](https://github.com/KokuuWork/rswirelesscrafting/releases/latest) 下载，功能与配置完全一致。
+两种加载器的 jar 都从 [Releases](https://github.com/KokuuWork/rswirelesscrafting/releases/latest) 下载，**二选一**（功能与配置完全一致，不要同时放进 `mods/`）。当前 0.3.1 对应 `rswirelesscrafting-neoforge-0.3.1.jar` / `rswirelesscrafting-fabric-0.3.1.jar`。
+
+> **升级注意**：NeoForge 只会更新配置文件的**注释**、不会覆盖你已经改过的值。跨版本升级后如果发现
+> `config/rswirelesscrafting-common.toml` 里「注释写的默认值」和「实际值」不一致，删掉该文件让它重新生成即可。
 
 > 本模组是**纯附属（addon）**：只依赖 Refined Storage 的公开 API，另用一处**窄 mixin**（只包一层 `AbstractNetworkEnergyItem.use` 的上下文，让距离耗电与升级插件对 RS 原生无线终端同样生效），不 fork、不魔改 RS 本体逻辑。移除本模组不会损坏存档（已装升级插件的终端会保留数据组件，重新装上即恢复）。
 
@@ -263,7 +271,7 @@ RS 的距离/维度校验并不位于 `resolveNetwork`，而在 `NetworkItemPlay
 
 方块实体则继承 RS 公开且标注为 STABLE 的 `AbstractNetworkNodeContainerBlockEntity<T extends NetworkNode>`，由它负责网络容器生命周期；自定义的 `ChargingStationNetworkNode` 只声明待机耗电。网络连接用的是 RS 的默认六向连接策略，因此连 `createMainContainer` 都不用重写。
 
-每 tick 里，服务端先为 3 个有线槽各自按速率补电，再扫描半径内的玩家（按距离由近到远排序），把全局 3 个「设备名额」按「每名玩家先拿 1 个、有余再轮」的次序分给最近的玩家——3 名玩家各充 1 个设备、1 名玩家独占 3 个，充满一个自动轮到下一个。连接面板的 6 个灯（3 有线 + 3 无线）由服务端算好状态写进 `ContainerData` 同步给客户端，客户端用 `level.getGameTime()` 驱动蓝灯的呼吸闪烁——纯视觉，不占额外网络包。多名玩家各自独占一个名额，状态互不干扰。
+每 tick 里服务端先为 3 个有线槽各自按速率补电；**无线扫描每 10 tick 一次**（按 10 tick 的额度一次性发放，速率不变）——玩家多、充电站多时，「每 tick 遍历附近所有玩家背包」是服务器上的真实热点，降频后开销约为原来的十分之一。扫描时把全局 3 个「设备名额」按「每名玩家先拿 1 个、有余再轮」的次序分给最近的玩家——3 名玩家各充 1 个设备、1 名玩家独占 3 个，充满一个自动轮到下一个。方块状态（通电 / 无线）的写入同样限流为 10 tick 一次，避免网络只剩几 FE 时缓冲在「空 / 有一点点」之间抖动，演变成每 tick 一次的方块更新与邻居红石更新风暴。连接面板的 6 个灯（3 有线 + 3 无线）由服务端算好状态写进 `ContainerData` 同步给客户端，客户端用 `level.getGameTime()` 驱动蓝灯的呼吸闪烁——纯视觉，不占额外网络包。多名玩家各自独占一个名额，状态互不干扰。
 
 无线充电带 **45% 效率**（`deliver` 里按 `cost = ceil(given * 100 / efficiency)` 出账，消耗 100 只充 45）；有线恒为 100%。基础待机损耗（128 FE/s）只有在无线模块开启时才会扣，被红石信号关掉后停扣。方块带一个 `wireless` 方块状态，服务端在状态变化时 `setBlockAndUpdate`，用亮/灭两套纹理让外形直接反映无线是否开启。
 
@@ -301,7 +309,9 @@ export JAVA_HOME="/path/to/jdk-21"
 
 ## 更新日志
 
-见 [CHANGELOG.md](CHANGELOG.md)。
+最新 **0.3.1**（2026-10-15）：**Fabric 移植**、**饰品栏兼容**（Curios / Trinkets）、距离耗电改**线性**（16 格内 ×1，超出按距离 ÷ 16）、跨维度 **×16**、合成 **20 FE** / 自动合成 **40 FE**、充电站改显自身缓冲并改为全局 3 设备名额、GUI 与 tooltip 修复、多人三项修复。
+
+完整记录见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 许可
 
@@ -310,6 +320,10 @@ export JAVA_HOME="/path/to/jdk-21"
 ---
 
 ## English
+
+> 🧪 **Current version 0.3.1** (2026-10-15) · **still a testing build**: the Fabric port is brand new and has not gone
+> through full in-game verification yet. Use it in a test world and **back up your saves** first; bug reports are
+> welcome in [Issues](https://github.com/KokuuWork/rswirelesscrafting/issues).
 
 An addon for **[Refined Storage 2](https://github.com/refinedmods/refinedstorage)** that adds the wireless **crafting** grid the base mod never had.
 
@@ -330,9 +344,9 @@ Vanilla Refined Storage ships only a wireless *viewing* grid — you can browse 
 | <img src="docs/images/item-range.png" width="40" alt=""> | **Range Upgrade**<br>`range_upgrade` | **Unlimited range** within the same dimension. | epic |
 | <img src="docs/images/item-interdimensional.png" width="40" alt=""> | **Interdimensional Upgrade**<br>`interdimensional_upgrade` | **Cross-dimensional** access. | epic |
 | <img src="docs/images/item-remote-energy.png" width="40" alt=""> | **Remote Energy Upgrade**<br>`remote_energy_upgrade` | Draws power **from the bound network** instead of the terminal's own battery. | epic |
-| <img src="docs/images/item-terminal-charging-station.png" width="40" alt=""> | **Terminal Charging Station**<br>`terminal_charging_station` | 3 wired fast-charge slots, plus a 5-block wireless aura (up to 3 players). | — |
+| <img src="docs/images/item-terminal-charging-station.png" width="40" alt=""> | **Terminal Charging Station**<br>`terminal_charging_station` | 3 wired fast-charge slots, plus a 5-block wireless aura (**3 device slots total**). | — |
 
-Tooltips are live: the terminal shows the **bound dimension and coordinates** and its **installed upgrades**; each card explains its effect, its prerequisite, and the values read from config in real time.
+Tooltips are live: the terminal shows the **bound dimension and coordinates**, its **installed upgrades**, and the **current distance and energy multiplier** (distance in blocks within a dimension, a separate label when cross-dimensional — always matching what the server bills); each card explains its effect, its prerequisite, and the values read from config in real time.
 
 ### The upgrade cards are pluggable
 
@@ -405,8 +419,10 @@ The base battery is only **400 FE**, while the distance multiplier can push a si
 
 ### Requirements
 
-- Minecraft **1.21.1**; **NeoForge 21.1.x** or **Fabric 0.14.6+**; Refined Storage **2.0.7+** (verified on 2.0.9). On Fabric you also need Fabric API, Cloth Config and Team Reborn Energy (normally bundled with Refined Storage).
-- Pure addon — no forking; one narrow mixin (wrapping `AbstractNetworkEnergyItem.use` so distance energy and upgrade cards also apply to RS's own wireless terminals), no permanent changes to your world (terminals keep their data components if you uninstall; they come back when you reinstall)
+- Minecraft **1.21.1**; **NeoForge 21.1.x** or **Fabric Loader 0.14.6+**; Refined Storage **2.0.7+** (verified on 2.0.9). On Fabric you also need Fabric API **≥ 0.101.0**, Cloth Config and Team Reborn Energy (normally bundled with Refined Storage).
+- Optional, for a trinket slot: Curios + RS Curios Integration (NeoForge) or Trinkets + RS Trinkets Integration (Fabric).
+- Pure addon — no forking; one narrow mixin (wrapping `AbstractNetworkEnergyItem.use` so distance energy and upgrade cards also apply to RS's own wireless terminals), no permanent changes to your world (terminals keep their data components if you uninstall; they come back when you reinstall).
+- Download from [Releases](https://github.com/KokuuWork/rswirelesscrafting/releases/latest) — pick **one** jar for your loader, never both. When upgrading, delete `config/rswirelesscrafting-common.toml` if its commented defaults no longer match the actual values.
 
 ### Trinket / Curio slots (optional)
 
