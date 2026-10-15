@@ -1,15 +1,15 @@
 <!-- 本文件是 GitHub Release 的发布说明正文（release.yml 会读取它）。
      发新版时直接改写本文件即可；没有本文件时发布会退回 GitHub 自动生成的说明。 -->
 
-> ⚠️ **测试版（Beta / Prerelease）**
-> 这是 **0.3.1 的测试版**，主要用于真机验证（尤其是首次移植的 **Fabric** 侧）。
-> 请在测试存档中使用，**务必先备份世界**；如遇到问题欢迎直接在
+> 🧪 **测试版声明 / Testing build**
+> 本版本作为 **0.3.1 正式版**发布，但**仍处于测试阶段** —— 尤其是**首次移植的 Fabric 侧**尚未完成完整真机验证。
+> 建议在测试存档中使用，**务必先备份世界**；如遇到问题欢迎直接在
 > [Issues](https://github.com/KokuuWork/rswirelesscrafting/issues) 反馈（附日志 + 复现步骤）。
 
-> ⚠️ **Beta (prerelease)**
-> This is a **beta build of 0.3.1**, mainly for real-world testing (especially the brand-new **Fabric** port).
-> Use it in a test world and **back up your saves** first. Bug reports are very welcome in
-> [Issues](https://github.com/KokuuWork/rswirelesscrafting/issues) (please include logs + repro steps).
+> 🧪 **Testing build**
+> Released as **0.3.1**, but it is still a **testing build** — the brand-new **Fabric** port has not gone through
+> full in-game verification yet. Use it in a test world and **back up your saves** first. Bug reports are very
+> welcome in [Issues](https://github.com/KokuuWork/rswirelesscrafting/issues) (please include logs + repro steps).
 
 ---
 
@@ -17,8 +17,8 @@
 
 | 加载器 Loader | 文件 File | 说明 Notes |
 | --- | --- | --- |
-| **NeoForge** | `rswirelesscrafting-neoforge-0.3.1-beta.1.jar` | Minecraft 1.21.1 |
-| **Fabric** | `rswirelesscrafting-fabric-0.3.1-beta.1.jar` | Minecraft 1.21.1，需 Fabric API |
+| **NeoForge** | `rswirelesscrafting-neoforge-0.3.1.jar` | Minecraft 1.21.1 |
+| **Fabric** | `rswirelesscrafting-fabric-0.3.1.jar` | Minecraft 1.21.1，需 Fabric API |
 
 两个 jar **二选一**，按你的加载器下载；不要同时放进 mods 目录。
 

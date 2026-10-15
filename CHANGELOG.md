@@ -2,9 +2,10 @@
 
 本项目遵循[语义化版本](https://semver.org/lang/zh-CN/)。所有显著变更都会记录在此。
 
-## [0.3.1-beta.1] - 2026-10-15
+## [0.3.1] - 2026-10-15
 
-首个**测试版（Beta）**发布：包含 Fabric 移植与饰品栏兼容，主要用于真机验证。
+**0.3.1 正式发布**（首个含 Fabric 移植与饰品栏兼容的版本）。
+⚠️ 该版本**仍处于测试阶段**：Fabric 侧为首次移植，建议在测试存档中使用并先备份世界。
 
 ### 新增
 - **Fabric 移植**：新增 `rswirelesscrafting-fabric` 模块，完整支持 **Minecraft 1.21.1 + Fabric**（官方 `quartz-arsenal` 三模块同构）。common 模块零改动，复用同一份 `Platform` 抽象。
