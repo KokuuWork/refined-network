@@ -1,15 +1,10 @@
 package com.kokuu.rswirelesscrafting.neoforge.mixin;
 
-import com.kokuu.rswirelesscrafting.common.ContentNames;
-import com.kokuu.rswirelesscrafting.common.upgrade.Upgrades;
+import com.kokuu.rswirelesscrafting.common.terminal.AbstractWirelessTerminalItem;
 import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.ExtendedWirelessNetworkItemContext;
-import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.WirelessCraftingGridItem;
-import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.WirelessCraftingGridUpgradeMenuProvider;
 
 import java.util.List;
 
-import com.refinedmods.refinedstorage.common.Platform;
-import com.refinedmods.refinedstorage.common.api.RefinedStorageApi;
 import com.refinedmods.refinedstorage.common.api.support.energy.AbstractNetworkEnergyItem;
 import com.refinedmods.refinedstorage.common.api.support.network.item.NetworkItemContext;
 import com.refinedmods.refinedstorage.common.api.support.slotreference.SlotReference;
@@ -90,11 +85,7 @@ public abstract class AbstractNetworkEnergyItemMixin {
         if (stack.isEmpty()) {
             return;
         }
-        final SlotReference slotReference = RefinedStorageApi.INSTANCE.createInventorySlotReference(player, hand);
-        Platform.INSTANCE.getMenuOpener().openMenu(
-            serverPlayer,
-            new WirelessCraftingGridUpgradeMenuProvider(slotReference)
-        );
+        AbstractWirelessTerminalItem.openUpgradePanel(serverPlayer, hand);
         cir.setReturnValue(InteractionResultHolder.consume(stack));
     }
 
@@ -112,22 +103,14 @@ public abstract class AbstractNetworkEnergyItemMixin {
                                     final List<Component> tooltip,
                                     final TooltipFlag flag,
                                     final CallbackInfo ci) {
-        if (stack.getItem() instanceof WirelessCraftingGridItem) {
+        if (stack.getItem() instanceof AbstractWirelessTerminalItem) {
             return;
         }
         tooltip.add(Component.empty());
-        tooltip.add(WirelessCraftingGridItem.createBoundLine(stack));
-        final Component distanceLine = WirelessCraftingGridItem.createDistanceLine(
+        AbstractWirelessTerminalItem.appendTerminalInfo(
             stack,
+            tooltip,
             com.kokuu.rswirelesscrafting.common.Platform.getClientPlayer()
         );
-        if (distanceLine != null) {
-            tooltip.add(distanceLine);
-        }
-        final List<ItemStack> upgrades = Upgrades.getUpgrades(stack);
-        if (!upgrades.isEmpty()) {
-            tooltip.add(WirelessCraftingGridItem.createInstalledUpgradesLine(upgrades));
-        }
-        tooltip.add(ContentNames.WIRELESS_CRAFTING_GRID_INSTALL_HINT);
     }
 }
