@@ -1,6 +1,8 @@
 package com.kokuu.rswirelesscrafting.common.patterngrid;
 
 import com.kokuu.rswirelesscrafting.common.DataComponents;
+import com.kokuu.rswirelesscrafting.common.Platform;
+import com.kokuu.rswirelesscrafting.common.virtual.VirtualTerminalSession;
 
 import javax.annotation.Nullable;
 
@@ -45,7 +47,7 @@ public class VirtualPatternGrid extends PatternGridBlockEntity {
 
     private final ItemStack stack;
     private final HolderLookup.Provider registries;
-    private final WirelessPatternGridSession session;
+    private final VirtualTerminalSession session;
     /**
      * 「空输出槽」的序列化指纹：只有与它不同，才说明这次真的产出了样板。
      */
@@ -61,7 +63,7 @@ public class VirtualPatternGrid extends PatternGridBlockEntity {
     public VirtualPatternGrid(final ItemStack stack,
                               final Level level,
                               @Nullable final Network network,
-                              final WirelessPatternGridSession session) {
+                              final VirtualTerminalSession session) {
         super(BlockPos.ZERO, Blocks.AIR.defaultBlockState());
         this.stack = stack;
         this.registries = level.registryAccess();
@@ -101,7 +103,9 @@ public class VirtualPatternGrid extends PatternGridBlockEntity {
         final String fingerprint = outputFingerprintOf(state);
         final boolean produced = !fingerprint.equals(outputFingerprint)
             && !fingerprint.equals(emptyOutputFingerprint);
-        if (produced && !session.tryChargeCreatePattern()) {
+        // 产出一张样板按「自动合成」档计价——它服务的是自动化本身。
+        final long cost = Platform.getConfig().getWirelessCraftingGrid().getAutocraftingEnergyUsage();
+        if (produced && !session.tryCharge(cost)) {
             // 电量不足：这次动作当作没发生，把上一次保存的状态恢复回去。
             restore(lastSavedState);
             return;

@@ -50,9 +50,11 @@
 | 类 | 职责 |
 |---|---|
 | `AbstractVirtualBlockEntity<T>` | AIR 状态构造（不注册幽灵节点）、`setLevel` 登记、`setChanged` 钩子、NBT ↔ 物品数据组件 |
-| `VirtualTerminalSession` | 把样板终端里的 `WirelessPatternGridSession` 泛化：距离耗电、余额检查、付费失败回滚、状态指纹 |
+| `VirtualTerminalSession` | 会话结算：距离耗电、先看余额再扣（避免双重收费）、付不起一分不扣；**所有终端共用这一份**，否则距离倍率与取电顺序一旦分叉就会出现「同类操作收费不同」 |
 | `VirtualMenuHolder`（接口）+ 两个加载器各一个 mixin | 让 RS 的**方块菜单**在「挂着我们会话」时判有效 |
-| `VirtualMenuCharger`（mixin，注入 `clicked`） | 按次计费：对「计费槽位」扣费，付不起取消本次点击 |
+| ~~`VirtualMenuCharger`~~ | **推迟到 ① 一起做**：按次计费要知道「哪些槽位算钱」，那是**菜单特有**的语义；先有真实消费者再定抽象，避免拍脑袋设计 |
+
+> **泛化原则**：这一层只收「有第二个消费者」的东西。状态快照 / 回写（`serialize` / `restore`）暂时留在各自的方块实体里——目前只有样板终端用，等第二件真正需要时再抽。
 
 **关键依据（已核实）**：RS 自己处理无线菜单就是这么干的——
 

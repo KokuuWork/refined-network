@@ -3,6 +3,7 @@ package com.kokuu.rswirelesscrafting.common.patterngrid;
 import com.kokuu.rswirelesscrafting.common.ContentNames;
 import com.kokuu.rswirelesscrafting.common.Platform;
 import com.kokuu.rswirelesscrafting.common.terminal.AbstractWirelessTerminalItem;
+import com.kokuu.rswirelesscrafting.common.virtual.VirtualTerminalSession;
 import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.ExtendedWirelessNetworkItemContext;
 
 import java.util.Optional;
@@ -89,7 +90,7 @@ public class WirelessPatternGridItem extends AbstractWirelessTerminalItem {
                 resolved.get(),
                 player.level(),
                 network.orElse(null),
-                new WirelessPatternGridSession(resolved.get(), context)
+                new VirtualTerminalSession(resolved.get(), context)
             );
             com.refinedmods.refinedstorage.common.Platform.INSTANCE.getMenuOpener().openMenu(
                 player,
