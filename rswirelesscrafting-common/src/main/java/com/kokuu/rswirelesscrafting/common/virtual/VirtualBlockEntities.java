@@ -7,7 +7,6 @@ import com.refinedmods.refinedstorage.api.network.Network;
 import com.refinedmods.refinedstorage.api.network.impl.node.AbstractNetworkNode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -18,9 +17,9 @@ import net.minecraft.world.level.block.state.BlockState;
  * 已有的样板终端就是这条路（{@code VirtualPatternGrid}），无线合成管理器继续用它。三条铁律：
  *
  * <ol>
- *   <li><b>用 {@code AIR} 的方块状态构造</b>：AIR 没有方向之类的属性，RS 的
- *       {@code setLevel → initialize} 会在第一步就提前 return，于是<b>不会</b>往世界里注册一个幽灵节点
- *       —— 这就是 {@link #createDetached} 只接受「状态 → 实例」工厂的原因。</li>
+ *   <li><b>用对应方块的<b>真实默认状态</b>构造</b>：RS 2.0.9 起会校验「BE 类型 ↔ 方块状态」，
+ *       AIR 会抛 {@code Invalid block entity}；幽灵节点改为在子类把
+ *       {@code initialize(ServerLevel, Direction)} 覆写成空来阻止。</li>
  *   <li><b>覆写 {@code setChanged()}</b>：原版实现会去 {@code level.blockEntityChanged(pos)} 加载坐标所在区块。
  *       虚拟方块实体要么覆写成空，要么（像我方样板终端那样）把「状态变了」重定向到
  *       「把状态写回物品的数据组件」。</li>
@@ -38,8 +37,11 @@ public final class VirtualBlockEntities {
      *
      * @param factory 该方块实体的构造器引用，签名形如 {@code (BlockPos, BlockState) -> T}
      */
-    public static <T extends BlockEntity> T createDetached(final BiFunction<BlockPos, BlockState, T> factory) {
-        return factory.apply(BlockPos.ZERO, Blocks.AIR.defaultBlockState());
+    public static <T extends BlockEntity> T createDetached(
+        final BlockState state,
+        final BiFunction<BlockPos, BlockState, T> factory
+    ) {
+        return factory.apply(BlockPos.ZERO, state);
     }
 
     /**
