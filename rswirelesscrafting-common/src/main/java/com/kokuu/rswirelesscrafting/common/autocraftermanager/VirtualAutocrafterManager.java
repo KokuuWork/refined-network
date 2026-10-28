@@ -5,8 +5,12 @@ import javax.annotation.Nullable;
 import com.refinedmods.refinedstorage.api.network.Network;
 import com.refinedmods.refinedstorage.common.autocrafting.autocraftermanager.AutocrafterManagerBlockEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * 「无线自动合成管理器」背后那个**不存在于世界里**的自动合成管理器。
@@ -27,9 +31,25 @@ import net.minecraft.world.level.block.Blocks;
  */
 public class VirtualAutocrafterManager extends AutocrafterManagerBlockEntity {
     public VirtualAutocrafterManager(final Level level, @Nullable final Network network) {
-        super(BlockPos.ZERO, Blocks.AIR.defaultBlockState());
+        super(BlockPos.ZERO, virtualState());
         setLevel(level);
         mainNetworkNode.setNetwork(network);
+    }
+
+    /**
+     * RS 2.0.9 起方块实体会校验「BE 类型 ↔ 方块状态」是否匹配，AIR 会抛
+     * {@code Invalid block entity ... got Block{minecraft:air}}。改用真实方块的默认状态；
+     * 幽灵节点由下面的 {@link #initialize(ServerLevel, Direction)} 空实现挡住。
+     */
+    private static BlockState virtualState() {
+        return BuiltInRegistries.BLOCK
+            .get(ResourceLocation.fromNamespaceAndPath("refinedstorage", "autocrafter_manager"))
+            .defaultBlockState();
+    }
+
+    @Override
+    protected void initialize(final ServerLevel level, final Direction direction) {
+        // 虚拟方块实体不参与世界里的网络图，不注册任何节点。
     }
 
     /**
