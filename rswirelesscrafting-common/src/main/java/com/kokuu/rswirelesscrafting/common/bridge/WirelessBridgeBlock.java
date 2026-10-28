@@ -1,10 +1,12 @@
 package com.kokuu.rswirelesscrafting.common.bridge;
 
 import com.kokuu.rswirelesscrafting.common.ContentNames;
+import com.kokuu.rswirelesscrafting.common.link.PairingClipboard;
 
 import javax.annotation.Nullable;
 
 import com.mojang.serialization.MapCodec;
+import com.refinedmods.refinedstorage.common.api.RefinedStorageApi;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.network.chat.Component;
@@ -98,11 +100,22 @@ public class WirelessBridgeBlock extends BaseEntityBlock {
     private static void crouchUse(final ServerPlayer player, final WirelessBridgeBlockEntity bridge) {
         if (bridge.isEndpoint()) {
             bridge.unbind();
-            BridgePairing.clearAnchor(player);
+            PairingClipboard.clearAnchor(player);
             player.displayClientMessage(ContentNames.BRIDGE_UNBOUND, false);
             return;
         }
-        BridgePairing.setAnchor(player, GlobalPos.of(player.level().dimension(), bridge.getBlockPos()));
+        if (PairingClipboard.getAnchor(player).isPresent()) {
+            final GlobalPos anchor = PairingClipboard.getAnchor(player).orElseThrow();
+            if (!bridge.bindTo(anchor, player)) {
+                RefinedStorageApi.INSTANCE.sendNoPermissionToOpenMessage(player, ContentNames.WIRELESS_BRIDGE);
+                PairingClipboard.clearAnchor(player);
+                return;
+            }
+            PairingClipboard.clearAnchor(player);
+            player.displayClientMessage(ContentNames.BRIDGE_BOUND, false);
+            return;
+        }
+        PairingClipboard.setAnchor(player, GlobalPos.of(player.level().dimension(), bridge.getBlockPos()));
         player.displayClientMessage(ContentNames.BRIDGE_ANCHOR_SET, false);
     }
 

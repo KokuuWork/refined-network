@@ -5,14 +5,17 @@ import com.kokuu.rswirelesscrafting.common.Config;
 import com.kokuu.rswirelesscrafting.common.Platform;
 import com.kokuu.rswirelesscrafting.common.link.BoundTargetResolver;
 import com.kokuu.rswirelesscrafting.common.link.LinkRegistry;
+import com.kokuu.rswirelesscrafting.common.link.LinkSecurity;
 import com.kokuu.rswirelesscrafting.common.link.NetworkAttachment;
 import com.kokuu.rswirelesscrafting.common.util.RateMeter;
 
+import java.util.UUID;
 import javax.annotation.Nullable;
 
 import com.refinedmods.refinedstorage.api.network.Network;
 import com.refinedmods.refinedstorage.api.network.energy.EnergyNetworkComponent;
 import com.refinedmods.refinedstorage.common.api.support.network.AbstractNetworkNodeContainerBlockEntity;
+import com.refinedmods.refinedstorage.common.security.BuiltinPermission;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.HolderLookup;
@@ -20,8 +23,8 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
@@ -46,13 +49,13 @@ import net.minecraft.world.level.block.state.BlockState;
  * <p><b>耗电</b>= 桥本身（默认 64 FE/s）+ **每保活一个区块的附加**（默认 16 FE/s，配对通常保两端 = 2 个）。
  * 保区块这件事是**明码计价**的，同时在开关上还留了配置总闸与红石挂起两条路。
  *
- * <p><b>一个已知边界</b>：据点如果**正好贴着线缆**，RS 的图会把它连到身边那张网络上，
- * 而这里又把它挂到基点的网络上，两边会轮流改写节点归属（每秒翻转一次）。实际用法里据点都在
- * 很远的地方、身边没有线缆，所以不处理；真要贴着线缆放，那就没必要用桥了。
+ * <p><b>节点归属</b>：进入远端网络前，`NetworkAttachment` 会先把节点从本地网络摘下，
+ * 避免同一个容器同时留在两张网络里被重复计费。
  */
 public class WirelessBridgeBlockEntity extends AbstractNetworkNodeContainerBlockEntity<WirelessBridgeNetworkNode> {
     private static final String TAG_TARGET_DIMENSION = "TargetDimension";
     private static final String TAG_TARGET_POS = "TargetPos";
+    private static final String TAG_OWNER = "Owner";
     /**
      * 每 20 tick（1 秒）对齐一次：RS 的图重建可能把我们的容器踢掉，定期补比事件驱动更皮实。
      */
@@ -62,6 +65,8 @@ public class WirelessBridgeBlockEntity extends AbstractNetworkNodeContainerBlock
 
     @Nullable
     private GlobalPos target;
+    @Nullable
+    private UUID owner;
     @Nullable
     private NetworkAttachment attachment;
     private int syncCountdown;
@@ -99,17 +104,48 @@ public class WirelessBridgeBlockEntity extends AbstractNetworkNodeContainerBlock
         return linked;
     }
 
-    public void bindTo(final GlobalPos anchor) {
+    public boolean bindTo(final GlobalPos anchor, final ServerPlayer player) {
+        if (!(level instanceof ServerLevel serverLevel)) {
+            return false;
+        }
+        final Network candidate = BoundTargetResolver.resolveNetwork(serverLevel, anchor).orElse(null);
+        if (candidate != null && !canUse(player, candidate)) {
+            return false;
+        }
+        owner = player.getUUID();
+        detachLink();
+        releaseTargetChunk(serverLevel);
         this.target = anchor;
         this.attachment = null;
         this.syncCountdown = 0;
+        setLinked(false);
         setChanged();
+        return true;
     }
 
     public void unbind() {
+        detachLink();
+        if (level instanceof ServerLevel serverLevel) {
+            releaseTargetChunk(serverLevel);
+        }
         this.target = null;
+        this.owner = null;
         this.attachment = null;
+        setLinked(false);
         setChanged();
+    }
+
+    private boolean canUse(final ServerPlayer player, final Network network) {
+        return LinkSecurity.isAllowed(player, BuiltinPermission.OPEN, network)
+            && LinkSecurity.isAllowed(player, BuiltinPermission.BUILD, network);
+    }
+
+    private boolean isAuthorized(final Network network) {
+        if (owner == null || !(level instanceof ServerLevel serverLevel)) {
+            return false;
+        }
+        return LinkSecurity.isAllowed(owner, BuiltinPermission.OPEN, network, serverLevel)
+            && LinkSecurity.isAllowed(owner, BuiltinPermission.BUILD, network, serverLevel);
     }
 
     public void tick() {
@@ -150,7 +186,7 @@ public class WirelessBridgeBlockEntity extends AbstractNetworkNodeContainerBlock
             return;
         }
         final Network anchorNetwork = BoundTargetResolver.resolveNetwork(serverLevel, target).orElse(null);
-        if (anchorNetwork == null) {
+        if (anchorNetwork == null || !isAuthorized(anchorNetwork)) {
             unpaid = false;
             detachLink();
             setLinked(false);
@@ -233,20 +269,27 @@ public class WirelessBridgeBlockEntity extends AbstractNetworkNodeContainerBlock
             LinkRegistry.release(serverLevel, worldPosition);
             holdingOwnChunk = false;
         }
-        if (holdingTargetChunk && target != null) {
-            final MinecraftServer server = serverLevel.getServer();
-            final ServerLevel targetLevel = server.getLevel(target.dimension());
-            if (targetLevel != null) {
-                LinkRegistry.release(targetLevel, target.pos());
-            }
-            holdingTargetChunk = false;
+        releaseTargetChunk(serverLevel);
+    }
+
+    private void releaseTargetChunk(final ServerLevel serverLevel) {
+        if (!holdingTargetChunk || target == null) {
+            return;
         }
+        final ServerLevel targetLevel = serverLevel.getServer().getLevel(target.dimension());
+        if (targetLevel != null) {
+            LinkRegistry.release(targetLevel, target.pos());
+        }
+        holdingTargetChunk = false;
     }
 
     /**
      * 常驻耗电：只按当前**真正持有**的区块计数，能扣多少扣多少，扣不出来也不撤区块。
      */
     private void consume(final Config.BridgeEntry config) {
+        if (!config.isEnabled() || !linked || suspended || unpaid) {
+            return;
+        }
         final Network network = mainNetworkNode.getNetwork();
         if (network == null) {
             return;
@@ -303,11 +346,15 @@ public class WirelessBridgeBlockEntity extends AbstractNetworkNodeContainerBlock
             tag.putString(TAG_TARGET_DIMENSION, current.dimension().location().toString());
             tag.putLong(TAG_TARGET_POS, current.pos().asLong());
         }
+        if (owner != null) {
+            tag.putUUID(TAG_OWNER, owner);
+        }
     }
 
     @Override
     public void loadAdditional(final CompoundTag tag, final HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
+        owner = tag.hasUUID(TAG_OWNER) ? tag.getUUID(TAG_OWNER) : null;
         final String dimension = tag.getString(TAG_TARGET_DIMENSION);
         if (dimension.isEmpty() || !tag.contains(TAG_TARGET_POS)) {
             target = null;

@@ -1,5 +1,6 @@
 package com.kokuu.rswirelesscrafting.common.link;
 
+import java.util.Set;
 import javax.annotation.Nullable;
 
 import com.refinedmods.refinedstorage.api.network.Network;
@@ -34,7 +35,7 @@ import net.minecraft.world.level.Level;
  */
 public final class NetworkAttachment {
     private final Level level;
-    private final NetworkNodeContainerProvider provider;
+    private final Set<InWorldNetworkNodeContainer> containers;
     private final GlobalPos target;
 
     @Nullable
@@ -43,8 +44,28 @@ public final class NetworkAttachment {
     public NetworkAttachment(final Level level,
                              final NetworkNodeContainerProvider provider,
                              final GlobalPos target) {
+        this(level, provider.getContainers(), target);
+    }
+
+    /**
+     * 用一个**自己造好的**容器挂载，而不是复用方块实体基类那一套。
+     *
+     * <p>为什么要这条路：基类会在 {@code clearRemoved()} 里把容器交给 RS 的建图器，
+     * 于是方块只要挨着线缆就会**自动加入本地网络**。对「节点会向网络提供能量 / 存储」的
+     * 方块（无线能量接收器、网络桥接器）来说，同时待在本网和远端网里意味着
+     * 能量被重复计入——那是刷电漏洞。自己造容器、只往绑定的网络里挂，就绕开了这一点。
+     */
+    public NetworkAttachment(final Level level,
+                             final InWorldNetworkNodeContainer container,
+                             final GlobalPos target) {
+        this(level, Set.of(container), target);
+    }
+
+    private NetworkAttachment(final Level level,
+                              final Set<InWorldNetworkNodeContainer> containers,
+                              final GlobalPos target) {
         this.level = level;
-        this.provider = provider;
+        this.containers = containers;
         this.target = target;
     }
 
@@ -63,13 +84,14 @@ public final class NetworkAttachment {
             detach();
             return false;
         }
+        detachFromOtherNetworks(network);
         if (network != attached) {
             detach();
             attach(network);
             return true;
         }
         // 同一个网络：RS 的图重建可能已经把容器踢出去了，这里只补那些掉队的。
-        for (final InWorldNetworkNodeContainer container : provider.getContainers()) {
+        for (final InWorldNetworkNodeContainer container : containers) {
             if (container.getNode().getNetwork() != network) {
                 container.getNode().setNetwork(network);
                 network.addContainer(container);
@@ -84,7 +106,7 @@ public final class NetworkAttachment {
         if (network == null) {
             return;
         }
-        for (final InWorldNetworkNodeContainer container : provider.getContainers()) {
+        for (final InWorldNetworkNodeContainer container : containers) {
             network.removeContainer(container);
             if (container.getNode().getNetwork() == network) {
                 container.getNode().setNetwork(null);
@@ -92,8 +114,18 @@ public final class NetworkAttachment {
         }
     }
 
+    private void detachFromOtherNetworks(final Network destination) {
+        for (final InWorldNetworkNodeContainer container : containers) {
+            final Network current = container.getNode().getNetwork();
+            if (current != null && current != destination) {
+                current.removeContainer(container);
+                container.getNode().setNetwork(null);
+            }
+        }
+    }
+
     private void attach(final Network network) {
-        for (final InWorldNetworkNodeContainer container : provider.getContainers()) {
+        for (final InWorldNetworkNodeContainer container : containers) {
             container.getNode().setNetwork(network);
             network.addContainer(container);
         }

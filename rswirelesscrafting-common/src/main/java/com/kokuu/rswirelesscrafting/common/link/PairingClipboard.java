@@ -1,4 +1,4 @@
-package com.kokuu.rswirelesscrafting.common.bridge;
+package com.kokuu.rswirelesscrafting.common.link;
 
 import java.util.Map;
 import java.util.Optional;
@@ -18,10 +18,10 @@ import net.minecraft.server.level.ServerPlayer;
  * <p>内存态、每个玩家一格、服务器重启即清空：配对一旦完成就写进据点的存档了，
  * 这份剪贴板只是配对过程中的临时东西。
  */
-public final class BridgePairing {
+public final class PairingClipboard {
     private static final Map<UUID, GlobalPos> PENDING = new ConcurrentHashMap<>();
 
-    private BridgePairing() {
+    private PairingClipboard() {
     }
 
     public static void setAnchor(final ServerPlayer player, final GlobalPos anchor) {
@@ -34,5 +34,10 @@ public final class BridgePairing {
 
     public static void clearAnchor(final ServerPlayer player) {
         PENDING.remove(player.getUUID());
+    }
+
+    /** 服务器停止/换世界时清空，避免把旧世界的坐标带进新存档。 */
+    public static void clearAll() {
+        PENDING.clear();
     }
 }

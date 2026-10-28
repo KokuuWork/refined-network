@@ -30,6 +30,7 @@ import net.minecraft.world.level.Level;
  */
 public final class LinkRegistry {
     private static final Map<ResourceKey<Level>, Map<Long, Integer>> HELD = new ConcurrentHashMap<>();
+    private static final Map<ResourceKey<Level>, ServerLevel> LEVELS = new ConcurrentHashMap<>();
 
     private LinkRegistry() {
     }
@@ -40,6 +41,7 @@ public final class LinkRegistry {
      * @return 这次调用是否**真正**触发了强加载（即从 0 变 1 的那一次）
      */
     public static boolean acquire(final ServerLevel level, final BlockPos pos) {
+        LEVELS.put(level.dimension(), level);
         final long chunkKey = ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4);
         final Map<Long, Integer> chunks = HELD.computeIfAbsent(
             level.dimension(),
@@ -72,6 +74,25 @@ public final class LinkRegistry {
         } else {
             chunks.put(chunkKey, count - 1);
         }
+    }
+
+    /**
+     * 服务器停止时释放本模组登记的强加载，并清空内存计数。
+     * 这样同一 JVM 换世界后不会继承旧计数；桥在下次 tick 会按存档重新获取。
+     */
+    public static void clearAll() {
+        for (final Map.Entry<ResourceKey<Level>, Map<Long, Integer>> entry : HELD.entrySet()) {
+            final ServerLevel level = LEVELS.get(entry.getKey());
+            if (level == null) {
+                continue;
+            }
+            for (final long chunkKey : entry.getValue().keySet()) {
+                final ChunkPos chunk = new ChunkPos(chunkKey);
+                level.setChunkForced(chunk.x, chunk.z, false);
+            }
+        }
+        HELD.clear();
+        LEVELS.clear();
     }
 
     /**
