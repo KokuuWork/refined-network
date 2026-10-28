@@ -10,14 +10,14 @@
 
 ## 当前版本
 
-- Release 页提供 **0.3.3（稳定线修复版）** 和 **0.4.1-beta.1（开发测试版）**；0.3.2 的 Release、标签和附件继续保留作为历史记录。
-- `main` 分支基于 **0.4.1-beta.1**，包含发布后的后续修复；只想使用稳定线时请下载 0.3.3。
-- **美术分界**：0.3.3 与 0.4.1-beta.1 使用重绘后的新纹理（RS2 风格灰机壳、深灰内嵌面板、青色信号色，方块为多面模型）；**0.3.2 及更早版本保持旧美术，不再回改**。两个版本线的玩法没有差别，只是外观不同。
-- 构建和纯逻辑测试已经通过，但这不等于所有内容都完成了实机验证。Fabric 和新增设备仍建议使用测试存档，并先备份。
+- Release 页现在提供 **0.4.1（正式版，Latest）**、**0.3.3（稳定线维护版，已标记为测试版）** 和 **0.3.2（历史记录）**。
+- `main` 分支就是 **0.4.1**。想要新设备（样板终端、无线桥、连接器、监控仪显示屏等）用 0.4.1；只想稳在 0.3.x 老功能上用 0.3.2。
+- **美术分界**：0.3.3 与 0.4.1 使用重绘后的新纹理（RS2 风格灰机壳、深灰内嵌面板、青色信号色，方块为多面模型）；**0.3.2 及更早版本保持旧美术，不再回改**。
+- **验证范围**：0.4.1 在 NeoForge 侧已实机验证终端绑定、无线样板终端、无线能量接收器、能量监控仪显示屏和无线连接器；其余功能与 Fabric 侧代码一致、构建与 checkstyle 通过，但**未逐项实测**，建议先在测试存档里过一遍并备份世界。
 
 ## 内容总览
 
-### 稳定线（0.3.3）
+### 0.3.x 稳定线（只有这些内容）
 
 | 图标 | 内容 | 作用 |
 |---|---|---|
@@ -32,7 +32,7 @@
 
 插件放在终端的 4 个装配槽里，可以随时取下，不用重新合成终端。它们是本模组自己的物品，**不等同于 RS 原生升级卡**，不要混用两套升级槽。
 
-### 开发测试版（0.4.1-beta.1）
+### 0.4.1 新增（正式版已包含）
 
 | 图标 | 内容 | 作用 |
 |---|---|---|
@@ -49,7 +49,7 @@
 | <img src="docs/images/item-smart-sorter.png" width="32" alt=""> | **智能分拣站** | 按物品或标签把网络物品送到面前容器。 |
 | <img src="docs/images/item-network-bridge.png" width="32" alt=""> | **网络桥接器** | 在两张独立网络之间转发物品和能量。 |
 
-这些内容已作为 **0.4.1 正式版**发布（此前带恶性 bug 的 `0.4.1-beta.1` 已撤下）。NeoForge 侧已逐项实机验证；Fabric 侧构建通过、代码一致，建议先在测试存档里过一遍。
+以上内容已随 **0.4.1 正式版**发布（此前带恶性 bug 的 `0.4.1-beta.1` 已撤下）。NeoForge 侧完成部分功能实机验证，其余与 Fabric 侧构建通过、代码一致，建议先在测试存档里过一遍。
 
 ### 配方示例
 
@@ -185,12 +185,12 @@ The idea is simple: when you are in a mine, the Nether or an outpost, you often 
 
 ### Current version
 
-- Releases provide **0.3.3** on the stable line and **0.4.1-beta.1** as a development preview. The 0.3.2 Release, tag and downloads remain available as historical records.
-- `main` is based on **0.4.1-beta.1** with post-release fixes. Use 0.3.3 if you only want the stable line.
-- **Art boundary**: 0.3.3 and 0.4.1-beta.1 ship the redrawn textures (RS2-style grey casings, dark inset panels, cyan signal colour, multi-face block models); **0.3.2 and older keep the old art and will not be retrofitted**. Gameplay is identical across the two lines, only the visuals differ.
-- Builds and unit tests pass, but that is not the same as complete in-game verification. Use a test world and make a backup first.
+- Releases now provide **0.4.1 (stable, Latest)**, **0.3.3 (stable-line maintenance, marked as a testing build)** and **0.3.2 (historical records)**.
+- `main` is **0.4.1**. Use 0.4.1 for the new devices (pattern terminal, wireless bridge, connector, monitor display); use 0.3.2 if you only want the old 0.3.x feature set.
+- **Art boundary**: 0.3.3 and 0.4.1 ship the redrawn textures (RS2-style grey casings, dark inset panels, cyan signal colour, multi-face block models); **0.3.2 and older keep the old art and will not be retrofitted**.
+- **Verification scope**: on NeoForge, terminal binding, the wireless pattern terminal, the wireless energy receiver, the energy monitor display and the wireless connector were verified in-game. The rest and the Fabric build are code-identical and compile clean, but were not individually tested — use a test world and back up your saves first.
 
-### Released features
+### 0.3.x stable line
 
 | Icon | Item | What it does |
 |---|---|---|
@@ -205,7 +205,7 @@ The idea is simple: when you are in a mine, the Nether or an outpost, you often 
 
 Upgrade cards fit in the terminal's four slots and can be removed at any time. They are not RS native upgrade cards.
 
-### Development preview
+### New in 0.4.1
 
 | Icon | Item | What it does |
 |---|---|---|
@@ -214,14 +214,15 @@ Upgrade cards fit in the terminal's four slots and can be removed at any time. T
 | <img src="docs/images/item-wireless-amplifier.png" width="32" alt=""> | **Wireless Amplifier** | Reduces the distance multiplier in its coverage area. |
 | <img src="docs/images/item-wireless-bridge.png" width="32" alt=""> | **Wireless Bridge** | Anchor/endpoint pairing with chunk keeping. |
 | <img src="docs/images/item-wireless-configuration-card.png" width="32" alt=""> | **Wireless Configuration Card** | Copy or batch-paste machine configuration. |
+| <img src="docs/images/item-wireless-connector.png" width="32" alt=""> | **Wireless Connector** | Binds receivers, monitors and both bridges to a network: right-click a network block to record an access point, then right-click the device. |
 | <img src="docs/images/item-wireless-monitor.png" width="32" alt=""> | **Wireless Monitor Terminal** | Threshold alerts, automatic restocking, and an optional held-item HUD showing energy, distance and multiplier (off by default). |
 | <img src="docs/images/item-overclock-upgrade.png" width="32" alt=""> | **Overclock Upgrade** | Halves autocrafter waiting time per card, up to four. |
-| <img src="docs/images/item-wireless-energy-receiver.png" width="32" alt=""> | **Wireless Energy Receiver** | Feeds remote FE generation into a bound network. |
-| <img src="docs/images/item-energy-monitor.png" width="32" alt=""> | **Energy Monitor** | Stored/capacity, net rate and time-to-empty. |
+| <img src="docs/images/item-wireless-energy-receiver.png" width="32" alt=""> | **Wireless Energy Receiver** | Draws power from the bound network and feeds the network it is placed against. |
+| <img src="docs/images/item-energy-monitor.png" width="32" alt=""> | **Energy Monitor** | Shows stored / net rate / time-to-empty floating above the block; right-click for chat details. |
 | <img src="docs/images/item-smart-sorter.png" width="32" alt=""> | **Smart Sorter** | Routes items or tags into the facing container. |
 | <img src="docs/images/item-network-bridge.png" width="32" alt=""> | **Network Bridge** | Transfers items and energy between two networks. |
 
-These are available in the **0.4.1-beta.1 development preview**. The newer network and sorting features still need more in-game testing, especially saved worlds, multiplayer permissions and cross-dimension use. Do not treat the preview as a stable server release.
+Everything above ships in **0.4.1 (stable)**. Part of the set was verified in-game on NeoForge; the rest and the Fabric build compile clean and are code-identical, but were not individually tested — use a test world first.
 
 ### Distance and energy
 
