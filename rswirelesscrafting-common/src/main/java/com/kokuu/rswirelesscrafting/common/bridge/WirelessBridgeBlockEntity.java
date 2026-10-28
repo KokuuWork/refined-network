@@ -2,7 +2,9 @@ package com.kokuu.rswirelesscrafting.common.bridge;
 
 import com.kokuu.rswirelesscrafting.common.BlockEntities;
 import com.kokuu.rswirelesscrafting.common.Config;
+import com.kokuu.rswirelesscrafting.common.ContentNames;
 import com.kokuu.rswirelesscrafting.common.Platform;
+import com.kokuu.rswirelesscrafting.common.connector.ConnectorTarget;
 import com.kokuu.rswirelesscrafting.common.link.BoundTargetResolver;
 import com.kokuu.rswirelesscrafting.common.link.LinkRegistry;
 import com.kokuu.rswirelesscrafting.common.link.LinkSecurity;
@@ -25,6 +27,7 @@ import net.minecraft.core.GlobalPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -57,7 +60,7 @@ import net.minecraft.world.level.block.state.BlockState;
  * 避免同一个容器同时留在两张网络里被重复计费。
  */
 public class WirelessBridgeBlockEntity extends AbstractNetworkNodeContainerBlockEntity<WirelessBridgeNetworkNode>
-    implements NetworkNodeContainerProvider, NetworkItemTargetBlockEntity {
+    implements NetworkNodeContainerProvider, NetworkItemTargetBlockEntity, ConnectorTarget {
     private static final String TAG_TARGET_DIMENSION = "TargetDimension";
     private static final String TAG_TARGET_POS = "TargetPos";
     private static final String TAG_OWNER = "Owner";
@@ -159,6 +162,21 @@ public class WirelessBridgeBlockEntity extends AbstractNetworkNodeContainerBlock
         this.attachment = null;
         setLinked(false);
         setChanged();
+    }
+
+    @Override
+    public boolean isBound() {
+        return isEndpoint();
+    }
+
+    @Override
+    public Component boundMessage() {
+        return ContentNames.BRIDGE_BOUND;
+    }
+
+    @Override
+    public Component unboundMessage() {
+        return ContentNames.BRIDGE_UNBOUND;
     }
 
     private boolean canUse(final ServerPlayer player, final Network network) {

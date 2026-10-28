@@ -4,6 +4,7 @@ import com.kokuu.rswirelesscrafting.common.BlockEntities;
 import com.kokuu.rswirelesscrafting.common.Config;
 import com.kokuu.rswirelesscrafting.common.ContentNames;
 import com.kokuu.rswirelesscrafting.common.Platform;
+import com.kokuu.rswirelesscrafting.common.connector.ConnectorTarget;
 import com.kokuu.rswirelesscrafting.common.link.BoundPosition;
 import com.kokuu.rswirelesscrafting.common.link.BoundTargetResolver;
 import com.kokuu.rswirelesscrafting.common.link.LinkDistanceEnergy;
@@ -57,7 +58,7 @@ import net.minecraft.world.level.block.state.BlockState;
  * 从**本地网络**扣：跨网搬运不是免费的，距离仍然是成本。
  */
 public class NetworkBridgeBlockEntity extends AbstractNetworkNodeContainerBlockEntity<NetworkBridgeNetworkNode>
-    implements NetworkNodeContainerProvider, NetworkItemTargetBlockEntity {
+    implements NetworkNodeContainerProvider, NetworkItemTargetBlockEntity, ConnectorTarget {
     private static final int SYNC_INTERVAL = 20;
     private static final String TAG_OWNER = "Owner";
 
@@ -199,6 +200,24 @@ public class NetworkBridgeBlockEntity extends AbstractNetworkNodeContainerBlockE
         this.remote = null;
         this.cyclic = false;
         setChanged();
+    }
+
+    @Override
+    public boolean isBound() {
+        return isEndpoint();
+    }
+
+    @Override
+    public Component boundMessage() {
+        return Component.translatable(
+            ContentNames.NETWORK_BRIDGE_BOUND_TRANSLATION_KEY,
+            target == null ? "?" : target.pos().toShortString()
+        );
+    }
+
+    @Override
+    public Component unboundMessage() {
+        return ContentNames.NETWORK_BRIDGE_UNBOUND;
     }
 
     private boolean canTransfer(final ServerPlayer player, final Network network) {
