@@ -8,7 +8,10 @@ import com.kokuu.rswirelesscrafting.common.upgrade.Upgrades;
 import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.ExtendedWirelessNetworkItemContext;
 import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.WirelessCraftingGridUpgradeMenuProvider;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import javax.annotation.Nullable;
 
 import com.refinedmods.refinedstorage.api.core.Action;
@@ -53,6 +56,12 @@ import net.minecraft.world.level.Level;
  * （{@link #getTerminalDescriptionLine}、{@link #getTerminalName}）。
  */
 public abstract class AbstractWirelessTerminalItem extends AbstractNetworkEnergyItem {
+
+    /**
+     * 同一次右键里 {@code useOn} 可能被触发不止一次（主 / 副手各算一次，或经别的模组转发），
+     * 记下「玩家 → 上次发提示的 gameTime」，同一 tick 只提示一条，避免聊天栏刷出两条一样的。
+     */
+    private static final Map<UUID, Long> LAST_BOUND_NOTICE_TICK = new HashMap<>();
 
     protected AbstractWirelessTerminalItem(final Item.Properties properties,
                                           final EnergyItemHelper energyItemHelper,
@@ -130,15 +139,23 @@ public abstract class AbstractWirelessTerminalItem extends AbstractNetworkEnergy
     @Override
     public InteractionResult useOn(final UseOnContext ctx) {
         final InteractionResult result = super.useOn(ctx);
-        if (result == InteractionResult.SUCCESS && ctx.getPlayer() instanceof ServerPlayer serverPlayer) {
-            final ItemStack stack = ctx.getItemInHand();
-            if (getBoundLocation(stack) != null) {
-                serverPlayer.displayClientMessage(
-                    createBoundLine(stack).copy().withStyle(ChatFormatting.GREEN),
-                    false
-                );
-            }
+        if (result != InteractionResult.SUCCESS || !(ctx.getPlayer() instanceof ServerPlayer serverPlayer)) {
+            return result;
         }
+        final ItemStack stack = ctx.getItemInHand();
+        if (getBoundLocation(stack) == null) {
+            return result;
+        }
+        final long tick = serverPlayer.level().getGameTime();
+        final Long previous = LAST_BOUND_NOTICE_TICK.get(serverPlayer.getUUID());
+        if (previous != null && previous == tick) {
+            return result;
+        }
+        LAST_BOUND_NOTICE_TICK.put(serverPlayer.getUUID(), tick);
+        serverPlayer.displayClientMessage(
+            createBoundLine(stack).copy().withStyle(ChatFormatting.GREEN),
+            false
+        );
         return result;
     }
 
