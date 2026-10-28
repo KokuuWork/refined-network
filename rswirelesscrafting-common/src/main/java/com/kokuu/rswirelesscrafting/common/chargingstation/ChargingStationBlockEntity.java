@@ -8,11 +8,16 @@ import com.kokuu.rswirelesscrafting.common.Platform;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 import javax.annotation.Nullable;
 
 import com.refinedmods.refinedstorage.api.network.Network;
 import com.refinedmods.refinedstorage.api.network.energy.EnergyNetworkComponent;
+import com.refinedmods.refinedstorage.api.network.security.SecurityNetworkComponent;
+import com.refinedmods.refinedstorage.common.api.security.SecurityHelper;
 import com.refinedmods.refinedstorage.common.api.support.network.AbstractNetworkNodeContainerBlockEntity;
+import com.refinedmods.refinedstorage.common.security.BuiltinPermission;
+import com.refinedmods.refinedstorage.common.security.PlayerSecurityActor;
 import com.refinedmods.refinedstorage.common.support.containermenu.ExtendedMenuProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -72,6 +77,7 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
     private static final long BUFFER_FILL_RATE_PER_SECOND = 1000;
     private static final String EXTERNAL_ENERGY_TAG = "ExternalEnergy";
     private static final String ITEMS_TAG = "Items";
+    private static final String OWNER_TAG = "Owner";
     // 无线充电每 10 tick 扫描一次（扫描一次就按 10 tick 的量充，效果与每 tick 相同、开销降 90%）。
     // 服务器上玩家多、充电站多时，每 tick 全量遍历附近玩家背包会成为热点。
     private static final int WIRELESS_SCAN_INTERVAL = 10;
@@ -92,6 +98,8 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
     private final long externalCapacity;
 
     private long externalEnergy;
+    @Nullable
+    private UUID owner;
     private long networkStored;
     private long networkCapacity;
     private int wirelessScanCountdown;
@@ -113,6 +121,37 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
         return Platform.getConfig().getChargingStation();
     }
 
+    public boolean canOpen(final ServerPlayer player) {
+        final Network network = mainNetworkNode.getNetwork();
+        return network == null || (SecurityHelper.isAllowed(player, BuiltinPermission.OPEN, network)
+            && SecurityHelper.isAllowed(player, BuiltinPermission.EXTRACT, network));
+    }
+
+    public void setOwner(final UUID playerId) {
+        if (!playerId.equals(owner)) {
+            owner = playerId;
+            setChanged();
+        }
+    }
+
+    private boolean isChargingAllowed() {
+        final Network network = mainNetworkNode.getNetwork();
+        if (network == null || owner == null) {
+            return true;
+        }
+        if (!(level instanceof ServerLevel serverLevel)) {
+            return false;
+        }
+        final ServerPlayer online = serverLevel.getServer().getPlayerList().getPlayer(owner);
+        if (online != null) {
+            return canOpen(online);
+        }
+        final SecurityNetworkComponent security = network.getComponent(SecurityNetworkComponent.class);
+        final PlayerSecurityActor actor = new PlayerSecurityActor(owner);
+        return security.isAllowed(BuiltinPermission.OPEN, actor)
+            && security.isAllowed(BuiltinPermission.EXTRACT, actor);
+    }
+
     // ---------------------------------------------------------------- tick
 
     public void tick() {
@@ -120,6 +159,13 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
             return;
         }
         final Config.ChargingStationEntry config = entry();
+        if (!isChargingAllowed()) {
+            networkStored = 0;
+            networkCapacity = 0;
+            updateBlockState(false, false);
+            clearWirelessLinks();
+            return;
+        }
         refreshNetworkEnergy();
         refillBufferFromNetwork();
         final boolean wirelessEnabled = !isRedstoneDisabling();
@@ -542,6 +588,9 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
     @Override
     protected void saveAdditional(final CompoundTag tag, final HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
+        if (owner != null) {
+            tag.putUUID(OWNER_TAG, owner);
+        }
         tag.putLong(EXTERNAL_ENERGY_TAG, externalEnergy);
         final CompoundTag itemsTag = new CompoundTag();
         for (int i = 0; i < items.size(); i++) {
@@ -555,6 +604,7 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
     @Override
     protected void loadAdditional(final CompoundTag tag, final HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
+        owner = tag.hasUUID(OWNER_TAG) ? tag.getUUID(OWNER_TAG) : null;
         // 旧存档可能在容量下调前（externalCapacity 10000→4000）存入了更大的能量值，
         // 这里必须 clamp 到当前容量，否则界面会显示「超容量」的异常电量。
         externalEnergy = Math.min(tag.getLong(EXTERNAL_ENERGY_TAG), externalCapacity);
