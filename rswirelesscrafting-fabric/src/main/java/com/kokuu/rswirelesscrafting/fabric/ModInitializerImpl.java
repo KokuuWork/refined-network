@@ -36,6 +36,7 @@ import com.kokuu.rswirelesscrafting.common.patterngrid.WirelessPatternGridItem;
 import com.kokuu.rswirelesscrafting.common.smartsorter.SmartSorterBlock;
 import com.kokuu.rswirelesscrafting.common.smartsorter.SmartSorterBlockEntity;
 import com.kokuu.rswirelesscrafting.common.smartsorter.SmartSorterBlockItem;
+import com.kokuu.rswirelesscrafting.common.terminal.AbstractWirelessTerminalItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.AdvancedEnergyUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.BatteryUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.EnergyUpgradeItem;
@@ -49,9 +50,11 @@ import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.WirelessCrafting
 import java.util.Set;
 
 import com.refinedmods.refinedstorage.common.api.RefinedStorageApi;
+import com.refinedmods.refinedstorage.common.api.support.network.AbstractNetworkNodeContainerBlockEntity;
 import com.refinedmods.refinedstorage.common.content.DirectRegistryCallback;
 import com.refinedmods.refinedstorage.common.content.ExtendedMenuTypeFactory;
 import com.refinedmods.refinedstorage.common.content.RegistryCallback;
+import com.refinedmods.refinedstorage.fabric.api.RefinedStorageFabricApi;
 import com.refinedmods.refinedstorage.fabric.api.RefinedStoragePlugin;
 import com.refinedmods.refinedstorage.fabric.support.energy.EnergyStorageAdapter;
 import me.shedaniel.autoconfig.AutoConfig;
@@ -372,12 +375,16 @@ public class ModInitializerImpl extends AbstractModInitializer implements Refine
     }
 
     private void registerCapabilities() {
+        // 四件无线终端共用同一套能量能力（容量来自 AbstractWirelessTerminalItem）。
         EnergyStorage.ITEM.registerForItems(
             (stack, context) -> new EnergyStorageAdapter(
-                Items.INSTANCE.getWirelessCraftingGrid().createEnergyStorage(stack),
+                ((AbstractWirelessTerminalItem) stack.getItem()).createEnergyStorage(stack),
                 context
             ),
-            Items.INSTANCE.getWirelessCraftingGrid()
+            Items.INSTANCE.getWirelessCraftingGrid(),
+            Items.INSTANCE.getWirelessPatternGrid(),
+            Items.INSTANCE.getWirelessAutocrafterManager(),
+            Items.INSTANCE.getWirelessMonitor()
         );
         EnergyStorage.SIDED.registerForBlockEntity(
             (blockEntity, context) -> new ChargingStationEnergyStorage(blockEntity),
@@ -386,6 +393,21 @@ public class ModInitializerImpl extends AbstractModInitializer implements Refine
         EnergyStorage.SIDED.registerForBlockEntity(
             (blockEntity, context) -> new WirelessEnergyReceiverEnergyStorage(blockEntity),
             BlockEntities.INSTANCE.getWirelessEnergyReceiver()
+        );
+        // 线缆和网络只认「方块类型上注册的容器」，只把容器塞在 BE 里是不够的。
+        registerNetworkNodeContainerProvider(BlockEntities.INSTANCE.getChargingStation());
+        registerNetworkNodeContainerProvider(BlockEntities.INSTANCE.getWirelessAmplifier());
+        registerNetworkNodeContainerProvider(BlockEntities.INSTANCE.getWirelessBridge());
+        registerNetworkNodeContainerProvider(BlockEntities.INSTANCE.getNetworkBridge());
+        registerNetworkNodeContainerProvider(BlockEntities.INSTANCE.getSmartSorter());
+    }
+
+    private void registerNetworkNodeContainerProvider(
+        final BlockEntityType<? extends AbstractNetworkNodeContainerBlockEntity<?>> type
+    ) {
+        RefinedStorageFabricApi.INSTANCE.getNetworkNodeContainerProviderLookup().registerForBlockEntity(
+            (blockEntity, direction) -> blockEntity.getContainerProvider(),
+            type
         );
     }
 
