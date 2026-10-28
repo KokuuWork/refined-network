@@ -105,6 +105,32 @@ public class VirtualPatternGrid extends PatternGridBlockEntity {
         // 虚拟方块实体不参与世界里的网络图，不注册任何节点。
     }
 
+    /**
+     * 菜单存活判定。RS 的默认实现走 {@code Container.stillValidBlockEntity}，里面有一句
+     * 「该坐标上的方块实体必须就是自己」的恒等检查——虚拟方块实体从不在世界里，必然为假，
+     * 于是界面刚打开、下一个 tick 就被服务端关掉（表现为闪一下就消失）。
+     *
+     * <p>这里照抄 RS 自家无线终端的写法（{@code WirelessGrid#canMenuStayOpen} 恒返回 {@code true}），
+     * 让界面的生死只由玩家主动关闭决定。
+     */
+    @Override
+    public boolean canMenuStayOpen(final Player who) {
+        return true;
+    }
+
+    /**
+     * 界面「已激活」判定。RS 默认读 {@code mainNetworkNode.isActive()}，而节点只有被网络
+     * **遍历到**（挂在 network 的容器列表里）才会被标成 active。虚拟网格刻意不注册容器
+     * （否则世界里会多出一个幽灵节点），于是默认实现恒为 false——客户端就把整个界面
+     * 画成未激活、资源栏全空，表现就是「打开里面没东西」。
+     *
+     * <p>这里按「网络还在」判定：只要绑定还在、网络能解析到，就当它激活。
+     */
+    @Override
+    public boolean isGridActive() {
+        return mainNetworkNode.getNetwork() != null;
+    }
+
     private void loadState() {
         final CompoundTag tag = stack.get(DataComponents.INSTANCE.getPatternGridState());
         if (tag == null) {
