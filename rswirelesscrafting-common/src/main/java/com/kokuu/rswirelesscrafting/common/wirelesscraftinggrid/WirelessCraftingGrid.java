@@ -4,6 +4,7 @@ import com.kokuu.rswirelesscrafting.common.DataComponents;
 import com.kokuu.rswirelesscrafting.common.Platform;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -62,6 +63,7 @@ class WirelessCraftingGrid implements CraftingGrid {
     private final Player gridPlayer;
     private final Level level;
     private final GridWatcherManager watchers = new GridWatcherManagerImpl();
+    private final Set<GridWatcher> registeredWatchers = new HashSet<>();
     @Nullable
     private final RecipeMatrix<CraftingRecipe, CraftingInput> craftingRecipe;
     private final SlotReference slotReference;
@@ -227,18 +229,29 @@ class WirelessCraftingGrid implements CraftingGrid {
 
     @Override
     public void addWatcher(final GridWatcher watcher, final Class<? extends Actor> actorType) {
-        if (!context.canAfford(Platform.getConfig().getWirelessCraftingGrid().getOpenEnergyUsage())) {
+        if (registeredWatchers.contains(watcher)) {
             return;
         }
-        context.drainEnergy(Platform.getConfig().getWirelessCraftingGrid().getOpenEnergyUsage());
+        // 付得起才扣开界面的钱，但无论扣没扣都必须完成注册：
+        // RS 的 GridWatcherManagerImpl 在移除未注册的 watcher 时会直接抛异常，不能留下「半开」状态。
+        final long openCost = Platform.getConfig().getWirelessCraftingGrid().getOpenEnergyUsage();
+        if (context.canAfford(openCost)) {
+            context.drainEnergy(openCost);
+        }
         final StorageNetworkComponent storage = context.resolveNetwork()
             .map(network -> network.getComponent(StorageNetworkComponent.class))
             .orElse(null);
         watchers.addWatcher(watcher, actorType, storage);
+        registeredWatchers.add(watcher);
     }
 
     @Override
     public void removeWatcher(final GridWatcher watcher) {
+        // 关界面可能被重复调用（正常关闭 + 开别的界面 + 断线各一次），RS 的 manager 不容忍重复移除。
+        // 这里以自己记录的注册表为准，没注册过或已移除过就直接忽略。
+        if (!registeredWatchers.remove(watcher)) {
+            return;
+        }
         final StorageNetworkComponent storage = context.resolveNetwork(true)
             .map(network -> network.getComponent(StorageNetworkComponent.class))
             .orElse(null);
