@@ -83,19 +83,11 @@ public final class Upgrades {
     }
 
     private static boolean hasUpgrade(final ItemStack stack, final TagKey<Item> tag) {
-        final List<ItemStack> upgrades = stack.get(DataComponents.INSTANCE.getUpgrades());
-        if (upgrades == null) {
-            return false;
-        }
-        return upgrades.stream().anyMatch(upgrade -> upgrade.is(tag));
+        return getUpgrades(stack).stream().anyMatch(upgrade -> upgrade.is(tag));
     }
 
     public static int countUpgrades(final ItemStack stack, final TagKey<Item> tag) {
-        final List<ItemStack> upgrades = stack.get(DataComponents.INSTANCE.getUpgrades());
-        if (upgrades == null) {
-            return 0;
-        }
-        return (int) upgrades.stream().filter(upgrade -> upgrade.is(tag)).count();
+        return (int) getUpgrades(stack).stream().filter(upgrade -> upgrade.is(tag)).count();
     }
 
     public static List<ItemStack> getUpgrades(final ItemStack stack) {

@@ -57,7 +57,9 @@ public class WirelessCraftingGridItem extends AbstractWirelessTerminalItem {
             RefinedStorageApi.INSTANCE.sendNoPermissionToOpenMessage(player, getTerminalName());
             return;
         }
-        final CraftingGrid craftingGrid = new WirelessCraftingGrid(player, context, slotReference);
+        final ExtendedWirelessNetworkItemContext extendedContext =
+            (ExtendedWirelessNetworkItemContext) context;
+        final CraftingGrid craftingGrid = new WirelessCraftingGrid(player, extendedContext, slotReference);
         final Component correctedName = requireNonNullElse(name, getTerminalName());
         final var provider = new WirelessCraftingGridExtendedMenuProvider(correctedName, craftingGrid, slotReference);
         com.refinedmods.refinedstorage.common.Platform.INSTANCE.getMenuOpener().openMenu(player, provider);

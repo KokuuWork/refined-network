@@ -2,7 +2,6 @@ package com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid;
 
 import com.kokuu.rswirelesscrafting.common.DataComponents;
 import com.kokuu.rswirelesscrafting.common.Platform;
-import com.kokuu.rswirelesscrafting.common.terminal.AbstractWirelessTerminalItem;
 
 import java.util.Collections;
 import java.util.List;
@@ -35,7 +34,6 @@ import com.refinedmods.refinedstorage.common.api.RefinedStorageApi;
 import com.refinedmods.refinedstorage.common.api.security.PlatformSecurityNetworkComponent;
 import com.refinedmods.refinedstorage.common.api.security.SecurityHelper;
 import com.refinedmods.refinedstorage.common.api.storage.PlayerActor;
-import com.refinedmods.refinedstorage.common.api.support.network.item.NetworkItemContext;
 import com.refinedmods.refinedstorage.common.api.support.resource.PlatformResourceKey;
 import com.refinedmods.refinedstorage.common.api.support.resource.ResourceType;
 import com.refinedmods.refinedstorage.common.api.support.slotreference.SlotReference;
@@ -60,7 +58,7 @@ import net.minecraft.world.level.Level;
 import static java.util.Objects.requireNonNull;
 
 class WirelessCraftingGrid implements CraftingGrid {
-    private final NetworkItemContext context;
+    private final ExtendedWirelessNetworkItemContext context;
     private final Player gridPlayer;
     private final Level level;
     private final GridWatcherManager watchers = new GridWatcherManagerImpl();
@@ -68,7 +66,9 @@ class WirelessCraftingGrid implements CraftingGrid {
     private final RecipeMatrix<CraftingRecipe, CraftingInput> craftingRecipe;
     private final SlotReference slotReference;
 
-    WirelessCraftingGrid(final Player player, final NetworkItemContext context, final SlotReference slotReference) {
+    WirelessCraftingGrid(final Player player,
+                         final ExtendedWirelessNetworkItemContext context,
+                         final SlotReference slotReference) {
         this.level = player.level();
         this.gridPlayer = player;
         this.context = context;
@@ -149,6 +149,9 @@ class WirelessCraftingGrid implements CraftingGrid {
 
     @Override
     public ExtractTransaction startExtractTransaction(final Player player, final boolean directCommit) {
+        if (!context.canAfford(Platform.getConfig().getWirelessCraftingGrid().getCraftingEnergyUsage())) {
+            return ExtractTransaction.NOOP;
+        }
         return getNetworkForActiveGrid()
             .map(network -> network.getComponent(StorageNetworkComponent.class))
             .map(storage -> (ExtractTransaction) new WirelessCraftingGridExtractTransaction(
@@ -168,7 +171,7 @@ class WirelessCraftingGrid implements CraftingGrid {
 
     @Override
     public boolean clearMatrix(final Player player, final boolean toPlayerInventory) {
-        if (!canAfford(Platform.getConfig().getWirelessCraftingGrid().getClearMatrixEnergyUsage())) {
+        if (!context.canAfford(Platform.getConfig().getWirelessCraftingGrid().getClearMatrixEnergyUsage())) {
             return false;
         }
         final boolean success = toPlayerInventory
@@ -189,7 +192,7 @@ class WirelessCraftingGrid implements CraftingGrid {
 
     @Override
     public void transferRecipe(final Player player, final List<List<ItemResource>> recipe) {
-        if (!canAfford(Platform.getConfig().getWirelessCraftingGrid().getRecipeTransferEnergyUsage())) {
+        if (!context.canAfford(Platform.getConfig().getWirelessCraftingGrid().getRecipeTransferEnergyUsage())) {
             return;
         }
         context.drainEnergy(Platform.getConfig().getWirelessCraftingGrid().getRecipeTransferEnergyUsage());
@@ -224,7 +227,7 @@ class WirelessCraftingGrid implements CraftingGrid {
 
     @Override
     public void addWatcher(final GridWatcher watcher, final Class<? extends Actor> actorType) {
-        if (!canAfford(Platform.getConfig().getWirelessCraftingGrid().getOpenEnergyUsage())) {
+        if (!context.canAfford(Platform.getConfig().getWirelessCraftingGrid().getOpenEnergyUsage())) {
             return;
         }
         context.drainEnergy(Platform.getConfig().getWirelessCraftingGrid().getOpenEnergyUsage());
@@ -318,12 +321,6 @@ class WirelessCraftingGrid implements CraftingGrid {
             .orElseGet(() -> CompletableFuture.completedFuture(0L));
     }
 
-    private boolean canAfford(final long baseCost) {
-        return slotReference.resolve(gridPlayer)
-            .map(stack -> AbstractWirelessTerminalItem.canAffordEnergy(stack, gridPlayer, baseCost))
-            .orElse(false);
-    }
-
     private boolean canAutocraft() {
         return context.resolveNetwork()
             .map(network -> gridPlayer instanceof ServerPlayer serverPlayer
@@ -340,7 +337,7 @@ class WirelessCraftingGrid implements CraftingGrid {
         if (!canAutocraft()) {
             return Optional.empty();
         }
-        if (!canAfford(Platform.getConfig().getWirelessCraftingGrid().getAutocraftingEnergyUsage())) {
+        if (!context.canAfford(Platform.getConfig().getWirelessCraftingGrid().getAutocraftingEnergyUsage())) {
             return Optional.empty();
         }
         return getAutocrafting()

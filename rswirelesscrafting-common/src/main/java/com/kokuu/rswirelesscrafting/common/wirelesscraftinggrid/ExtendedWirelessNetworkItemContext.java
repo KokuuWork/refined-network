@@ -3,6 +3,7 @@ package com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid;
 import com.kokuu.rswirelesscrafting.common.Config;
 import com.kokuu.rswirelesscrafting.common.Platform;
 import com.kokuu.rswirelesscrafting.common.amplifier.AmplifierRegistry;
+import com.kokuu.rswirelesscrafting.common.terminal.AbstractWirelessTerminalItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.Upgrades;
 
 import java.util.Optional;
@@ -77,9 +78,9 @@ public class ExtendedWirelessNetworkItemContext implements NetworkItemContext {
     /**
      * 统一工厂：读取物品上已装配的全部插件，构造一个距离感知 + 卡片放宽的上下文。
      */
-    public static NetworkItemContext wrap(final ItemStack stack,
-                                          final ServerPlayer player,
-                                          final SlotReference slotReference) {
+    public static ExtendedWirelessNetworkItemContext wrap(final ItemStack stack,
+                                                          final ServerPlayer player,
+                                                          final SlotReference slotReference) {
         return new ExtendedWirelessNetworkItemContext(
             stack,
             player,
@@ -140,6 +141,20 @@ public class ExtendedWirelessNetworkItemContext implements NetworkItemContext {
             .map(network -> !RefinedStorageApi.INSTANCE.isEnergyRequired()
                 || network.getComponent(EnergyNetworkComponent.class).getStored() > 0)
             .orElse(false);
+    }
+
+    /**
+     * 按实际距离倍率检查动作费用，远程输电不足时与扣费路径一样回落到终端电池。
+     */
+    public boolean canAfford(final long baseCost) {
+        if (!RefinedStorageApi.INSTANCE.isEnergyRequired()) {
+            return true;
+        }
+        final long cost = AbstractWirelessTerminalItem.actionCost(stack, player, baseCost);
+        final boolean networkCovers = remoteEnergy && resolveNetwork()
+            .map(network -> network.getComponent(EnergyNetworkComponent.class).getStored() >= cost)
+            .orElse(false);
+        return networkCovers || AbstractWirelessTerminalItem.getStoredEnergy(stack) >= cost;
     }
 
     @Override
