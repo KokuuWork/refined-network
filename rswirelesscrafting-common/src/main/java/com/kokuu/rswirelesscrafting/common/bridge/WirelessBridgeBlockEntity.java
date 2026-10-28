@@ -9,12 +9,16 @@ import com.kokuu.rswirelesscrafting.common.link.LinkSecurity;
 import com.kokuu.rswirelesscrafting.common.link.NetworkAttachment;
 import com.kokuu.rswirelesscrafting.common.util.RateMeter;
 
+import java.util.Set;
 import java.util.UUID;
 import javax.annotation.Nullable;
 
 import com.refinedmods.refinedstorage.api.network.Network;
 import com.refinedmods.refinedstorage.api.network.energy.EnergyNetworkComponent;
 import com.refinedmods.refinedstorage.common.api.support.network.AbstractNetworkNodeContainerBlockEntity;
+import com.refinedmods.refinedstorage.common.api.support.network.InWorldNetworkNodeContainer;
+import com.refinedmods.refinedstorage.common.api.support.network.NetworkNodeContainerProvider;
+import com.refinedmods.refinedstorage.common.api.support.network.item.NetworkItemTargetBlockEntity;
 import com.refinedmods.refinedstorage.common.security.BuiltinPermission;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
@@ -52,7 +56,8 @@ import net.minecraft.world.level.block.state.BlockState;
  * <p><b>节点归属</b>：进入远端网络前，`NetworkAttachment` 会先把节点从本地网络摘下，
  * 避免同一个容器同时留在两张网络里被重复计费。
  */
-public class WirelessBridgeBlockEntity extends AbstractNetworkNodeContainerBlockEntity<WirelessBridgeNetworkNode> {
+public class WirelessBridgeBlockEntity extends AbstractNetworkNodeContainerBlockEntity<WirelessBridgeNetworkNode>
+    implements NetworkNodeContainerProvider, NetworkItemTargetBlockEntity {
     private static final String TAG_TARGET_DIMENSION = "TargetDimension";
     private static final String TAG_TARGET_POS = "TargetPos";
     private static final String TAG_OWNER = "Owner";
@@ -83,6 +88,27 @@ public class WirelessBridgeBlockEntity extends AbstractNetworkNodeContainerBlock
             state,
             new WirelessBridgeNetworkNode(Platform.getConfig().getBridge().getEnergyUsage())
         );
+    }
+
+    @Override
+    public Set<InWorldNetworkNodeContainer> getContainers() {
+        return containers.getContainers();
+    }
+
+    @Override
+    public void addContainer(final InWorldNetworkNodeContainer container) {
+        containers.addContainer(container);
+    }
+
+    @Override
+    public boolean canBuild(final ServerPlayer player) {
+        return true;
+    }
+
+    @Nullable
+    @Override
+    public Network getNetworkForItem() {
+        return mainNetworkNode.getNetwork();
     }
 
     /**
