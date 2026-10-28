@@ -999,7 +999,7 @@ RS2 的便携终端（`portable_grid`）是**方块物品**（`PortableGridBlock
 - **基础待机损耗默认 128 FE/s**（原 8，用户两次嫌低）：空转约 4 分钟吃空一个基础网络，红石开关才有省电意义。配置总闸 `idleEnergyUsageEnabled`（默认 true）关掉后待机永不扣。
 - **红石信号 = 省电开关**：`level.hasNeighborSignal(pos)` 为真时关闭无线充电并停扣待机损耗（有线槽仍工作）。
 - **无线充电 45% 效率**（配置 `wirelessChargeEfficiencyPercent`，默认 45，1–100）：`deliver` 里 `cost = ceil(given * 100 / efficiency)`，消耗 100 只给设备充 45；有线恒 100% 无损耗。可用能量按 `available * efficiency / 100` 向下折算可充入量，避免低效率时超支。
-- **外形 4 形态**（两个独立亮灭，用户要求「通电/断电」与「无线开/关」分开）：方块加 `POWERED` + `WIRELESS` 两个 `BooleanProperty`，服务端在状态变化时一次性 `setBlockAndUpdate`。纹理用 `gen_textures.py` 的 `terminal_charging_station_texture(powered, wireless)` 生成 4 张——中央闪电亮青=通电、面板右上 2×2 小灯亮青绿=无线开，各自独立亮灭。
+- **外形 4 形态**（两个独立亮灭，用户要求「通电/断电」与「无线开/关」分开）：方块加 `POWERED` + `WIRELESS` 两个 `BooleanProperty`，服务端在状态变化时一次性 `setBlockAndUpdate`。纹理用 `gen_textures.py` 的 `terminal_charging_station_texture(powered, wireless)` 生成 4 张——面板中央是电池（通电时白色实心、断电时灰暗）+ 上方广播圆顶（无线开为青色、关为灰色），框线右侧另有两颗深槽指示灯重复这两个状态，各自独立亮灭；方块同时按多面模型出图（顶面充电线圈垫、侧面线缆导管、底面基板），四个状态各有独立顶/侧纹理。
 - **关键核实**：本项目充电站用的是 STABLE API 的 `AbstractNetworkNodeContainerBlockEntity`，它**不会**自动调 `node.doWork()` 去 `extract(getEnergyUsage())`（那是非 API 包 `AbstractBaseNetworkNodeContainerBlockEntity` 的 `ticker` 行为），所以待机损耗完全由方块实体手动 `consumeEnergy` 控制，红石/配置开关得以精确生效，不存在双重扣电。
 
 ---

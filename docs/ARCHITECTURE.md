@@ -236,7 +236,7 @@ RefinedStorageApi.INSTANCE.createNetworkNodeContainer(blockEntity, networkNode)
 
 ## 8. 完成状态与发版清单（2026-10-15）
 
-六件内容**全部实现完毕**，全部落在 `0.4.1-beta.1`（**未发版**）：
+六件内容**全部实现完毕**，全部落在 `0.4.1-beta.1`（**已作为开发测试版发布**）：
 
 | # | 内容 | 代码位置 | 状态 |
 |---|---|---|---|

@@ -12,6 +12,7 @@
 
 - Release 页提供 **0.3.3（稳定线修复版）** 和 **0.4.1-beta.1（开发测试版）**；0.3.2 的 Release、标签和附件继续保留作为历史记录。
 - `main` 分支基于 **0.4.1-beta.1**，包含发布后的后续修复；只想使用稳定线时请下载 0.3.3。
+- **美术分界**：0.3.3 与 0.4.1-beta.1 使用重绘后的新纹理（RS2 风格灰机壳、深灰内嵌面板、青色信号色，方块为多面模型）；**0.3.2 及更早版本保持旧美术，不再回改**。两个版本线的玩法没有差别，只是外观不同。
 - 构建和纯逻辑测试已经通过，但这不等于所有内容都完成了实机验证。Fabric 和新增设备仍建议使用测试存档，并先备份。
 
 ## 内容总览
@@ -40,13 +41,12 @@
 | <img src="docs/images/item-wireless-amplifier.png" width="32" alt=""> | **无线增幅塔** | 覆盖范围内的终端距离倍率打折。 |
 | <img src="docs/images/item-wireless-bridge.png" width="32" alt=""> | **无线桥** | 基点/据点两种身份，支持跨维度和区块保活。 |
 | <img src="docs/images/item-wireless-configuration-card.png" width="32" alt=""> | **无线配置卡** | 复制单个配置，或批量粘贴给附近同类型方块。 |
-| <img src="docs/images/item-wireless-monitor.png" width="32" alt=""> | **无线监控终端** | 阈值提醒，或低于目标时自动补货。 |
+| <img src="docs/images/item-wireless-monitor.png" width="32" alt=""> | **无线监控终端** | 阈值提醒，或低于目标时自动补货；手持终端时显示电量/距离/倍率的 HUD（默认关闭）。 |
 | <img src="docs/images/item-overclock-upgrade.png" width="32" alt=""> | **超频升级卡** | 插入 RS 自动合成仓，每张等待间隔折半，最多 4 张。 |
 | <img src="docs/images/item-wireless-energy-receiver.png" width="32" alt=""> | **无线能量接收器** | 把远处的 FE 发电接入绑定网络。 |
 | <img src="docs/images/item-energy-monitor.png" width="32" alt=""> | **能量监控仪** | 查看存量、容量、净收支和预计耗尽时间。 |
 | <img src="docs/images/item-smart-sorter.png" width="32" alt=""> | **智能分拣站** | 按物品或标签把网络物品送到面前容器。 |
 | <img src="docs/images/item-network-bridge.png" width="32" alt=""> | **网络桥接器** | 在两张独立网络之间转发物品和能量。 |
-| <img src="docs/images/item-wireless-monitor.png" width="32" alt=""> | **手持 HUD** | 显示终端电量、距离和倍率，默认关闭。 |
 
 这些内容已作为 **0.4.1-beta.1 开发测试版**发布。网络桥接器、智能分拣站、无线监控终端等新功能仍需要更多实机测试，尤其是存档重载、多人权限和跨维度场景。不要把开发版直接当成稳定服务器版本。
 
@@ -119,6 +119,18 @@
 
 这张卡通过 mixin 修改 RS 的等待间隔读取逻辑。RS 改字段或方法时，按当前设计会安静失效，不保证继续有效。
 
+## 美术与图标
+
+所有物品图标和方块纹理由 `gen_textures.py` 程序化生成（16×16，不依赖外部素材），整体向 RS2 原版靠拢，但保留本模组自己的识别色：
+
+- **机壳**：中性灰钢板 + 1px 深灰描边 + 左上斜面高光，与 RS2 的机器外壳同一配方；旧版的钢蓝配色和四角铆钉已去掉。
+- **面板**：六面统一位置的深灰内嵌面板，同一框线、同一内阴影，顶面最亮、侧面居中、底面最暗——用明度表达受光方向，而不是给每面各画一套高光。
+- **方块为多面模型**：正面是功能图形，侧面是机壳与结构侧视（桅杆、塔柱、导管与正面同一坐标，结构绕过棱边），顶面是俯视的功能件，底面是暗色基板与线缆槽。
+- **信号色**：青色只代表「无线 / 网络」，灰蓝 = 待机，红 = 低电，白 = 通电；每个状态在正面、顶面和侧面都有对应元素，任意角度都能读出来。
+- **手持终端**沿用「灰平板 + 天线 + 深色屏幕」，四台终端靠屏幕字形区分（合成矩阵 / 样板点阵 / 监控行 / 管理器阵列）。
+
+README 里的图标由 `gen_readme_images.py` 从同一套纹理生成，方块图标按游戏内的等距投影渲染，所以和物品栏里看到的一致。
+
 ## 安装
 
 需要：
@@ -170,6 +182,7 @@ The idea is simple: when you are in a mine, the Nether or an outpost, you often 
 
 - Releases provide **0.3.3** on the stable line and **0.4.1-beta.1** as a development preview. The 0.3.2 Release, tag and downloads remain available as historical records.
 - `main` is based on **0.4.1-beta.1** with post-release fixes. Use 0.3.3 if you only want the stable line.
+- **Art boundary**: 0.3.3 and 0.4.1-beta.1 ship the redrawn textures (RS2-style grey casings, dark inset panels, cyan signal colour, multi-face block models); **0.3.2 and older keep the old art and will not be retrofitted**. Gameplay is identical across the two lines, only the visuals differ.
 - Builds and unit tests pass, but that is not the same as complete in-game verification. Use a test world and make a backup first.
 
 ### Released features
@@ -196,13 +209,12 @@ Upgrade cards fit in the terminal's four slots and can be removed at any time. T
 | <img src="docs/images/item-wireless-amplifier.png" width="32" alt=""> | **Wireless Amplifier** | Reduces the distance multiplier in its coverage area. |
 | <img src="docs/images/item-wireless-bridge.png" width="32" alt=""> | **Wireless Bridge** | Anchor/endpoint pairing with chunk keeping. |
 | <img src="docs/images/item-wireless-configuration-card.png" width="32" alt=""> | **Wireless Configuration Card** | Copy or batch-paste machine configuration. |
-| <img src="docs/images/item-wireless-monitor.png" width="32" alt=""> | **Wireless Monitor Terminal** | Threshold alerts and automatic restocking. |
+| <img src="docs/images/item-wireless-monitor.png" width="32" alt=""> | **Wireless Monitor Terminal** | Threshold alerts, automatic restocking, and an optional held-item HUD showing energy, distance and multiplier (off by default). |
 | <img src="docs/images/item-overclock-upgrade.png" width="32" alt=""> | **Overclock Upgrade** | Halves autocrafter waiting time per card, up to four. |
 | <img src="docs/images/item-wireless-energy-receiver.png" width="32" alt=""> | **Wireless Energy Receiver** | Feeds remote FE generation into a bound network. |
 | <img src="docs/images/item-energy-monitor.png" width="32" alt=""> | **Energy Monitor** | Stored/capacity, net rate and time-to-empty. |
 | <img src="docs/images/item-smart-sorter.png" width="32" alt=""> | **Smart Sorter** | Routes items or tags into the facing container. |
 | <img src="docs/images/item-network-bridge.png" width="32" alt=""> | **Network Bridge** | Transfers items and energy between two networks. |
-| <img src="docs/images/item-wireless-monitor.png" width="32" alt=""> | **Held-item HUD** | Shows terminal energy, distance and multiplier; off by default. |
 
 These are available in the **0.4.1-beta.1 development preview**. The newer network and sorting features still need more in-game testing, especially saved worlds, multiplayer permissions and cross-dimension use. Do not treat the preview as a stable server release.
 
@@ -222,6 +234,18 @@ The dedicated-server config is not automatically sent to clients. Tooltips show 
 Sneak-right-click an RS network block to record an access point, then sneak-right-click the receiver, monitor or network bridge to bind it. Sneak-right-click a bound device again to unbind it.
 
 A wireless bridge or network bridge can also be an access point. An energy receiver or energy monitor is not an access point.
+
+### Art and icons
+
+Every item icon and block texture is generated by `gen_textures.py` (16×16, no external assets). The set leans on RS2's look but keeps this addon's own signal colours:
+
+- **Casing**: neutral grey plate with a 1px dark border and a lit top-left bevel, the same recipe as RS2's machine casing. The older steel-blue palette and corner rivets are gone.
+- **Panels**: one recessed dark panel at the same position on all six faces, with the same frame and inner shadow. The top face is lightest, sides sit in the middle and the bottom is darkest — light direction is carried by tone instead of a baked highlight per face.
+- **Blocks are multi-face models**: the front carries the function, the sides carry the casing and a structural side view (masts, pylons and conduits sit on the same coordinates as the front, so the machinery wraps around the edge), the top carries the top-down part and the bottom is a dark base plate with a cable channel.
+- **Signal colours**: cyan only ever means "wireless/network", grey-blue is idle, red is low power and white is powered. Each state shows up on the front, top and side, so it reads from any angle.
+- **Handheld terminals** keep the "grey tablet + antenna + dark screen" silhouette and are told apart by their screen glyph.
+
+The icons in this README are produced by `gen_readme_images.py` from the same textures, with block icons rendered in the same isometric projection the game uses, so they match the inventory.
 
 ### Building
 

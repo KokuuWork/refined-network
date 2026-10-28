@@ -26,6 +26,16 @@
 - 网络桥接器：在两张独立网络之间转发物品和能量。
 - 手持 HUD：显示终端电量、距离和倍率，默认关闭。
 
+## 美术重制
+
+物品图标与方块纹理整套重绘，风格向 RS2 原版靠拢，**资源路径与 blockstate 未改动**，旧存档、配方和模型引用都不受影响。
+
+- 机壳改为中性灰钢板 + 1px 深灰描边 + 左上斜面高光，去掉旧版的钢蓝配色与四角铆钉。
+- 六面统一深灰内嵌面板：同位置、同框线、同内阴影；顶面最亮、侧面居中、底面最暗。
+- 方块改用多面模型：正面功能图形、侧面机壳与结构侧视、顶面俯视功能件、底面暗色基板；侧面结构与正面共用 x 坐标，机器骨架绕过棱边。
+- 信号色语义不变：**青 = 无线/网络，灰蓝 = 待机，红 = 低电，白 = 通电**，每个状态在正面、顶面和侧面都有对应元素。
+- **版本分界**：0.3.3 与 0.4.1-beta.1 使用这套新美术；0.3.2 及更早版本保持旧美术，不再回改。
+
 ## 主要修复
 
 - 网络桥接器接入 RS 复合存储缓存，避免先放后绑、远端库存变化后列表为空或过期。
@@ -79,6 +89,8 @@ Both loaders build successfully, checkstyle passes and all 7 unit tests pass. Fu
 This preview adds wireless pattern editing, autocrafter management, wireless amplification, wireless bridges, configuration cards, monitoring and restocking, overclock upgrades, energy receivers, energy monitors, smart sorting and network bridges.
 
 It also fixes RS composite-storage cache synchronization, bridge pairing and lifecycle, power/permission checks, virtual terminal billing, sorter input faces, configuration reload behavior, energy overflow, client/server registries and Fabric energy transactions.
+
+Every item icon and block texture has been redrawn in an RS2-leaning style: neutral grey casings with a dark inset panel, multi-face block models (functional front, structural sides, top-down part, dark base plate) and cyan reserved for wireless/network state. Resource paths are unchanged. 0.3.3 ships the same new art; 0.3.2 and older keep the old textures.
 
 - Minecraft 1.21.1
 - Refined Storage 2.0.7 or compatible

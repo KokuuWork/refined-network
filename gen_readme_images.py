@@ -189,6 +189,57 @@ def overlay(base, layer):
     return out
 
 
+ISO_FRONT = 0.80
+ISO_SIDE = 0.60
+
+
+def iso_sprite(front, side, top, size):
+    """A cube icon in Minecraft's GUI projection: top diamond at full brightness,
+    the north face slightly lit, the east face in shadow. Sampling is done by
+    inverse affine transform, so the faces meet without seams or gaps."""
+    t = size / 32.0
+    img = canvas(size, size)
+    faces = (
+        ((16 * t, 0), (t, t / 2), (-t, t / 2), 1.0, top),
+        ((0, 8 * t), (t, t / 2), (0, t), ISO_FRONT, front),
+        ((16 * t, 16 * t), (t, -t / 2), (0, t), ISO_SIDE, side),
+    )
+    for (ox, oy), (ax, ay), (bx, by), shade, texture in faces:
+        det = ax * by - ay * bx
+        corners = [(ox, oy), (ox + 16 * ax, oy + 16 * ay),
+                   (ox + 16 * bx, oy + 16 * by),
+                   (ox + 16 * (ax + bx), oy + 16 * (ay + by))]
+        x0 = max(0, int(round(min(c[0] for c in corners))))
+        x1 = min(size - 1, int(round(max(c[0] for c in corners))))
+        y0 = max(0, int(round(min(c[1] for c in corners))))
+        y1 = min(size - 1, int(round(max(c[1] for c in corners))))
+        for yy in range(y0, y1 + 1):
+            for xx in range(x0, x1 + 1):
+                dx, dy = xx - ox, yy - oy
+                u = (dx * by - dy * bx) / det
+                v = (ax * dy - ay * dx) / det
+                if 0 <= u < 16 and 0 <= v < 16:
+                    colour = texture[int(v)][int(u)]
+                    if colour[3] == 0:
+                        continue
+                    img[yy][xx] = (int(colour[0] * shade), int(colour[1] * shade),
+                                   int(colour[2] * shade), 255)
+    return img
+
+
+def blit_fit(px, sprite, x, y, size):
+    """Draw a 16x16 (or pre-rendered) sprite into a `size` box, nearest-neighbour."""
+    n = len(sprite)
+    if n == size:
+        for sy in range(n):
+            for sx in range(n):
+                colour = sprite[sy][sx]
+                if colour[3]:
+                    px[y + sy][x + sx] = colour
+        return
+    blit(px, sprite, x, y, size // n)
+
+
 def draw_arrow(px, x, y, length, colour):
     head = 7
     shaft_end = x + length - head
@@ -308,19 +359,52 @@ def load_assets():
     }.items():
         assets[key] = read_png(os.path.join(OWN_TEXTURES, path))
 
-    assets["charging"] = read_png(
-        os.path.join(OWN_TEXTURES, "..", "block", "terminal_charging_station.png")
-    )
-    assets["amplifier"] = read_png(
-        os.path.join(OWN_TEXTURES, "..", "block", "wireless_amplifier_active.png")
-    )
-    assets["bridge_off"] = read_png(
-        os.path.join(OWN_TEXTURES, "..", "block", "wireless_bridge.png")
-    )
-    assets["bridge_on"] = read_png(
-        os.path.join(OWN_TEXTURES, "..", "block", "wireless_bridge_linked.png")
-    )
+    # Block items render as 3D icons in game, so compose them from their three
+    # distinct faces (front / side / top) instead of pasting one flat texture.
+    own_block = lambda name: read_png(os.path.join(OWN_TEXTURES, "..", "block", name + ".png"))
+
+    def cube(front, side, top):
+        return {"front": own_block(front), "side": own_block(side), "top": own_block(top)}
+
+    assets["charging"] = cube("terminal_charging_station",
+                              "terminal_charging_station_side",
+                              "terminal_charging_station_top")
+    assets["amplifier"] = cube("wireless_amplifier_active",
+                               "wireless_amplifier_active_side",
+                               "wireless_amplifier_active_top")
+    assets["bridge_off"] = cube("wireless_bridge", "wireless_bridge_side", "wireless_bridge_top")
+    assets["bridge_on"] = cube("wireless_bridge_linked", "wireless_bridge_linked_side",
+                               "wireless_bridge_linked_top")
+    assets["receiver"] = cube("wireless_energy_receiver_linked",
+                              "wireless_energy_receiver_linked_side",
+                              "wireless_energy_receiver_linked_top")
+    assets["emon"] = cube("energy_monitor_linked", "energy_monitor_linked_side",
+                          "energy_monitor_linked_top")
+    assets["netbridge"] = cube("network_bridge_linked", "network_bridge_linked_side",
+                               "network_bridge_linked_top")
+    # The sorter is orientable: its front face is the chute, the other sides are
+    # the plain casing, so the icon is composed by hand rather than by suffix.
+    assets["sorter"] = {"front": own_block("smart_sorter_front_active"),
+                        "side": own_block("smart_sorter_active"),
+                        "top": own_block("smart_sorter_active_top")}
     return assets
+
+
+SPRITE_CACHE = {}
+
+
+def sprite(assets, key, size):
+    """Resolve an asset to a pixel grid of exactly `size` x `size`."""
+    cache_key = (key, size)
+    if cache_key in SPRITE_CACHE:
+        return SPRITE_CACHE[cache_key]
+    asset = assets[key]
+    if isinstance(asset, dict):
+        grid = iso_sprite(asset["front"], asset["side"], asset["top"], size)
+    else:
+        grid = asset
+    SPRITE_CACHE[cache_key] = grid
+    return grid
 
 
 # ================================================================== figures
@@ -340,7 +424,7 @@ def items_figure(assets, path):
         x = margin + i * (cell + gap)
         y = margin
         slot(px, x, y, cell, scale)
-        blit(px, assets[key], x + 4, y + 4, scale)
+        blit_fit(px, sprite(assets, key, 16 * scale), x + 4, y + 4, 16 * scale)
     write_png(path, px)
     print("wrote", path)
 
@@ -351,7 +435,7 @@ def single_item_figure(assets, key, path):
     cell = 16 * scale + 8
     px = canvas(cell, cell)
     slot(px, 0, 0, cell, scale)
-    blit(px, assets[key], 4, 4, scale)
+    blit_fit(px, sprite(assets, key, 16 * scale), 4, 4, 16 * scale)
     write_png(path, px)
     print("wrote", path)
 
@@ -375,7 +459,7 @@ def recipe_figure(assets, path, pattern, result_key):
             slot(px, x, y, cell, scale)
             key = pattern[r][c]
             if key:
-                blit(px, assets[key], x + 4, y + 4, scale)
+                blit_fit(px, sprite(assets, key, 16 * scale), x + 4, y + 4, 16 * scale)
 
     ay = margin + grid // 2
     ax = margin + grid + 5
@@ -383,7 +467,8 @@ def recipe_figure(assets, path, pattern, result_key):
 
     rx = width - margin - cell
     slot(px, rx, margin + (grid - cell) // 2, cell, scale)
-    blit(px, assets[result_key], rx + 4, margin + (grid - cell) // 2 + 4, scale)
+    blit_fit(px, sprite(assets, result_key, 16 * scale),
+             rx + 4, margin + (grid - cell) // 2 + 4, 16 * scale)
     write_png(path, px)
     print("wrote", path)
 
@@ -439,7 +524,11 @@ def main():
                       ("range", "item-range.png"),
                       ("interdim", "item-interdimensional.png"),
                       ("remote", "item-remote-energy.png"),
-                      ("charging", "item-terminal-charging-station.png")):
+                      ("charging", "item-terminal-charging-station.png"),
+                      ("receiver", "item-wireless-energy-receiver.png"),
+                      ("emon", "item-energy-monitor.png"),
+                      ("sorter", "item-smart-sorter.png"),
+                      ("netbridge", "item-network-bridge.png")):
         single_item_figure(assets, key, os.path.join(OUT_DIR, name))
 
     recipe_figure(
