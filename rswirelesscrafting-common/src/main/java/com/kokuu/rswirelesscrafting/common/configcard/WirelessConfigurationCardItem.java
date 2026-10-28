@@ -2,11 +2,17 @@ package com.kokuu.rswirelesscrafting.common.configcard;
 
 import com.kokuu.rswirelesscrafting.common.ContentNames;
 import com.kokuu.rswirelesscrafting.common.amplifier.AmplifierRegistry;
+import com.kokuu.rswirelesscrafting.common.link.BoundTargetResolver;
 
+import com.refinedmods.refinedstorage.api.network.security.Permission;
+import com.refinedmods.refinedstorage.common.api.RefinedStorageApi;
 import com.refinedmods.refinedstorage.common.api.configurationcard.ConfigurationCardTarget;
+import com.refinedmods.refinedstorage.common.api.security.SecurityHelper;
 import com.refinedmods.refinedstorage.common.configurationcard.ConfigurationCardState;
 import com.refinedmods.refinedstorage.common.content.DataComponents;
+import com.refinedmods.refinedstorage.common.security.BuiltinPermission;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -101,6 +107,10 @@ public class WirelessConfigurationCardItem extends Item {
                              final BlockEntity blockEntity,
                              final ConfigurationCardTarget target,
                              final HolderLookup.Provider registries) {
+        if (!canAccess(player, blockEntity, BuiltinPermission.OPEN)) {
+            RefinedStorageApi.INSTANCE.sendNoPermissionMessage(player, ContentNames.WIRELESS_CONFIGURATION_CARD);
+            return;
+        }
         final CompoundTag tag = new CompoundTag();
         target.writeConfiguration(tag, registries);
         stack.set(
@@ -117,6 +127,10 @@ public class WirelessConfigurationCardItem extends Item {
                                  final HolderLookup.Provider registries) {
         if (!sameType(blockEntity, state)) {
             player.displayClientMessage(ContentNames.CONFIG_CARD_WRONG_TYPE, false);
+            return;
+        }
+        if (!canAccess(player, blockEntity, BuiltinPermission.BUILD)) {
+            RefinedStorageApi.INSTANCE.sendNoPermissionMessage(player, ContentNames.WIRELESS_CONFIGURATION_CARD);
             return;
         }
         target.readConfiguration(state.config(), registries);
@@ -137,7 +151,8 @@ public class WirelessConfigurationCardItem extends Item {
         )) {
             if (!(level.getBlockEntity(pos) instanceof ConfigurationCardTarget candidate)
                 || !(candidate instanceof BlockEntity candidateEntity)
-                || !sameType(candidateEntity, state)) {
+                || !sameType(candidateEntity, state)
+                || !canAccess(player, candidateEntity, BuiltinPermission.BUILD)) {
                 continue;
             }
             candidate.readConfiguration(state.config(), registries);
@@ -147,6 +162,15 @@ public class WirelessConfigurationCardItem extends Item {
             Component.translatable(ContentNames.CONFIG_CARD_PASTED_BATCH_TRANSLATION_KEY, count),
             false
         );
+    }
+
+    private static boolean canAccess(final ServerPlayer player,
+                                     final BlockEntity blockEntity,
+                                     final Permission permission) {
+        final GlobalPos target = GlobalPos.of(player.level().dimension(), blockEntity.getBlockPos());
+        return BoundTargetResolver.resolveNetwork(player.level(), target)
+            .map(network -> SecurityHelper.isAllowed(player, permission, network))
+            .orElse(true);
     }
 
     private static boolean sameType(final BlockEntity blockEntity, final ConfigurationCardState state) {

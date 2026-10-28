@@ -1,13 +1,18 @@
 package com.kokuu.rswirelesscrafting.common.chargingstation;
 
+import com.kokuu.rswirelesscrafting.common.ContentNames;
+
 import javax.annotation.Nullable;
 
 import com.mojang.serialization.MapCodec;
+import com.refinedmods.refinedstorage.common.api.RefinedStorageApi;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
@@ -72,6 +77,19 @@ public class ChargingStationBlock extends BaseEntityBlock {
         return new ChargingStationBlockEntity(pos, state);
     }
 
+    @Override
+    public void setPlacedBy(final Level level,
+                            final BlockPos pos,
+                            final BlockState state,
+                            @Nullable final LivingEntity placer,
+                            final ItemStack stack) {
+        super.setPlacedBy(level, pos, state, placer, stack);
+        if (placer instanceof Player player
+            && level.getBlockEntity(pos) instanceof ChargingStationBlockEntity station) {
+            station.setOwner(player.getUUID());
+        }
+    }
+
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(final Level level,
@@ -98,6 +116,14 @@ public class ChargingStationBlock extends BaseEntityBlock {
             return InteractionResult.PASS;
         }
         if (player instanceof ServerPlayer serverPlayer) {
+            if (!station.canOpen(serverPlayer)) {
+                RefinedStorageApi.INSTANCE.sendNoPermissionToOpenMessage(
+                    serverPlayer,
+                    ContentNames.TERMINAL_CHARGING_STATION
+                );
+                return InteractionResult.sidedSuccess(level.isClientSide());
+            }
+            station.setOwner(serverPlayer.getUUID());
             com.refinedmods.refinedstorage.common.Platform.INSTANCE.getMenuOpener().openMenu(
                 serverPlayer,
                 station

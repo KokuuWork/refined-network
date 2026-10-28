@@ -8,10 +8,13 @@ import com.kokuu.rswirelesscrafting.common.virtual.VirtualTerminalSession;
 import java.util.List;
 import javax.annotation.Nullable;
 
+import com.refinedmods.refinedstorage.common.api.RefinedStorageApi;
+import com.refinedmods.refinedstorage.common.api.security.SecurityHelper;
 import com.refinedmods.refinedstorage.common.api.support.energy.EnergyItemHelper;
 import com.refinedmods.refinedstorage.common.api.support.network.item.NetworkItemContext;
 import com.refinedmods.refinedstorage.common.api.support.network.item.NetworkItemHelper;
 import com.refinedmods.refinedstorage.common.api.support.slotreference.SlotReference;
+import com.refinedmods.refinedstorage.common.security.BuiltinPermission;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -62,8 +65,14 @@ public class WirelessMonitorItem extends AbstractWirelessTerminalItem {
                                 final SlotReference slotReference,
                                 final NetworkItemContext context) {
         try {
+            if (context.resolveNetwork()
+                .map(network -> !SecurityHelper.isAllowed(player, BuiltinPermission.OPEN, network))
+                .orElse(false)) {
+                RefinedStorageApi.INSTANCE.sendNoPermissionToOpenMessage(player, getTerminalName());
+                return;
+            }
             final ItemStack terminal = slotReference.resolve(player).orElse(ItemStack.EMPTY);
-            final VirtualTerminalSession session = new VirtualTerminalSession(terminal, context);
+            final VirtualTerminalSession session = new VirtualTerminalSession(terminal, player, context);
             // 开界面与其它终端同口径、按距离倍率结算；付不起一分不扣、也不开。
             if (!session.tryCharge(Platform.getConfig().getWirelessCraftingGrid().getOpenEnergyUsage())) {
                 player.displayClientMessage(ContentNames.TERMINAL_NOT_ENOUGH_ENERGY, false);

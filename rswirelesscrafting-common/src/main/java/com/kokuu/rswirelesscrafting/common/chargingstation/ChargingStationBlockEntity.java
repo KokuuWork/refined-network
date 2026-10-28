@@ -4,16 +4,20 @@ import com.kokuu.rswirelesscrafting.common.BlockEntities;
 import com.kokuu.rswirelesscrafting.common.Config;
 import com.kokuu.rswirelesscrafting.common.ContentNames;
 import com.kokuu.rswirelesscrafting.common.Platform;
+import com.kokuu.rswirelesscrafting.common.link.LinkSecurity;
 import com.kokuu.rswirelesscrafting.common.util.RateMeter;
+import com.kokuu.rswirelesscrafting.common.util.SaturatedMath;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 import javax.annotation.Nullable;
 
 import com.refinedmods.refinedstorage.api.network.Network;
 import com.refinedmods.refinedstorage.api.network.energy.EnergyNetworkComponent;
 import com.refinedmods.refinedstorage.common.api.support.network.AbstractNetworkNodeContainerBlockEntity;
+import com.refinedmods.refinedstorage.common.security.BuiltinPermission;
 import com.refinedmods.refinedstorage.common.support.containermenu.ExtendedMenuProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -73,6 +77,7 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
     private static final long BUFFER_FILL_RATE_PER_SECOND = 1000;
     private static final String EXTERNAL_ENERGY_TAG = "ExternalEnergy";
     private static final String ITEMS_TAG = "Items";
+    private static final String OWNER_TAG = "Owner";
     // 无线充电每 10 tick 扫描一次（扫描一次就按 10 tick 的量充，效果与每 tick 相同、开销降 90%）。
     // 服务器上玩家多、充电站多时，每 tick 全量遍历附近玩家背包会成为热点。
     private static final int WIRELESS_SCAN_INTERVAL = 10;
@@ -90,9 +95,10 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
         ChargeStatus.IDLE, ChargeStatus.IDLE, ChargeStatus.IDLE
     };
     private final boolean[] wirelessActive = new boolean[WIRELESS_LINK_COUNT];
-    private final long externalCapacity;
 
     private long externalEnergy;
+    @Nullable
+    private UUID owner;
     private long networkStored;
     private long networkCapacity;
     private int wirelessScanCountdown;
@@ -107,11 +113,33 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
             state,
             new ChargingStationNetworkNode(Platform.getConfig().getChargingStation().getEnergyUsage())
         );
-        this.externalCapacity = Platform.getConfig().getChargingStation().getExternalCapacity();
     }
 
     private Config.ChargingStationEntry entry() {
         return Platform.getConfig().getChargingStation();
+    }
+
+    public boolean canOpen(final ServerPlayer player) {
+        final Network network = mainNetworkNode.getNetwork();
+        return network == null || (LinkSecurity.isAllowed(player, BuiltinPermission.OPEN, network)
+            && LinkSecurity.isAllowed(player, BuiltinPermission.EXTRACT, network));
+    }
+
+    public void setOwner(final UUID playerId) {
+        if (!playerId.equals(owner)) {
+            owner = playerId;
+            setChanged();
+        }
+    }
+
+    private boolean isChargingAllowed() {
+        final Network network = mainNetworkNode.getNetwork();
+        if (network == null || owner == null) {
+            return true;
+        }
+        return level instanceof ServerLevel serverLevel
+            && LinkSecurity.isAllowed(owner, BuiltinPermission.OPEN, network, serverLevel)
+            && LinkSecurity.isAllowed(owner, BuiltinPermission.EXTRACT, network, serverLevel);
     }
 
     // ---------------------------------------------------------------- tick
@@ -121,6 +149,13 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
             return;
         }
         final Config.ChargingStationEntry config = entry();
+        if (!isChargingAllowed()) {
+            networkStored = 0;
+            networkCapacity = 0;
+            updateBlockState(false, false);
+            clearWirelessLinks();
+            return;
+        }
         refreshNetworkEnergy();
         refillBufferFromNetwork();
         final boolean wirelessEnabled = !isRedstoneDisabling();
@@ -197,7 +232,7 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
      * 充电站的能量来源是「网络 → 内部缓冲 → 充电动作」，缓冲是界面展示的唯一电量池。
      */
     private void refillBufferFromNetwork() {
-        final long missing = externalCapacity - externalEnergy;
+        final long missing = getExternalCapacity() - externalEnergy;
         if (missing <= 0) {
             return;
         }
@@ -253,7 +288,7 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
                                 final int intervalTicks) {
         final int radius = config.getWirelessRadius();
         final long perDeviceBudget = wirelessMeter.next(
-            config.getWirelessChargeRate() * intervalTicks
+            SaturatedMath.multiply(config.getWirelessChargeRate(), intervalTicks)
         );
         clearWirelessLinks();
         if (radius <= 0 || perDeviceBudget <= 0) {
@@ -391,7 +426,7 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
         if (available <= 0) {
             return 0;
         }
-        final long payable = Math.min(accepted, available * efficiencyPercent / 100);
+        final long payable = Math.min(accepted, SaturatedMath.multiply(available, efficiencyPercent) / 100);
         if (payable <= 0) {
             return 0;
         }
@@ -409,7 +444,7 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
         if (efficiencyPercent >= 100) {
             return given;
         }
-        return (given * 100 + efficiencyPercent - 1) / efficiencyPercent;
+        return SaturatedMath.add(SaturatedMath.multiply(given, 100), efficiencyPercent - 1) / efficiencyPercent;
     }
 
     // ------------------------------------------------------------ 能量账本
@@ -440,7 +475,7 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
         if (amount <= 0) {
             return 0;
         }
-        final long accepted = Math.min(amount, Math.max(0, externalCapacity - externalEnergy));
+        final long accepted = Math.min(amount, Math.max(0, getExternalCapacity() - externalEnergy));
         if (!simulate && accepted > 0) {
             externalEnergy += accepted;
             setChanged();
@@ -456,8 +491,14 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
         return externalEnergy;
     }
 
+    /** Fabric 能量事务回滚时恢复外部缓冲。 */
+    public void restoreExternalEnergy(final long value) {
+        externalEnergy = Math.max(0L, Math.min(value, getExternalCapacity()));
+        setChanged();
+    }
+
     public long getExternalCapacity() {
-        return externalCapacity;
+        return Platform.getConfig().getChargingStation().getExternalCapacity();
     }
 
     // ---------------------------------------------------------------- 菜单
@@ -543,6 +584,9 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
     @Override
     protected void saveAdditional(final CompoundTag tag, final HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
+        if (owner != null) {
+            tag.putUUID(OWNER_TAG, owner);
+        }
         tag.putLong(EXTERNAL_ENERGY_TAG, externalEnergy);
         final CompoundTag itemsTag = new CompoundTag();
         for (int i = 0; i < items.size(); i++) {
@@ -556,9 +600,10 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
     @Override
     protected void loadAdditional(final CompoundTag tag, final HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
+        owner = tag.hasUUID(OWNER_TAG) ? tag.getUUID(OWNER_TAG) : null;
         // 旧存档可能在容量下调前（externalCapacity 10000→4000）存入了更大的能量值，
         // 这里必须 clamp 到当前容量，否则界面会显示「超容量」的异常电量。
-        externalEnergy = Math.min(tag.getLong(EXTERNAL_ENERGY_TAG), externalCapacity);
+        externalEnergy = Math.min(tag.getLong(EXTERNAL_ENERGY_TAG), getExternalCapacity());
         final CompoundTag itemsTag = tag.getCompound(ITEMS_TAG);
         for (int i = 0; i < items.size(); i++) {
             final int slot = i;
@@ -580,7 +625,7 @@ public class ChargingStationBlockEntity extends AbstractNetworkNodeContainerBloc
         public int get(final int index) {
             return switch (index) {
                 case 0 -> (int) Math.min(externalEnergy, Integer.MAX_VALUE);
-                case 1 -> (int) Math.min(externalCapacity, Integer.MAX_VALUE);
+                case 1 -> (int) Math.min(getExternalCapacity(), Integer.MAX_VALUE);
                 case 2 -> (int) Math.min(networkStored, Integer.MAX_VALUE);
                 case 3 -> (int) Math.min(networkCapacity, Integer.MAX_VALUE);
                 case 4, 5, 6 -> wiredStatus[index - 4].ordinal();

@@ -9,9 +9,12 @@ import javax.annotation.Nullable;
 
 import com.refinedmods.refinedstorage.api.network.Network;
 import com.refinedmods.refinedstorage.api.network.storage.StorageNetworkComponent;
+import com.refinedmods.refinedstorage.common.api.security.SecurityHelper;
 import com.refinedmods.refinedstorage.common.api.support.slotreference.SlotReference;
+import com.refinedmods.refinedstorage.common.security.BuiltinPermission;
 import com.refinedmods.refinedstorage.common.support.resource.ItemResource;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -183,7 +186,7 @@ public class WirelessMonitorContainerMenu extends AbstractContainerMenu {
 
     private void refreshData() {
         final Network network = resolveNetwork();
-        final var storages = network == null
+        final var storages = network == null || !canRead(network)
             ? null
             : network.getComponent(StorageNetworkComponent.class);
         final var current = rules.rules();
@@ -210,6 +213,11 @@ public class WirelessMonitorContainerMenu extends AbstractContainerMenu {
         }
     }
 
+    private boolean canRead(@Nullable final Network network) {
+        return network == null || !(playerInventory.player instanceof ServerPlayer serverPlayer)
+            || SecurityHelper.isAllowed(serverPlayer, BuiltinPermission.OPEN, network);
+    }
+
     @Nullable
     private Network resolveNetwork() {
         final Level level = playerInventory.player.level();
@@ -226,6 +234,11 @@ public class WirelessMonitorContainerMenu extends AbstractContainerMenu {
             return false;
         }
         final int slot = id / ACTION_COUNT;
+        final Network network = resolveNetwork();
+        if (network != null && player instanceof ServerPlayer serverPlayer
+            && !SecurityHelper.isAllowed(serverPlayer, BuiltinPermission.OPEN, network)) {
+            return false;
+        }
         switch (id % ACTION_COUNT) {
             case ACTION_THRESHOLD_UP -> rules.cycleThreshold(slot, true);
             case ACTION_THRESHOLD_DOWN -> rules.cycleThreshold(slot, false);

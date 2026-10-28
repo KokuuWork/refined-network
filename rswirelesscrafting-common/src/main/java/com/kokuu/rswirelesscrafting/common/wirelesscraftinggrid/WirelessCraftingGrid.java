@@ -2,6 +2,7 @@ package com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid;
 
 import com.kokuu.rswirelesscrafting.common.DataComponents;
 import com.kokuu.rswirelesscrafting.common.Platform;
+import com.kokuu.rswirelesscrafting.common.terminal.AbstractWirelessTerminalItem;
 
 import java.util.Collections;
 import java.util.List;
@@ -32,6 +33,7 @@ import com.refinedmods.refinedstorage.api.storage.Storage;
 import com.refinedmods.refinedstorage.api.storage.TrackedResourceAmount;
 import com.refinedmods.refinedstorage.common.api.RefinedStorageApi;
 import com.refinedmods.refinedstorage.common.api.security.PlatformSecurityNetworkComponent;
+import com.refinedmods.refinedstorage.common.api.security.SecurityHelper;
 import com.refinedmods.refinedstorage.common.api.storage.PlayerActor;
 import com.refinedmods.refinedstorage.common.api.support.network.item.NetworkItemContext;
 import com.refinedmods.refinedstorage.common.api.support.resource.PlatformResourceKey;
@@ -42,6 +44,7 @@ import com.refinedmods.refinedstorage.common.grid.DirectCommitExtractTransaction
 import com.refinedmods.refinedstorage.common.grid.ExtractTransaction;
 import com.refinedmods.refinedstorage.common.grid.SecuredGridOperations;
 import com.refinedmods.refinedstorage.common.grid.SnapshotExtractTransaction;
+import com.refinedmods.refinedstorage.common.security.BuiltinPermission;
 import com.refinedmods.refinedstorage.common.support.RecipeMatrix;
 import com.refinedmods.refinedstorage.common.support.RecipeMatrixContainer;
 import com.refinedmods.refinedstorage.common.support.resource.ItemResource;
@@ -58,6 +61,7 @@ import static java.util.Objects.requireNonNull;
 
 class WirelessCraftingGrid implements CraftingGrid {
     private final NetworkItemContext context;
+    private final Player gridPlayer;
     private final Level level;
     private final GridWatcherManager watchers = new GridWatcherManagerImpl();
     @Nullable
@@ -66,6 +70,7 @@ class WirelessCraftingGrid implements CraftingGrid {
 
     WirelessCraftingGrid(final Player player, final NetworkItemContext context, final SlotReference slotReference) {
         this.level = player.level();
+        this.gridPlayer = player;
         this.context = context;
         this.slotReference = slotReference;
         this.craftingRecipe = createMatrix(player, () -> updateCraftingRecipe(player), slotReference);
@@ -163,6 +168,9 @@ class WirelessCraftingGrid implements CraftingGrid {
 
     @Override
     public boolean clearMatrix(final Player player, final boolean toPlayerInventory) {
+        if (!canAfford(Platform.getConfig().getWirelessCraftingGrid().getClearMatrixEnergyUsage())) {
+            return false;
+        }
         final boolean success = toPlayerInventory
             ? getCraftingMatrix().clearToPlayerInventory(player)
             : clearMatrixIntoStorage(player);
@@ -181,6 +189,9 @@ class WirelessCraftingGrid implements CraftingGrid {
 
     @Override
     public void transferRecipe(final Player player, final List<List<ItemResource>> recipe) {
+        if (!canAfford(Platform.getConfig().getWirelessCraftingGrid().getRecipeTransferEnergyUsage())) {
+            return;
+        }
         context.drainEnergy(Platform.getConfig().getWirelessCraftingGrid().getRecipeTransferEnergyUsage());
         getCraftingMatrix().transferRecipe(
             player,
@@ -213,6 +224,9 @@ class WirelessCraftingGrid implements CraftingGrid {
 
     @Override
     public void addWatcher(final GridWatcher watcher, final Class<? extends Actor> actorType) {
+        if (!canAfford(Platform.getConfig().getWirelessCraftingGrid().getOpenEnergyUsage())) {
+            return;
+        }
         context.drainEnergy(Platform.getConfig().getWirelessCraftingGrid().getOpenEnergyUsage());
         final StorageNetworkComponent storage = context.resolveNetwork()
             .map(network -> network.getComponent(StorageNetworkComponent.class))
@@ -304,12 +318,31 @@ class WirelessCraftingGrid implements CraftingGrid {
             .orElseGet(() -> CompletableFuture.completedFuture(0L));
     }
 
+    private boolean canAfford(final long baseCost) {
+        return slotReference.resolve(gridPlayer)
+            .map(stack -> AbstractWirelessTerminalItem.canAffordEnergy(stack, gridPlayer, baseCost))
+            .orElse(false);
+    }
+
+    private boolean canAutocraft() {
+        return context.resolveNetwork()
+            .map(network -> gridPlayer instanceof ServerPlayer serverPlayer
+                && SecurityHelper.isAllowed(serverPlayer, BuiltinPermission.AUTOCRAFTING, network))
+            .orElse(false);
+    }
+
     @Override
     public Optional<TaskId> startTask(final ResourceKey resourceKey,
                                       final long amount,
                                       final Actor actor,
                                       final boolean notify,
                                       final CancellationToken cancellationToken) {
+        if (!canAutocraft()) {
+            return Optional.empty();
+        }
+        if (!canAfford(Platform.getConfig().getWirelessCraftingGrid().getAutocraftingEnergyUsage())) {
+            return Optional.empty();
+        }
         return getAutocrafting()
             .map(autocrafting -> autocrafting.startTask(resourceKey, amount, actor, notify,
                 cancellationToken))

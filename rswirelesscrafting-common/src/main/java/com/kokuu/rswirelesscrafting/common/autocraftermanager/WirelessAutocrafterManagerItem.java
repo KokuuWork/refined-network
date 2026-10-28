@@ -78,14 +78,15 @@ public class WirelessAutocrafterManagerItem extends AbstractWirelessTerminalItem
         }
         final Optional<Network> network = context.resolveNetwork();
         final boolean isAllowed = network
-            .map(found -> SecurityHelper.isAllowed(player, BuiltinPermission.OPEN, found))
+            .map(found -> SecurityHelper.isAllowed(player, BuiltinPermission.OPEN, found)
+                && SecurityHelper.isAllowed(player, BuiltinPermission.AUTOCRAFTING, found))
             .orElse(true);
         if (!isAllowed) {
             RefinedStorageApi.INSTANCE.sendNoPermissionToOpenMessage(player, getTerminalName());
             return;
         }
         // 开界面本身就要钱：走公共会话结算（同样吃距离倍率），付不起一分不扣、并明确告诉玩家。
-        final VirtualTerminalSession session = new VirtualTerminalSession(resolved.get(), context);
+        final VirtualTerminalSession session = new VirtualTerminalSession(resolved.get(), player, context);
         if (!session.tryCharge(Platform.getConfig().getWirelessCraftingGrid().getOpenEnergyUsage())) {
             player.displayClientMessage(ContentNames.TERMINAL_NOT_ENOUGH_ENERGY, false);
             return;

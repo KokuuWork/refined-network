@@ -71,7 +71,8 @@ public class WirelessPatternGridItem extends AbstractWirelessTerminalItem {
         }
         final Optional<Network> network = context.resolveNetwork();
         final boolean isAllowed = network
-            .map(found -> SecurityHelper.isAllowed(player, BuiltinPermission.OPEN, found))
+            .map(found -> SecurityHelper.isAllowed(player, BuiltinPermission.OPEN, found)
+                && SecurityHelper.isAllowed(player, BuiltinPermission.AUTOCRAFTING, found))
             .orElse(true);
         if (!isAllowed) {
             RefinedStorageApi.INSTANCE.sendNoPermissionToOpenMessage(player, getTerminalName());
@@ -85,13 +86,15 @@ public class WirelessPatternGridItem extends AbstractWirelessTerminalItem {
                 return;
             }
             // 开界面本身就要钱：与无线合成终端同口径、按距离倍率结算；付不起一分不扣。
-            final VirtualTerminalSession session = new VirtualTerminalSession(resolved.get(), context);
+            final VirtualTerminalSession session = new VirtualTerminalSession(resolved.get(), player, context);
             if (!session.tryCharge(Platform.getConfig().getWirelessCraftingGrid().getOpenEnergyUsage())) {
                 player.displayClientMessage(ContentNames.TERMINAL_NOT_ENOUGH_ENERGY, false);
                 return;
             }
             final VirtualPatternGrid grid = new VirtualPatternGrid(
                 resolved.get(),
+                player,
+                slotReference,
                 player.level(),
                 network.orElse(null),
                 session

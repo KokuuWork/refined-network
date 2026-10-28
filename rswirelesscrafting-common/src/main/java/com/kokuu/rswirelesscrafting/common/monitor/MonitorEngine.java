@@ -15,6 +15,8 @@ import com.refinedmods.refinedstorage.api.network.Network;
 import com.refinedmods.refinedstorage.api.network.autocrafting.AutocraftingNetworkComponent;
 import com.refinedmods.refinedstorage.api.network.storage.StorageNetworkComponent;
 import com.refinedmods.refinedstorage.api.resource.ResourceKey;
+import com.refinedmods.refinedstorage.common.api.security.SecurityHelper;
+import com.refinedmods.refinedstorage.common.security.BuiltinPermission;
 import com.refinedmods.refinedstorage.common.support.resource.ItemResource;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerPlayer;
@@ -73,7 +75,7 @@ public final class MonitorEngine {
             return;
         }
         final Network network = BoundTargetResolver.resolveNetwork(player.level(), bound).orElse(null);
-        if (network == null) {
+        if (network == null || !SecurityHelper.isAllowed(player, BuiltinPermission.OPEN, network)) {
             return;
         }
         final StorageNetworkComponent storages = network.getComponent(StorageNetworkComponent.class);
@@ -120,6 +122,9 @@ public final class MonitorEngine {
         if (autocrafting.getPatternsByOutput(resource).isEmpty()) {
             // 网络里根本没有能产出它的样板——说一次，别让玩家以为补货坏了。
             blocked(player, rule, true, now);
+            return;
+        }
+        if (!SecurityHelper.isAllowed(player, BuiltinPermission.AUTOCRAFTING, network)) {
             return;
         }
         final long baseCost = Platform.getConfig().getWirelessCraftingGrid().getAutocraftingEnergyUsage();

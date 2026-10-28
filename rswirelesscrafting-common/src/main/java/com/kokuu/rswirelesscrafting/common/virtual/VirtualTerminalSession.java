@@ -5,6 +5,7 @@ import com.kokuu.rswirelesscrafting.common.upgrade.Upgrades;
 
 import com.refinedmods.refinedstorage.api.network.energy.EnergyNetworkComponent;
 import com.refinedmods.refinedstorage.common.api.support.network.item.NetworkItemContext;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -23,10 +24,12 @@ import net.minecraft.world.item.ItemStack;
  */
 public class VirtualTerminalSession {
     private final ItemStack stack;
+    private final Player player;
     private final NetworkItemContext context;
 
-    public VirtualTerminalSession(final ItemStack stack, final NetworkItemContext context) {
+    public VirtualTerminalSession(final ItemStack stack, final Player player, final NetworkItemContext context) {
         this.stack = stack;
+        this.player = player;
         this.context = context;
     }
 
@@ -57,11 +60,12 @@ public class VirtualTerminalSession {
      * 「扣回来的够不够」会让网络白扣一份、余额再从电池补一次（双重收费）。
      */
     public boolean canAfford(final long baseCost) {
+        final long actualCost = AbstractWirelessTerminalItem.actionCost(stack, player, baseCost);
         if (Upgrades.hasRemoteEnergyUpgrade(stack)) {
             return context.resolveNetwork()
-                .map(network -> network.getComponent(EnergyNetworkComponent.class).getStored() >= baseCost)
+                .map(network -> network.getComponent(EnergyNetworkComponent.class).getStored() >= actualCost)
                 .orElse(false);
         }
-        return AbstractWirelessTerminalItem.getStoredEnergy(stack) >= baseCost;
+        return AbstractWirelessTerminalItem.getStoredEnergy(stack) >= actualCost;
     }
 }

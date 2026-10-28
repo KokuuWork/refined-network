@@ -7,10 +7,12 @@ import com.kokuu.rswirelesscrafting.common.virtual.VirtualTerminalSession;
 import javax.annotation.Nullable;
 
 import com.refinedmods.refinedstorage.api.network.Network;
+import com.refinedmods.refinedstorage.common.api.support.slotreference.SlotReference;
 import com.refinedmods.refinedstorage.common.autocrafting.patterngrid.PatternGridBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -46,6 +48,8 @@ public class VirtualPatternGrid extends PatternGridBlockEntity {
     private static final String TAG_PATTERN_OUTPUT = "pattern_output";
 
     private final ItemStack stack;
+    private final Player player;
+    private final SlotReference slotReference;
     private final HolderLookup.Provider registries;
     private final VirtualTerminalSession session;
     /**
@@ -61,11 +65,15 @@ public class VirtualPatternGrid extends PatternGridBlockEntity {
     private boolean loading;
 
     public VirtualPatternGrid(final ItemStack stack,
+                              final Player player,
+                              final SlotReference slotReference,
                               final Level level,
                               @Nullable final Network network,
                               final VirtualTerminalSession session) {
         super(BlockPos.ZERO, Blocks.AIR.defaultBlockState());
         this.stack = stack;
+        this.player = player;
+        this.slotReference = slotReference;
         this.registries = level.registryAccess();
         this.session = session;
         this.emptyOutputFingerprint = outputFingerprintOf(serialize());
@@ -99,6 +107,11 @@ public class VirtualPatternGrid extends PatternGridBlockEntity {
         if (loading) {
             return;
         }
+        if (!isTerminalValid()) {
+            player.containerMenu.removed(player);
+            player.containerMenu = player.inventoryMenu;
+            return;
+        }
         final CompoundTag state = serialize();
         final String fingerprint = outputFingerprintOf(state);
         final boolean produced = !fingerprint.equals(outputFingerprint)
@@ -113,6 +126,10 @@ public class VirtualPatternGrid extends PatternGridBlockEntity {
         outputFingerprint = fingerprint;
         lastSavedState = state;
         stack.set(DataComponents.INSTANCE.getPatternGridState(), state);
+    }
+
+    private boolean isTerminalValid() {
+        return slotReference.resolve(player).map(current -> current == stack).orElse(false);
     }
 
     private CompoundTag serialize() {
