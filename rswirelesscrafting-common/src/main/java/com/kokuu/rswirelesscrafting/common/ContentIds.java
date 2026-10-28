@@ -13,6 +13,7 @@ public final class ContentIds {
     public static final ResourceLocation WIRELESS_CONFIGURATION_CARD =
         createIdentifier("wireless_configuration_card");
     public static final ResourceLocation WIRELESS_MONITOR = createIdentifier("wireless_monitor");
+    public static final ResourceLocation WIRELESS_CONNECTOR = createIdentifier("wireless_connector");
     public static final ResourceLocation OVERCLOCK_UPGRADE = createIdentifier("overclock_upgrade");
     public static final ResourceLocation WIRELESS_ENERGY_RECEIVER =
         createIdentifier("wireless_energy_receiver");

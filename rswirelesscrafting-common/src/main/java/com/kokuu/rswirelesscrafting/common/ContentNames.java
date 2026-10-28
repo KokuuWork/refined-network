@@ -411,6 +411,10 @@ public final class ContentNames {
         "msg",
         "energy_monitor.unlinked"
     ).withStyle(ChatFormatting.YELLOW);
+    public static final MutableComponent ENERGY_MONITOR_LOCAL_NETWORK = createTranslation(
+        "msg",
+        "energy_monitor.local_network"
+    ).withStyle(ChatFormatting.GRAY);
     public static final MutableComponent ENERGY_MONITOR_NOT_DRAINING = createTranslation(
         "msg",
         "energy_monitor.not_draining"
@@ -675,6 +679,20 @@ public final class ContentNames {
         "item",
         "dimension.end"
     );
+
+    public static final MutableComponent CONNECTOR_DESC =
+        createTranslation("item", "wireless_connector.desc").withStyle(ChatFormatting.GRAY);
+    public static final MutableComponent CONNECTOR_USAGE =
+        createTranslation("item", "wireless_connector.hint").withStyle(ChatFormatting.DARK_GRAY);
+    public static final String CONNECTOR_ANCHOR_SET_KEY = createTranslationKey("msg", "connector.anchor_set");
+    public static final MutableComponent CONNECTOR_CLEARED =
+        createTranslation("msg", "connector.cleared").withStyle(ChatFormatting.YELLOW);
+    public static final MutableComponent CONNECTOR_NEED_ANCHOR =
+        createTranslation("msg", "connector.need_anchor").withStyle(ChatFormatting.YELLOW);
+    public static final MutableComponent CONNECTOR_NOT_NETWORK =
+        createTranslation("msg", "connector.not_network").withStyle(ChatFormatting.RED);
+    public static final MutableComponent CONNECTOR_NO_PERMISSION =
+        createTranslation("msg", "connector.no_permission").withStyle(ChatFormatting.RED);
 
     private ContentNames() {
     }
