@@ -1,8 +1,10 @@
 {
-  "parent": "block/orientable",
+  "parent": "rswirelesscrafting:block/cube_front",
   "textures": {
-    "top": "rswirelesscrafting:block/smart_sorter",
+    "particle": "rswirelesscrafting:block/smart_sorter",
     "front": "rswirelesscrafting:block/smart_sorter_front",
-    "side": "rswirelesscrafting:block/smart_sorter"
+    "side": "rswirelesscrafting:block/smart_sorter",
+    "top": "rswirelesscrafting:block/smart_sorter_top",
+    "bottom": "rswirelesscrafting:block/smart_sorter_bottom"
   }
 }

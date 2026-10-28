@@ -1,6 +1,10 @@
 {
-  "parent": "block/cube_all",
+  "parent": "rswirelesscrafting:block/cube_front",
   "textures": {
-    "all": "rswirelesscrafting:block/energy_monitor_low"
+    "particle": "rswirelesscrafting:block/energy_monitor_low_side",
+    "front": "rswirelesscrafting:block/energy_monitor_low",
+    "side": "rswirelesscrafting:block/energy_monitor_low_side",
+    "top": "rswirelesscrafting:block/energy_monitor_low_top",
+    "bottom": "rswirelesscrafting:block/energy_monitor_bottom"
   }
 }

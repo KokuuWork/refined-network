@@ -1,6 +1,10 @@
 {
-  "parent": "block/cube_all",
+  "parent": "rswirelesscrafting:block/cube_front",
   "textures": {
-    "all": "rswirelesscrafting:block/wireless_amplifier_active"
+    "particle": "rswirelesscrafting:block/wireless_amplifier_active_side",
+    "front": "rswirelesscrafting:block/wireless_amplifier_active",
+    "side": "rswirelesscrafting:block/wireless_amplifier_active_side",
+    "top": "rswirelesscrafting:block/wireless_amplifier_active_top",
+    "bottom": "rswirelesscrafting:block/wireless_amplifier_bottom"
   }
 }

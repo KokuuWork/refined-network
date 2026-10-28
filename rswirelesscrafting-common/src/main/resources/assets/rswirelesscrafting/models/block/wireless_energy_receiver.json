@@ -1,6 +1,10 @@
 {
-  "parent": "block/cube_all",
+  "parent": "rswirelesscrafting:block/cube_front",
   "textures": {
-    "all": "rswirelesscrafting:block/wireless_energy_receiver"
+    "particle": "rswirelesscrafting:block/wireless_energy_receiver_side",
+    "front": "rswirelesscrafting:block/wireless_energy_receiver",
+    "side": "rswirelesscrafting:block/wireless_energy_receiver_side",
+    "top": "rswirelesscrafting:block/wireless_energy_receiver_top",
+    "bottom": "rswirelesscrafting:block/wireless_energy_receiver_bottom"
   }
 }
