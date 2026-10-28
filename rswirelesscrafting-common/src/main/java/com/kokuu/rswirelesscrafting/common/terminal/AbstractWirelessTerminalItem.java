@@ -29,11 +29,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 
 /**
@@ -120,6 +122,24 @@ public abstract class AbstractWirelessTerminalItem extends AbstractNetworkEnergy
             openUpgradePanel(serverPlayer, hand);
         }
         return InteractionResultHolder.consume(player.getItemInHand(hand));
+    }
+
+    /**
+     * 绑定成功后给一条明确反馈。RS 的 bind 只写组件、不发声，玩家只能盯着 tooltip 猜有没有绑上。
+     */
+    @Override
+    public InteractionResult useOn(final UseOnContext ctx) {
+        final InteractionResult result = super.useOn(ctx);
+        if (result == InteractionResult.SUCCESS && ctx.getPlayer() instanceof ServerPlayer serverPlayer) {
+            final ItemStack stack = ctx.getItemInHand();
+            if (getBoundLocation(stack) != null) {
+                serverPlayer.displayClientMessage(
+                    createBoundLine(stack).copy().withStyle(ChatFormatting.GREEN),
+                    false
+                );
+            }
+        }
+        return result;
     }
 
     /**
