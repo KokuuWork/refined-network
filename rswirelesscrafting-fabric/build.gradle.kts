@@ -26,7 +26,7 @@ repositories {
 }
 
 // 与 neoforge 模块保持一致：显式覆盖版本号，避免本地回落 0.0.0。
-version = "0.4.0-SNAPSHOT"
+version = "0.4.1-beta.1"
 
 refinedarchitect {
     modId = "rswirelesscrafting"

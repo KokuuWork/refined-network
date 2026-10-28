@@ -1,104 +1,88 @@
-<!-- 本文件是 GitHub Release 的发布说明正文（release.yml 会读取它）。
-     发新版时直接改写本文件即可；没有本文件时发布会退回 GitHub 自动生成的说明。 -->
+# rswirelesscrafting 0.4.1-beta.1
 
-> 🧪 **测试版声明 / Testing build**
-> 本版本 **0.3.2** 是 0.3.1 的修复版，但**仍处于测试阶段** —— 尤其是**首次移植的 Fabric 侧**尚未完成完整真机验证。
-> 建议在测试存档中使用，**务必先备份世界**；遇到问题**优先来 QQ 群 498700382**（👉 [点击加入](https://qm.qq.com/q/ueYTU8T3xK)），
-> 或在 [Issues](https://github.com/KokuuWork/rswirelesscrafting/issues) 反馈（附日志 + 复现步骤）。
+**开发测试版。不是稳定正式版。**
 
-> 🧪 **Testing build**
-> **0.3.2** is a bug-fix release on top of 0.3.1, but it is still a **testing build** — the brand-new **Fabric** port
-> has not gone through full in-game verification yet. Use it in a test world and **back up your saves** first.
-> Bug reports are very welcome in [Issues](https://github.com/KokuuWork/rswirelesscrafting/issues) (logs + repro steps).
+这个版本把无线终端扩展成一套完整的远程工具体系，并修复了网络桥接、配对、权限、能量和 GUI 生命周期问题。两个加载器的构建、checkstyle 和 7 个纯逻辑测试已经通过，但还没有完成完整的实机、专用服务器、跨维度和旧存档验证。请先在测试存档中使用，并备份世界。
 
----
+## 下载
 
-## 🐞 有问题？来 QQ 群（Bug 维修 / 反馈群）
+- `rswirelesscrafting-neoforge-0.4.1-beta.1.jar`
+- `rswirelesscrafting-fabric-0.4.1-beta.1.jar`
 
-**QQ 群号：`498700382`** —— 👉 **[点击加入群聊](https://qm.qq.com/q/ueYTU8T3xK)**
-（群名「MC-玩了X年服务器终于不想玩了」；也可以在 QQ 里直接搜索群号 `498700382`）
+需要 Minecraft 1.21.1 和 Refined Storage 2.0.7 或兼容版本。NeoForge 与 Fabric **二选一**，不要同时安装。升级前请删除旧版本 jar。
 
-崩溃、耗电数值不对、GUI 显示异常、多人 / 服务器故障、新功能建议，**来群里直接说最快**，带上 `latest.log` 或崩溃报告即可。
-不方便用 QQ 也可以提 [Issue](https://github.com/KokuuWork/rswirelesscrafting/issues)。
+## 新增内容
 
-> 🐞 **Got a bug? Join the QQ support group: `498700382`** — 👉 [click to join](https://qm.qq.com/q/ueYTU8T3xK).
-> Crashes, wrong energy numbers, GUI glitches, server trouble or feature requests: the group is the fastest way to
-> get help. Otherwise open an [Issue](https://github.com/KokuuWork/rswirelesscrafting/issues).
+- 无线样板终端：远程编辑自动化样板。
+- 无线自动合成仓管理器：远程管理全网合成仓的样板。
+- 无线增幅塔：覆盖范围内降低终端距离倍率。
+- 无线桥：基点/据点配对、跨维度连接和区块保活。
+- 无线配置卡：单个复制/粘贴，或批量粘贴同类型方块配置。
+- 无线监控终端：阈值提醒和自动补货。
+- 超频升级卡：RS 自动合成仓等待间隔折半，最多 4 张。
+- 无线能量接收器：把远处 FE 发电接入绑定网络。
+- 能量监控仪：存量、容量、净收支和预计耗尽时间。
+- 智能分拣站：按物品或标签分流到面前容器。
+- 网络桥接器：在两张独立网络之间转发物品和能量。
+- 手持 HUD：显示终端电量、距离和倍率，默认关闭。
 
----
+## 主要修复
 
-## 下载 / Downloads
+- 网络桥接器接入 RS 复合存储缓存，避免先放后绑、远端库存变化后列表为空或过期。
+- 无线桥补上实际配对流程，重新绑定和解绑会清理旧链路及旧目标区块。
+- 节点进入新网络前会离开旧网络，避免同一节点同时计入两张网络。
+- 无线桥停机、配置关闭和欠费时不再继续扣费；增幅塔欠费后停止提供折扣。
+- 网络桥费要求实际足额扣除，不能只凭余额判断。
+- 虚拟终端按实际距离倍率预检费用；自动合成和补货先检查权限与费用，不再先建单后欠费。
+- 监控、充电站、无线桥、接收器、监控仪和配置卡加入权限检查。
+- 充电站同时检查 OPEN 和 EXTRACT，后台无线充电也会复核授权。
+- 虚拟样板终端物品移动或替换后关闭菜单，不再向旧物品写状态。
+- 分拣站按 WorldlyContainer 输入面校验，避免向错误面写入物品。
+- 接收器、充电站容量和网络桥接器限速支持当前配置值，不再只读取构造时的旧值。
+- 能量和速率计算增加溢出保护，避免大配置产生负费用。
+- 增幅塔登记按世界实例隔离，修复集成端客户端/服务端互相影响。
+- 服务器停止时清理本模组的强加载记录和配对剪贴板。
+- 超频 mixin 的 Shadow 字段明确禁用 remap；Fabric 能量适配器使用事务快照。
+- 分拣站增加正面纹理和定向模型，README 补齐全部物品图标。
 
-| 加载器 Loader | 文件 File | 说明 Notes |
-| --- | --- | --- |
-| **NeoForge** | `rswirelesscrafting-neoforge-0.3.2.jar` | Minecraft 1.21.1 |
-| **Fabric** | `rswirelesscrafting-fabric-0.3.2.jar` | Minecraft 1.21.1，需 Fabric API |
+## 验证范围
 
-两个 jar **二选一**，按你的加载器下载；不要同时放进 mods 目录。
-**从 0.3.1 升级**：直接替换 jar 即可，配置与存档兼容（配置文件有新增/改默认值时，删掉 `config/rswirelesscrafting-common.toml` 让它重新生成）。
+- NeoForge 构建通过。
+- Fabric 构建通过。
+- checkstyle 通过。
+- 7 个 JUnit 测试通过。
+- 资源引用和语言键检查通过。
 
-**前置依赖 Requirements**
+以下仍需实机确认：
 
-- Minecraft **1.21.1**
-- [Refined Storage 2](https://modrinth.com/mod/refined-storage) **2.0.7+**（实测 2.0.9）
-- NeoForge 侧：NeoForge for 1.21.1
-- Fabric 侧：Fabric Loader + Fabric API
-- 可选：Curios（NeoForge）/ Trinkets（Fabric）+ 对应的 RS 整合模组 → 终端可放进饰品栏
+- 先放桥后绑定、远端插取、断线重连和 RS 图重建后的库存一致性。
+- RS 安全网络下的绑定、打开、后台补货和无线充电。
+- 跨维度、区块卸载、服务器重启和旧存档迁移。
+- 第三方 Capability/Storage 容器、双箱和超频 mixin 的生产环境行为。
 
----
+## 反馈
 
-## 本次更新内容 / What's in this build
+- QQ 群：**498700382**
+- 加群链接：<https://qm.qq.com/q/ueYTU8T3xK>
+- Issues：<https://github.com/KokuuWork/rswirelesscrafting/issues>
 
-### 修复（0.3.2）
-
-- **远程输电插件不再双重收费**：网络电量不足以支付单次动作时，原先会把网络剩余电量先抽走、再回落到终端电池扣一次（RS 的 `extract` 不足额也会抽走剩余）。现在先查余额、够才抽电，网络没电时才完整回落终端电池。
-- **无线充电速率修正**：扫描倒数的重置值少算一个 tick，实际每 11 tick 才扫一次（额度却按 10 tick 发放），速率被压低约 9%。现在精确每 10 tick 一次，**20 FE/s 名副其实**。
-- 修正终端充电站 tooltip 里过时的无线名额描述：中英均改为「全场共 3 个设备名额」。
-
-### 0.3.1 的主要内容（本版一并包含）
-
-- **Fabric 移植**：新增 `rswirelesscrafting-fabric` 模块，完整支持 **1.21.1 + Fabric**（配置走 Cloth Config，能量走 Team Reborn Energy）。common 模块零改动，与 NeoForge 侧共用同一份逻辑。
-- **饰品栏兼容**（可选、纯数据驱动）：终端可放进 Curios / Trinkets 饰品槽，与 RS 原生无线终端共用同一组槽位，用本模组的快捷键即可从饰品栏直接打开。
-
-### 平衡性调整
-
-- **距离耗电改为线性**：16 格内 ×1，超出后按「距离 ÷ 16」线性增长 —— 32 格 ×2、256 格 ×16、400 格 ×25。
-- **跨维度大幅加价**：固定 **×16**（能耗插件不减免跨维度）。
-- **合成终端合成更贵**：手动合成 **20 FE**、自动合成 **40 FE**（打开 / 清空 / 配方转移仍为 5 FE）。让能耗插件与远程输电插件真正成为超远距离 / 跨维度的必需品。
-- 充电站改显**自身内部缓冲电量**（默认 4000 FE），未满时自动从 RS 网络补电。
-- **无线充电改为全局 3 个设备名额**（3 人各充 1 个，或 1 人独占 3 个）。
-
-### 修复（0.3.1）
-
-- 充电站与插件装配界面：能量数字改 K/M/G 紧凑格式，不再溢出；「物品栏」标签不再被横线划穿；**槽位悬停提示恢复正常**（MC 1.21 起需手动调用 `renderTooltip`）。
-- 旧存档缓冲电量超过新容量时自动 clamp。
-
-### 多人 / 服务器
-
-- 插件装配界面锁定终端所在槽位（不能拿走 / 拖走 / 数字键换掉），终端身份变化立即关闭界面。
-- 无线充电扫描与充电站方块状态写入均降频到每 10 tick 一次，速率不变、开销大幅下降。
-
-完整记录见 [CHANGELOG.md](CHANGELOG.md)。
+请附上加载器、RS 版本、复现步骤和 `latest.log`。如果遇到库存或能量异常，请同时记录绑定位置和是否使用了桥接器。
 
 ---
 
-## 已知限制 / Known limitations
+# rswirelesscrafting 0.4.1-beta.1 — Development preview
 
-- **专用服务器配置不同步**：NeoForge 侧配置注册为 `COMMON` 类型，服务器不会把 `rswirelesscrafting-common.toml` 下发给客户端。服主修改数值后，客户端 tooltip 显示的是本地配置值，**实际扣费以服务端为准**。
-- **升级默认值改动需要重生成配置**：NeoForge 只会更新配置注释、不会覆盖已存在的值。升级后如发现「注释里的默认值和实际值不一致」，删掉 `config/rswirelesscrafting-common.toml` 让它重新生成。
-- **跨维度需要两端区块加载**（与 RS 原生的 Transmitter / Receiver 一致）。
-- Fabric 侧为首次移植，若遇到与 NeoForge 侧表现不一致的地方请优先反馈。
+**This is a development preview, not a stable release.**
 
----
+Both loaders build successfully, checkstyle passes and all 7 unit tests pass. Full in-game, dedicated-server, cross-dimension and saved-world verification is still pending. Use a test world and make a backup first.
 
-## 反馈 / Feedback
+This preview adds wireless pattern editing, autocrafter management, wireless amplification, wireless bridges, configuration cards, monitoring and restocking, overclock upgrades, energy receivers, energy monitors, smart sorting and network bridges.
 
-**最快的方式：QQ 群 `498700382`** —— 👉 [点击加入群聊](https://qm.qq.com/q/ueYTU8T3xK)（也可在 QQ 里搜索群号）。
+It also fixes RS composite-storage cache synchronization, bridge pairing and lifecycle, power/permission checks, virtual terminal billing, sorter input faces, configuration reload behavior, energy overflow, client/server registries and Fabric energy transactions.
 
-测试版阶段任何异常（GUI、耗电数值、多人同步、Fabric 启动）都欢迎反馈，附：
+- Minecraft 1.21.1
+- Refined Storage 2.0.7 or compatible
+- NeoForge **or** Fabric, not both
+- Remove the old jar before upgrading
 
-1. 加载器 + 版本号（NeoForge / Fabric，本模组与 RS 的版本）
-2. `latest.log` 或崩溃报告
-3. 复现步骤与截图
-
-License: MIT
+Feedback: QQ group **498700382** — <https://qm.qq.com/q/ueYTU8T3xK>, or open an issue with your loader, RS version, reproduction steps and `latest.log`.

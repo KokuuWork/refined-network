@@ -236,7 +236,7 @@ RefinedStorageApi.INSTANCE.createNetworkNodeContainer(blockEntity, networkNode)
 
 ## 8. 完成状态与发版清单（2026-10-15）
 
-六件内容**全部实现完毕**，全部落在 `0.4.0-SNAPSHOT`（**未发版**）：
+六件内容**全部实现完毕**，全部落在 `0.4.1-beta.1`（**未发版**）：
 
 | # | 内容 | 代码位置 | 状态 |
 |---|---|---|---|
@@ -252,7 +252,7 @@ RefinedStorageApi.INSTANCE.createNetworkNodeContainer(blockEntity, networkNode)
 
 **发版前清单（0.4.0 转正时逐条做）**
 
-1. 两个 `build.gradle.kts` 的 `version`：`0.4.0-SNAPSHOT` → `0.4.0`。
+1. 两个 `build.gradle.kts` 的 `version`：`0.4.1-beta.1` → `0.4.0`。
 2. README：去掉全部 **🧪** 标记；把「内容一览」的两张表（✅ 已上线 / 🧪 未上线）**合并回一张**。
 3. README 顶部「两批内容」对照表整块删除，换回单条「当前版本 0.4.0」声明。
 4. `RELEASE_NOTES.md` 按 0.4.0 重写（顶部 QQ 群区块保留）；`CHANGELOG.md` 的
@@ -260,3 +260,49 @@ RefinedStorageApi.INSTANCE.createNetworkNodeContainer(blockEntity, networkNode)
 5. 打 tag 前先 `git pull --rebase origin main`（用户会自己往 main 推东西）。
 6. 用户升级时要提醒：**旧 jar 必须删掉**（同名不同版本会 duplicate mod 报错）。
 7. Fabric 侧若仍未真机启动过，README 里「Fabric 首次移植未完整验证」那句**继续保留**。
+
+---
+
+## 9. 本批设备与 2026-10-28 修复记录
+
+### 9.1 无线能量接收器（`common/energyreceiver/`）
+
+- 普通 `BlockEntity` + 自建 `InWorldNetworkNodeContainer`，不继承 RS 自动入网的方块实体基类。
+- 节点实现 `EnergyProvider`：RS 网络总电量由所有 provider 求和，`EnergyNetworkComponent` 只有 `extract`，因此接收器必须成为提供者，而不是调用不存在的 `insert`。
+- 外部 FE 能力只负责填充缓冲；配置关闭或红石开启时，能力也拒绝接收，避免“停机时先充电、恢复后白送”。
+- `bindTo`/`unbind` 先 `NetworkAttachment.detach()`，再清 target；旧网络不能留下幽灵 provider。
+
+### 9.2 能量监控仪（`common/energymonitor/`）
+
+- 只读，不注册节点、不提供能量或存储。
+- 净收支通过两次采样之间的 `stored` 差值和真实 `gameTime` 差值计算；第一次采样只建立基线，断网/重绑时重置。
+- 低电阈值和比较器用浮点中间值，避免 `stored * 100` / `stored * 15` 溢出。
+- 配置总闸在 tick 最前面生效。
+
+### 9.3 智能分拣站（`common/smartsorter/`）
+
+- `EXACT` 用 `ItemResource` 精确匹配，`TAG` 用 `ResourceTag.resources()` 匹配。
+- 标签模式按过滤槽维护轮转游标，避免总是搬列表中的第一种物品。
+- GUI 按钮由 `SmartSorterScreen.mouseClicked` 发送原版 `handleInventoryButtonClick`，服务端 `clickMenuButton` 再校验距离与权限。
+- 目标容器先检查 `canPlaceItem` 和 `getMaxStackSize(stack)`，再提取；部分插入时把差额退回网络。
+- 放置者 UUID 存入 NBT；tick 和打开界面都走 `LinkSecurity`，离线时用 `PlayerSecurityActor` 复核。
+
+### 9.4 网络桥接器（`common/networkbridge/`）
+
+- 节点同时实现 `StorageProvider` 和 `EnergyProvider`，转发到绑定网络；插入/提取只在 `Action.EXECUTE` 时消耗物品限速额度。
+- `BridgeRecursionGuard` 按当前服务器线程记录正在读取的网络，拒绝自指，检测互相桥接的环并停用本次绑定。
+- 绑定和每次同步都检查 `EXTRACT` + `INSERT`；owner 存 NBT，在线走 `SecurityHelper`，离线走 `PlayerSecurityActor`。
+- 欠费时不允许免费转发，断开链路并在后续同步周期重试。
+
+### 9.5 配对、区块与平台
+
+- NeoForge 用 `PlayerInteractEvent.RightClickBlock`，Fabric 用 `UseBlockCallback`：在原生 RS 网络方块上潜行右键即可写入 `PairingClipboard`。本模组方块跳过全局入口，交给自己的 `useWithoutItem`。
+- 接收器/监控仪不再把自身当作 anchor；它们是普通 BE，`BoundTargetResolver` 无法把它们解析成网络。
+- 无线桥重绑时先释放旧目标区块，再设置新 target；强制加载引用计数只在真正释放时归零。
+- Fabric 能量适配器使用 `SnapshotParticipant<Long>`，事务嵌套/回滚会恢复缓冲。
+
+### 9.6 验证基线
+
+- `./gradlew -I init-mirror.gradle build`：NeoForge、Fabric、checkstyle 全部通过。
+- 公共模块 `src/test/java`：7 个 JUnit 纯逻辑测试，覆盖 `RateMeter`、`RateLimiter`、`SaturatedMath`、`SorterMatchMode`；CI 不再 `-x test`。
+- 当前仍未完成：Minecraft 实机、专用服务器、RS 安全网络、跨维度、旧存档迁移测试。
