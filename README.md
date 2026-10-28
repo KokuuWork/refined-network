@@ -18,6 +18,7 @@
 > 不方便用 QQ 的话，欢迎直接提 [Issue](https://github.com/KokuuWork/rswirelesscrafting/issues)。
 
 > ✅ **当前稳定线版本 0.3.3**（2026-10-28）· 基于 0.3.2 的权限与计费修复版，不包含 0.4.x 开发功能。
+> 🎨 **本版同步新美术**：终端图标、六张升级插件与充电站纹理整套重绘（RS2 风格灰机壳、深灰内嵌面板、青色信号色，充电站改为多面模型）。**0.3.2 及更早版本保持旧美术，不再回改**，玩法完全一致，只是外观不同。
 > 请在测试存档中使用并**先备份世界**；遇到问题欢迎来上面的 QQ 群反馈（附日志与复现步骤）。
 
 给 [Refined Storage 2](https://github.com/refinedmods/refinedstorage) 补上原版缺失的**无线合成**能力。
@@ -343,6 +344,8 @@ export JAVA_HOME="/path/to/jdk-21"
 > in the group. 👉 **[Click to join (group 498700382)](https://qm.qq.com/q/ueYTU8T3xK)**, or search the group
 > number **498700382** inside QQ.
 > No QQ? Open an [Issue](https://github.com/KokuuWork/rswirelesscrafting/issues) instead.
+
+> 🎨 **New art in this build**: the terminal icons, the six upgrade cards and the charging station were redrawn (RS2-style grey casing, dark inset panels, cyan signal colour, multi-face charging station model). **0.3.2 and older keep the old art and will not be retrofitted** — gameplay is identical, only the look differs.
 
 > ✅ **Current stable-line version 0.3.3** (2026-10-28) · a permission and energy-check hotfix on top of 0.3.2,
 > without the 0.4.x development features. Back up your saves before updating; bug reports are welcome in

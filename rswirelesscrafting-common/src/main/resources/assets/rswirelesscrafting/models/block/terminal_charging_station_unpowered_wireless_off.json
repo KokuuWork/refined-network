@@ -1,6 +1,10 @@
 {
-  "parent": "block/cube_all",
+  "parent": "rswirelesscrafting:block/cube_front",
   "textures": {
-    "all": "rswirelesscrafting:block/terminal_charging_station_unpowered_wireless_off"
+    "particle": "rswirelesscrafting:block/terminal_charging_station_unpowered_wireless_off_side",
+    "front": "rswirelesscrafting:block/terminal_charging_station_unpowered_wireless_off",
+    "side": "rswirelesscrafting:block/terminal_charging_station_unpowered_wireless_off_side",
+    "top": "rswirelesscrafting:block/terminal_charging_station_unpowered_wireless_off_top",
+    "bottom": "rswirelesscrafting:block/terminal_charging_station_bottom"
   }
 }
