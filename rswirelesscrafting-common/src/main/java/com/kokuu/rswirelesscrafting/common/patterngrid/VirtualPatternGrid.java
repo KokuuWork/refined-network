@@ -10,12 +10,16 @@ import com.refinedmods.refinedstorage.api.network.Network;
 import com.refinedmods.refinedstorage.common.api.support.slotreference.SlotReference;
 import com.refinedmods.refinedstorage.common.autocrafting.patterngrid.PatternGridBlockEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * 「无线样板终端」背后那座**虚拟的**样板网格。
@@ -70,7 +74,7 @@ public class VirtualPatternGrid extends PatternGridBlockEntity {
                               final Level level,
                               @Nullable final Network network,
                               final VirtualTerminalSession session) {
-        super(BlockPos.ZERO, Blocks.AIR.defaultBlockState());
+        super(BlockPos.ZERO, virtualState());
         this.stack = stack;
         this.player = player;
         this.slotReference = slotReference;
@@ -83,6 +87,22 @@ public class VirtualPatternGrid extends PatternGridBlockEntity {
         this.outputFingerprint = outputFingerprintOf(serialize());
         this.lastSavedState = serialize();
         mainNetworkNode.setNetwork(network);
+    }
+
+    /**
+     * RS 2.0.9 起方块实体会校验「BE 类型 ↔ 方块状态」是否匹配，用 AIR 会直接抛
+     * {@code Invalid block entity ... got Block{minecraft:air}}。所以这里改用真实方块的默认状态；
+     * 幽灵节点由下面的 {@link #initialize(ServerLevel, Direction)} 空实现挡住。
+     */
+    private static BlockState virtualState() {
+        return BuiltInRegistries.BLOCK
+            .get(ResourceLocation.fromNamespaceAndPath("refinedstorage", "pattern_grid"))
+            .defaultBlockState();
+    }
+
+    @Override
+    protected void initialize(final ServerLevel level, final Direction direction) {
+        // 虚拟方块实体不参与世界里的网络图，不注册任何节点。
     }
 
     private void loadState() {
