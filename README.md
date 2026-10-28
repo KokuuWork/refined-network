@@ -10,13 +10,13 @@
 
 ## 当前版本
 
-- Release 页目前提供 **0.4.1-beta.1（开发测试版）**；旧的 0.3.2 是上一版正式 Release。
-- `main` 分支是 **0.4.1-beta.1**，还包含下面标为“未发布”的内容，需要从源码构建。
+- Release 页提供 **0.3.3（稳定线修复版）** 和 **0.4.1-beta.1（开发测试版）**；0.3.2 的 Release、标签和附件继续保留作为历史记录。
+- `main` 分支基于 **0.4.1-beta.1**，包含发布后的后续修复；只想使用稳定线时请下载 0.3.3。
 - 构建和纯逻辑测试已经通过，但这不等于所有内容都完成了实机验证。Fabric 和新增设备仍建议使用测试存档，并先备份。
 
 ## 内容总览
 
-### 已发布（0.3.2）
+### 稳定线（0.3.3）
 
 | 图标 | 内容 | 作用 |
 |---|---|---|
@@ -48,7 +48,7 @@
 | <img src="docs/images/item-network-bridge.png" width="32" alt=""> | **网络桥接器** | 在两张独立网络之间转发物品和能量。 |
 | <img src="docs/images/item-wireless-monitor.png" width="32" alt=""> | **手持 HUD** | 显示终端电量、距离和倍率，默认关闭。 |
 
-这些内容已经在 `main` 中，但还没有作为正式版发布。网络桥接器、智能分拣站、无线监控终端等新功能仍需要更多实机测试，尤其是存档重载、多人权限和跨维度场景。不要把开发版直接当成稳定服务器版本。
+这些内容已作为 **0.4.1-beta.1 开发测试版**发布。网络桥接器、智能分拣站、无线监控终端等新功能仍需要更多实机测试，尤其是存档重载、多人权限和跨维度场景。不要把开发版直接当成稳定服务器版本。
 
 ### 配方示例
 
@@ -168,8 +168,8 @@ The idea is simple: when you are in a mine, the Nether or an outpost, you often 
 
 ### Current version
 
-- Releases currently provide **0.3.2**: the wireless crafting grid, six upgrade cards and the terminal charging station.
-- `main` is **0.4.1-beta.1** and contains the additional items marked as unreleased below. Build it from source.
+- Releases provide **0.3.3** on the stable line and **0.4.1-beta.1** as a development preview. The 0.3.2 Release, tag and downloads remain available as historical records.
+- `main` is based on **0.4.1-beta.1** with post-release fixes. Use 0.3.3 if you only want the stable line.
 - Builds and unit tests pass, but that is not the same as complete in-game verification. Use a test world and make a backup first.
 
 ### Released features
@@ -204,7 +204,7 @@ Upgrade cards fit in the terminal's four slots and can be removed at any time. T
 | <img src="docs/images/item-network-bridge.png" width="32" alt=""> | **Network Bridge** | Transfers items and energy between two networks. |
 | <img src="docs/images/item-wireless-monitor.png" width="32" alt=""> | **Held-item HUD** | Shows terminal energy, distance and multiplier; off by default. |
 
-These are in `main` but have not been included in a stable release. The newer network and sorting features still need more in-game testing, especially saved worlds, multiplayer permissions and cross-dimension use. Do not treat a snapshot build as a stable server release.
+These are available in the **0.4.1-beta.1 development preview**. The newer network and sorting features still need more in-game testing, especially saved worlds, multiplayer permissions and cross-dimension use. Do not treat the preview as a stable server release.
 
 ### Distance and energy
 
