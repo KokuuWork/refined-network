@@ -49,7 +49,7 @@
 
 | 类 | 职责 |
 |---|---|
-| `AbstractVirtualBlockEntity<T>` | AIR 状态构造（不注册幽灵节点）、`setLevel` 登记、`setChanged` 钩子、NBT ↔ 物品数据组件 |
+| `AbstractVirtualBlockEntity<T>` | 真实方块状态构造（RS 2.0.9 起校验 BE 类型 ↔ 方块状态，AIR 会抛 `Invalid block entity`）、子类覆写 `initialize(ServerLevel, Direction)` 为空以阻止注册幽灵节点、`setLevel` 登记、`setChanged` 钩子、NBT ↔ 物品数据组件 |
 | `VirtualTerminalSession` | 会话结算：距离耗电、先看余额再扣（避免双重收费）、付不起一分不扣；**所有终端共用这一份**，否则距离倍率与取电顺序一旦分叉就会出现「同类操作收费不同」 |
 | `VirtualMenuHolder`（接口）+ 两个加载器各一个 mixin | 让 RS 的**方块菜单**在「挂着我们会话」时判有效 |
 | ~~`VirtualMenuCharger`~~ | **推迟到 ① 一起做**：按次计费要知道「哪些槽位算钱」，那是**菜单特有**的语义；先有真实消费者再定抽象，避免拍脑袋设计 |
