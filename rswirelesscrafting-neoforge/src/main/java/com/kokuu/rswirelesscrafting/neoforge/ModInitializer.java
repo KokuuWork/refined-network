@@ -36,6 +36,7 @@ import com.kokuu.rswirelesscrafting.common.patterngrid.WirelessPatternGridItem;
 import com.kokuu.rswirelesscrafting.common.smartsorter.SmartSorterBlock;
 import com.kokuu.rswirelesscrafting.common.smartsorter.SmartSorterBlockEntity;
 import com.kokuu.rswirelesscrafting.common.smartsorter.SmartSorterBlockItem;
+import com.kokuu.rswirelesscrafting.common.terminal.AbstractWirelessTerminalItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.AdvancedEnergyUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.BatteryUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.EnergyUpgradeItem;
@@ -49,8 +50,10 @@ import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.WirelessCrafting
 import java.util.function.Supplier;
 
 import com.refinedmods.refinedstorage.common.api.RefinedStorageApi;
+import com.refinedmods.refinedstorage.common.api.support.network.AbstractNetworkNodeContainerBlockEntity;
 import com.refinedmods.refinedstorage.common.content.ExtendedMenuTypeFactory;
 import com.refinedmods.refinedstorage.common.content.RegistryCallback;
+import com.refinedmods.refinedstorage.neoforge.api.RefinedStorageNeoForgeApi;
 import com.refinedmods.refinedstorage.neoforge.support.energy.EnergyStorageAdapter;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.component.DataComponentType;
@@ -430,12 +433,16 @@ public class ModInitializer extends AbstractModInitializer {
     }
 
     private void registerCapabilities(final RegisterCapabilitiesEvent event) {
+        // 四件无线终端共用同一套能量能力（容量来自 AbstractWirelessTerminalItem）。
         event.registerItem(
             Capabilities.EnergyStorage.ITEM,
             (stack, ctx) -> new EnergyStorageAdapter(
-                Items.INSTANCE.getWirelessCraftingGrid().createEnergyStorage(stack)
+                ((AbstractWirelessTerminalItem) stack.getItem()).createEnergyStorage(stack)
             ),
-            Items.INSTANCE.getWirelessCraftingGrid()
+            Items.INSTANCE.getWirelessCraftingGrid(),
+            Items.INSTANCE.getWirelessPatternGrid(),
+            Items.INSTANCE.getWirelessAutocrafterManager(),
+            Items.INSTANCE.getWirelessMonitor()
         );
         event.registerBlockEntity(
             Capabilities.EnergyStorage.BLOCK,
@@ -446,6 +453,23 @@ public class ModInitializer extends AbstractModInitializer {
             Capabilities.EnergyStorage.BLOCK,
             BlockEntities.INSTANCE.getWirelessEnergyReceiver(),
             (blockEntity, side) -> new WirelessEnergyReceiverEnergyStorage(blockEntity)
+        );
+        // 线缆和网络只认「方块类型上注册的容器能力」，只把容器塞在 BE 里是不够的。
+        registerNetworkNodeContainerProvider(event, BlockEntities.INSTANCE.getChargingStation());
+        registerNetworkNodeContainerProvider(event, BlockEntities.INSTANCE.getWirelessAmplifier());
+        registerNetworkNodeContainerProvider(event, BlockEntities.INSTANCE.getWirelessBridge());
+        registerNetworkNodeContainerProvider(event, BlockEntities.INSTANCE.getNetworkBridge());
+        registerNetworkNodeContainerProvider(event, BlockEntities.INSTANCE.getSmartSorter());
+    }
+
+    private void registerNetworkNodeContainerProvider(
+        final RegisterCapabilitiesEvent event,
+        final BlockEntityType<? extends AbstractNetworkNodeContainerBlockEntity<?>> type
+    ) {
+        event.registerBlockEntity(
+            RefinedStorageNeoForgeApi.INSTANCE.getNetworkNodeContainerProviderCapability(),
+            type,
+            (blockEntity, side) -> blockEntity.getContainerProvider()
         );
     }
 
