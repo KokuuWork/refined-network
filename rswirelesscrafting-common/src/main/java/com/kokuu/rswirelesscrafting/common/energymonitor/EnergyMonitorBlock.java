@@ -91,10 +91,11 @@ public class EnergyMonitorBlock extends BaseEntityBlock {
                             @Nullable final LivingEntity placer,
                             final ItemStack stack) {
         super.setPlacedBy(level, pos, state, placer, stack);
-        if (placer instanceof Player player
-            && level.getBlockEntity(pos) instanceof EnergyMonitorBlockEntity monitor) {
-            monitor.setOwner(player.getUUID());
+        if (!(placer instanceof Player player)
+            || !(level.getBlockEntity(pos) instanceof EnergyMonitorBlockEntity monitor)) {
+            return;
         }
+        monitor.setOwner(player.getUUID());
     }
 
     @Nullable
@@ -151,6 +152,11 @@ public class EnergyMonitorBlock extends BaseEntityBlock {
                 ),
                 false
             );
+            return;
+        }
+        if (monitor.hasLocalNetwork()) {
+            // 已经贴着网络了，这时候再要求「先记录接入点」纯属误导。
+            player.displayClientMessage(ContentNames.ENERGY_MONITOR_LOCAL_NETWORK, false);
             return;
         }
         player.displayClientMessage(ContentNames.LINK_ANCHOR_REQUIRED, false);

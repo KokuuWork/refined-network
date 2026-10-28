@@ -4,24 +4,29 @@ import com.kokuu.rswirelesscrafting.common.BlockEntities;
 import com.kokuu.rswirelesscrafting.common.Config;
 import com.kokuu.rswirelesscrafting.common.ContentNames;
 import com.kokuu.rswirelesscrafting.common.Platform;
+import com.kokuu.rswirelesscrafting.common.connector.ConnectorTarget;
+import com.kokuu.rswirelesscrafting.common.link.AdjacentNetworks;
 import com.kokuu.rswirelesscrafting.common.link.BoundPosition;
 import com.kokuu.rswirelesscrafting.common.link.BoundTargetResolver;
 import com.kokuu.rswirelesscrafting.common.link.LinkSecurity;
+import com.kokuu.rswirelesscrafting.common.util.CompactNumber;
 import com.kokuu.rswirelesscrafting.common.util.RateMeter;
 
+import java.util.List;
 import java.util.UUID;
 import javax.annotation.Nullable;
 
 import com.refinedmods.refinedstorage.api.network.Network;
 import com.refinedmods.refinedstorage.api.network.energy.EnergyNetworkComponent;
-import com.refinedmods.refinedstorage.common.api.support.network.NetworkNodeContainerProvider;
 import com.refinedmods.refinedstorage.common.security.BuiltinPermission;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -51,9 +56,19 @@ import net.minecraft.world.level.block.state.BlockState;
  * 比较器输出 = 电量充盈度（0–15）；低于阈值亮红灯；右键在聊天栏报
  * 存量 / 容量 / 净收支 / 预计耗尽时间。
  */
-public class EnergyMonitorBlockEntity extends BlockEntity {
-    private static final Direction[] DIRECTIONS = Direction.values();
+public class EnergyMonitorBlockEntity extends BlockEntity implements ConnectorTarget {
     private static final String TAG_OWNER = "Owner";
+    /**
+     * 「显示屏」同步用的短键：只给客户端渲染文字用，和存档标签分开。
+     */
+    private static final String TAG_DISPLAY_STORED = "ds";
+    private static final String TAG_DISPLAY_CAPACITY = "dc";
+    private static final String TAG_DISPLAY_RATE = "dr";
+    private static final String TAG_DISPLAY_LINKED = "dl";
+    /**
+     * 多少 tick 往客户端推一次数值（10 tick = 0.5 秒，肉眼看起来是连续的）。
+     */
+    private static final long DISPLAY_SYNC_INTERVAL = 10L;
 
     private final RateMeter feeMeter = new RateMeter();
 
@@ -119,6 +134,24 @@ public class EnergyMonitorBlockEntity extends BlockEntity {
     }
 
     /**
+     * 方块上方那块「显示屏」要写的内容：电量 / 净收支 / 预计耗尽。
+     *
+     * <p>客户端方块实体一样能调——{@link #getUpdateTag()} 会把这三个数同步过去，
+     * 渲染器（{@code EnergyMonitorRenderer}）直接拿这几行画。
+     */
+    public List<Component> displayLines() {
+        if (!linked) {
+            return List.of();
+        }
+        final long seconds = getSecondsUntilEmpty();
+        return List.of(
+            Component.literal(CompactNumber.format(stored) + " / " + CompactNumber.format(capacity) + " FE"),
+            Component.literal((netRate >= 0 ? "+" : "") + CompactNumber.format(netRate) + " FE/s"),
+            Component.literal(seconds < 0 ? "--" : seconds + "s")
+        );
+    }
+
+    /**
      * 比较器输出（0–15）：按电量充盈度线性映射。
      */
     public int getAnalogOutput() {
@@ -151,6 +184,24 @@ public class EnergyMonitorBlockEntity extends BlockEntity {
         this.owner = null;
         this.lastSampleGameTime = -1L;
         setChanged();
+    }
+
+    @Override
+    public boolean isBound() {
+        return isEndpoint();
+    }
+
+    @Override
+    public Component boundMessage() {
+        return Component.translatable(
+            ContentNames.ENERGY_MONITOR_BOUND_TRANSLATION_KEY,
+            target == null ? "?" : target.pos().toShortString()
+        );
+    }
+
+    @Override
+    public Component unboundMessage() {
+        return ContentNames.ENERGY_MONITOR_UNBOUND;
     }
 
     public void setOwner(final UUID playerId) {
@@ -199,6 +250,19 @@ public class EnergyMonitorBlockEntity extends BlockEntity {
             sampleCountdown = Math.max(1, config.getSampleInterval()) - 1;
             sample();
         }
+        if (level.getGameTime() % DISPLAY_SYNC_INTERVAL == 0L) {
+            syncDisplay();
+        }
+    }
+
+    /**
+     * 把数值推给客户端，方块上方的牌子才会跟着变。
+     */
+    private void syncDisplay() {
+        if (level == null || level.isClientSide()) {
+            return;
+        }
+        level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 2);
     }
 
     /**
@@ -215,21 +279,20 @@ public class EnergyMonitorBlockEntity extends BlockEntity {
 
     /**
      * 六邻域里随便找一张 RS 网络：监控仪贴在网络里就等于盯上它。
+     *
+     * <p>「RS 自己的方块实体实现 {@code NetworkItemTargetBlockEntity}、容器只挂在方块能力上」
+     * 这套细节统一收在 {@link AdjacentNetworks} 里，能量接收器也在用同一份逻辑。
      */
     @Nullable
     private Network adjacentNetwork() {
-        for (final Direction direction : DIRECTIONS) {
-            if (level.getBlockEntity(worldPosition.relative(direction))
-                instanceof NetworkNodeContainerProvider provider) {
-                for (final var container : provider.getContainers()) {
-                    final Network network = container.getNode().getNetwork();
-                    if (network != null) {
-                        return network;
-                    }
-                }
-            }
-        }
-        return null;
+        return AdjacentNetworks.find(level, worldPosition);
+    }
+
+    /**
+     * 本方块六邻域里是否已经贴着一张网络（「摆在网络里」这种用法，不需要绑定接入点）。
+     */
+    public boolean hasLocalNetwork() {
+        return adjacentNetwork() != null;
     }
 
     private void read(@Nullable final Network network) {
@@ -330,6 +393,22 @@ public class EnergyMonitorBlockEntity extends BlockEntity {
     // ------------------------------------------------------------- 生命周期
 
     @Override
+    public CompoundTag getUpdateTag(final HolderLookup.Provider registries) {
+        final CompoundTag tag = new CompoundTag();
+        tag.putLong(TAG_DISPLAY_STORED, stored);
+        tag.putLong(TAG_DISPLAY_CAPACITY, capacity);
+        tag.putLong(TAG_DISPLAY_RATE, netRate);
+        tag.putBoolean(TAG_DISPLAY_LINKED, linked);
+        return tag;
+    }
+
+    @Nullable
+    @Override
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
     protected void saveAdditional(final CompoundTag tag, final HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         BoundPosition.save(tag, target);
@@ -343,5 +422,11 @@ public class EnergyMonitorBlockEntity extends BlockEntity {
         super.loadAdditional(tag, registries);
         target = BoundPosition.load(tag);
         owner = tag.hasUUID(TAG_OWNER) ? tag.getUUID(TAG_OWNER) : null;
+        if (tag.contains(TAG_DISPLAY_LINKED)) {
+            stored = tag.getLong(TAG_DISPLAY_STORED);
+            capacity = tag.getLong(TAG_DISPLAY_CAPACITY);
+            netRate = tag.getLong(TAG_DISPLAY_RATE);
+            linked = tag.getBoolean(TAG_DISPLAY_LINKED);
+        }
     }
 }
