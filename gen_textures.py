@@ -613,30 +613,40 @@ def vent_slots(px):
 # ================================================================ charging station
 
 def terminal_charging_station_texture(powered=True, wireless=True):
-    """Wifi glyph over a battery glyph, both centred on the x=7/8 axis.
-    Powered lights the battery white, wireless lights the glyph cyan."""
+    """A battery with a broadcast dome above it, both on the x=7 axis.
+
+    Powered fills the battery bright and gives the dome a lit dot; wireless
+    turns the dome cyan. Two small lamps on the frame lip repeat the states."""
     px = casing_frame("side")
     panel(px, "side")
-    charge = WHITE if powered else rgb("#5A5A5A")
-    fill = rgb("#2E2E2E") if powered else BORE
+    body = WHITE if powered else rgb("#6E6E6E")
+    inner = rgb("#9E9E9E") if powered else rgb("#3A3A3A")
     wifi = CYAN_CORE if wireless else rgb("#5A5A5A")
-    put(px, 7, 6, wifi)
-    signal_arcs(px, 7, 6, (1, 2), wifi)
-    if not wireless:
-        for i in range(4):
-            put(px, 4 + i, 3 + i, rgb("#B7B7B7"))
-    # battery body
+
+    # broadcast dome: 3px cap, two shoulders, one dot
+    for x in (6, 7, 8):
+        put(px, x, 3, wifi)
+    put(px, 5, 4, wifi)
+    put(px, 9, 4, wifi)
+    put(px, 7, 5, wifi)
+
+    # battery: 7x5 body with a 1px terminal nub
     for x in range(4, 11):
-        put(px, x, 8, charge)
-        put(px, x, 11, charge)
-    for y in range(9, 12):
-        put(px, 4, y, charge)
-        put(px, 10, y, charge)
-    for y in (9, 10):
-        put(px, 11, y, charge)
+        put(px, x, 7, body)
+        put(px, x, 11, body)
+    for y in range(7, 12):
+        put(px, 4, y, body)
+        put(px, 10, y, body)
+    for y in range(8, 11):
         for x in range(5, 10):
-            put(px, x, y, fill)
-    # power LED on the frame lip, wireless LED under it
+            put(px, x, y, inner)
+    put(px, 11, 8, body)
+    put(px, 11, 9, body)
+    if powered:
+        for x in range(5, 10):
+            put(px, x, 8, WHITE)
+
+    # power lamp and wireless lamp, stacked on the frame lip
     indicator(px, 12, 3, CYAN_LIT if powered else rgb("#3E3E3E"))
     indicator(px, 12, 11, CYAN_CORE if wireless else rgb("#3E3E3E"))
     return px
@@ -659,13 +669,13 @@ def amplifier_texture(active):
         put(px, x, 5, arc)
     for x in (4, 11):
         put(px, x, 6, arc)
-    for x in range(6, 10):
-        put(px, x, 7, PART_LO)
-    for y in range(8, 12):
+    # mast: two pixels with a lit left edge, held by stepped guy wires
+    for y in range(7, 12):
         put(px, 7, y, CAS_HI)
         put(px, 8, y, rgb("#5C5C5C"))
-    for (x, y) in ((6, 8), (9, 10), (9, 8), (6, 10)):
-        put(px, x, y, CAS_FIELD)
+    for i, y in enumerate((9, 10)):
+        put(px, 6 - i, y, rgb("#3E3E3E"))
+        put(px, 9 + i, y, rgb("#3E3E3E"))
     for x in range(5, 11):
         put(px, x, 12, PART_LO)
     return px
@@ -803,16 +813,33 @@ def smart_sorter_texture(active):
 
 
 def smart_sorter_front_texture(active):
-    """Diagonal intake chute with an arrow tip."""
+    """A hopper funnel dropping into an arrow: items go in the top, out the face."""
     px = casing_frame("side")
     panel(px, "side")
     chute = CYAN_CORE if active else rgb("#6E6E6E")
     tip = CYAN_LIT if active else rgb("#8A8A8A")
-    for i in range(6):
-        put(px, 4 + i, 6 + i, chute)
-        put(px, 5 + i, 6 + i, chute)
-    put(px, 10, 11, tip)
-    put(px, 11, 11, tip)
+    # funnel mouth: steel rim, dark throat
+    for x in range(4, 12):
+        put(px, x, 3, rgb("#5C5C5C"))
+        put(px, x, 4, rgb("#3E3E3E"))
+    for x in range(5, 11):
+        put(px, x, 4, BORE)
+    # stepped walls narrowing to the spout
+    for i, (x0, x1) in enumerate(((4, 11), (5, 10), (6, 9))):
+        y = 5 + i
+        put(px, x0, y, rgb("#6E6E6E"))
+        put(px, x1, y, rgb("#4A4A4A"))
+        for x in range(x0 + 1, x1):
+            put(px, x, y, BORE)
+    # spout and arrow head
+    for y in (8, 9):
+        put(px, 7, y, chute)
+        put(px, 8, y, chute)
+    for x in (6, 9):
+        put(px, x, 10, chute)
+    for x in (7, 8):
+        put(px, x, 10, tip)
+        put(px, x, 11, tip)
     return px
 
 
