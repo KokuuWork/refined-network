@@ -19,6 +19,7 @@ import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlock;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockEntity;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockItem;
 import com.kokuu.rswirelesscrafting.common.configcard.WirelessConfigurationCardItem;
+import com.kokuu.rswirelesscrafting.common.connector.WirelessConnectorItem;
 import com.kokuu.rswirelesscrafting.common.energymonitor.EnergyMonitorBlock;
 import com.kokuu.rswirelesscrafting.common.energymonitor.EnergyMonitorBlockEntity;
 import com.kokuu.rswirelesscrafting.common.energymonitor.EnergyMonitorBlockItem;
@@ -315,6 +316,11 @@ public class ModInitializerImpl extends AbstractModInitializer implements Refine
                 new Item.Properties().stacksTo(1)
             ))
         );
+        Items.INSTANCE.setWirelessConnector(
+            callback.register(ContentIds.WIRELESS_CONNECTOR, () -> new WirelessConnectorItem(
+                new Item.Properties().stacksTo(1)
+            ))
+        );
         Items.INSTANCE.setWirelessBridgeBlockItem(
             callback.register(ContentIds.WIRELESS_BRIDGE, () -> new WirelessBridgeBlockItem(
                 Blocks.INSTANCE.getWirelessBridge(),
@@ -425,20 +431,42 @@ public class ModInitializerImpl extends AbstractModInitializer implements Refine
                                          final Level level,
                                          final InteractionHand hand,
                                          final BlockHitResult hitResult) {
-        if (level.isClientSide() || !(player instanceof ServerPlayer serverPlayer) || !serverPlayer.isCrouching()) {
+        if (level.isClientSide() || hand != InteractionHand.MAIN_HAND
+            || !(player instanceof ServerPlayer serverPlayer)) {
             return InteractionResult.PASS;
         }
-        final var pos = hitResult.getBlockPos();
-        if (level.getBlockState(pos).getBlock().getDescriptionId().startsWith("block.rswirelesscrafting.")) {
+        // 连接器：任何姿态都接管——敲哪台连哪台，绝不放方块。
+        if (serverPlayer.getMainHandItem().getItem() instanceof WirelessConnectorItem connector) {
+            return connector.apply(
+                serverPlayer,
+                level,
+                hitResult.getBlockPos(),
+                serverPlayer.isCrouching()
+            );
+        }
+        if (!serverPlayer.isCrouching()) {
             return InteractionResult.PASS;
+        }
+        return ownBlockOrAnchor(level, serverPlayer, hitResult);
+    }
+
+    private static InteractionResult ownBlockOrAnchor(final Level level,
+                                                      final ServerPlayer player,
+                                                      final BlockHitResult hitResult) {
+        final var pos = hitResult.getBlockPos();
+        final var state = level.getBlockState(pos);
+        // 潜行 + 手上有物品时，原版会跳过方块交互直接放置物品——这里手动把交互交还给方块。
+        if (state.getBlock().getDescriptionId().startsWith("block.rswirelesscrafting.")) {
+            return state.useWithoutItem(level, player, hitResult);
         }
         final GlobalPos target = GlobalPos.of(level.dimension(), pos);
         if (BoundTargetResolver.resolveNetwork(level, target).isEmpty()) {
             return InteractionResult.PASS;
         }
-        PairingClipboard.setAnchor(serverPlayer, target);
-        serverPlayer.displayClientMessage(ContentNames.LINK_ANCHOR_SET, false);
-        return InteractionResult.PASS;
+        PairingClipboard.setAnchor(player, target);
+        player.displayClientMessage(ContentNames.LINK_ANCHOR_SET, false);
+        // 记完接入点就到此为止，别顺手把手里的方块放下去。
+        return InteractionResult.SUCCESS;
     }
 
     @Override

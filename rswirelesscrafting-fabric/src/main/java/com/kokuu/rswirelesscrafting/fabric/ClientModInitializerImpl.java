@@ -1,12 +1,14 @@
 package com.kokuu.rswirelesscrafting.fabric;
 
 import com.kokuu.rswirelesscrafting.common.AbstractClientModInitializer;
+import com.kokuu.rswirelesscrafting.common.BlockEntities;
 import com.kokuu.rswirelesscrafting.common.ContentNames;
 import com.kokuu.rswirelesscrafting.common.Items;
 import com.kokuu.rswirelesscrafting.common.KeyMappings;
 import com.kokuu.rswirelesscrafting.common.Menus;
 import com.kokuu.rswirelesscrafting.common.Platform;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationScreen;
+import com.kokuu.rswirelesscrafting.common.client.EnergyMonitorRenderer;
 import com.kokuu.rswirelesscrafting.common.hud.WirelessTerminalHud;
 import com.kokuu.rswirelesscrafting.common.monitor.WirelessMonitorScreen;
 import com.kokuu.rswirelesscrafting.common.smartsorter.SmartSorterScreen;
@@ -18,6 +20,7 @@ import com.refinedmods.refinedstorage.common.support.network.item.NetworkItemPro
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -31,6 +34,10 @@ public class ClientModInitializerImpl extends AbstractClientModInitializer imple
         registerKeyMappings();
         registerMenuScreens();
         registerItemProperties();
+        BlockEntityRendererRegistry.register(
+            BlockEntities.INSTANCE.getEnergyMonitor(),
+            EnergyMonitorRenderer::new
+        );
         HudRenderCallback.EVENT.register((graphics, tickCounter) -> WirelessTerminalHud.render(graphics));
     }
 
