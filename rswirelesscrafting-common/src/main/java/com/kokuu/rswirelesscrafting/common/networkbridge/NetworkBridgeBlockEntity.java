@@ -12,12 +12,16 @@ import com.kokuu.rswirelesscrafting.common.util.RateLimiter;
 import com.kokuu.rswirelesscrafting.common.util.RateMeter;
 import com.kokuu.rswirelesscrafting.common.util.SaturatedMath;
 
+import java.util.Set;
 import java.util.UUID;
 import javax.annotation.Nullable;
 
 import com.refinedmods.refinedstorage.api.network.Network;
 import com.refinedmods.refinedstorage.api.network.energy.EnergyNetworkComponent;
 import com.refinedmods.refinedstorage.common.api.support.network.AbstractNetworkNodeContainerBlockEntity;
+import com.refinedmods.refinedstorage.common.api.support.network.InWorldNetworkNodeContainer;
+import com.refinedmods.refinedstorage.common.api.support.network.NetworkNodeContainerProvider;
+import com.refinedmods.refinedstorage.common.api.support.network.item.NetworkItemTargetBlockEntity;
 import com.refinedmods.refinedstorage.common.security.BuiltinPermission;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
@@ -52,7 +56,8 @@ import net.minecraft.world.level.block.state.BlockState;
  * 按距离线性收（与手持终端同一套口径，见 {@link LinkDistanceEnergy}），
  * 从**本地网络**扣：跨网搬运不是免费的，距离仍然是成本。
  */
-public class NetworkBridgeBlockEntity extends AbstractNetworkNodeContainerBlockEntity<NetworkBridgeNetworkNode> {
+public class NetworkBridgeBlockEntity extends AbstractNetworkNodeContainerBlockEntity<NetworkBridgeNetworkNode>
+    implements NetworkNodeContainerProvider, NetworkItemTargetBlockEntity {
     private static final int SYNC_INTERVAL = 20;
     private static final String TAG_OWNER = "Owner";
 
@@ -79,6 +84,27 @@ public class NetworkBridgeBlockEntity extends AbstractNetworkNodeContainerBlockE
         // Java 不允许把 this 传进 super(...)，所以节点在构造末期才补上对方块实体的引用。
         // 节点的提供者方法只会在「容器加入网络」时被调用，那时候早就补好了。
         mainNetworkNode.attach(this);
+    }
+
+    @Override
+    public Set<InWorldNetworkNodeContainer> getContainers() {
+        return containers.getContainers();
+    }
+
+    @Override
+    public void addContainer(final InWorldNetworkNodeContainer container) {
+        containers.addContainer(container);
+    }
+
+    @Override
+    public boolean canBuild(final ServerPlayer player) {
+        return true;
+    }
+
+    @Nullable
+    @Override
+    public Network getNetworkForItem() {
+        return mainNetworkNode.getNetwork();
     }
 
     // ------------------------------------------------------------- 状态查询
