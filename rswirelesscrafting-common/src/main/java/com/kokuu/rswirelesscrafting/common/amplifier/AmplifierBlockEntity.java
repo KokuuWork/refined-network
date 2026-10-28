@@ -68,11 +68,18 @@ public class AmplifierBlockEntity extends AbstractNetworkNodeContainerBlockEntit
         }
         final Config.AmplifierEntry config = Platform.getConfig().getAmplifier();
         final Network network = mainNetworkNode.getNetwork();
-        final boolean active = config.isEnabled() && network != null && !level.hasNeighborSignal(worldPosition);
+        final boolean active = config.isEnabled() && network != null && !level.hasNeighborSignal(worldPosition)
+            && canAfford(network, config);
         updateActive(active);
         if (active) {
             consume(network, meter.next(config.getEnergyUsage()));
         }
+    }
+
+    private boolean canAfford(final Network network, final Config.AmplifierEntry config) {
+        final long cost = config.getEnergyUsage();
+        return cost <= 0 || network.getComponent(EnergyNetworkComponent.class).getStored()
+            >= Math.max(1L, cost / 20L);
     }
 
     private void updateActive(final boolean active) {

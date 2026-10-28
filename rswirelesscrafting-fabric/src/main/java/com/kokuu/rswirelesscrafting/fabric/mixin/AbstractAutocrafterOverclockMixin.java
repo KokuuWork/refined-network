@@ -25,11 +25,11 @@ import org.spongepowered.asm.mixin.injection.Redirect;
  */
 @Mixin(AutocrafterBlockEntity.class)
 public abstract class AbstractAutocrafterOverclockMixin {
-    @Shadow
+    @Shadow(remap = false)
     @Final
     private UpgradeContainer upgradeContainer;
 
-    @Shadow
+    @Shadow(remap = false)
     private int tickRate;
 
     @Redirect(

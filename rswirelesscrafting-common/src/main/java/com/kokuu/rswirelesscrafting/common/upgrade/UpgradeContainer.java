@@ -26,6 +26,9 @@ public class UpgradeContainer implements Container {
      */
     private List<ItemStack> snapshot() {
         final List<ItemStack> upgrades = new ArrayList<>(Upgrades.getUpgrades(gridStack));
+        if (upgrades.size() > size) {
+            return new ArrayList<>(upgrades.subList(0, size));
+        }
         while (upgrades.size() < size) {
             upgrades.add(ItemStack.EMPTY);
         }

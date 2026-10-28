@@ -4,13 +4,13 @@ import com.kokuu.rswirelesscrafting.common.Blocks;
 import com.kokuu.rswirelesscrafting.common.Config;
 import com.kokuu.rswirelesscrafting.common.Platform;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -26,24 +26,24 @@ import net.minecraft.world.level.block.state.BlockState;
  * 天然两侧一致。
  */
 public final class AmplifierRegistry {
-    private static final Map<ResourceKey<Level>, Set<BlockPos>> AMPLIFIERS = new ConcurrentHashMap<>();
+    private static final Map<Level, Set<BlockPos>> AMPLIFIERS =
+        Collections.synchronizedMap(new WeakHashMap<>());
 
     private AmplifierRegistry() {
     }
 
     public static void add(final Level level, final BlockPos pos) {
-        AMPLIFIERS.computeIfAbsent(level.dimension(), key -> new CopyOnWriteArraySet<>()).add(pos.immutable());
+        AMPLIFIERS.computeIfAbsent(level, key -> new CopyOnWriteArraySet<>()).add(pos.immutable());
     }
 
     public static void remove(final Level level, final BlockPos pos) {
-        final ResourceKey<Level> dimension = level.dimension();
-        final Set<BlockPos> positions = AMPLIFIERS.get(dimension);
+        final Set<BlockPos> positions = AMPLIFIERS.get(level);
         if (positions == null) {
             return;
         }
         positions.remove(pos);
         if (positions.isEmpty()) {
-            AMPLIFIERS.remove(dimension, positions);
+            AMPLIFIERS.remove(level, positions);
         }
     }
 
@@ -63,7 +63,7 @@ public final class AmplifierRegistry {
         if (!config.isEnabled() || multiplierPercent <= 100L) {
             return multiplierPercent;
         }
-        final Set<BlockPos> positions = AMPLIFIERS.get(level.dimension());
+        final Set<BlockPos> positions = AMPLIFIERS.get(level);
         if (positions == null || positions.isEmpty()) {
             return multiplierPercent;
         }
@@ -98,7 +98,7 @@ public final class AmplifierRegistry {
         if (!config.isEnabled()) {
             return 0;
         }
-        final Set<BlockPos> positions = AMPLIFIERS.get(level.dimension());
+        final Set<BlockPos> positions = AMPLIFIERS.get(level);
         if (positions == null || positions.isEmpty()) {
             return 0;
         }

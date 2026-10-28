@@ -3,6 +3,7 @@ package com.kokuu.rswirelesscrafting.common.hud;
 import com.kokuu.rswirelesscrafting.common.ContentNames;
 import com.kokuu.rswirelesscrafting.common.Platform;
 import com.kokuu.rswirelesscrafting.common.terminal.AbstractWirelessTerminalItem;
+import com.kokuu.rswirelesscrafting.common.util.SaturatedMath;
 import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.ExtendedWirelessNetworkItemContext;
 
 import net.minecraft.client.Minecraft;
@@ -89,8 +90,10 @@ public final class WirelessTerminalHud {
 
     private static boolean isLow(final ItemStack terminal) {
         final long capacity = AbstractWirelessTerminalItem.getEnergyCapacity(terminal);
-        return AbstractWirelessTerminalItem.getStoredEnergy(terminal) * LOW_ENERGY_DENOMINATOR
-            < capacity * LOW_ENERGY_NUMERATOR;
+        return SaturatedMath.multiply(
+            AbstractWirelessTerminalItem.getStoredEnergy(terminal),
+            LOW_ENERGY_DENOMINATOR
+        ) < capacity * LOW_ENERGY_NUMERATOR;
     }
 
     private static ItemStack heldTerminal(final Player player) {

@@ -99,7 +99,8 @@ public final class Upgrades {
     }
 
     public static List<ItemStack> getUpgrades(final ItemStack stack) {
-        return new ArrayList<>(stack.getOrDefault(DataComponents.INSTANCE.getUpgrades(), List.of()));
+        final List<ItemStack> all = stack.getOrDefault(DataComponents.INSTANCE.getUpgrades(), List.of());
+        return new ArrayList<>(all.subList(0, Math.min(MAX_UPGRADES, all.size())));
     }
 
     /**

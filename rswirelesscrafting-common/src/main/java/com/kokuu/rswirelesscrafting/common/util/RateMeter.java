@@ -18,7 +18,7 @@ public final class RateMeter {
      * @return 本 tick 可用的额度
      */
     public long next(final long perSecond) {
-        final long total = carry + Math.max(0L, perSecond);
+        final long total = SaturatedMath.add(carry, Math.max(0L, perSecond));
         carry = total % TICKS_PER_SECOND;
         return total / TICKS_PER_SECOND;
     }
