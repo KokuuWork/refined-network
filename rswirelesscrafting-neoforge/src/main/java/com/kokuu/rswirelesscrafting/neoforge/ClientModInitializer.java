@@ -1,6 +1,7 @@
 package com.kokuu.rswirelesscrafting.neoforge;
 
 import com.kokuu.rswirelesscrafting.common.AbstractClientModInitializer;
+import com.kokuu.rswirelesscrafting.common.BlockEntities;
 import com.kokuu.rswirelesscrafting.common.ContentNames;
 import com.kokuu.rswirelesscrafting.common.Items;
 import com.kokuu.rswirelesscrafting.common.KeyMappings;
@@ -8,6 +9,7 @@ import com.kokuu.rswirelesscrafting.common.Menus;
 import com.kokuu.rswirelesscrafting.common.ModIdentifierUtil;
 import com.kokuu.rswirelesscrafting.common.Platform;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationScreen;
+import com.kokuu.rswirelesscrafting.common.client.EnergyMonitorRenderer;
 import com.kokuu.rswirelesscrafting.common.hud.WirelessTerminalHud;
 import com.kokuu.rswirelesscrafting.common.monitor.WirelessMonitorScreen;
 import com.kokuu.rswirelesscrafting.common.smartsorter.SmartSorterScreen;
@@ -21,6 +23,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
@@ -46,6 +49,11 @@ public class ClientModInitializer extends AbstractClientModInitializer {
     @SubscribeEvent
     public static void onMouseInput(final InputEvent.MouseButton.Pre e) {
         handleInputEvents();
+    }
+
+    @SubscribeEvent
+    public static void onRegisterRenderers(final EntityRenderersEvent.RegisterRenderers e) {
+        e.registerBlockEntityRenderer(BlockEntities.INSTANCE.getEnergyMonitor(), EnergyMonitorRenderer::new);
     }
 
     @SubscribeEvent

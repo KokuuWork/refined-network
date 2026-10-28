@@ -19,6 +19,7 @@ import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlock;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockEntity;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockItem;
 import com.kokuu.rswirelesscrafting.common.configcard.WirelessConfigurationCardItem;
+import com.kokuu.rswirelesscrafting.common.connector.WirelessConnectorItem;
 import com.kokuu.rswirelesscrafting.common.energymonitor.EnergyMonitorBlock;
 import com.kokuu.rswirelesscrafting.common.energymonitor.EnergyMonitorBlockEntity;
 import com.kokuu.rswirelesscrafting.common.energymonitor.EnergyMonitorBlockItem;
@@ -64,6 +65,8 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
@@ -114,6 +117,7 @@ public class ModInitializer extends AbstractModInitializer {
         Platform.setItemEnergyProvider(new PlatformImpl());
         if (FMLEnvironment.dist == Dist.CLIENT) {
             eventBus.addListener(ClientModInitializer::onClientSetup);
+            eventBus.addListener(ClientModInitializer::onRegisterRenderers);
             eventBus.addListener(ClientModInitializer::onRegisterMenuScreens);
             eventBus.addListener(ClientModInitializer::onRegisterKeyMappings);
             eventBus.addListener(ClientModInitializer::onRegisterGuiLayers);
@@ -135,21 +139,44 @@ public class ModInitializer extends AbstractModInitializer {
     }
 
     private void onRightClickBlock(final PlayerInteractEvent.RightClickBlock event) {
-        if (!(event.getEntity() instanceof ServerPlayer player) || !player.isCrouching()) {
+        if (event.getHand() != InteractionHand.MAIN_HAND
+            || !(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
-        final var pos = event.getPos();
-        // 本模组方块自己的 useWithoutItem 负责绑定，避免全局入口抢先改变剪贴板语义。
-        if (event.getLevel().getBlockState(pos).getBlock().getDescriptionId()
-            .startsWith("block.rswirelesscrafting.")) {
+        // 连接器：任何姿态都接管——敲哪台连哪台，绝不放方块。
+        if (player.getMainHandItem().getItem() instanceof WirelessConnectorItem connector) {
+            final InteractionResult result =
+                connector.apply(player, event.getLevel(), event.getPos(), player.isCrouching());
+            event.setCanceled(true);
+            event.setCancellationResult(result);
             return;
+        }
+        if (!player.isCrouching()) {
+            return;
+        }
+        // 潜行 + 手上有物品时原版会跳过方块交互直接放置，这里手动把交互交还给本模组方块。
+        final InteractionResult result = ownBlockOrAnchor(event, player);
+        if (result != InteractionResult.PASS) {
+            event.setCanceled(true);
+            event.setCancellationResult(result);
+        }
+    }
+
+    private static InteractionResult ownBlockOrAnchor(final PlayerInteractEvent.RightClickBlock event,
+                                                       final ServerPlayer player) {
+        final var pos = event.getPos();
+        final var state = event.getLevel().getBlockState(pos);
+        if (state.getBlock().getDescriptionId().startsWith("block.rswirelesscrafting.")) {
+            return state.useWithoutItem(event.getLevel(), player, event.getHitVec());
         }
         final GlobalPos target = GlobalPos.of(event.getLevel().dimension(), pos);
         if (BoundTargetResolver.resolveNetwork(event.getLevel(), target).isEmpty()) {
-            return;
+            return InteractionResult.PASS;
         }
         PairingClipboard.setAnchor(player, target);
         player.displayClientMessage(ContentNames.LINK_ANCHOR_SET, false);
+        // 记完接入点就到此为止，别顺手把手里的方块放下去。
+        return InteractionResult.SUCCESS;
     }
 
     private void registerContent(final IEventBus eventBus) {
@@ -349,6 +376,11 @@ public class ModInitializer extends AbstractModInitializer {
         );
         Items.INSTANCE.setWirelessConfigurationCard(
             callback.register(ContentIds.WIRELESS_CONFIGURATION_CARD, () -> new WirelessConfigurationCardItem(
+                new Item.Properties().stacksTo(1)
+            ))
+        );
+        Items.INSTANCE.setWirelessConnector(
+            callback.register(ContentIds.WIRELESS_CONNECTOR, () -> new WirelessConnectorItem(
                 new Item.Properties().stacksTo(1)
             ))
         );
