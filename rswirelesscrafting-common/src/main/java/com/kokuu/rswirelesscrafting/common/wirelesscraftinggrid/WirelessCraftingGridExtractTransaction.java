@@ -2,16 +2,16 @@ package com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid;
 
 import com.kokuu.rswirelesscrafting.common.Platform;
 
-import com.refinedmods.refinedstorage.common.api.support.network.item.NetworkItemContext;
 import com.refinedmods.refinedstorage.common.grid.ExtractTransaction;
 import com.refinedmods.refinedstorage.common.support.resource.ItemResource;
 import net.minecraft.world.entity.player.Player;
 
 class WirelessCraftingGridExtractTransaction implements ExtractTransaction {
-    private final NetworkItemContext context;
+    private final ExtendedWirelessNetworkItemContext context;
     private final ExtractTransaction delegate;
 
-    WirelessCraftingGridExtractTransaction(final NetworkItemContext context, final ExtractTransaction delegate) {
+    WirelessCraftingGridExtractTransaction(final ExtendedWirelessNetworkItemContext context,
+                                           final ExtractTransaction delegate) {
         this.context = context;
         this.delegate = delegate;
     }

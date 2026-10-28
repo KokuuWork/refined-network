@@ -76,9 +76,9 @@ public class ExtendedWirelessNetworkItemContext implements NetworkItemContext {
     /**
      * 统一工厂：读取物品上已装配的全部插件，构造一个距离感知 + 卡片放宽的上下文。
      */
-    public static NetworkItemContext wrap(final ItemStack stack,
-                                          final ServerPlayer player,
-                                          final SlotReference slotReference) {
+    public static ExtendedWirelessNetworkItemContext wrap(final ItemStack stack,
+                                                          final ServerPlayer player,
+                                                          final SlotReference slotReference) {
         return new ExtendedWirelessNetworkItemContext(
             stack,
             player,
@@ -141,13 +141,31 @@ public class ExtendedWirelessNetworkItemContext implements NetworkItemContext {
             .orElse(false);
     }
 
+    /**
+     * 按实际距离倍率检查动作费用；远程输电不足时与扣费路径一样回落到终端电池。
+     */
+    public boolean canAfford(final long baseCost) {
+        if (!RefinedStorageApi.INSTANCE.isEnergyRequired()) {
+            return true;
+        }
+        final long cost = actionCost(baseCost);
+        final boolean networkCovers = remoteEnergy && resolveNetwork()
+            .map(network -> network.getComponent(EnergyNetworkComponent.class).getStored() >= cost)
+            .orElse(false);
+        return networkCovers || WirelessCraftingGridItem.createEnergyStorage(stack).getStored() >= cost;
+    }
+
     @Override
     public void drainEnergy(final long amount) {
-        final long cost = Math.max(1L, amount * distanceMultiplierPercent(stack, player) / 100);
+        final long cost = actionCost(amount);
         if (remoteEnergy && payFromNetwork(cost)) {
             return;
         }
         standard.drainEnergy(cost);
+    }
+
+    private long actionCost(final long baseCost) {
+        return Math.max(1L, baseCost * distanceMultiplierPercent(stack, player) / 100);
     }
 
     /**

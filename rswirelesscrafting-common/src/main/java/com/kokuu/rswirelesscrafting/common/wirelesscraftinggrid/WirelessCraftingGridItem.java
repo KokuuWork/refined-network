@@ -53,7 +53,7 @@ public class WirelessCraftingGridItem extends AbstractNetworkEnergyItem {
      * <p>每次查询能量能力都会重新计算，所以装配 / 拆卸电池升级卡后容量立刻生效，
      * 无需重新合成终端。
      */
-    public EnergyStorage createEnergyStorage(final ItemStack stack) {
+    public static EnergyStorage createEnergyStorage(final ItemStack stack) {
         final EnergyStorage energyStorage = new EnergyStorageImpl(getEnergyCapacity(stack));
         return RefinedStorageApi.INSTANCE.asItemEnergyStorage(energyStorage, stack);
     }
@@ -157,7 +157,8 @@ public class WirelessCraftingGridItem extends AbstractNetworkEnergyItem {
     public void use(final ServerPlayer player,
                     final ItemStack stack,
                     final SlotReference slotReference) {
-        final NetworkItemContext context = ExtendedWirelessNetworkItemContext.wrap(stack, player, slotReference);
+        final ExtendedWirelessNetworkItemContext context =
+            ExtendedWirelessNetworkItemContext.wrap(stack, player, slotReference);
         use(stack.get(DataComponents.CUSTOM_NAME), player, slotReference, context);
     }
 
@@ -195,7 +196,9 @@ public class WirelessCraftingGridItem extends AbstractNetworkEnergyItem {
             RefinedStorageApi.INSTANCE.sendNoPermissionToOpenMessage(player, ContentNames.WIRELESS_CRAFTING_GRID);
             return;
         }
-        final CraftingGrid craftingGrid = new WirelessCraftingGrid(player, context, slotReference);
+        final ExtendedWirelessNetworkItemContext extendedContext =
+            (ExtendedWirelessNetworkItemContext) context;
+        final CraftingGrid craftingGrid = new WirelessCraftingGrid(player, extendedContext, slotReference);
         final Component correctedName = requireNonNullElse(name, ContentNames.WIRELESS_CRAFTING_GRID);
         final var provider = new WirelessCraftingGridExtendedMenuProvider(correctedName, craftingGrid, slotReference);
         com.refinedmods.refinedstorage.common.Platform.INSTANCE.getMenuOpener().openMenu(player, provider);
