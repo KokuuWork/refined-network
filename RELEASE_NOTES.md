@@ -3,26 +3,11 @@
 > ✅ **正式版 / Stable** —— 取代 `0.4.1-beta.1`（该测试版已**撤下**：它包含几个恶性 bug，包括关闭无线合成终端会崩服）。
 > NeoForge 侧已完成**部分功能**的实机验证：终端绑定、无线样板终端、无线能量接收器、能量监控仪显示屏、无线连接器。
 > 其余功能与 Fabric 侧代码一致、构建与 checkstyle 通过，但**本轮未逐项实测**——建议先在测试存档里过一遍并备份世界。
-> 有问题**优先来 QQ 群 498700382**（👉 [点击加入](https://qm.qq.com/q/ueYTU8T3xK)）。
 
 > ✅ **Stable release.** Replaces `0.4.1-beta.1`, withdrawn because it shipped several serious bugs (including a
 > server crash when closing the wireless crafting grid). Part of the feature set has been verified in-game on
 > NeoForge; the rest and the Fabric build are code-identical and compile clean but were not individually tested
 > this round. Use a test world and back up your saves first.
-
----
-
-## 🐞 有问题？来 QQ 群（Bug 维修 / 反馈群）
-
-**QQ 群号：`498700382`** —— 👉 **[点击加入群聊](https://qm.qq.com/q/ueYTU8T3xK)**
-（群名「MC-玩了X年服务器终于不想玩了」；也可以在 QQ 里直接搜索群号 `498700382`）
-
-崩溃、耗电数值不对、GUI 显示异常、多人 / 服务器故障、新功能建议，**来群里直接说最快**，带上 `latest.log` 或崩溃报告即可。
-不方便用 QQ 也可以提 [Issue](https://github.com/KokuuWork/rswirelesscrafting/issues)。
-
-> 🐞 **Got a bug? Join the QQ support group: `498700382`** — 👉 [click to join](https://qm.qq.com/q/ueYTU8T3xK).
-
----
 
 ## 下载 / Downloads
 
@@ -134,7 +119,7 @@
 
 ## 反馈 / Feedback
 
-**最快的方式：QQ 群 `498700382`** —— 👉 [点击加入群聊](https://qm.qq.com/q/ueYTU8T3xK)（也可在 QQ 里搜索群号）。
+请到 [Issues](https://github.com/KokuuWork/rswirelesscrafting/issues) 反馈，也可以加 QQ 群 `498700382`。
 
 反馈请附：
 
