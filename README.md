@@ -15,41 +15,49 @@
 - **美术分界**：0.3.3 与 0.4.1 使用重绘后的新纹理（RS2 风格灰机壳、深灰内嵌面板、青色信号色，方块为多面模型）；**0.3.2 及更早版本保持旧美术，不再回改**。
 - **验证范围**：0.4.1 在 NeoForge 侧已实机验证终端绑定、无线样板终端、无线能量接收器、能量监控仪显示屏和无线连接器；其余功能与 Fabric 侧代码一致、构建与 checkstyle 通过，但**未逐项实测**，建议先在测试存档里过一遍并备份世界。
 
-## 内容总览
+## 内容一览（0.4.1）
 
-### 0.3.x 稳定线（只有这些内容）
+### 终端（手持）
 
 | 图标 | 内容 | 作用 |
 |---|---|---|
 | <img src="docs/images/item-grid.png" width="32" alt=""> | **无线合成终端** | 远程打开 RS 网络、手动合成和自动合成。潜行 + 右键打开插件装配界面。 |
-| <img src="docs/images/item-battery.png" width="32" alt=""> | **电池升级插件** | 每张增加 1000 FE 终端容量。 |
-| <img src="docs/images/item-energy.png" width="32" alt=""> | **初级能耗插件** | 距离倍率减半，最低仍为 100%。 |
-| <img src="docs/images/item-advanced-energy.png" width="32" alt=""> | **高级能耗插件** | 同维度距离倍率归 100%，跨维度倍率不变。 |
-| <img src="docs/images/item-range.png" width="32" alt=""> | **距离升级插件** | 同维度不再受距离限制。 |
-| <img src="docs/images/item-interdimensional.png" width="32" alt=""> | **维度升级插件** | 通过 Network Transmitter / Receiver 跨维度访问。 |
-| <img src="docs/images/item-remote-energy.png" width="32" alt=""> | **远程输电插件** | 优先使用绑定网络的电，不足时回落到终端电池。 |
-| <img src="docs/images/item-terminal-charging-station.png" width="32" alt=""> | **终端充电站** | 3 个有线槽和无线充电，支持外部 FE 输入。 |
+| <img src="docs/images/item-wireless-pattern-grid.png" width="32" alt=""> | **无线样板终端** | 远程编写自动化样板（合成 / 处理 / 切石 / 锻造四种）。 |
+| <img src="docs/images/item-wireless-autocrafter-manager.png" width="32" alt=""> | **无线自动合成仓管理器** | 远程查看和移动全网合成仓的样板。 |
+| <img src="docs/images/item-wireless-monitor.png" width="32" alt=""> | **无线监控终端** | 阈值提醒与自动补货；手持时显示电量 / 距离 / 倍率的 HUD（默认关闭）。 |
 
-插件放在终端的 4 个装配槽里，可以随时取下，不用重新合成终端。它们是本模组自己的物品，**不等同于 RS 原生升级卡**，不要混用两套升级槽。
-
-### 0.4.1 新增（正式版已包含）
+### 插件（装在终端的 4 个装配槽里）
 
 | 图标 | 内容 | 作用 |
 |---|---|---|
-| <img src="docs/images/item-wireless-pattern-grid.png" width="32" alt=""> | **无线样板终端** | 远程编辑自动化样板。 |
-| <img src="docs/images/item-wireless-autocrafter-manager.png" width="32" alt=""> | **无线自动合成仓管理器** | 远程查看和移动全网合成仓的样板。 |
-| <img src="docs/images/item-wireless-amplifier.png" width="32" alt=""> | **无线增幅塔** | 覆盖范围内的终端距离倍率打折。 |
-| <img src="docs/images/item-wireless-bridge.png" width="32" alt=""> | **无线桥** | 基点/据点两种身份，支持跨维度和区块保活。 |
-| <img src="docs/images/item-wireless-configuration-card.png" width="32" alt=""> | **无线配置卡** | 复制单个配置，或批量粘贴给附近同类型方块。 |
-| <img src="docs/images/item-wireless-connector.png" width="32" alt=""> | **无线连接器** | 把接收器、监控仪、两种桥绑到网络；两段式：先右键网络方块记录接入点，再右键设备。 |
-| <img src="docs/images/item-wireless-monitor.png" width="32" alt=""> | **无线监控终端** | 阈值提醒，或低于目标时自动补货；手持终端时显示电量/距离/倍率的 HUD（默认关闭）。 |
-| <img src="docs/images/item-overclock-upgrade.png" width="32" alt=""> | **超频升级卡** | 插入 RS 自动合成仓，每张等待间隔折半，最多 4 张。 |
+| <img src="docs/images/item-battery.png" width="32" alt=""> | **电池升级插件** | 每张增加 1000 FE 终端容量。 |
+| <img src="docs/images/item-energy.png" width="32" alt=""> | **初级能耗插件** | 距离倍率减半，最低仍为 100%。 |
+| <img src="docs/images/item-advanced-energy.png" width="32" alt=""> | **高级能耗插件** | 同维度距离倍率归 100%，跨维度不变。 |
+| <img src="docs/images/item-range.png" width="32" alt=""> | **距离升级插件** | 同维度不再受距离限制。 |
+| <img src="docs/images/item-interdimensional.png" width="32" alt=""> | **维度升级插件** | 通过 Network Transmitter / Receiver 跨维度访问。 |
+| <img src="docs/images/item-remote-energy.png" width="32" alt=""> | **远程输电插件** | 优先用绑定网络的电，不足时回落到终端电池。 |
+
+插件随时可以取下，不用重新合成终端。它们是本模组自己的物品，**不等同于 RS 原生升级卡**，两套升级槽不要混用。
+
+### 设备（方块）
+
+| 图标 | 内容 | 作用 |
+|---|---|---|
+| <img src="docs/images/item-terminal-charging-station.png" width="32" alt=""> | **终端充电站** | 3 个有线槽 + 无线充电（全场 3 个名额），自动从网络补电。 |
+| <img src="docs/images/item-wireless-amplifier.png" width="32" alt=""> | **无线增幅塔** | 覆盖范围内的终端距离倍率打对折。 |
+| <img src="docs/images/item-wireless-bridge.png" width="32" alt=""> | **无线桥** | 基点 / 据点两种身份，支持跨维度和区块保活。 |
 | <img src="docs/images/item-wireless-energy-receiver.png" width="32" alt=""> | **无线能量接收器** | 从绑定的网络取电，供给它旁边这张网络（空控制器也能点亮）。 |
-| <img src="docs/images/item-energy-monitor.png" width="32" alt=""> | **能量监控仪** | 方块上方直接显示电量/收支/预计耗尽，也可右键看聊天栏。 |
+| <img src="docs/images/item-energy-monitor.png" width="32" alt=""> | **能量监控仪** | 方块上方直接显示电量 / 收支 / 预计耗尽，也可右键看聊天栏。 |
 | <img src="docs/images/item-smart-sorter.png" width="32" alt=""> | **智能分拣站** | 按物品或标签把网络物品送到面前容器。 |
 | <img src="docs/images/item-network-bridge.png" width="32" alt=""> | **网络桥接器** | 在两张独立网络之间转发物品和能量。 |
 
-以上内容已随 **0.4.1 正式版**发布（此前带恶性 bug 的 `0.4.1-beta.1` 已撤下）。NeoForge 侧完成部分功能实机验证，其余与 Fabric 侧构建通过、代码一致，建议先在测试存档里过一遍。
+### 工具
+
+| 图标 | 内容 | 作用 |
+|---|---|---|
+| <img src="docs/images/item-wireless-connector.png" width="32" alt=""> | **无线连接器** | 把接收器、监控仪和两种桥绑到网络。先右键 RS 网络方块记录接入点，再右键目标设备完成绑定；合成 = RS 原版扳手 + 高级处理器 ×2 + 石英富集铁 ×2。 |
+| <img src="docs/images/item-wireless-configuration-card.png" width="32" alt=""> | **无线配置卡** | 复制 RS 方块的设置，或按增幅塔范围批量粘贴。 |
+| <img src="docs/images/item-overclock-upgrade.png" width="32" alt=""> | **超频升级卡** | 插进 RS 原版自动合成仓，每张等待间隔折半，最多 4 张。 |
 
 ### 配方示例
 
@@ -124,6 +132,26 @@
 
 这张卡通过 mixin 修改 RS 的等待间隔读取逻辑。RS 改字段或方法时，按当前设计会安静失效，不保证继续有效。
 
+### 无线能量接收器
+
+把它当一根「不用铺的电缆」：从一张网络取电，喂给它旁边那张网络。
+
+1. 贴着**要用电的那张网络**放（旁边有控制器或线缆即可）。
+2. 用**无线连接器**绑到**有电的那张网络**（比如主基地控制器）。
+3. 本地网络的空控制器会被这份电点亮。
+
+- 带宽 = 内部容量的 1/10 每秒，越远越慢（跨维度 1/16）。
+- 链路费从**供电方那张网**扣，不是从本地扣。
+- 绑定到自己旁边这张网会直接停机，否则就是自己给自己充电。
+- 红石信号可停机，缓冲里的电保留。
+
+### 能量监控仪
+
+- 贴着网络方块放就能读那张网，不需要绑定；也可以用连接器绑到远处网络。
+- 方块上方悬浮显示电量 / 净收支 / 预计耗尽，48 格内可见、每 0.5 秒刷新。
+- 右键在聊天栏看详细数据；比较器输出按电量充盈度 0–15。
+- 低于阈值时方块亮红灯。
+
 ## 美术与图标
 
 所有物品图标和方块纹理由 `gen_textures.py` 程序化生成（16×16，不依赖外部素材），整体向 RS2 原版靠拢，但保留本模组自己的识别色：
@@ -190,37 +218,47 @@ The idea is simple: when you are in a mine, the Nether or an outpost, you often 
 - **Art boundary**: 0.3.3 and 0.4.1 ship the redrawn textures (RS2-style grey casings, dark inset panels, cyan signal colour, multi-face block models); **0.3.2 and older keep the old art and will not be retrofitted**.
 - **Verification scope**: on NeoForge, terminal binding, the wireless pattern terminal, the wireless energy receiver, the energy monitor display and the wireless connector were verified in-game. The rest and the Fabric build are code-identical and compile clean, but were not individually tested — use a test world and back up your saves first.
 
-### 0.3.x stable line
+### Terminals
 
 | Icon | Item | What it does |
 |---|---|---|
 | <img src="docs/images/item-grid.png" width="32" alt=""> | **Wireless Crafting Grid** | Opens an RS network remotely for manual crafting and autocrafting. |
+| <img src="docs/images/item-wireless-pattern-grid.png" width="32" alt=""> | **Wireless Pattern Terminal** | Edit autocrafting patterns remotely (crafting / processing / stonecutter / smithing). |
+| <img src="docs/images/item-wireless-autocrafter-manager.png" width="32" alt=""> | **Wireless Autocrafter Manager** | View and move patterns across the network. |
+| <img src="docs/images/item-wireless-monitor.png" width="32" alt=""> | **Wireless Monitor Terminal** | Threshold alerts and automatic restocking, plus an optional held-item HUD (off by default). |
+
+### Upgrades (four slots inside a terminal)
+
+| Icon | Item | What it does |
+|---|---|---|
 | <img src="docs/images/item-battery.png" width="32" alt=""> | **Battery Upgrade** | +1000 FE terminal capacity per card. |
-| <img src="docs/images/item-energy.png" width="32" alt=""> | **Energy Upgrade** | Halves the distance multiplier. |
+| <img src="docs/images/item-energy.png" width="32" alt=""> | **Energy Upgrade** | Halves the distance multiplier, never below 100%. |
 | <img src="docs/images/item-advanced-energy.png" width="32" alt=""> | **Advanced Energy Upgrade** | Removes same-dimension distance cost. |
 | <img src="docs/images/item-range.png" width="32" alt=""> | **Range Upgrade** | Unlimited same-dimension range. |
 | <img src="docs/images/item-interdimensional.png" width="32" alt=""> | **Interdimensional Upgrade** | Access through Network Transmitter / Receiver. |
 | <img src="docs/images/item-remote-energy.png" width="32" alt=""> | **Remote Energy Upgrade** | Uses network energy first, then the terminal battery. |
-| <img src="docs/images/item-terminal-charging-station.png" width="32" alt=""> | **Terminal Charging Station** | Three wired slots plus wireless charging and external FE input. |
 
-Upgrade cards fit in the terminal's four slots and can be removed at any time. They are not RS native upgrade cards.
+Cards can be removed at any time. They are **not** RS native upgrade cards — do not mix the two systems.
 
-### New in 0.4.1
+### Devices (blocks)
 
 | Icon | Item | What it does |
 |---|---|---|
-| <img src="docs/images/item-wireless-pattern-grid.png" width="32" alt=""> | **Wireless Pattern Terminal** | Edit autocrafting patterns remotely. |
-| <img src="docs/images/item-wireless-autocrafter-manager.png" width="32" alt=""> | **Wireless Autocrafter Manager** | View and move patterns across the network. |
-| <img src="docs/images/item-wireless-amplifier.png" width="32" alt=""> | **Wireless Amplifier** | Reduces the distance multiplier in its coverage area. |
-| <img src="docs/images/item-wireless-bridge.png" width="32" alt=""> | **Wireless Bridge** | Anchor/endpoint pairing with chunk keeping. |
-| <img src="docs/images/item-wireless-configuration-card.png" width="32" alt=""> | **Wireless Configuration Card** | Copy or batch-paste machine configuration. |
-| <img src="docs/images/item-wireless-connector.png" width="32" alt=""> | **Wireless Connector** | Binds receivers, monitors and both bridges to a network: right-click a network block to record an access point, then right-click the device. |
-| <img src="docs/images/item-wireless-monitor.png" width="32" alt=""> | **Wireless Monitor Terminal** | Threshold alerts, automatic restocking, and an optional held-item HUD showing energy, distance and multiplier (off by default). |
-| <img src="docs/images/item-overclock-upgrade.png" width="32" alt=""> | **Overclock Upgrade** | Halves autocrafter waiting time per card, up to four. |
+| <img src="docs/images/item-terminal-charging-station.png" width="32" alt=""> | **Terminal Charging Station** | Three wired slots plus wireless charging (three global devices), refilled from the network. |
+| <img src="docs/images/item-wireless-amplifier.png" width="32" alt=""> | **Wireless Amplifier** | Halves the distance multiplier for terminals in range. |
+| <img src="docs/images/item-wireless-bridge.png" width="32" alt=""> | **Wireless Bridge** | Anchor/endpoint pairing across dimensions, with chunk keeping. |
 | <img src="docs/images/item-wireless-energy-receiver.png" width="32" alt=""> | **Wireless Energy Receiver** | Draws power from the bound network and feeds the network it is placed against. |
-| <img src="docs/images/item-energy-monitor.png" width="32" alt=""> | **Energy Monitor** | Shows stored / net rate / time-to-empty floating above the block; right-click for chat details. |
+| <img src="docs/images/item-energy-monitor.png" width="32" alt=""> | **Energy Monitor** | Shows stored / net rate / time-to-empty floating above the block. |
 | <img src="docs/images/item-smart-sorter.png" width="32" alt=""> | **Smart Sorter** | Routes items or tags into the facing container. |
-| <img src="docs/images/item-network-bridge.png" width="32" alt=""> | **Network Bridge** | Transfers items and energy between two networks. |
+| <img src="docs/images/item-network-bridge.png" width="32" alt=""> | **Network Bridge** | Transfers items and energy between two independent networks. |
+
+### Tools
+
+| Icon | Item | What it does |
+|---|---|---|
+| <img src="docs/images/item-wireless-connector.png" width="32" alt=""> | **Wireless Connector** | Binds receivers, monitors and both bridges to a network: right-click an RS network block to record an access point, then right-click the device. Crafted from an RS wrench + two advanced processors + two quartz-enriched iron. |
+| <img src="docs/images/item-wireless-configuration-card.png" width="32" alt=""> | **Wireless Configuration Card** | Copies RS block settings, or batch-pastes within amplifier range. |
+| <img src="docs/images/item-overclock-upgrade.png" width="32" alt=""> | **Overclock Upgrade** | Fits an RS autocrafter; halves the waiting interval per card, up to four. |
 
 Everything above ships in **0.4.1 (stable)**. Part of the set was verified in-game on NeoForge; the rest and the Fabric build compile clean and are code-identical, but were not individually tested — use a test world first.
 
@@ -235,11 +273,37 @@ Actions have a base cost. Distance and upgrades determine the final cost.
 
 The dedicated-server config is not automatically sent to clients. Tooltips show local config values; the server is authoritative for billing.
 
-### Pairing new devices
+### Binding block devices
 
-Sneak-right-click an RS network block to record an access point, then sneak-right-click the receiver, monitor or network bridge to bind it. Sneak-right-click a bound device again to unbind it.
+Block devices (energy receiver, energy monitor, wireless bridge, network bridge) are bound with the **Wireless Connector**:
+
+1. Right-click an RS network block with the connector to record an access point — chat reports "Access point set: dimension x, y, z".
+2. Right-click the target device to bind it. Both ends light up with a ring and an electric-spark line connects them.
+3. Right-click a bound device again to unbind; sneak-right-click to clear the recorded access point.
+
+A tool is required because these devices are **block items**: right-clicking with one in hand always places the block first, so the device's own binding entry can never run.
 
 A wireless bridge or network bridge can also be an access point. An energy receiver or energy monitor is not an access point.
+
+### Wireless energy receiver
+
+Think of it as a cable you do not have to lay: it draws power from one network and feeds the network it sits against.
+
+1. Place it against the network that **needs** power (a controller or cable next to it is enough).
+2. Bind it with the **wireless connector** to the network that **has** power.
+3. An empty controller on the local network will come alive from that power.
+
+- Throughput = 1/10 of internal capacity per second, slower with distance (1/16 across dimensions).
+- The link fee is paid by the **supplying** network.
+- Binding it to the network it sits against disables it — otherwise it would charge itself.
+- A redstone signal pauses it; buffered energy is kept.
+
+### Energy monitor
+
+- Placed against a network it reads that network without any binding; it can also be bound to a remote network with the connector.
+- Stored / net rate / time-to-empty float above the block within 48 blocks, refreshed every 0.5 s.
+- Right-click for details in chat; the comparator outputs 0–15 by charge level.
+- Turns red below the configured low threshold.
 
 ### Art and icons
 

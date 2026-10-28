@@ -349,6 +349,7 @@ def load_assets():
         "monitor_off": "wireless_monitor/inactive.png",
         "monitor_on": "wireless_monitor/active.png",
         "card": "wireless_configuration_card.png",
+        "connector": "wireless_connector.png",
         "battery": "battery_upgrade.png",
         "range": "range_upgrade.png",
         "overclock": "overclock_upgrade.png",
@@ -412,7 +413,7 @@ def sprite(assets, key, size):
 def items_figure(assets, path):
     order = ["grid_off", "grid_on", "pattern_off", "pattern_on", "manager_off", "manager_on",
              "battery", "energy", "advanced", "range", "interdim", "remote", "charging",
-             "amplifier", "bridge_on", "card", "monitor_on", "overclock"]
+             "amplifier", "bridge_on", "card", "connector", "monitor_on", "overclock"]
     scale = 8
     cell = 16 * scale + 8          # slot size, leaving a 4px inset for the sprite
     gap = 16
@@ -516,6 +517,7 @@ def main():
                       ("manager_on", "item-wireless-autocrafter-manager.png"),
                       ("bridge_on", "item-wireless-bridge.png"),
                       ("card", "item-wireless-configuration-card.png"),
+                      ("connector", "item-wireless-connector.png"),
                       ("monitor_on", "item-wireless-monitor.png"),
                       ("overclock", "item-overclock-upgrade.png"),
                       ("battery", "item-battery.png"),
