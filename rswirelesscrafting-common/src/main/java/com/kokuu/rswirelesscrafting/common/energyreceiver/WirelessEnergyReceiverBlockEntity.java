@@ -4,11 +4,13 @@ import com.kokuu.rswirelesscrafting.common.BlockEntities;
 import com.kokuu.rswirelesscrafting.common.Config;
 import com.kokuu.rswirelesscrafting.common.ContentNames;
 import com.kokuu.rswirelesscrafting.common.Platform;
+import com.kokuu.rswirelesscrafting.common.connector.ConnectorTarget;
+import com.kokuu.rswirelesscrafting.common.link.AdjacentNetworks;
 import com.kokuu.rswirelesscrafting.common.link.BoundPosition;
 import com.kokuu.rswirelesscrafting.common.link.BoundTargetResolver;
 import com.kokuu.rswirelesscrafting.common.link.LinkDistanceEnergy;
 import com.kokuu.rswirelesscrafting.common.link.LinkSecurity;
-import com.kokuu.rswirelesscrafting.common.link.NetworkAttachment;
+import com.kokuu.rswirelesscrafting.common.link.NetworkMount;
 import com.kokuu.rswirelesscrafting.common.util.RateMeter;
 import com.kokuu.rswirelesscrafting.common.util.SaturatedMath;
 
@@ -31,48 +33,52 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * 无线能量接收器：把**远处**的 FE 发电接进 RS 网络。
+ * 无线能量接收器：**从绑定的网络取电，喂给旁边这张网络**——一根不用铺的电缆。
  *
  * <h2>它解决什么问题</h2>
- * RS 网络唯一的能量入口是控制器（能量能力只注册在控制器和便携终端上），
- * 所以「下界岩浆机 → 主基地网络」只能拉一条能量线回来。本方块让这件事变成无线：
- * 贴在发电机旁边收电，再以「网络能量提供者」的身份把电送进绑定的那张网络。
+ * RS 网络唯一的能量入口是控制器，所以「主基地有大电厂、矿场只有空控制器」这种情况，
+ * 以前只能拉一条能量线过去。本方块让这件事变成无线：
+ * <ol>
+ *   <li>把它贴着**要用电的那张网络**放（旁边有控制器或线缆即可）；</li>
+ *   <li>用无线连接器把它绑到**有电的那张网络**（比如主基地的控制器）。</li>
+ * </ol>
+ * 于是它每秒从那头抽一点电存进内部缓冲，同时以 {@code EnergyProvider} 的身份待在本地网络里，
+ * 缓冲里的电就是本地网络能用的电。
  *
- * <h2>怎么做到的</h2>
- * RS 网络的总电量是所有 {@code EnergyProvider} 之和，而 {@code EnergyNetworkComponent}
- * **只提供 extract、不提供 insert**——所以「给网络充电」唯一的正道就是成为它的提供者。
- * 我们把节点挂进绑定的网络（{@link NetworkAttachment}），它的缓冲就算进了网络电量池，
- * 网络里任何机器用电都会回头向它 {@code extract}。
+ * <h2>为什么只挂一边</h2>
+ * RS 网络的总电量是所有能量提供者之和。这个节点只挂**本地网络**（{@link NetworkMount}），
+ * 它从不把自己挂进供电方那张网——否则同一份缓冲会被两张网同时计入，直接把电刷出来。
  *
- * <h2>🚨 为什么不继承 RS 的方块实体基类</h2>
- * 基类会在 {@code clearRemoved()} 里把容器交给 RS 的建图器，于是方块只要挨着线缆就会
- * **自动加入本地网络**。对一个会向网络供电的节点来说，同时待在本网和远端网里意味着
- * 同一份缓冲被两张网络同时计入——那是刷电漏洞。所以这里自己造容器
- * （{@code createNetworkNodeContainer}），只往绑定的网络里挂，从根上杜绝重复计入。
- *
- * <h2>链路费</h2>
- * 按距离线性收（与手持终端同一套口径，见 {@link LinkDistanceEnergy}）：基础值
- * {@code energyUsage} FE/s，越远越贵，跨维度按维度倍率，增幅塔覆盖内打折。
- * 费用从**绑定的网络**里扣——所以远端发电不是白嫖的，距离仍然是成本。
+ * <h2>链路费与带宽</h2>
+ * 带宽 = 容量的 1/{@link #TRANSFER_SECONDS} 每秒，并按距离倍率**变慢**（越远越慢，跨维度 1/16）。
+ * 链路费按距离线性收（{@link LinkDistanceEnergy}），从**供电方那张网**扣——远端不是白给。
  */
-public class WirelessEnergyReceiverBlockEntity extends BlockEntity {
+public class WirelessEnergyReceiverBlockEntity extends BlockEntity implements ConnectorTarget {
     private static final String TAG_BUFFER = "Buffer";
     private static final String TAG_OWNER = "Owner";
     /**
      * 每 20 tick（1 秒）对齐一次：RS 的图重建可能把我们的容器踢掉，定期补比事件驱动更皮实。
      */
     private static final int SYNC_INTERVAL = 20;
+    /**
+     * 满速时「充满内部缓冲」需要的秒数：带宽 = 容量 / 这个数。
+     */
+    private static final long TRANSFER_SECONDS = 10;
 
     private final WirelessEnergyReceiverNetworkNode node;
     private final InWorldNetworkNodeContainer container;
+    private final NetworkMount mount;
     private final RateMeter feeMeter = new RateMeter();
 
     @Nullable
     private GlobalPos target;
     @Nullable
     private UUID owner;
+    /**
+     * 供电方那张网（绑定的网络）。每 {@link #SYNC_INTERVAL} tick 重解析一次。
+     */
     @Nullable
-    private NetworkAttachment attachment;
+    private Network remoteNetwork;
     private long buffer;
     private int syncCountdown;
     private boolean linked;
@@ -81,6 +87,7 @@ public class WirelessEnergyReceiverBlockEntity extends BlockEntity {
         super(BlockEntities.INSTANCE.getWirelessEnergyReceiver(), pos, state);
         this.node = new WirelessEnergyReceiverNetworkNode(this);
         this.container = RefinedStorageApi.INSTANCE.createNetworkNodeContainer(this, node).build();
+        this.mount = new NetworkMount(container);
     }
 
     // ------------------------------------------------------------- 状态查询
@@ -133,7 +140,6 @@ public class WirelessEnergyReceiverBlockEntity extends BlockEntity {
         owner = player.getUUID();
         detachLink();
         this.target = anchor;
-        this.attachment = null;
         this.syncCountdown = 0;
         setLinked(false);
         setChanged();
@@ -144,9 +150,23 @@ public class WirelessEnergyReceiverBlockEntity extends BlockEntity {
         detachLink();
         this.target = null;
         this.owner = null;
-        this.attachment = null;
         setLinked(false);
         setChanged();
+    }
+
+    @Override
+    public boolean isBound() {
+        return isEndpoint();
+    }
+
+    @Override
+    public Component boundMessage() {
+        return ContentNames.ENERGY_RECEIVER_BOUND;
+    }
+
+    @Override
+    public Component unboundMessage() {
+        return ContentNames.ENERGY_RECEIVER_UNBOUND;
     }
 
     private boolean isAuthorized(final Network network) {
@@ -177,41 +197,84 @@ public class WirelessEnergyReceiverBlockEntity extends BlockEntity {
         }
         if (syncCountdown-- <= 0) {
             syncCountdown = SYNC_INTERVAL - 1;
-            sync(serverLevel, config);
+            sync(serverLevel);
         }
         if (linked) {
-            chargeFee(config);
+            // 挂载每 20 tick 对齐一次，抽电是每 tick 连续的。
+            pull();
+            chargeFee();
         }
     }
 
-    private void sync(final ServerLevel serverLevel, final Config.EnergyReceiverEntry config) {
-        final Network anchorNetwork = BoundTargetResolver.resolveNetwork(serverLevel, target).orElse(null);
-        if (anchorNetwork == null || !isAuthorized(anchorNetwork)) {
+    private void sync(final ServerLevel serverLevel) {
+        final Network remote = BoundTargetResolver.resolveNetwork(serverLevel, target).orElse(null);
+        if (remote == null || !isAuthorized(remote)) {
             detachLink();
             setLinked(false);
             return;
         }
-        attachment(serverLevel).ensureAttached();
-        setLinked(attachment(serverLevel).isAttached());
+        final Network local = AdjacentNetworks.find(serverLevel, worldPosition);
+        if (local == null || local == remote) {
+            // 旁边没有自己的网络；或者绑定的就是自己这张网——那等于自己给自己充电，
+            // 一点新电都不会产生，只会让链路费在两张「同一张网」之间空转。
+            detachLink();
+            setLinked(false);
+            return;
+        }
+        remoteNetwork = remote;
+        mount.mount(local);
+        setLinked(mount.isMounted());
     }
 
     /**
-     * 链路费从**绑定的网络**扣：扣不出来也照常挂着（缓冲里的电网络照样能用），
-     * 只是这一秒不收钱——和无线桥「先看余额再挂」不同，这里没有必要把链路断掉，
-     * 因为断链路等于把电掐了，比不收钱更糟。
+     * 从供电方那张网抽电，存进内部缓冲；缓冲再以 {@code EnergyProvider} 的身份供本地网络使用。
      */
-    private void chargeFee(final Config.EnergyReceiverEntry config) {
-        final NetworkAttachment current = attachment;
-        if (current == null) {
+    private void pull() {
+        final Network remote = remoteNetwork;
+        if (remote == null || buffer >= getCapacity()) {
             return;
         }
-        final Network network = current.getAttachedNetwork();
-        if (network == null) {
+        final long want = Math.min(getCapacity() - buffer, transferPerTick());
+        if (want <= 0) {
+            return;
+        }
+        final EnergyNetworkComponent energy = remote.getComponent(EnergyNetworkComponent.class);
+        final long stored = energy.getStored();
+        if (stored <= 0) {
+            return;
+        }
+        final long gained = energy.extract(Math.min(want, stored));
+        if (gained > 0) {
+            buffer = Math.min(getCapacity(), buffer + gained);
+            setChanged();
+        }
+    }
+
+    /**
+     * 每 tick 的搬运上限：容量 / {@link #TRANSFER_SECONDS} / 20，再按距离倍率**变慢**
+     * （越远越慢，跨维度倍率 16 就是 1/16 带宽）。
+     */
+    private long transferPerTick() {
+        final GlobalPos current = target;
+        if (current == null || level == null) {
+            return 0;
+        }
+        final long perSecond = Math.max(1L, getCapacity() / TRANSFER_SECONDS);
+        final long percent = Math.max(100L, LinkDistanceEnergy.multiplierPercent(level, worldPosition, current));
+        return Math.max(1L, perSecond * 100L / percent / 20L);
+    }
+
+    /**
+     * 链路费从**供电方那张网**扣：电是它出的，钱也该它出。
+     */
+    private void chargeFee() {
+        final Network remote = remoteNetwork;
+        if (remote == null) {
             return;
         }
         final long fee = feeMeter.next(feePerSecond());
         if (fee > 0) {
-            network.getComponent(EnergyNetworkComponent.class).extract(fee);
+            remote.getComponent(EnergyNetworkComponent.class).extract(fee);
             setChanged();
         }
     }
@@ -228,25 +291,9 @@ public class WirelessEnergyReceiverBlockEntity extends BlockEntity {
         ));
     }
 
-    private NetworkAttachment attachment(final ServerLevel serverLevel) {
-        final NetworkAttachment existing = attachment;
-        if (existing != null && target != null && existing.getTarget().equals(target)) {
-            return existing;
-        }
-        final NetworkAttachment created = new NetworkAttachment(
-            serverLevel,
-            container,
-            target == null ? GlobalPos.of(serverLevel.dimension(), worldPosition) : target
-        );
-        attachment = created;
-        return created;
-    }
-
     private void detachLink() {
-        final NetworkAttachment existing = attachment;
-        if (existing != null) {
-            existing.detach();
-        }
+        mount.detach();
+        remoteNetwork = null;
     }
 
     private void setLinked(final boolean value) {
