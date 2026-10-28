@@ -41,14 +41,15 @@
 | <img src="docs/images/item-wireless-amplifier.png" width="32" alt=""> | **无线增幅塔** | 覆盖范围内的终端距离倍率打折。 |
 | <img src="docs/images/item-wireless-bridge.png" width="32" alt=""> | **无线桥** | 基点/据点两种身份，支持跨维度和区块保活。 |
 | <img src="docs/images/item-wireless-configuration-card.png" width="32" alt=""> | **无线配置卡** | 复制单个配置，或批量粘贴给附近同类型方块。 |
+| <img src="docs/images/item-wireless-connector.png" width="32" alt=""> | **无线连接器** | 把接收器、监控仪、两种桥绑到网络；两段式：先右键网络方块记录接入点，再右键设备。 |
 | <img src="docs/images/item-wireless-monitor.png" width="32" alt=""> | **无线监控终端** | 阈值提醒，或低于目标时自动补货；手持终端时显示电量/距离/倍率的 HUD（默认关闭）。 |
 | <img src="docs/images/item-overclock-upgrade.png" width="32" alt=""> | **超频升级卡** | 插入 RS 自动合成仓，每张等待间隔折半，最多 4 张。 |
-| <img src="docs/images/item-wireless-energy-receiver.png" width="32" alt=""> | **无线能量接收器** | 把远处的 FE 发电接入绑定网络。 |
-| <img src="docs/images/item-energy-monitor.png" width="32" alt=""> | **能量监控仪** | 查看存量、容量、净收支和预计耗尽时间。 |
+| <img src="docs/images/item-wireless-energy-receiver.png" width="32" alt=""> | **无线能量接收器** | 从绑定的网络取电，供给它旁边这张网络（空控制器也能点亮）。 |
+| <img src="docs/images/item-energy-monitor.png" width="32" alt=""> | **能量监控仪** | 方块上方直接显示电量/收支/预计耗尽，也可右键看聊天栏。 |
 | <img src="docs/images/item-smart-sorter.png" width="32" alt=""> | **智能分拣站** | 按物品或标签把网络物品送到面前容器。 |
 | <img src="docs/images/item-network-bridge.png" width="32" alt=""> | **网络桥接器** | 在两张独立网络之间转发物品和能量。 |
 
-这些内容已作为 **0.4.1-beta.1 开发测试版**发布。网络桥接器、智能分拣站、无线监控终端等新功能仍需要更多实机测试，尤其是存档重载、多人权限和跨维度场景。不要把开发版直接当成稳定服务器版本。
+这些内容已作为 **0.4.1 正式版**发布（此前带恶性 bug 的 `0.4.1-beta.1` 已撤下）。NeoForge 侧已逐项实机验证；Fabric 侧构建通过、代码一致，建议先在测试存档里过一遍。
 
 ### 配方示例
 
@@ -62,13 +63,17 @@
 
 本模组终端仍使用 RS 的网卡绑定方式。先让网络方块与终端完成绑定，再打开终端。
 
-对于需要配对的新设备：
+对于需要配对的方块设备（接收器、监控仪、无线桥、网络桥接器），统一用**无线连接器**：
 
-1. 在 RS 网络方块上潜行 + 右键，记录接入点。
-2. 在接收器、监控仪或网络桥接器上潜行 + 右键，完成绑定。
-3. 再次潜行 + 右键已绑定设备，可以解绑。
+1. 拿连接器**右键 RS 网络方块**（控制器、线缆、或任何能给出网络的方块），聊天栏会报「已设置接入点：维度 x, y, z」。
+2. 拿连接器**右键目标设备**，完成绑定；两端会各亮起一圈光环，中间撒一条电火花连线。
+3. 对着已绑定的设备**再右键一次**即解绑；**潜行右键**清掉手上的接入点记录。
+
+为什么必须用工具：这些设备本身是方块物品，手持它们右键任何方块都会先被原版「放置」逻辑吃掉，方块自己的绑定入口根本轮不到。
 
 无线桥和网络桥接器也可以作为接入点。能量接收器和能量监控仪本身不是接入点，不要拿它们互相绑定。
+
+合成：RS 原版扳手 + 高级处理器 ×2 + 石英富集铁 ×2。
 
 ### 距离和耗电
 
