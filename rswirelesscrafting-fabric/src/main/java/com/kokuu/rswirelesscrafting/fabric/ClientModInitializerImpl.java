@@ -28,7 +28,13 @@ import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.item.ItemProperties;
 
 public class ClientModInitializerImpl extends AbstractClientModInitializer implements ClientModInitializer {
+    /**
+     * Fabric 目前没有 {@code BlockEntityRendererRegistry} 的替代 API（0.116.17 的
+     * fabric-rendering-v1 里只有这一个类，标注了弃用但未给出新入口），
+     * 所以这里显式抑制弃用警告；等官方给出替代方案再切换。
+     */
     @Override
+    @SuppressWarnings("deprecation")
     public void onInitializeClient() {
         Platform.setClientPlayerProvider(() -> Minecraft.getInstance().player);
         registerKeyMappings();
