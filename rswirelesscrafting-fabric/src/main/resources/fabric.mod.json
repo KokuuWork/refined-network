@@ -3,7 +3,7 @@
   "id": "rswirelesscrafting",
   "version": "${version}",
   "name": "Refined Storage - Wireless Crafting",
-  "description": "Adds the wireless crafting grid Refined Storage never had, plus six pluggable upgrade cards (battery, range, interdimensional, remote energy, energy, advanced energy) and a terminal charging station that recharges every FE terminal.",
+  "description": "Adds wireless crafting and pattern terminals, upgrade cards, charging, wireless links, energy monitoring, smart sorting and network bridging for Refined Storage.",
   "authors": [
     "Kokuu"
   ],

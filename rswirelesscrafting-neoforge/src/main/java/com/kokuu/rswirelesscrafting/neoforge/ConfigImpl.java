@@ -5,6 +5,10 @@ import com.kokuu.rswirelesscrafting.common.DefaultEnergyUsage;
 import com.kokuu.rswirelesscrafting.common.amplifier.AmplifierDefaults;
 import com.kokuu.rswirelesscrafting.common.bridge.BridgeDefaults;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationDefaults;
+import com.kokuu.rswirelesscrafting.common.energymonitor.EnergyMonitorDefaults;
+import com.kokuu.rswirelesscrafting.common.energyreceiver.EnergyReceiverDefaults;
+import com.kokuu.rswirelesscrafting.common.networkbridge.NetworkBridgeDefaults;
+import com.kokuu.rswirelesscrafting.common.smartsorter.SmartSorterDefaults;
 
 import net.neoforged.neoforge.common.ModConfigSpec;
 
@@ -19,6 +23,10 @@ public class ConfigImpl implements Config {
     private final AmplifierEntryImpl amplifier = new AmplifierEntryImpl();
     private final HudEntryImpl hud = new HudEntryImpl();
     private final BridgeEntry bridge;
+    private final EnergyReceiverEntry energyReceiver;
+    private final EnergyMonitorEntry energyMonitor;
+    private final SmartSorterEntry smartSorter;
+    private final NetworkBridgeEntry networkBridge;
 
     public ConfigImpl() {
         wirelessCraftingGrid = new WirelessCraftingGridEntryImpl();
@@ -29,6 +37,10 @@ public class ConfigImpl implements Config {
         );
         amplifier.define();
         bridge = new BridgeEntryImpl(builder);
+        energyReceiver = new EnergyReceiverEntryImpl(builder);
+        energyMonitor = new EnergyMonitorEntryImpl(builder);
+        smartSorter = new SmartSorterEntryImpl(builder);
+        networkBridge = new NetworkBridgeEntryImpl(builder);
         spec = builder.build();
     }
 
@@ -64,6 +76,26 @@ public class ConfigImpl implements Config {
     @Override
     public BridgeEntry getBridge() {
         return bridge;
+    }
+
+    @Override
+    public EnergyReceiverEntry getEnergyReceiver() {
+        return energyReceiver;
+    }
+
+    @Override
+    public EnergyMonitorEntry getEnergyMonitor() {
+        return energyMonitor;
+    }
+
+    @Override
+    public SmartSorterEntry getSmartSorter() {
+        return smartSorter;
+    }
+
+    @Override
+    public NetworkBridgeEntry getNetworkBridge() {
+        return networkBridge;
     }
 
     private static String translationKey(final String value) {
@@ -399,6 +431,186 @@ public class ConfigImpl implements Config {
         @Override
         public long getChunkLoadingEnergyUsage() {
             return chunkLoadingEnergyUsage.get();
+        }
+    }
+
+    private class EnergyReceiverEntryImpl implements EnergyReceiverEntry {
+        private final ModConfigSpec.BooleanValue enabled;
+        private final ModConfigSpec.LongValue capacity;
+        private final ModConfigSpec.LongValue energyUsage;
+
+        EnergyReceiverEntryImpl(final ModConfigSpec.Builder builder) {
+            final String path = "energyReceiver";
+            final EnergyReceiverDefaults defaults = DefaultEnergyUsage.ENERGY_RECEIVER;
+            builder.translation(translationKey(path)).push(path);
+            enabled = builder
+                .translation(translationKey(path + ".enabled"))
+                .comment("Master switch for the Wireless Energy Receiver block.")
+                .define("enabled", true);
+            capacity = builder
+                .translation(translationKey(path + ".capacity"))
+                .comment("Internal FE buffer, which is also the amount of energy it contributes to the network.")
+                .defineInRange("capacity", defaults.capacity(), 1, Long.MAX_VALUE);
+            energyUsage = builder
+                .translation(translationKey(path + ".energyUsage"))
+                .comment("Base link fee in FE per second; scaled by the distance multiplier.")
+                .defineInRange("energyUsage", defaults.energyUsage(), 0, Long.MAX_VALUE);
+            builder.pop();
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return enabled.get();
+        }
+
+        @Override
+        public long getCapacity() {
+            return capacity.get();
+        }
+
+        @Override
+        public long getEnergyUsage() {
+            return energyUsage.get();
+        }
+    }
+
+    private class EnergyMonitorEntryImpl implements EnergyMonitorEntry {
+        private final ModConfigSpec.BooleanValue enabled;
+        private final ModConfigSpec.LongValue energyUsage;
+        private final ModConfigSpec.IntValue lowThresholdPercent;
+        private final ModConfigSpec.IntValue sampleInterval;
+
+        EnergyMonitorEntryImpl(final ModConfigSpec.Builder builder) {
+            final String path = "energyMonitor";
+            final EnergyMonitorDefaults defaults = DefaultEnergyUsage.ENERGY_MONITOR;
+            builder.translation(translationKey(path)).push(path);
+            enabled = builder
+                .translation(translationKey(path + ".enabled"))
+                .comment("Master switch for the Energy Monitor block.")
+                .define("enabled", true);
+            energyUsage = builder
+                .translation(translationKey(path + ".energyUsage"))
+                .comment("Constant drain in FE per second; the monitor only reads the network.")
+                .defineInRange("energyUsage", defaults.energyUsage(), 0, Long.MAX_VALUE);
+            lowThresholdPercent = builder
+                .translation(translationKey(path + ".lowThresholdPercent"))
+                .comment("Light up the warning state below this percentage of stored energy.")
+                .defineInRange("lowThresholdPercent", defaults.lowThresholdPercent(), 1, 100);
+            sampleInterval = builder
+                .translation(translationKey(path + ".sampleInterval"))
+                .comment("Net throughput sampling interval in ticks (20 = once per second).")
+                .defineInRange("sampleInterval", defaults.sampleInterval(), 1, 200);
+            builder.pop();
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return enabled.get();
+        }
+
+        @Override
+        public long getEnergyUsage() {
+            return energyUsage.get();
+        }
+
+        @Override
+        public int getLowThresholdPercent() {
+            return lowThresholdPercent.get();
+        }
+
+        @Override
+        public int getSampleInterval() {
+            return sampleInterval.get();
+        }
+    }
+
+    private class SmartSorterEntryImpl implements SmartSorterEntry {
+        private final ModConfigSpec.BooleanValue enabled;
+        private final ModConfigSpec.LongValue energyPerStack;
+        private final ModConfigSpec.IntValue stacksPerSecond;
+
+        SmartSorterEntryImpl(final ModConfigSpec.Builder builder) {
+            final String path = "smartSorter";
+            final SmartSorterDefaults defaults = DefaultEnergyUsage.SMART_SORTER;
+            builder.translation(translationKey(path)).push(path);
+            enabled = builder
+                .translation(translationKey(path + ".enabled"))
+                .comment("Master switch for the Smart Sorter block.")
+                .define("enabled", true);
+            energyPerStack = builder
+                .translation(translationKey(path + ".energyPerStack"))
+                .comment("Network energy spent per stack moved, in FE.")
+                .defineInRange("energyPerStack", defaults.energyPerStack(), 0, Long.MAX_VALUE);
+            stacksPerSecond = builder
+                .translation(translationKey(path + ".stacksPerSecond"))
+                .comment("Transfer rate cap in stacks per second, so it cannot drain the network in one go.")
+                .defineInRange("stacksPerSecond", defaults.stacksPerSecond(), 1, 64);
+            builder.pop();
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return enabled.get();
+        }
+
+        @Override
+        public long getEnergyPerStack() {
+            return energyPerStack.get();
+        }
+
+        @Override
+        public int getStacksPerSecond() {
+            return stacksPerSecond.get();
+        }
+    }
+
+    private class NetworkBridgeEntryImpl implements NetworkBridgeEntry {
+        private final ModConfigSpec.BooleanValue enabled;
+        private final ModConfigSpec.LongValue energyUsage;
+        private final ModConfigSpec.LongValue itemTransferRate;
+        private final ModConfigSpec.LongValue energyTransferRate;
+
+        NetworkBridgeEntryImpl(final ModConfigSpec.Builder builder) {
+            final String path = "networkBridge";
+            final NetworkBridgeDefaults defaults = DefaultEnergyUsage.NETWORK_BRIDGE;
+            builder.translation(translationKey(path)).push(path);
+            enabled = builder
+                .translation(translationKey(path + ".enabled"))
+                .comment("Master switch for the Network Bridge block.")
+                .define("enabled", true);
+            energyUsage = builder
+                .translation(translationKey(path + ".energyUsage"))
+                .comment("Base link fee in FE per second; scaled by the distance multiplier.")
+                .defineInRange("energyUsage", defaults.energyUsage(), 0, Long.MAX_VALUE);
+            itemTransferRate = builder
+                .translation(translationKey(path + ".itemTransferRate"))
+                .comment("Cap on items crossing the bridge per second.")
+                .defineInRange("itemTransferRate", defaults.itemTransferRate(), 1, Long.MAX_VALUE);
+            energyTransferRate = builder
+                .translation(translationKey(path + ".energyTransferRate"))
+                .comment("Cap on FE crossing the bridge per second.")
+                .defineInRange("energyTransferRate", defaults.energyTransferRate(), 1, Long.MAX_VALUE);
+            builder.pop();
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return enabled.get();
+        }
+
+        @Override
+        public long getEnergyUsage() {
+            return energyUsage.get();
+        }
+
+        @Override
+        public long getItemTransferRate() {
+            return itemTransferRate.get();
+        }
+
+        @Override
+        public long getEnergyTransferRate() {
+            return energyTransferRate.get();
         }
     }
 }

@@ -281,6 +281,10 @@ public final class ContentNames {
         "msg",
         "bridge.anchor_set"
     ).withStyle(ChatFormatting.GREEN);
+    public static final MutableComponent BRIDGE_BOUND = createTranslation(
+        "msg",
+        "bridge.bound"
+    ).withStyle(ChatFormatting.GREEN);
     public static final MutableComponent BRIDGE_UNBOUND = createTranslation(
         "msg",
         "bridge.unbound"
@@ -309,6 +313,219 @@ public final class ContentNames {
         "gui",
         "wireless_crafting_grid_upgrades"
     );
+
+    // ------------------------------------------------------------- 无线能量接收器
+
+    public static final MutableComponent WIRELESS_ENERGY_RECEIVER = createTranslation(
+        "block",
+        "wireless_energy_receiver"
+    );
+    public static final MutableComponent WIRELESS_ENERGY_RECEIVER_DESC = createTranslation(
+        "block",
+        "wireless_energy_receiver.desc"
+    ).withStyle(ChatFormatting.GRAY);
+    public static final MutableComponent WIRELESS_ENERGY_RECEIVER_HINT_BIND = createTranslation(
+        "block",
+        "wireless_energy_receiver.hint.bind"
+    ).withStyle(ChatFormatting.GRAY);
+    public static final String WIRELESS_ENERGY_RECEIVER_CAPACITY_TRANSLATION_KEY = createTranslationKey(
+        "block",
+        "wireless_energy_receiver.capacity"
+    );
+    public static final String WIRELESS_ENERGY_RECEIVER_ENERGY_TRANSLATION_KEY = createTranslationKey(
+        "block",
+        "wireless_energy_receiver.energy"
+    );
+    public static final String ENERGY_RECEIVER_BUFFER_TRANSLATION_KEY = createTranslationKey(
+        "block",
+        "wireless_energy_receiver.buffer"
+    );
+    public static final MutableComponent WIRELESS_ENERGY_RECEIVER_HINT_REDSTONE = createTranslation(
+        "block",
+        "wireless_energy_receiver.hint.redstone"
+    ).withStyle(ChatFormatting.DARK_GRAY);
+    public static final MutableComponent ENERGY_RECEIVER_UNBOUND = createTranslation(
+        "msg",
+        "energy_receiver.unbound"
+    ).withStyle(ChatFormatting.YELLOW);
+    public static final MutableComponent ENERGY_RECEIVER_BOUND = createTranslation(
+        "msg",
+        "energy_receiver.bound"
+    ).withStyle(ChatFormatting.GREEN);
+    public static final MutableComponent ENERGY_RECEIVER_ANCHOR_SET = createTranslation(
+        "msg",
+        "energy_receiver.anchor_set"
+    ).withStyle(ChatFormatting.GREEN);
+    public static final String ENERGY_RECEIVER_STATUS_TRANSLATION_KEY = createTranslationKey(
+        "msg",
+        "energy_receiver.status"
+    );
+    public static final MutableComponent ENERGY_RECEIVER_ONLINE = createTranslation(
+        "msg",
+        "energy_receiver.online"
+    ).withStyle(ChatFormatting.GREEN);
+    public static final MutableComponent ENERGY_RECEIVER_OFFLINE = createTranslation(
+        "msg",
+        "energy_receiver.offline"
+    ).withStyle(ChatFormatting.RED);
+
+    // ------------------------------------------------------------- 能量监控仪
+
+    public static final MutableComponent ENERGY_MONITOR = createTranslation(
+        "block",
+        "energy_monitor"
+    );
+    public static final MutableComponent WIRELESS_ENERGY_MONITOR_DESC = createTranslation(
+        "block",
+        "energy_monitor.desc"
+    ).withStyle(ChatFormatting.GRAY);
+    public static final MutableComponent WIRELESS_ENERGY_MONITOR_HINT_PLACE = createTranslation(
+        "block",
+        "energy_monitor.hint.place"
+    ).withStyle(ChatFormatting.GRAY);
+    public static final MutableComponent WIRELESS_ENERGY_MONITOR_HINT_BIND = createTranslation(
+        "block",
+        "energy_monitor.hint.bind"
+    ).withStyle(ChatFormatting.GRAY);
+    public static final String WIRELESS_ENERGY_MONITOR_THRESHOLD_TRANSLATION_KEY = createTranslationKey(
+        "block",
+        "energy_monitor.threshold"
+    );
+    public static final String WIRELESS_ENERGY_MONITOR_ENERGY_TRANSLATION_KEY = createTranslationKey(
+        "block",
+        "energy_monitor.energy"
+    );
+    public static final MutableComponent ENERGY_MONITOR_UNBOUND = createTranslation(
+        "msg",
+        "energy_monitor.unbound"
+    ).withStyle(ChatFormatting.YELLOW);
+    public static final MutableComponent ENERGY_MONITOR_ANCHOR_SET = createTranslation(
+        "msg",
+        "energy_monitor.anchor_set"
+    ).withStyle(ChatFormatting.GREEN);
+    public static final String ENERGY_MONITOR_BOUND_TRANSLATION_KEY = createTranslationKey(
+        "msg",
+        "energy_monitor.bound"
+    );
+    public static final MutableComponent ENERGY_MONITOR_UNLINKED = createTranslation(
+        "msg",
+        "energy_monitor.unlinked"
+    ).withStyle(ChatFormatting.YELLOW);
+    public static final MutableComponent ENERGY_MONITOR_NOT_DRAINING = createTranslation(
+        "msg",
+        "energy_monitor.not_draining"
+    ).withStyle(ChatFormatting.GREEN);
+    public static final String ENERGY_MONITOR_STATUS_TRANSLATION_KEY = createTranslationKey(
+        "msg",
+        "energy_monitor.status"
+    );
+
+    // ------------------------------------------------------------- 智能分拣站
+
+    public static final MutableComponent SMART_SORTER = createTranslation(
+        "block",
+        "smart_sorter"
+    );
+    public static final MutableComponent SMART_SORTER_DESC = createTranslation(
+        "block",
+        "smart_sorter.desc"
+    ).withStyle(ChatFormatting.GRAY);
+    public static final MutableComponent SMART_SORTER_HINT_PLACE = createTranslation(
+        "block",
+        "smart_sorter.hint.place"
+    ).withStyle(ChatFormatting.GRAY);
+    public static final MutableComponent SMART_SORTER_HINT_FILTER = createTranslation(
+        "block",
+        "smart_sorter.hint.filter"
+    ).withStyle(ChatFormatting.GRAY);
+    public static final String SMART_SORTER_RATE_TRANSLATION_KEY = createTranslationKey(
+        "block",
+        "smart_sorter.rate"
+    );
+    public static final String SMART_SORTER_ENERGY_TRANSLATION_KEY = createTranslationKey(
+        "block",
+        "smart_sorter.energy"
+    );
+    public static final MutableComponent SMART_SORTER_MODE_EXACT = createTranslation(
+        "gui",
+        "smart_sorter.mode.exact"
+    );
+    public static final MutableComponent SMART_SORTER_MODE_TAG = createTranslation(
+        "gui",
+        "smart_sorter.mode.tag"
+    );
+    public static final String SMART_SORTER_MODE_TOOLTIP_TRANSLATION_KEY = createTranslationKey(
+        "gui",
+        "smart_sorter.mode_tooltip"
+    );
+    public static final String SMART_SORTER_MATCHES_TRANSLATION_KEY = createTranslationKey(
+        "gui",
+        "smart_sorter.matches"
+    );
+
+    // ------------------------------------------------------------- 网络桥接器
+
+    public static final MutableComponent NETWORK_BRIDGE = createTranslation(
+        "block",
+        "network_bridge"
+    );
+    public static final MutableComponent NETWORK_BRIDGE_DESC = createTranslation(
+        "block",
+        "network_bridge.desc"
+    ).withStyle(ChatFormatting.GRAY);
+    public static final MutableComponent NETWORK_BRIDGE_HINT_BIND = createTranslation(
+        "block",
+        "network_bridge.hint.bind"
+    ).withStyle(ChatFormatting.GRAY);
+    public static final String NETWORK_BRIDGE_ITEM_RATE_TRANSLATION_KEY = createTranslationKey(
+        "block",
+        "network_bridge.item_rate"
+    );
+    public static final String NETWORK_BRIDGE_ENERGY_RATE_TRANSLATION_KEY = createTranslationKey(
+        "block",
+        "network_bridge.energy_rate"
+    );
+    public static final String NETWORK_BRIDGE_FEE_TRANSLATION_KEY = createTranslationKey(
+        "block",
+        "network_bridge.fee"
+    );
+    public static final MutableComponent NETWORK_BRIDGE_UNBOUND = createTranslation(
+        "msg",
+        "network_bridge.unbound"
+    ).withStyle(ChatFormatting.YELLOW);
+    public static final MutableComponent NETWORK_BRIDGE_ANCHOR_SET = createTranslation(
+        "msg",
+        "network_bridge.anchor_set"
+    ).withStyle(ChatFormatting.GREEN);
+    public static final String NETWORK_BRIDGE_BOUND_TRANSLATION_KEY = createTranslationKey(
+        "msg",
+        "network_bridge.bound"
+    );
+    public static final String NETWORK_BRIDGE_STATUS_TRANSLATION_KEY = createTranslationKey(
+        "msg",
+        "network_bridge.status"
+    );
+    public static final MutableComponent NETWORK_BRIDGE_ONLINE = createTranslation(
+        "msg",
+        "network_bridge.online"
+    ).withStyle(ChatFormatting.GREEN);
+    public static final MutableComponent NETWORK_BRIDGE_CYCLE = createTranslation(
+        "msg",
+        "network_bridge.cycle"
+    ).withStyle(ChatFormatting.RED);
+    public static final MutableComponent NETWORK_BRIDGE_OFFLINE = createTranslation(
+        "msg",
+        "network_bridge.offline"
+    ).withStyle(ChatFormatting.RED);
+
+    public static final MutableComponent LINK_ANCHOR_REQUIRED = createTranslation(
+        "msg",
+        "link.anchor_required"
+    ).withStyle(ChatFormatting.YELLOW);
+    public static final MutableComponent LINK_ANCHOR_SET = createTranslation(
+        "msg",
+        "link.anchor_set"
+    ).withStyle(ChatFormatting.GREEN);
 
     // Tooltips. These are stored fully styled: MutableComponent#withStyle mutates in place,
     // so styling has to be applied once here rather than at every append site.

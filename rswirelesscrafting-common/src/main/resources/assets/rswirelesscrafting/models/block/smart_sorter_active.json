@@ -1,0 +1,8 @@
+{
+  "parent": "block/orientable",
+  "textures": {
+    "top": "rswirelesscrafting:block/smart_sorter_active",
+    "front": "rswirelesscrafting:block/smart_sorter_front_active",
+    "side": "rswirelesscrafting:block/smart_sorter_active"
+  }
+}

@@ -4,6 +4,7 @@ import com.kokuu.rswirelesscrafting.common.AbstractModInitializer;
 import com.kokuu.rswirelesscrafting.common.BlockEntities;
 import com.kokuu.rswirelesscrafting.common.Blocks;
 import com.kokuu.rswirelesscrafting.common.ContentIds;
+import com.kokuu.rswirelesscrafting.common.ContentNames;
 import com.kokuu.rswirelesscrafting.common.CreativeModeTabItems;
 import com.kokuu.rswirelesscrafting.common.Items;
 import com.kokuu.rswirelesscrafting.common.Platform;
@@ -18,8 +19,23 @@ import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlock;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockEntity;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockItem;
 import com.kokuu.rswirelesscrafting.common.configcard.WirelessConfigurationCardItem;
+import com.kokuu.rswirelesscrafting.common.energymonitor.EnergyMonitorBlock;
+import com.kokuu.rswirelesscrafting.common.energymonitor.EnergyMonitorBlockEntity;
+import com.kokuu.rswirelesscrafting.common.energymonitor.EnergyMonitorBlockItem;
+import com.kokuu.rswirelesscrafting.common.energyreceiver.WirelessEnergyReceiverBlock;
+import com.kokuu.rswirelesscrafting.common.energyreceiver.WirelessEnergyReceiverBlockEntity;
+import com.kokuu.rswirelesscrafting.common.energyreceiver.WirelessEnergyReceiverBlockItem;
+import com.kokuu.rswirelesscrafting.common.link.BoundTargetResolver;
+import com.kokuu.rswirelesscrafting.common.link.LinkRegistry;
+import com.kokuu.rswirelesscrafting.common.link.PairingClipboard;
 import com.kokuu.rswirelesscrafting.common.monitor.WirelessMonitorItem;
+import com.kokuu.rswirelesscrafting.common.networkbridge.NetworkBridgeBlock;
+import com.kokuu.rswirelesscrafting.common.networkbridge.NetworkBridgeBlockEntity;
+import com.kokuu.rswirelesscrafting.common.networkbridge.NetworkBridgeBlockItem;
 import com.kokuu.rswirelesscrafting.common.patterngrid.WirelessPatternGridItem;
+import com.kokuu.rswirelesscrafting.common.smartsorter.SmartSorterBlock;
+import com.kokuu.rswirelesscrafting.common.smartsorter.SmartSorterBlockEntity;
+import com.kokuu.rswirelesscrafting.common.smartsorter.SmartSorterBlockItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.AdvancedEnergyUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.BatteryUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.EnergyUpgradeItem;
@@ -41,25 +57,32 @@ import com.refinedmods.refinedstorage.fabric.support.energy.EnergyStorageAdapter
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.Toml4jConfigSerializer;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.phys.BlockHitResult;
 import team.reborn.energy.api.EnergyStorage;
 
 public class ModInitializerImpl extends AbstractModInitializer implements RefinedStoragePlugin, ModInitializer {
@@ -112,6 +135,34 @@ public class ModInitializerImpl extends AbstractModInitializer implements Refine
                 .strength(3.0F, 9.0F)
                 .sound(SoundType.METAL))
         ));
+        Blocks.INSTANCE.setWirelessEnergyReceiver(blockCallback.register(
+            ContentIds.WIRELESS_ENERGY_RECEIVER,
+            () -> new WirelessEnergyReceiverBlock(BlockBehaviour.Properties.of()
+                .mapColor(MapColor.METAL)
+                .strength(3.0F, 9.0F)
+                .sound(SoundType.METAL))
+        ));
+        Blocks.INSTANCE.setEnergyMonitor(blockCallback.register(
+            ContentIds.ENERGY_MONITOR,
+            () -> new EnergyMonitorBlock(BlockBehaviour.Properties.of()
+                .mapColor(MapColor.METAL)
+                .strength(2.5F, 7.0F)
+                .sound(SoundType.METAL))
+        ));
+        Blocks.INSTANCE.setSmartSorter(blockCallback.register(
+            ContentIds.SMART_SORTER,
+            () -> new SmartSorterBlock(BlockBehaviour.Properties.of()
+                .mapColor(MapColor.METAL)
+                .strength(3.0F, 9.0F)
+                .sound(SoundType.METAL))
+        ));
+        Blocks.INSTANCE.setNetworkBridge(blockCallback.register(
+            ContentIds.NETWORK_BRIDGE,
+            () -> new NetworkBridgeBlock(BlockBehaviour.Properties.of()
+                .mapColor(MapColor.METAL)
+                .strength(3.0F, 9.0F)
+                .sound(SoundType.METAL))
+        ));
 
         final DirectRegistryCallback<BlockEntityType<?>> blockEntityCallback =
             new DirectRegistryCallback<>(BuiltInRegistries.BLOCK_ENTITY_TYPE);
@@ -136,6 +187,38 @@ public class ModInitializerImpl extends AbstractModInitializer implements Refine
             () -> new BlockEntityType<>(
                 ChargingStationBlockEntity::new,
                 Set.of(Blocks.INSTANCE.getTerminalChargingStation()),
+                null
+            )
+        ));
+        BlockEntities.INSTANCE.setWirelessEnergyReceiver(blockEntityCallback.register(
+            ContentIds.WIRELESS_ENERGY_RECEIVER,
+            () -> new BlockEntityType<>(
+                WirelessEnergyReceiverBlockEntity::new,
+                Set.of(Blocks.INSTANCE.getWirelessEnergyReceiver()),
+                null
+            )
+        ));
+        BlockEntities.INSTANCE.setEnergyMonitor(blockEntityCallback.register(
+            ContentIds.ENERGY_MONITOR,
+            () -> new BlockEntityType<>(
+                EnergyMonitorBlockEntity::new,
+                Set.of(Blocks.INSTANCE.getEnergyMonitor()),
+                null
+            )
+        ));
+        BlockEntities.INSTANCE.setSmartSorter(blockEntityCallback.register(
+            ContentIds.SMART_SORTER,
+            () -> new BlockEntityType<>(
+                SmartSorterBlockEntity::new,
+                Set.of(Blocks.INSTANCE.getSmartSorter()),
+                null
+            )
+        ));
+        BlockEntities.INSTANCE.setNetworkBridge(blockEntityCallback.register(
+            ContentIds.NETWORK_BRIDGE,
+            () -> new BlockEntityType<>(
+                NetworkBridgeBlockEntity::new,
+                Set.of(Blocks.INSTANCE.getNetworkBridge()),
                 null
             )
         ));
@@ -250,6 +333,42 @@ public class ModInitializerImpl extends AbstractModInitializer implements Refine
                 )
             )
         );
+        Items.INSTANCE.setWirelessEnergyReceiverBlockItem(
+            callback.register(
+                ContentIds.WIRELESS_ENERGY_RECEIVER,
+                () -> new WirelessEnergyReceiverBlockItem(
+                    Blocks.INSTANCE.getWirelessEnergyReceiver(),
+                    new Item.Properties()
+                )
+            )
+        );
+        Items.INSTANCE.setEnergyMonitorBlockItem(
+            callback.register(
+                ContentIds.ENERGY_MONITOR,
+                () -> new EnergyMonitorBlockItem(
+                    Blocks.INSTANCE.getEnergyMonitor(),
+                    new Item.Properties()
+                )
+            )
+        );
+        Items.INSTANCE.setSmartSorterBlockItem(
+            callback.register(
+                ContentIds.SMART_SORTER,
+                () -> new SmartSorterBlockItem(
+                    Blocks.INSTANCE.getSmartSorter(),
+                    new Item.Properties()
+                )
+            )
+        );
+        Items.INSTANCE.setNetworkBridgeBlockItem(
+            callback.register(
+                ContentIds.NETWORK_BRIDGE,
+                () -> new NetworkBridgeBlockItem(
+                    Blocks.INSTANCE.getNetworkBridge(),
+                    new Item.Properties()
+                )
+            )
+        );
     }
 
     private void registerCapabilities() {
@@ -264,6 +383,10 @@ public class ModInitializerImpl extends AbstractModInitializer implements Refine
             (blockEntity, context) -> new ChargingStationEnergyStorage(blockEntity),
             BlockEntities.INSTANCE.getChargingStation()
         );
+        EnergyStorage.SIDED.registerForBlockEntity(
+            (blockEntity, context) -> new WirelessEnergyReceiverEnergyStorage(blockEntity),
+            BlockEntities.INSTANCE.getWirelessEnergyReceiver()
+        );
     }
 
     private void registerCreativeModeTabListener(final RefinedStorageApi refinedStorageApi) {
@@ -276,8 +399,33 @@ public class ModInitializerImpl extends AbstractModInitializer implements Refine
         );
     }
 
+    private InteractionResult onUseBlock(final Player player,
+                                         final Level level,
+                                         final InteractionHand hand,
+                                         final BlockHitResult hitResult) {
+        if (level.isClientSide() || !(player instanceof ServerPlayer serverPlayer) || !serverPlayer.isCrouching()) {
+            return InteractionResult.PASS;
+        }
+        final var pos = hitResult.getBlockPos();
+        if (level.getBlockState(pos).getBlock().getDescriptionId().startsWith("block.rswirelesscrafting.")) {
+            return InteractionResult.PASS;
+        }
+        final GlobalPos target = GlobalPos.of(level.dimension(), pos);
+        if (BoundTargetResolver.resolveNetwork(level, target).isEmpty()) {
+            return InteractionResult.PASS;
+        }
+        PairingClipboard.setAnchor(serverPlayer, target);
+        serverPlayer.displayClientMessage(ContentNames.LINK_ANCHOR_SET, false);
+        return InteractionResult.PASS;
+    }
+
     @Override
     public void onInitialize() {
         AutoConfig.register(ConfigImpl.class, Toml4jConfigSerializer::new);
+        UseBlockCallback.EVENT.register(this::onUseBlock);
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+            LinkRegistry.clearAll();
+            PairingClipboard.clearAll();
+        });
     }
 }

@@ -9,9 +9,8 @@ displayName = "Refined Storage - Wireless Crafting"
 displayURL = "https://github.com/KokuuWork/rswirelesscrafting"
 authors = "Kokuu"
 description = '''
-Adds the wireless crafting grid Refined Storage never had, plus six pluggable
-upgrade cards (battery, range, interdimensional, remote energy, energy, advanced
-energy) and a terminal charging station that recharges every FE terminal.
+Adds wireless crafting and pattern terminals, upgrade cards, charging, wireless links,
+energy monitoring, smart sorting and network bridging for Refined Storage.
 '''
 [[mixins]]
 config="rswirelesscrafting.mixins.json"

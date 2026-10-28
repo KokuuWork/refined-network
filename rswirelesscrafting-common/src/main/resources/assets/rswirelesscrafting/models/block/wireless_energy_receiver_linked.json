@@ -1,0 +1,6 @@
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "all": "rswirelesscrafting:block/wireless_energy_receiver_linked"
+  }
+}

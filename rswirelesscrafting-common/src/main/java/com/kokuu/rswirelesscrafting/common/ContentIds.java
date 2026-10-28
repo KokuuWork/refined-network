@@ -14,6 +14,11 @@ public final class ContentIds {
         createIdentifier("wireless_configuration_card");
     public static final ResourceLocation WIRELESS_MONITOR = createIdentifier("wireless_monitor");
     public static final ResourceLocation OVERCLOCK_UPGRADE = createIdentifier("overclock_upgrade");
+    public static final ResourceLocation WIRELESS_ENERGY_RECEIVER =
+        createIdentifier("wireless_energy_receiver");
+    public static final ResourceLocation ENERGY_MONITOR = createIdentifier("energy_monitor");
+    public static final ResourceLocation SMART_SORTER = createIdentifier("smart_sorter");
+    public static final ResourceLocation NETWORK_BRIDGE = createIdentifier("network_bridge");
     public static final ResourceLocation WIRELESS_CRAFTING_GRID_UPGRADES =
         createIdentifier("wireless_crafting_grid_upgrades");
     public static final ResourceLocation RANGE_UPGRADE = createIdentifier("range_upgrade");

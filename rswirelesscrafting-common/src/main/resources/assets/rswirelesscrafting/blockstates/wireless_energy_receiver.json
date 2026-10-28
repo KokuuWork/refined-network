@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "linked=false": {
+      "model": "rswirelesscrafting:block/wireless_energy_receiver"
+    },
+    "linked=true": {
+      "model": "rswirelesscrafting:block/wireless_energy_receiver_linked"
+    }
+  }
+}

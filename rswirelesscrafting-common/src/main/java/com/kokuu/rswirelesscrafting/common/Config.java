@@ -14,6 +14,67 @@ public interface Config {
 
     AmplifierEntry getAmplifier();
 
+    EnergyReceiverEntry getEnergyReceiver();
+
+    EnergyMonitorEntry getEnergyMonitor();
+
+    SmartSorterEntry getSmartSorter();
+
+    NetworkBridgeEntry getNetworkBridge();
+
+    /**
+     * 无线能量接收器：把远处 FE 发电接进网络。
+     *
+     * <p>它以「网络能量提供者」的身份挂进绑定的网络，于是远处发电机的电直接算进网络电量池。
+     * 链路费按距离线性收（与手持终端同一套口径），所以远端发电不是白嫖的。
+     */
+    interface EnergyReceiverEntry {
+        boolean isEnabled();
+
+        long getCapacity();
+
+        long getEnergyUsage();
+    }
+
+    /**
+     * 能量监控仪：让网络能量第一次可观测。
+     *
+     * <p>纯读取设备，不向网络提供任何东西；常驻收一点「看仪表」的钱。
+     */
+    interface EnergyMonitorEntry {
+        boolean isEnabled();
+
+        long getEnergyUsage();
+
+        int getLowThresholdPercent();
+
+        int getSampleInterval();
+    }
+
+    /**
+     * 智能分拣站：按物品 / 标签把网络里的东西搬进面前的容器。
+     */
+    interface SmartSorterEntry {
+        boolean isEnabled();
+
+        long getEnergyPerStack();
+
+        int getStacksPerSecond();
+    }
+
+    /**
+     * 网络桥接器：让两张各自独立的网络互通（可限速）。
+     */
+    interface NetworkBridgeEntry {
+        boolean isEnabled();
+
+        long getEnergyUsage();
+
+        long getItemTransferRate();
+
+        long getEnergyTransferRate();
+    }
+
     /**
      * 无线增幅塔：覆盖半径内的无线终端距离倍率打折，塔本身接网络常驻耗电。
      */

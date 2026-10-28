@@ -157,11 +157,41 @@ def wireless_monitor_gui():
     return pixels
 
 
+def smart_sorter_gui():
+    """
+    The smart sorter: a well for the match-mode button (the screen paints the
+    button itself on top), a 3x3 filter grid, then the player inventory.
+
+    Menu coordinates (must match SmartSorterContainerMenu / Screen):
+        mode button   (8, 18) 50x20, drawn by the screen - well sits at (7, 17)
+        filter slots  x=62/80/98, y=18/36/54
+        divider       y=82
+        inventory     y=104
+        hotbar        y=158
+        size          176x182
+    """
+    pixels = canvas(176, 182)
+    frame(pixels)
+    panel(pixels, 7, 17, 52, 22)
+    for row in range(3):
+        for column in range(3):
+            slot(pixels, 62 + column * 18 - 1, 18 + row * 18 - 1)
+    for x in range(7, 176 - 7):
+        pixels[82][x] = BG_SHADE
+    for row in range(3):
+        for column in range(9):
+            slot(pixels, 7 + column * 18, 103 + row * 18)
+    for column in range(9):
+        slot(pixels, 7 + column * 18, 157)
+    return pixels
+
+
 def main():
     targets = [
         ("wireless_crafting_grid_upgrades.png", upgrades_gui()),
         ("terminal_charging_station.png", terminal_charging_station_gui()),
         ("wireless_monitor.png", wireless_monitor_gui()),
+        ("smart_sorter.png", smart_sorter_gui()),
     ]
     for name, pixels in targets:
         path = os.path.join(OUT, name)

@@ -5,8 +5,12 @@ import com.kokuu.rswirelesscrafting.common.autocraftermanager.WirelessAutocrafte
 import com.kokuu.rswirelesscrafting.common.bridge.WirelessBridgeBlockItem;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockItem;
 import com.kokuu.rswirelesscrafting.common.configcard.WirelessConfigurationCardItem;
+import com.kokuu.rswirelesscrafting.common.energymonitor.EnergyMonitorBlockItem;
+import com.kokuu.rswirelesscrafting.common.energyreceiver.WirelessEnergyReceiverBlockItem;
 import com.kokuu.rswirelesscrafting.common.monitor.WirelessMonitorItem;
+import com.kokuu.rswirelesscrafting.common.networkbridge.NetworkBridgeBlockItem;
 import com.kokuu.rswirelesscrafting.common.patterngrid.WirelessPatternGridItem;
+import com.kokuu.rswirelesscrafting.common.smartsorter.SmartSorterBlockItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.AdvancedEnergyUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.BatteryUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.EnergyUpgradeItem;
@@ -54,6 +58,14 @@ public final class Items {
     private Supplier<WirelessConfigurationCardItem> wirelessConfigurationCard;
     @Nullable
     private Supplier<WirelessMonitorItem> wirelessMonitor;
+    @Nullable
+    private Supplier<WirelessEnergyReceiverBlockItem> wirelessEnergyReceiver;
+    @Nullable
+    private Supplier<EnergyMonitorBlockItem> energyMonitor;
+    @Nullable
+    private Supplier<SmartSorterBlockItem> smartSorter;
+    @Nullable
+    private Supplier<NetworkBridgeBlockItem> networkBridge;
 
     private Items() {
     }
@@ -176,5 +188,37 @@ public final class Items {
 
     public void setTerminalChargingStationBlockItem(final Supplier<ChargingStationBlockItem> supplier) {
         this.terminalChargingStation = supplier;
+    }
+
+    public WirelessEnergyReceiverBlockItem getWirelessEnergyReceiverBlockItem() {
+        return requireNonNull(wirelessEnergyReceiver).get();
+    }
+
+    public void setWirelessEnergyReceiverBlockItem(final Supplier<WirelessEnergyReceiverBlockItem> supplier) {
+        this.wirelessEnergyReceiver = supplier;
+    }
+
+    public EnergyMonitorBlockItem getEnergyMonitorBlockItem() {
+        return requireNonNull(energyMonitor).get();
+    }
+
+    public void setEnergyMonitorBlockItem(final Supplier<EnergyMonitorBlockItem> supplier) {
+        this.energyMonitor = supplier;
+    }
+
+    public SmartSorterBlockItem getSmartSorterBlockItem() {
+        return requireNonNull(smartSorter).get();
+    }
+
+    public void setSmartSorterBlockItem(final Supplier<SmartSorterBlockItem> supplier) {
+        this.smartSorter = supplier;
+    }
+
+    public NetworkBridgeBlockItem getNetworkBridgeBlockItem() {
+        return requireNonNull(networkBridge).get();
+    }
+
+    public void setNetworkBridgeBlockItem(final Supplier<NetworkBridgeBlockItem> supplier) {
+        this.networkBridge = supplier;
     }
 }

@@ -3,6 +3,10 @@ package com.kokuu.rswirelesscrafting.common;
 import com.kokuu.rswirelesscrafting.common.amplifier.AmplifierDefaults;
 import com.kokuu.rswirelesscrafting.common.bridge.BridgeDefaults;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationDefaults;
+import com.kokuu.rswirelesscrafting.common.energymonitor.EnergyMonitorDefaults;
+import com.kokuu.rswirelesscrafting.common.energyreceiver.EnergyReceiverDefaults;
+import com.kokuu.rswirelesscrafting.common.networkbridge.NetworkBridgeDefaults;
+import com.kokuu.rswirelesscrafting.common.smartsorter.SmartSorterDefaults;
 
 public final class DefaultEnergyUsage {
     public static final long WIRELESS_CRAFTING_GRID_CAPACITY = 400;
@@ -60,6 +64,36 @@ public final class DefaultEnergyUsage {
         64,    // 每座桥常驻耗电 FE/s
         true,  // 据点自动保活两端区块
         512    // 每个被保活的区块附加 FE/s（配对时两端共 2 个）
+    );
+
+    // 无线能量接收器：把远处 FE 发电接进网络。它以「能量提供者」的身份挂进绑定的网络，
+    // 缓冲有多大，就向网络贡献多少电量。链路费按距离线性收（与手持终端同一套口径），
+    // 所以「远端发电」不是白嫖的——距离仍然是成本，增幅塔照样能打折。
+    public static final EnergyReceiverDefaults ENERGY_RECEIVER = new EnergyReceiverDefaults(
+        100_000, // 内部 FE 缓冲容量（同时就是它向网络贡献的电量）
+        16       // 链路费基础值 FE/s（按距离倍率缩放）
+    );
+
+    // 能量监控仪：让网络能量第一次可观测。纯读取设备，只收一点「看仪表」的钱。
+    public static final EnergyMonitorDefaults ENERGY_MONITOR = new EnergyMonitorDefaults(
+        4,    // 常驻耗电 FE/s
+        20,   // 低于这个百分比亮红灯
+        20    // 净收支采样间隔（tick，20 = 每秒一次）
+    );
+
+    // 智能分拣站：按物品 / 标签把网络里的东西搬进面前的容器。
+    // 每搬走一组收 4 FE，速率上限 4 组/秒（原版输出总线的默认节奏）。
+    public static final SmartSorterDefaults SMART_SORTER = new SmartSorterDefaults(
+        4,  // 每组消耗 FE
+        4   // 速率上限（组/秒）
+    );
+
+    // 网络桥接器：让两张各自独立的网络互通。限速按「件/秒」与「FE/秒」两路各算各的，
+    // 链路费按距离线性收——跨网搬运不是免费的。
+    public static final NetworkBridgeDefaults NETWORK_BRIDGE = new NetworkBridgeDefaults(
+        32,      // 链路费基础值 FE/s（按距离倍率缩放）
+        4_000,   // 经过桥搬运物品的速率上限（件/秒）
+        20_000   // 经过桥搬运能量的速率上限（FE/s）
     );
 
     private DefaultEnergyUsage() {

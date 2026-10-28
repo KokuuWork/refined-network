@@ -526,6 +526,239 @@ def bridge_texture(linked):
     return px
 
 
+# ============================================================ energy receiver
+#
+# An intake dish opening to the sky with energy rays converging into it, and a
+# bolt sitting in the bowl: "far-away power lands here, then goes into the network".
+
+RECEIVER_ART = [
+    "................",
+    "..A........A....",
+    "...A......A.....",
+    "....A....A......",
+    ".....A..A.......",
+    "......AA........",
+    "....mmmmmmmm....",
+    "...mMMMMMMMMm...",
+    "..mMMMBBBBMMMm..",
+    "..mMMMBBBBMMMm..",
+    "..mMMMBBBBMMMm..",
+    "...mMMMMMMMMm...",
+    "....mMMMMMMm....",
+    ".....mmmmmm.....",
+    "................",
+    "................",
+]
+
+RECEIVER_PALETTE_OFF = {
+    "A": rgb("#3C414C"),   # incoming rays, idle
+    "m": rgb("#7A8090"),   # dish rim
+    "M": rgb("#5A6270"),   # dish bowl
+    "B": rgb("#3C414C"),   # energy bolt, idle
+}
+
+RECEIVER_PALETTE_ON = dict(RECEIVER_PALETTE_OFF)
+RECEIVER_PALETTE_ON.update({
+    "A": rgb("#38BBDC"),   # incoming rays, catching power
+    "B": rgb("#5FE0F5"),   # energy bolt, lit
+})
+
+
+def energy_receiver_texture(linked):
+    px = canvas()
+    paint(px, RECEIVER_ART, RECEIVER_PALETTE_ON if linked else RECEIVER_PALETTE_OFF)
+    return px
+
+
+# ============================================================= energy monitor
+#
+# A gauge face with three bars: full when the network is healthy, a short red
+# stub when it runs low. The unlinked state shows a dead screen.
+
+MONITOR_ART = [
+    "................",
+    "................",
+    "...KKKKKKKKKKK..",
+    "...KnnnnnnnnnK..",
+    "...KnBBnBBnBBK..",
+    "...KnBBnBBnBBK..",
+    "...KnBBnBBnBBK..",
+    "...KnBBnBBnBBK..",
+    "...KnBBnBBnBBK..",
+    "...KnBBnBBnBBK..",
+    "...KnBBnBBnBBK..",
+    "...KnBBnBBnBBK..",
+    "...KnnnnnnnnnK..",
+    "...KKKKKKKKKKK..",
+    "................",
+    "................",
+]
+
+MONITOR_LOW_ART = [
+    "................",
+    "................",
+    "...KKKKKKKKKKK..",
+    "...KnnnnnnnnnK..",
+    "...KnnnnnnnnnK..",
+    "...KnnnnnnnnnK..",
+    "...KnnnnnnnnnK..",
+    "...KnnnnnnnnnK..",
+    "...KnnnnnnnnnK..",
+    "...KnnnnnnnnnK..",
+    "...KnnnnnnnnnK..",
+    "...KnBBnBBnBBK..",
+    "...KnnnnnnnnnK..",
+    "...KKKKKKKKKKK..",
+    "................",
+    "................",
+]
+
+MONITOR_PALETTE_UNLINKED = {
+    "K": rgb("#2E323B"),
+    "n": rgb("#3C414C"),
+    "B": rgb("#3C414C"),
+}
+
+MONITOR_PALETTE_LINKED = dict(MONITOR_PALETTE_UNLINKED)
+MONITOR_PALETTE_LINKED.update({
+    "n": rgb("#6E7784"),
+    "B": rgb("#38BBDC"),
+})
+
+MONITOR_PALETTE_LOW = dict(MONITOR_PALETTE_LINKED)
+MONITOR_PALETTE_LOW.update({"B": rgb("#D94A4A")})
+
+
+def energy_monitor_texture(linked, low):
+    if not linked:
+        palette = MONITOR_PALETTE_UNLINKED
+        art = MONITOR_ART
+    elif low:
+        palette = MONITOR_PALETTE_LOW
+        art = MONITOR_LOW_ART
+    else:
+        palette = MONITOR_PALETTE_LINKED
+        art = MONITOR_ART
+    px = canvas()
+    paint(px, art, palette)
+    return px
+
+
+# ================================================================ smart sorter
+#
+# A hopper throat over a machine body with a lit intake slot: items come in the
+# top, get checked against the filters, and leave through the slot.
+
+SORTER_ART = [
+    "................",
+    "................",
+    "...KKKKKKKKKK...",
+    "...KmmmmmmmmK...",
+    "...KmKKKKKKmK...",
+    "...KmKnnnnKmK...",
+    "...KmKKKKKKmK...",
+    "..KKKKKKKKKKKK..",
+    "..KmmmmmmmmmmK..",
+    "..KmKKKKKKKKmK..",
+    "..KmKnnnnnnKmK..",
+    "..KmKKKKKKKKmK..",
+    "..KmmmmmmmmmmK..",
+    "..KKKKKKKKKKKK..",
+    "................",
+    "................",
+]
+
+SORTER_PALETTE = {
+    "K": rgb("#2E323B"),
+    "m": rgb("#5A6270"),
+    "n": rgb("#3C414C"),
+}
+
+SORTER_PALETTE_ACTIVE = dict(SORTER_PALETTE)
+SORTER_PALETTE_ACTIVE.update({"n": rgb("#38BBDC")})
+
+SORTER_FRONT_ART = [
+    "................",
+    "...KKKKKKKKKK...",
+    "...KmmmmmmmmK...",
+    "...KmKKKKKKmK...",
+    "...KmKnnnnKmK...",
+    "...KmKKKKKKmK...",
+    "...KmmmmmmmmK...",
+    "...KmmmAAmmmK...",
+    "...KmmmmAAmmK...",
+    "...KmmmmmAAmK...",
+    "...KmmmmAAmmK...",
+    "...KmmmAAmmmK...",
+    "...KmmmmmmmmK...",
+    "...KKKKKKKKKK...",
+    "................",
+    "................",
+]
+SORTER_FRONT_PALETTE = dict(SORTER_PALETTE)
+SORTER_FRONT_PALETTE.update({"A": rgb("#8995A6")})
+SORTER_FRONT_PALETTE_ACTIVE = dict(SORTER_FRONT_PALETTE)
+SORTER_FRONT_PALETTE_ACTIVE.update({"A": rgb("#38BBDC")})
+
+
+def smart_sorter_front_texture(active):
+    px = canvas()
+    paint(px, SORTER_FRONT_ART,
+          SORTER_FRONT_PALETTE_ACTIVE if active else SORTER_FRONT_PALETTE)
+    return px
+
+
+def smart_sorter_texture(active):
+    px = canvas()
+    paint(px, SORTER_ART, SORTER_PALETTE_ACTIVE if active else SORTER_PALETTE)
+    return px
+
+
+# ============================================================== network bridge
+#
+# Two ports on a plinth with a beam running between them: two separate networks,
+# joined through this block.
+
+NETWORK_BRIDGE_ART = [
+    "................",
+    "................",
+    "..KKK......KKK..",
+    "..KmK......KmK..",
+    "..KmK..AA..KmK..",
+    "..KmK.AAAA.KmK..",
+    "..KmK..AA..KmK..",
+    "..KmK......KmK..",
+    "..KKK......KKK..",
+    "...MMMMMMMMMM...",
+    "...MMMMMMMMMM...",
+    "....MMMMMMMM....",
+    ".....MMMMMM.....",
+    "................",
+    "................",
+    "................",
+]
+
+NETWORK_BRIDGE_PALETTE_OFF = {
+    "A": rgb("#3C414C"),   # link beam, idle
+    "m": rgb("#3C414C"),   # port interior
+    "K": rgb("#2E323B"),   # port frame
+    "M": rgb("#5A6270"),   # plinth
+}
+
+NETWORK_BRIDGE_PALETTE_ON = dict(NETWORK_BRIDGE_PALETTE_OFF)
+NETWORK_BRIDGE_PALETTE_ON.update({
+    "A": rgb("#38BBDC"),   # link beam, live
+    "m": rgb("#6E7784"),   # port interior, powered
+})
+
+
+def network_bridge_texture(linked):
+    px = canvas()
+    paint(px, NETWORK_BRIDGE_ART,
+          NETWORK_BRIDGE_PALETTE_ON if linked else NETWORK_BRIDGE_PALETTE_OFF)
+    return px
+
+
 # ======================================================== configuration card
 #
 # A card at the bottom with a pair of signal arcs above it: "settings, delivered".
@@ -668,6 +901,45 @@ def main():
          terminal_charging_station_texture(False, False)),
     ]
     for name, pixels in station_textures:
+        path = os.path.join(block_out, name)
+        write_png(path, pixels)
+        print("wrote", path)
+
+    receiver_textures = [
+        ("wireless_energy_receiver.png", energy_receiver_texture(False)),
+        ("wireless_energy_receiver_linked.png", energy_receiver_texture(True)),
+    ]
+    for name, pixels in receiver_textures:
+        path = os.path.join(block_out, name)
+        write_png(path, pixels)
+        print("wrote", path)
+
+    monitor_textures = [
+        ("energy_monitor.png", energy_monitor_texture(False, False)),
+        ("energy_monitor_linked.png", energy_monitor_texture(True, False)),
+        ("energy_monitor_low.png", energy_monitor_texture(True, True)),
+    ]
+    for name, pixels in monitor_textures:
+        path = os.path.join(block_out, name)
+        write_png(path, pixels)
+        print("wrote", path)
+
+    sorter_textures = [
+        ("smart_sorter.png", smart_sorter_texture(False)),
+        ("smart_sorter_active.png", smart_sorter_texture(True)),
+        ("smart_sorter_front.png", smart_sorter_front_texture(False)),
+        ("smart_sorter_front_active.png", smart_sorter_front_texture(True)),
+    ]
+    for name, pixels in sorter_textures:
+        path = os.path.join(block_out, name)
+        write_png(path, pixels)
+        print("wrote", path)
+
+    network_bridge_textures = [
+        ("network_bridge.png", network_bridge_texture(False)),
+        ("network_bridge_linked.png", network_bridge_texture(True)),
+    ]
+    for name, pixels in network_bridge_textures:
         path = os.path.join(block_out, name)
         write_png(path, pixels)
         print("wrote", path)

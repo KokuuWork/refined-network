@@ -5,6 +5,8 @@ import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationData;
 import com.kokuu.rswirelesscrafting.common.monitor.MonitorMenuData;
 import com.kokuu.rswirelesscrafting.common.monitor.MonitorRule;
 import com.kokuu.rswirelesscrafting.common.monitor.WirelessMonitorContainerMenu;
+import com.kokuu.rswirelesscrafting.common.smartsorter.SmartSorterContainerMenu;
+import com.kokuu.rswirelesscrafting.common.smartsorter.SmartSorterMenuData;
 import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.UpgradeMenuData;
 import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.WirelessCraftingGridContainerMenu;
 import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.WirelessCraftingGridData;
@@ -57,6 +59,13 @@ public abstract class AbstractModInitializer {
             () -> extendedMenuTypeFactory.create(
                 WirelessCraftingGridUpgradeContainerMenu::new,
                 UpgradeMenuData.STREAM_CODEC
+            )
+        ));
+        Menus.INSTANCE.setSmartSorter(callback.register(
+            ContentIds.SMART_SORTER,
+            () -> extendedMenuTypeFactory.create(
+                SmartSorterContainerMenu::new,
+                SmartSorterMenuData.STREAM_CODEC
             )
         ));
     }

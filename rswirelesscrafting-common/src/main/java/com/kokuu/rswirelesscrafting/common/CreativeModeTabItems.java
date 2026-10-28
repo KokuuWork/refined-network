@@ -24,5 +24,9 @@ public final class CreativeModeTabItems {
         consumer.accept(Items.INSTANCE.getWirelessBridgeBlockItem().getDefaultInstance());
         consumer.accept(Items.INSTANCE.getWirelessConfigurationCard().getDefaultInstance());
         consumer.accept(Items.INSTANCE.getWirelessMonitor().getDefaultInstance());
+        consumer.accept(Items.INSTANCE.getWirelessEnergyReceiverBlockItem().getDefaultInstance());
+        consumer.accept(Items.INSTANCE.getEnergyMonitorBlockItem().getDefaultInstance());
+        consumer.accept(Items.INSTANCE.getSmartSorterBlockItem().getDefaultInstance());
+        consumer.accept(Items.INSTANCE.getNetworkBridgeBlockItem().getDefaultInstance());
     }
 }

@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "linked=false": {
+      "model": "rswirelesscrafting:block/energy_monitor"
+    },
+    "linked=true,low=false": {
+      "model": "rswirelesscrafting:block/energy_monitor_linked"
+    },
+    "linked=true,low=true": {
+      "model": "rswirelesscrafting:block/energy_monitor_low"
+    }
+  }
+}

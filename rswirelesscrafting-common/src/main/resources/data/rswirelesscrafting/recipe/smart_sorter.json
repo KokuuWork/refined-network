@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "QEQ",
+    "CMC",
+    "QAQ"
+  ],
+  "key": {
+    "Q": {
+      "item": "refinedstorage:quartz_enriched_iron"
+    },
+    "E": {
+      "item": "refinedstorage:exporter"
+    },
+    "C": {
+      "item": "refinedstorage:construction_core"
+    },
+    "M": {
+      "item": "refinedstorage:machine_casing"
+    },
+    "A": {
+      "item": "refinedstorage:advanced_processor"
+    }
+  },
+  "result": {
+    "id": "rswirelesscrafting:smart_sorter"
+  }
+}

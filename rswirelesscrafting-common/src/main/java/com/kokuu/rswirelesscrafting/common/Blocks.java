@@ -3,6 +3,10 @@ package com.kokuu.rswirelesscrafting.common;
 import com.kokuu.rswirelesscrafting.common.amplifier.AmplifierBlock;
 import com.kokuu.rswirelesscrafting.common.bridge.WirelessBridgeBlock;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlock;
+import com.kokuu.rswirelesscrafting.common.energymonitor.EnergyMonitorBlock;
+import com.kokuu.rswirelesscrafting.common.energyreceiver.WirelessEnergyReceiverBlock;
+import com.kokuu.rswirelesscrafting.common.networkbridge.NetworkBridgeBlock;
+import com.kokuu.rswirelesscrafting.common.smartsorter.SmartSorterBlock;
 
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
@@ -18,6 +22,14 @@ public final class Blocks {
     private Supplier<AmplifierBlock> wirelessAmplifier;
     @Nullable
     private Supplier<WirelessBridgeBlock> wirelessBridge;
+    @Nullable
+    private Supplier<WirelessEnergyReceiverBlock> wirelessEnergyReceiver;
+    @Nullable
+    private Supplier<EnergyMonitorBlock> energyMonitor;
+    @Nullable
+    private Supplier<SmartSorterBlock> smartSorter;
+    @Nullable
+    private Supplier<NetworkBridgeBlock> networkBridge;
 
     private Blocks() {
     }
@@ -44,5 +56,37 @@ public final class Blocks {
 
     public void setWirelessBridge(final Supplier<WirelessBridgeBlock> supplier) {
         this.wirelessBridge = supplier;
+    }
+
+    public WirelessEnergyReceiverBlock getWirelessEnergyReceiver() {
+        return requireNonNull(wirelessEnergyReceiver).get();
+    }
+
+    public void setWirelessEnergyReceiver(final Supplier<WirelessEnergyReceiverBlock> supplier) {
+        this.wirelessEnergyReceiver = supplier;
+    }
+
+    public EnergyMonitorBlock getEnergyMonitor() {
+        return requireNonNull(energyMonitor).get();
+    }
+
+    public void setEnergyMonitor(final Supplier<EnergyMonitorBlock> supplier) {
+        this.energyMonitor = supplier;
+    }
+
+    public SmartSorterBlock getSmartSorter() {
+        return requireNonNull(smartSorter).get();
+    }
+
+    public void setSmartSorter(final Supplier<SmartSorterBlock> supplier) {
+        this.smartSorter = supplier;
+    }
+
+    public NetworkBridgeBlock getNetworkBridge() {
+        return requireNonNull(networkBridge).get();
+    }
+
+    public void setNetworkBridge(final Supplier<NetworkBridgeBlock> supplier) {
+        this.networkBridge = supplier;
     }
 }

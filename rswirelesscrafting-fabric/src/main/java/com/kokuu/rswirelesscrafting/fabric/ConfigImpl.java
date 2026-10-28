@@ -3,6 +3,10 @@ package com.kokuu.rswirelesscrafting.fabric;
 import com.kokuu.rswirelesscrafting.common.Config;
 import com.kokuu.rswirelesscrafting.common.DefaultEnergyUsage;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationDefaults;
+import com.kokuu.rswirelesscrafting.common.energymonitor.EnergyMonitorDefaults;
+import com.kokuu.rswirelesscrafting.common.energyreceiver.EnergyReceiverDefaults;
+import com.kokuu.rswirelesscrafting.common.networkbridge.NetworkBridgeDefaults;
+import com.kokuu.rswirelesscrafting.common.smartsorter.SmartSorterDefaults;
 
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.ConfigData;
@@ -28,6 +32,18 @@ public class ConfigImpl implements ConfigData, Config {
 
     @ConfigEntry.Gui.CollapsibleObject
     private BridgeEntryEntryImpl wirelessBridge = new BridgeEntryEntryImpl();
+
+    @ConfigEntry.Gui.CollapsibleObject
+    private EnergyReceiverEntryEntryImpl energyReceiver = new EnergyReceiverEntryEntryImpl();
+
+    @ConfigEntry.Gui.CollapsibleObject
+    private EnergyMonitorEntryEntryImpl energyMonitor = new EnergyMonitorEntryEntryImpl();
+
+    @ConfigEntry.Gui.CollapsibleObject
+    private SmartSorterEntryEntryImpl smartSorter = new SmartSorterEntryEntryImpl();
+
+    @ConfigEntry.Gui.CollapsibleObject
+    private NetworkBridgeEntryEntryImpl networkBridge = new NetworkBridgeEntryEntryImpl();
 
     public static ConfigImpl get() {
         return AutoConfig.getConfigHolder(ConfigImpl.class).getConfig();
@@ -61,6 +77,26 @@ public class ConfigImpl implements ConfigData, Config {
     @Override
     public BridgeEntry getBridge() {
         return wirelessBridge;
+    }
+
+    @Override
+    public EnergyReceiverEntry getEnergyReceiver() {
+        return energyReceiver;
+    }
+
+    @Override
+    public EnergyMonitorEntry getEnergyMonitor() {
+        return energyMonitor;
+    }
+
+    @Override
+    public SmartSorterEntry getSmartSorter() {
+        return smartSorter;
+    }
+
+    @Override
+    public NetworkBridgeEntry getNetworkBridge() {
+        return networkBridge;
     }
 
     private static class HudEntryEntryImpl implements HudEntry {
@@ -257,6 +293,120 @@ public class ConfigImpl implements ConfigData, Config {
         @Override
         public long getChunkLoadingEnergyUsage() {
             return chunkLoadingEnergyUsage;
+        }
+    }
+
+    private static class EnergyReceiverEntryEntryImpl implements EnergyReceiverEntry {
+        private static final EnergyReceiverDefaults DEFAULTS = DefaultEnergyUsage.ENERGY_RECEIVER;
+
+        private boolean enabled = true;
+        @ConfigEntry.BoundedDiscrete(min = 1L, max = Long.MAX_VALUE)
+        private long capacity = DEFAULTS.capacity();
+        @ConfigEntry.BoundedDiscrete(min = 0L, max = Long.MAX_VALUE)
+        private long energyUsage = DEFAULTS.energyUsage();
+
+        @Override
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        @Override
+        public long getCapacity() {
+            return capacity;
+        }
+
+        @Override
+        public long getEnergyUsage() {
+            return energyUsage;
+        }
+    }
+
+    private static class EnergyMonitorEntryEntryImpl implements EnergyMonitorEntry {
+        private static final EnergyMonitorDefaults DEFAULTS = DefaultEnergyUsage.ENERGY_MONITOR;
+
+        private boolean enabled = true;
+        @ConfigEntry.BoundedDiscrete(min = 0L, max = Long.MAX_VALUE)
+        private long energyUsage = DEFAULTS.energyUsage();
+        @ConfigEntry.BoundedDiscrete(min = 1, max = 100)
+        private int lowThresholdPercent = DEFAULTS.lowThresholdPercent();
+        @ConfigEntry.BoundedDiscrete(min = 1, max = 200)
+        private int sampleInterval = DEFAULTS.sampleInterval();
+
+        @Override
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        @Override
+        public long getEnergyUsage() {
+            return energyUsage;
+        }
+
+        @Override
+        public int getLowThresholdPercent() {
+            return lowThresholdPercent;
+        }
+
+        @Override
+        public int getSampleInterval() {
+            return sampleInterval;
+        }
+    }
+
+    private static class SmartSorterEntryEntryImpl implements SmartSorterEntry {
+        private static final SmartSorterDefaults DEFAULTS = DefaultEnergyUsage.SMART_SORTER;
+
+        private boolean enabled = true;
+        @ConfigEntry.BoundedDiscrete(min = 0L, max = Long.MAX_VALUE)
+        private long energyPerStack = DEFAULTS.energyPerStack();
+        @ConfigEntry.BoundedDiscrete(min = 1, max = 64)
+        private int stacksPerSecond = DEFAULTS.stacksPerSecond();
+
+        @Override
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        @Override
+        public long getEnergyPerStack() {
+            return energyPerStack;
+        }
+
+        @Override
+        public int getStacksPerSecond() {
+            return stacksPerSecond;
+        }
+    }
+
+    private static class NetworkBridgeEntryEntryImpl implements NetworkBridgeEntry {
+        private static final NetworkBridgeDefaults DEFAULTS = DefaultEnergyUsage.NETWORK_BRIDGE;
+
+        private boolean enabled = true;
+        @ConfigEntry.BoundedDiscrete(min = 0L, max = Long.MAX_VALUE)
+        private long energyUsage = DEFAULTS.energyUsage();
+        @ConfigEntry.BoundedDiscrete(min = 1L, max = Long.MAX_VALUE)
+        private long itemTransferRate = DEFAULTS.itemTransferRate();
+        @ConfigEntry.BoundedDiscrete(min = 1L, max = Long.MAX_VALUE)
+        private long energyTransferRate = DEFAULTS.energyTransferRate();
+
+        @Override
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        @Override
+        public long getEnergyUsage() {
+            return energyUsage;
+        }
+
+        @Override
+        public long getItemTransferRate() {
+            return itemTransferRate;
+        }
+
+        @Override
+        public long getEnergyTransferRate() {
+            return energyTransferRate;
         }
     }
 }

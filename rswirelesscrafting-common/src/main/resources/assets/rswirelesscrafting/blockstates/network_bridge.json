@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "linked=false": {
+      "model": "rswirelesscrafting:block/network_bridge"
+    },
+    "linked=true": {
+      "model": "rswirelesscrafting:block/network_bridge_linked"
+    }
+  }
+}

@@ -3,6 +3,10 @@ package com.kokuu.rswirelesscrafting.common;
 import com.kokuu.rswirelesscrafting.common.amplifier.AmplifierBlockEntity;
 import com.kokuu.rswirelesscrafting.common.bridge.WirelessBridgeBlockEntity;
 import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockEntity;
+import com.kokuu.rswirelesscrafting.common.energymonitor.EnergyMonitorBlockEntity;
+import com.kokuu.rswirelesscrafting.common.energyreceiver.WirelessEnergyReceiverBlockEntity;
+import com.kokuu.rswirelesscrafting.common.networkbridge.NetworkBridgeBlockEntity;
+import com.kokuu.rswirelesscrafting.common.smartsorter.SmartSorterBlockEntity;
 
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
@@ -20,6 +24,14 @@ public final class BlockEntities {
     private Supplier<BlockEntityType<AmplifierBlockEntity>> wirelessAmplifier;
     @Nullable
     private Supplier<BlockEntityType<WirelessBridgeBlockEntity>> wirelessBridge;
+    @Nullable
+    private Supplier<BlockEntityType<WirelessEnergyReceiverBlockEntity>> wirelessEnergyReceiver;
+    @Nullable
+    private Supplier<BlockEntityType<EnergyMonitorBlockEntity>> energyMonitor;
+    @Nullable
+    private Supplier<BlockEntityType<SmartSorterBlockEntity>> smartSorter;
+    @Nullable
+    private Supplier<BlockEntityType<NetworkBridgeBlockEntity>> networkBridge;
 
     private BlockEntities() {
     }
@@ -46,5 +58,37 @@ public final class BlockEntities {
 
     public void setWirelessBridge(final Supplier<BlockEntityType<WirelessBridgeBlockEntity>> supplier) {
         this.wirelessBridge = supplier;
+    }
+
+    public BlockEntityType<WirelessEnergyReceiverBlockEntity> getWirelessEnergyReceiver() {
+        return requireNonNull(wirelessEnergyReceiver).get();
+    }
+
+    public void setWirelessEnergyReceiver(final Supplier<BlockEntityType<WirelessEnergyReceiverBlockEntity>> supplier) {
+        this.wirelessEnergyReceiver = supplier;
+    }
+
+    public BlockEntityType<EnergyMonitorBlockEntity> getEnergyMonitor() {
+        return requireNonNull(energyMonitor).get();
+    }
+
+    public void setEnergyMonitor(final Supplier<BlockEntityType<EnergyMonitorBlockEntity>> supplier) {
+        this.energyMonitor = supplier;
+    }
+
+    public BlockEntityType<SmartSorterBlockEntity> getSmartSorter() {
+        return requireNonNull(smartSorter).get();
+    }
+
+    public void setSmartSorter(final Supplier<BlockEntityType<SmartSorterBlockEntity>> supplier) {
+        this.smartSorter = supplier;
+    }
+
+    public BlockEntityType<NetworkBridgeBlockEntity> getNetworkBridge() {
+        return requireNonNull(networkBridge).get();
+    }
+
+    public void setNetworkBridge(final Supplier<BlockEntityType<NetworkBridgeBlockEntity>> supplier) {
+        this.networkBridge = supplier;
     }
 }
