@@ -10,9 +10,9 @@
 
 ## 当前版本
 
-- Release 页现在提供 **0.4.1（正式版，Latest）**、**0.3.3（稳定线维护版，已标记为测试版）** 和 **0.3.2（历史记录）**。
-- `main` 分支就是 **0.4.1**。想要新设备（样板终端、无线桥、连接器、监控仪显示屏等）用 0.4.1；只想稳在 0.3.x 老功能上用 0.3.2。
-- **美术分界**：0.3.3 与 0.4.1 使用重绘后的新纹理（RS2 风格灰机壳、深灰内嵌面板、青色信号色，方块为多面模型）；**0.3.2 及更早版本保持旧美术，不再回改**。
+- Release 页现在提供 **0.4.1（正式版，Latest）**、**0.3.4（稳定线维护版）** 和 **0.3.2（历史记录）**。
+- `main` 分支就是 **0.4.1**。想要新设备（样板终端、无线桥、连接器、监控仪显示屏等）用 0.4.1；只想稳在 0.3.x 老功能上用 0.3.4。
+- **美术分界**：0.3.3 起（含 0.3.4）与 0.4.1 使用重绘后的新纹理（RS2 风格灰机壳、深灰内嵌面板、青色信号色，方块为多面模型）；**0.3.2 及更早版本保持旧美术，不再回改**。
 - **验证范围**：0.4.1 在 NeoForge 侧已实机验证终端绑定、无线样板终端、无线能量接收器、能量监控仪显示屏和无线连接器；其余功能与 Fabric 侧代码一致、构建与 checkstyle 通过，但**未逐项实测**，建议先在测试存档里过一遍并备份世界。
 
 ## 内容一览（0.4.1）
@@ -213,9 +213,9 @@ The idea is simple: when you are in a mine, the Nether or an outpost, you often 
 
 ### Current version
 
-- Releases now provide **0.4.1 (stable, Latest)**, **0.3.3 (stable-line maintenance, marked as a testing build)** and **0.3.2 (historical records)**.
-- `main` is **0.4.1**. Use 0.4.1 for the new devices (pattern terminal, wireless bridge, connector, monitor display); use 0.3.2 if you only want the old 0.3.x feature set.
-- **Art boundary**: 0.3.3 and 0.4.1 ship the redrawn textures (RS2-style grey casings, dark inset panels, cyan signal colour, multi-face block models); **0.3.2 and older keep the old art and will not be retrofitted**.
+- Releases now provide **0.4.1 (stable, Latest)**, **0.3.4 (stable-line maintenance)** and **0.3.2 (historical records)**.
+- `main` is **0.4.1**. Use 0.4.1 for the new devices (pattern terminal, wireless bridge, connector, monitor display); use 0.3.4 if you only want the old 0.3.x feature set.
+- **Art boundary**: 0.3.3 onwards (including 0.3.4) and 0.4.1 ship the redrawn textures (RS2-style grey casings, dark inset panels, cyan signal colour, multi-face block models); **0.3.2 and older keep the old art and will not be retrofitted**.
 - **Verification scope**: on NeoForge, terminal binding, the wireless pattern terminal, the wireless energy receiver, the energy monitor display and the wireless connector were verified in-game. The rest and the Fabric build are code-identical and compile clean, but were not individually tested — use a test world and back up your saves first.
 
 ### Terminals

@@ -80,29 +80,19 @@
 
   新增无线连接器的图标。
 
-### 0.3.3
+### 0.3.4
 
-- terminals now check the actual cost before opening the interface, inserting or extracting items, crafting, clearing the grid and requesting a recipe
+- fixed a server crash when closing the wireless crafting terminal with insufficient energy
 
-  终端在打开界面、存取物品、手动合成、清空合成矩阵与请求配方前检查实际费用。
+  修复无线合成终端电量不足时关闭界面导致的服务端崩溃。
 
-- autocrafting tasks now check the AUTOCRAFTING permission
+- the terminal no longer opens an empty interface when the battery cannot pay for opening it
 
-  自动合成任务新增 AUTOCRAFTING 权限检查。
+  电量不足时不再打开空白界面，改为提示先充电。
 
-- the charging station now respects the OPEN and EXTRACT permissions and stores the authorized user
+- the terminal charging station can now be connected with cables
 
-  充电站接入 OPEN 与 EXTRACT 权限，并记录授权使用者。
-
-- upgrade cards are capped at four for display, statistics and effect
-
-  升级插件的显示、统计与实际生效统一限制为 4 张。
-
-- synced the new textures for the terminal icon, the upgrade cards and the charging station
-
-  同步无线合成终端图标、升级插件与充电站的新纹理。
-
-## 2026-10-15
+  终端充电站现在可以直接连接线缆。
 
 ### 0.3.2
 
