@@ -1,14 +1,18 @@
 # Refined Network
 
-**精致网络** —— 把 Refined Storage 2 的网络从「必须走到控制器旁边」里解放出来：任意距离、任意维度、任意方块。
+**精致网络**（Refined Network）是精致存储 2 的附属模组，把网络的使用范围从控制器旁边扩展到任意距离与任意维度。
 
-原版 RS 的无线访问点基础范围只有 16 格、满级 48 格，且不能跨维度。这个附属做的不是「再加一个无线终端」，而是给网络本身补上一整套远程能力：按距离计费的终端、可装配的升级插件、给终端补电的充电站、把网络延伸到远处的方块设备，以及远程的分拣、监控与输电。
+原版无线访问点基础 16 格、满级 48 格，且不能跨维度。这个模组在它之外补了三层东西：
+
+- **终端按距离收费**：离网络越远，单次操作耗电越高，跨维度固定 16 倍；插件可以逐级压回基准。
+- **六张装配式插件**：容量、能耗、范围、维度、供能方式，4 个槽位任意组合。
+- **七件方块设备**：桥、增幅塔、能量接收器、监控仪、分拣站、网络桥接器、终端充电站——把网络伸到远处，而不是把玩家叫回来。
+
+所有远程行为共用同一套能量口径：远处的东西建得越多，网络就越需要发电。
 
 ![无线合成终端、升级插件和充电站](docs/images/items.png)
 
-> **和官方附属 Quartz Arsenal 的关系**
-> 两者都提供无线合成终端，但方向不同：Quartz Arsenal 是「一件能远程合成的物品」，本模组是「一整套无线网络」——距离与维度、能量经济、方块设备、绑定工具。
-> 装了本模组后可以不再安装 Quartz Arsenal；两者同时安装也不会冲突（物品 ID 不同），只是会看到两个功能重叠的终端。
+> **和官方附属 Quartz Arsenal 的关系**：两者都提供无线合成终端。Quartz Arsenal 只做这一件物品；本模组除此之外还有距离计费、维度、能量与方块设备。装了本模组后可以不再装 Quartz Arsenal，两者并存也不冲突（物品 ID 不同）。
 
 **简体中文** | [English](#english)
 
@@ -211,9 +215,15 @@ MIT，见 [LICENSE](LICENSE)。
 
 ## English
 
-**Refined Network** — an addon for Refined Storage 2 that gives the network a wireless side: any distance, any dimension, any block.
+**Refined Network** is an addon for Refined Storage 2 that moves the network's reach from “next to the controller” to any distance and any dimension.
 
-Vanilla RS wireless access points reach 16 blocks out of the box and 48 at best, and never cross dimensions. This addon does not just add another wireless terminal — it adds the remote layer underneath: distance-priced terminals, pluggable upgrade cards, a charging station, and block devices that extend the network outward.
+Vanilla wireless access points cover 16 blocks at base and 48 at best, and never cross dimensions. This mod adds three layers on top:
+
+- **Distance-priced terminals** — the farther you are, the more each action costs; crossing dimensions is a flat 16×, and upgrade cards can push it back down.
+- **Six pluggable upgrade cards** — capacity, energy, range, dimension and power source, four slots, any combination.
+- **Seven block devices** — bridge, amplifier, energy receiver, monitor, sorter, network bridge and charging station, so the network reaches out instead of calling you back.
+
+Every remote action shares one energy budget: the more you build out there, the more power the network has to make.
 
 ### Current version
 

@@ -10,9 +10,9 @@ displayURL = "https://github.com/KokuuWork/refined-network"
 logoFile = "assets/rswirelesscrafting/icon.png"
 authors = "Kokuu"
 description = '''
-An addon for Refined Storage 2 that gives the network a wireless side:
-upgrade cards, charging, wireless block links, energy monitoring, smart sorting and
-network bridging.
+An addon for Refined Storage 2 that moves the network's reach from next to the controller to
+any distance and any dimension: distance-priced terminals, six upgrade cards, a charging
+station and seven block devices.
 '''
 [[mixins]]
 config="rswirelesscrafting.mixins.json"
