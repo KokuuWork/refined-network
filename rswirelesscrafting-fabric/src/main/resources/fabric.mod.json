@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "id": "rswirelesscrafting",
   "version": "${version}",
-  "name": "Refined Storage - Wireless Crafting",
-  "description": "Adds wireless crafting and pattern terminals, upgrade cards, charging, wireless links, energy monitoring, smart sorting and network bridging for Refined Storage.",
+  "name": "Refined Network",
+  "description": "An addon for Refined Storage 2 that gives the network a wireless side: distance- and dimension-aware terminals, upgrade cards, charging, wireless block links, energy monitoring, smart sorting and network bridging.",
   "icon": "assets/rswirelesscrafting/icon.png",
   "authors": [
     "Kokuu"

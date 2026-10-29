@@ -198,12 +198,12 @@ def main():
     canvas.fill_rect(0, HEIGHT - 3, WIDTH, 3, ACCENT, 160)
 
     # 标题。
-    title = "RSWC"
+    title = "RN"
     tw = len(title) * 6 * 3 - 3
     canvas.draw_text((WIDTH - tw) // 2, 12, title, TEXT, 3)
 
     # 副标题。
-    sub = "RS2 WIRELESS CRAFTING"
+    sub = "REFINED NETWORK"
     sw = len(sub) * 6 - 1
     canvas.draw_text((WIDTH - sw) // 2, 128, sub, DIM, 1)
 

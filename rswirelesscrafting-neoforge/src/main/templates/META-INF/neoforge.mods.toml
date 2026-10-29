@@ -5,13 +5,14 @@ license = "MIT"
 [[mods]]
 modId = "rswirelesscrafting"
 version = "${version}"
-displayName = "Refined Storage - Wireless Crafting"
+displayName = "Refined Network"
 displayURL = "https://github.com/KokuuWork/rswirelesscrafting"
 logoFile = "assets/rswirelesscrafting/icon.png"
 authors = "Kokuu"
 description = '''
-Adds wireless crafting and pattern terminals, upgrade cards, charging, wireless links,
-energy monitoring, smart sorting and network bridging for Refined Storage.
+An addon for Refined Storage 2 that gives the network a wireless side:
+upgrade cards, charging, wireless block links, energy monitoring, smart sorting and
+network bridging.
 '''
 [[mixins]]
 config="rswirelesscrafting.mixins.json"

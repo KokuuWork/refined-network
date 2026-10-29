@@ -52,7 +52,7 @@
   "schemaVersion": 1,
   "id": "rswirelesscrafting",
   "version": "${version}",
-  "name": "Refined Storage - Wireless Crafting Terminal",
+  "name": "Refined Network",
   "license": "MIT",
   "environment": "*",
   "entrypoints": {

@@ -1,10 +1,14 @@
-# Refined Storage - Wireless Crafting
+# Refined Network
 
-一个给 Refined Storage 2 做远程终端和配套设备的附属模组。
+**精致网络** —— 把 Refined Storage 2 的网络从「必须走到控制器旁边」里解放出来：任意距离、任意维度、任意方块。
 
-这个项目的出发点很简单：玩家在矿场、下界或外岛时，经常只是想看一眼库存、改个配方、搬几张样板，不想每次都回基地。模组就围绕这些事情做扩展，尽量沿用 RS2 自己的网络、存储、能量和界面规则。
+原版 RS 的无线访问点基础范围只有 16 格、满级 48 格，且不能跨维度。这个附属做的不是「再加一个无线终端」，而是给网络本身补上一整套远程能力：按距离计费的终端、可装配的升级插件、给终端补电的充电站、把网络延伸到远处的方块设备，以及远程的分拣、监控与输电。
 
 ![无线合成终端、升级插件和充电站](docs/images/items.png)
+
+> **和官方附属 Quartz Arsenal 的关系**
+> 两者都提供无线合成终端，但方向不同：Quartz Arsenal 是「一件能远程合成的物品」，本模组是「一整套无线网络」——距离与维度、能量经济、方块设备、绑定工具。
+> 装了本模组后可以不再安装 Quartz Arsenal；两者同时安装也不会冲突（物品 ID 不同），只是会看到两个功能重叠的终端。
 
 **简体中文** | [English](#english)
 
@@ -207,9 +211,9 @@ MIT，见 [LICENSE](LICENSE)。
 
 ## English
 
-A small Refined Storage 2 addon for remote terminals and related devices.
+**Refined Network** — an addon for Refined Storage 2 that gives the network a wireless side: any distance, any dimension, any block.
 
-The idea is simple: when you are in a mine, the Nether or an outpost, you often just want to check stock, edit a pattern or move a few patterns around. You should not have to fly back to your base for every small task. This addon adds those tools while staying close to RS2's network, storage and energy rules.
+Vanilla RS wireless access points reach 16 blocks out of the box and 48 at best, and never cross dimensions. This addon does not just add another wireless terminal — it adds the remote layer underneath: distance-priced terminals, pluggable upgrade cards, a charging station, and block devices that extend the network outward.
 
 ### Current version
 
