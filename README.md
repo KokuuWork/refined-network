@@ -1,5 +1,7 @@
 # Refined Network
 
+<img src="docs/images/mod-icon.png" width="112" align="right" alt="Refined Network icon">
+
 精致存储 2 的附属模组。
 
 精致存储原生的无线访问点范围有限，也不能跨维度。这个模组没有改动它，而是另开了一条路：终端走到哪都能用，代价是按距离扣电，跨维度更贵。再配上一批方块设备，把网络铺到远处。
