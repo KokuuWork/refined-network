@@ -199,7 +199,7 @@ README 里的图标由 `gen_readme_images.py` 从同一套纹理生成，方块�
 
 - QQ 群：**498700382**
 - 加群链接：<https://qm.qq.com/q/ueYTU8T3xK>
-- Issues：<https://github.com/KokuuWork/rswirelesscrafting/issues>
+- Issues：<https://github.com/KokuuWork/refined-network/issues>
 
 反馈问题时请附上加载器、RS 版本、操作步骤和 `latest.log`。如果涉及存档问题，请先备份，不要只发一张截图。
 
@@ -334,7 +334,7 @@ The build runs checkstyle and unit tests. Install only the jar for your loader, 
 ### Feedback
 
 - QQ group: **498700382** — <https://qm.qq.com/q/ueYTU8T3xK>
-- Issues: <https://github.com/KokuuWork/rswirelesscrafting/issues>
+- Issues: <https://github.com/KokuuWork/refined-network/issues>
 
 Include your loader, RS version, steps to reproduce and `latest.log` when reporting a problem.
 

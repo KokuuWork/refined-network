@@ -30,7 +30,7 @@
 | 模组标签 | 存储、能源、自动化、无线、附属 |
 | 封面 | `docs/images/mcmod-cover-240x150.png`（240×150，编辑器内本地上传后取站内地址） |
 | 作者/团队 | Kokuu |
-| 相关链接 | GitHub：https://github.com/KokuuWork/rswirelesscrafting |
+| 相关链接 | GitHub：https://github.com/KokuuWork/refined-network |
 | 许可协议 | MIT License |
 | 官方状态 | 活跃开发中 |
 

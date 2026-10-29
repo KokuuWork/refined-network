@@ -120,7 +120,7 @@
 
 ## 反馈 / Feedback
 
-请到 [Issues](https://github.com/KokuuWork/rswirelesscrafting/issues) 反馈，也可以加 QQ 群 `498700382`。
+请到 [Issues](https://github.com/KokuuWork/refined-network/issues) 反馈，也可以加 QQ 群 `498700382`。
 
 反馈请附：
 

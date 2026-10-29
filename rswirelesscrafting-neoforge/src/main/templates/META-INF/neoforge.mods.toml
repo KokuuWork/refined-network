@@ -1,12 +1,12 @@
 modLoader = "javafml"
 loaderVersion = "[2,)"
-issueTrackerURL = "https://github.com/KokuuWork/rswirelesscrafting/issues"
+issueTrackerURL = "https://github.com/KokuuWork/refined-network/issues"
 license = "MIT"
 [[mods]]
 modId = "rswirelesscrafting"
 version = "${version}"
 displayName = "Refined Network"
-displayURL = "https://github.com/KokuuWork/rswirelesscrafting"
+displayURL = "https://github.com/KokuuWork/refined-network"
 logoFile = "assets/rswirelesscrafting/icon.png"
 authors = "Kokuu"
 description = '''

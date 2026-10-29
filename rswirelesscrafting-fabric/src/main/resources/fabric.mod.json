@@ -9,8 +9,8 @@
     "Kokuu"
   ],
   "contact": {
-    "sources": "https://github.com/KokuuWork/rswirelesscrafting",
-    "issues": "https://github.com/KokuuWork/rswirelesscrafting/issues"
+    "sources": "https://github.com/KokuuWork/refined-network",
+    "issues": "https://github.com/KokuuWork/refined-network/issues"
   },
   "license": "MIT",
   "environment": "*",
