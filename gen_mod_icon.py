@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""生成模组图标：teal 渐变圆角块 + 无线格（3×3 缺一格）+ 信号弧。
+"""生成模组图标：与 Refined Storage 官方 logo 同一套语言。
+
+  · 切角方形（45° chamfer），不用圆角
+  · 左上偏蓝的青 → 右下偏绿的薄荷青，沿对角线渐变
+  · 右侧一格按像素块拆散、向右拖出零星像素（RS 的 dissolve 手法）
 
 输出
   assets/rswirelesscrafting/icon.png   512×512，Fabric / NeoForge 共用
@@ -7,6 +11,7 @@
 """
 
 import os
+import random
 
 from PIL import Image, ImageDraw
 
@@ -20,64 +25,93 @@ OUT_DOC = os.path.join(ROOT, "docs", "images", "mod-icon.png")
 SIZE = 512
 S = 4  # 超采样
 
-TOP = (79, 209, 224)
-BOTTOM = (18, 116, 146)
+# 取自 RS 官方 logo-icon.png 的采样色
+FROM = (6, 138, 196)
+TO = (52, 242, 206)
+
+CELL = 84
+GAP = 14
+X0 = 58
+Y0 = 116
+CUT = 11
+PIX = 14  # 拆散用的小方格边长
 
 
 def sc(v):
     return int(round(v * S))
 
 
-def gradient(w, h, top, bottom):
-    img = Image.new("RGB", (1, h))
+def octagon(draw, x, y, size, cut=CUT, fill=255):
+    pts = [
+        (x + cut, y), (x + size - cut, y), (x + size, y + cut),
+        (x + size, y + size - cut), (x + size - cut, y + size),
+        (x + cut, y + size), (x, y + size - cut), (x, y + cut),
+    ]
+    draw.polygon([(sc(px), sc(py)) for px, py in pts], fill=fill)
+
+
+def mask():
+    m = Image.new("L", (sc(SIZE), sc(SIZE)), 0)
+    d = ImageDraw.Draw(m)
+
+    row_solid = (0.55, 0.80, 1.00)  # 越靠下越完整，整体向右上角散开
+    steps = CELL // PIX
+    for row, thr in enumerate(row_solid):
+        y = Y0 + row * (CELL + GAP)
+        for col in range(3):
+            x = X0 + col * (CELL + GAP)
+            if col < 2:
+                octagon(d, x, y, CELL)
+                continue
+            # 第三列：沿对角线拆散，边缘干净、只留少量散点
+            for iy in range(steps):
+                for ix in range(steps):
+                    u = ix / (steps - 1)
+                    v = iy / (steps - 1)
+                    strength = u * 0.9 + (1 - v) * 0.6
+                    keep = min(max((thr - strength) * 5 + 0.5, 0.0), 1.0)
+                    if random.Random(row * 1000 + iy * 100 + ix).random() < keep:
+                        px = x + ix * PIX
+                        py = y + iy * PIX
+                        d.rectangle([sc(px), sc(py), sc(px + PIX), sc(py + PIX)], fill=255)
+            # 向右拖出的零星像素
+            for iy in range(steps):
+                for k in range(1, 4):
+                    if random.Random(7000 + row * 100 + iy * 10 + k).random() < 0.30 / k:
+                        px = x + CELL + (k - 1) * PIX
+                        py = y + iy * PIX
+                        d.rectangle([sc(px), sc(py), sc(px + PIX), sc(py + PIX)], fill=255)
+    return m
+
+
+def gradient(w, h):
+    img = Image.new("RGB", (w, h))
     px = img.load()
     for y in range(h):
-        t = y / max(h - 1, 1)
-        px[0, y] = tuple(int(round(top[i] + (bottom[i] - top[i]) * t)) for i in range(3))
-    return img.resize((w, h), Image.BILINEAR)
+        for x in range(0, w, 4):
+            t = x / w * 0.5 + y / h * 0.5
+            colour = tuple(int(round(FROM[i] + (TO[i] - FROM[i]) * t)) for i in range(3))
+            for k in range(4):
+                if x + k < w:
+                    px[x + k, y] = colour
+    return img
 
 
 def build():
     canvas = Image.new("RGBA", (sc(SIZE), sc(SIZE)), (0, 0, 0, 0))
-    mask = Image.new("L", (sc(SIZE), sc(SIZE)), 0)
-    d = ImageDraw.Draw(mask)
-
-    # 底板
-    d.rounded_rectangle([sc(56), sc(56), sc(456), sc(456)], radius=sc(92), fill=255)
-
-    # 挖出 3×3 格子，右上角那格留给信号弧
-    cell = 72
-    centers = (152, 256, 360)
-    for cy in centers:
-        for cx in centers:
-            if cx == 360 and cy == 152:
-                continue
-            d.rounded_rectangle(
-                [sc(cx - cell / 2), sc(cy - cell / 2), sc(cx + cell / 2), sc(cy + cell / 2)],
-                radius=sc(19), fill=0)
-
-    # 挖出两段信号弧（圆心落在右上那格的外角）
-    ax, ay = 376, 172
-    d.ellipse([sc(ax - 12), sc(ay - 12), sc(ax + 12), sc(ay + 12)], fill=0)
-    for radius, width in ((32, 19), (60, 19)):
-        d.arc([sc(ax - radius), sc(ay - radius), sc(ax + radius), sc(ay + radius)],
-              start=-104, end=-14, fill=0, width=sc(width))
-
-    fill = gradient(sc(SIZE), sc(SIZE), TOP, BOTTOM).convert("RGBA")
-    fill.putalpha(mask)
+    fill = gradient(sc(SIZE), sc(SIZE)).convert("RGBA")
+    fill.putalpha(mask())
     canvas.alpha_composite(fill)
     return canvas.resize((SIZE, SIZE), Image.LANCZOS)
 
 
 def main():
+    random.seed(20261029)
     icon = build()
     icon.save(OUT_MOD)
     print("wrote", OUT_MOD)
     icon.save(OUT_DOC)
     print("wrote", OUT_DOC)
-    for size in (16, 32, 64):
-        icon.resize((size, size), Image.LANCZOS).save(
-            os.path.join(ROOT, "_preview_%d.png" % size))
 
 
 if __name__ == "__main__":
