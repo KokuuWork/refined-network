@@ -2,11 +2,9 @@
 
 精致存储 2 的附属模组。
 
-原版无线访问点基础 16 格，范围升级插满 48 格，不能跨维度。这个模组没有改动它，而是在它旁边另开了一条路。
+精致存储原生的无线访问点范围有限，也不能跨维度。这个模组没有改动它，而是另开了一条路：终端走到哪都能用，代价是按距离扣电，跨维度更贵。再配上一批方块设备，把网络铺到远处。
 
-终端按距离扣电：离网络越远，单次操作越费电，跨维度固定 16 倍。六张插件插在终端的四个槽里，管容量、能耗、范围、维度、供电方式。另有七件方块设备，把网络铺到远处。
-
-不开终端就不耗电。方块设备按秒计费，跨维度另算。建得越远，网络越需要发电。
+不开终端就不耗电；方块设备常驻耗电，跨维度另算。东西建得越远，网络越需要发电。
 
 ![无线合成终端、升级插件和充电站](docs/images/items.png)
 
@@ -215,11 +213,10 @@ MIT，见 [LICENSE](LICENSE)。
 
 An addon for Refined Storage 2.
 
-The vanilla wireless access point covers 16 blocks, 48 with full range upgrades, and never crosses dimensions. This mod doesn’t touch it — it goes around it.
+The vanilla wireless access point has limited range and never crosses dimensions. This mod doesn’t touch it — it goes around it. Terminals work wherever you are, and every action costs FE based on distance; crossing dimensions costs more. A handful of block devices push the network outward.
 
-Terminals charge by distance: the farther you are, the more each action costs, and crossing dimensions is a flat 16×. Six cards go into the terminal’s four slots — capacity, energy, range, dimension, power. Seven blocks push the network outward.
+A terminal you don’t open costs nothing. Blocks draw power while they run. The farther you build, the more power the network needs.
 
-A terminal you don’t open costs nothing. Blocks charge per second, and dimensions cost extra. The farther you build, the more power the network needs.
 
 ### Current version
 
