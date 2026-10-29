@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
-"""按 MC百科正文标题生成配图（6 张，浅色卡片风格）。
+"""MC百科配图（16:9，1280×720），按正文板块拆分。
 
-每张对应一个板块：
-  01 总览（特点）      概念 + 20 件内容全展示
-  02 终端              4 件终端与关键数值
-  03 升级插件          6 张插件效果 + 装配方式
-  04 设备与工具        7 件设备数值 + 3 件工具 + 绑定三步
-  05 合成表            20 张配方
-  06 能量与耗电        倍率柱状图 + 单次费用
+  01 特点      概念 + 20 件内容全展示
+  02 终端      4 件终端与关键数值
+  03 升级插件  6 张插件与装配方式
+  04 设备工具  7 件设备数值 + 3 件工具 + 绑定三步
+  05 合成表 A  10 张配方
+  06 合成表 B  10 张配方
+  07 能量耗电  倍率柱状图 + 单次费用
+
+统一版式：左上标题块（竖线 + 标题 + 副标题）、右上板块编号、底部细线与一行注脚。
 """
 
 import glob
@@ -32,14 +34,19 @@ LANG_ZH = os.path.join(
     "rswirelesscrafting", "lang", "zh_cn.json",
 )
 
-MUTED = M.MUTED
-SUB = M.SUB
-INK = M.INK
-ACCENT = M.ACCENT
-BORDER = M.BORDER
-CARD = M.CARD
-TILE = M.TILE
-TILE_BORDER = M.TILE_BORDER
+W, H = 1280, 720
+MARGIN = 48
+
+BG = (255, 255, 255)
+CARD = (255, 255, 255)
+BORDER = (226, 231, 237)
+TILE = (246, 248, 250)
+TILE_BORDER = (231, 235, 240)
+INK = (28, 32, 38)
+SUB = (104, 112, 124)
+MUTED = (146, 154, 164)
+ACCENT = (32, 132, 156)
+DIVIDER = (233, 237, 242)
 
 
 def icon(name):
@@ -64,13 +71,12 @@ def jar_png(rel):
 
 
 TAGS = {
-    "c:ender_pearls": ("minecraft", "ender_pearl"),
-    "c:gems/quartz": ("minecraft", "quartz"),
-    "c:glass_blocks": ("minecraft", "glass"),
-    "c:ingots/copper": ("minecraft", "copper_ingot"),
-    "c:ingots/netherite": ("minecraft", "netherite_ingot"),
+    "c:ender_pearls": "ender_pearl",
+    "c:gems/quartz": "quartz",
+    "c:glass_blocks": "glass",
+    "c:ingots/copper": "copper_ingot",
+    "c:ingots/netherite": "netherite_ingot",
 }
-
 RS_SPECIAL = {
     "machine_casing": "block/machine_casing/side.png",
     "crafting_grid": "block/crafting_grid/front.png",
@@ -78,10 +84,60 @@ RS_SPECIAL = {
 
 
 def placeholder():
-    im = Image.new("RGBA", (32, 32), (238, 241, 245, 255))
-    d = ImageDraw.Draw(im)
-    d.text((16, 16), "?", anchor="mm", fill=(160, 168, 178, 255))
+    im = Image.new("RGBA", (32, 32), (240, 243, 246, 255))
+    ImageDraw.Draw(im).text((16, 16), "?", anchor="mm", fill=(160, 168, 178, 255))
     return im
+
+
+def rs_icon(name):
+    """RS 的图标可能来自物品纹理、物品状态目录、方块纹理或方块模型目录。"""
+    rs = os.environ["RS_TEXTURES"]
+
+    def png(path):
+        return M.png(path) if os.path.exists(path) else None
+
+    hit = png(os.path.join(rs, "item", name + ".png"))
+    if hit:
+        return hit
+
+    item_dir = os.path.join(rs, "item", name)
+    if os.path.isdir(item_dir):
+        for f in ("crafting.png", "inactive.png", "empty.png"):
+            hit = png(os.path.join(item_dir, f))
+            if hit:
+                return hit
+        pngs = sorted(glob.glob(os.path.join(item_dir, "*.png")))
+        if pngs:
+            return M.png(pngs[0])
+
+    hit = png(os.path.join(rs, "block", name + ".png"))
+    if hit:
+        return hit
+
+    block_dir = os.path.join(rs, "block", name)
+    if os.path.isdir(block_dir):
+        front_path = None
+        for f in ("front.png", name + ".png"):
+            if os.path.exists(os.path.join(block_dir, f)):
+                front_path = os.path.join(block_dir, f)
+                break
+        if front_path is None:
+            pngs = sorted(glob.glob(os.path.join(block_dir, "*.png")))
+            front_path = pngs[0] if pngs else None
+        if front_path:
+            front = G.read_png(front_path)
+            side = G.read_png(os.path.join(rs, "block", "machine_casing", "side.png")) \
+                if os.path.exists(os.path.join(rs, "block", "machine_casing", "side.png")) else front
+            top = G.read_png(os.path.join(rs, "block", "machine_casing", "end.png")) \
+                if os.path.exists(os.path.join(rs, "block", "machine_casing", "end.png")) else front
+            return M.grid_to_img(G.iso_sprite(front, side, top, 64))
+
+    hit = png(os.path.join(rs, "block", "storage_block", name + ".png"))
+    if hit:
+        return hit
+
+    # 线缆挂件（exporter / importer 之类）：用挂件边框兜底
+    return png(os.path.join(rs, "block", "cable", "part_border.png"))
 
 
 def ingredient_icon(spec):
@@ -90,29 +146,20 @@ def ingredient_icon(spec):
         return _icon_cache[key]
     im = None
     if "item" in spec:
-        iid = spec["item"]
-        ns, name = iid.split(":", 1)
+        ns, name = spec["item"].split(":", 1)
         if ns == "rswirelesscrafting":
             im = icon(name)
         elif ns == "refinedstorage":
-            rs = os.environ["RS_TEXTURES"]
-            for rel in (RS_SPECIAL.get(name), "item/%s.png" % name, "block/%s.png" % name):
-                if not rel:
-                    continue
-                path = os.path.join(rs, rel)
-                if os.path.exists(path):
-                    im = M.png(path)
-                    break
+            im = rs_icon(name)
         elif ns == "minecraft":
             im = jar_png("assets/minecraft/textures/item/%s.png" % name)
             if im is None:
                 im = jar_png("assets/minecraft/textures/block/%s.png" % name)
-    else:
-        tag = spec["tag"]
-        if tag in TAGS:
-            ns, name = TAGS[tag]
-            im = jar_png("assets/minecraft/textures/item/%s.png" % name) or \
-                jar_png("assets/minecraft/textures/block/%s.png" % name)
+    elif spec["tag"] in TAGS:
+        name = TAGS[spec["tag"]]
+        im = jar_png("assets/minecraft/textures/item/%s.png" % name)
+        if im is None:
+            im = jar_png("assets/minecraft/textures/block/%s.png" % name)
     if im is None:
         im = placeholder()
     _icon_cache[key] = im
@@ -130,129 +177,142 @@ def zh_names():
     return names
 
 
-def cell(img, x, y, size, icon_img, name, note, name_size=14, note_size=12):
+# ------------------------------------------------------------------ 版式
+
+def frame(kicker, title, sub, note):
+    img = M.new_canvas(W, H)
+    img.paste(Image.new("RGBA", img.size, BG + (255,)), (0, 0))
+    d = ImageDraw.Draw(img)
+
+    d.rectangle([M.sc(MARGIN), M.sc(54), M.sc(MARGIN + 4), M.sc(102)], fill=ACCENT)
+    M.text(d, (MARGIN + 20, 50), title, 32, INK, bold=True)
+    M.text(d, (MARGIN + 20, 96), sub, 15, SUB)
+    M.text(d, (W - MARGIN, 58), kicker, 13, MUTED, anchor="ra")
+
+    d.line([M.sc(MARGIN), M.sc(H - 62), M.sc(W - MARGIN), M.sc(H - 62)],
+           fill=DIVIDER, width=M.sc(1))
+    M.text(d, (MARGIN, H - 46), note, 13, MUTED)
+    return img, d
+
+
+def tile(img, x, y, size, icon_img, name, note, name_size=14, note_size=11, pad_ratio=0.16):
     d = ImageDraw.Draw(img)
     d.rounded_rectangle([M.sc(x), M.sc(y), M.sc(x + size), M.sc(y + size)],
                         radius=M.sc(12), fill=TILE, outline=TILE_BORDER, width=M.sc(1))
-    pad = size * 0.16
+    pad = size * pad_ratio
     inner = int(round((size - 2 * pad) * M.S))
     img.alpha_composite(icon_img.resize((inner, inner), Image.NEAREST),
                         (M.sc(x + pad), M.sc(y + pad)))
     if name:
         M.text(d, (x + size / 2, y + size + 8), name, name_size, INK, bold=True, anchor="ma")
     if note:
-        M.text(d, (x + size / 2, y + size + 8 + name_size + 6), note, note_size, SUB, anchor="ma")
+        M.text(d, (x + size / 2, y + size + 10 + name_size + 5), note, note_size, SUB, anchor="ma")
+
+
+def save(img, path):
+    img.convert("RGB").resize((W, H), Image.LANCZOS).save(path)
+    print("wrote", path)
 
 
 ITEMS = [
-    ("wireless_crafting_grid", "无线合成终端", "终端"),
-    ("wireless_pattern_grid", "无线样板终端", "终端"),
-    ("wireless_autocrafter_manager", "自动合成仓管理器", "终端"),
-    ("wireless_monitor", "无线监控终端", "终端"),
-    ("battery_upgrade", "电池升级插件", "插件"),
-    ("energy_upgrade", "初级能耗插件", "插件"),
-    ("advanced_energy_upgrade", "高级能耗插件", "插件"),
-    ("range_upgrade", "距离升级插件", "插件"),
-    ("interdimensional_upgrade", "维度升级插件", "插件"),
-    ("remote_energy_upgrade", "远程输电插件", "插件"),
-    ("terminal_charging_station", "终端充电站", "设备"),
-    ("wireless_amplifier", "无线增幅塔", "设备"),
-    ("wireless_bridge", "无线桥", "设备"),
-    ("wireless_energy_receiver", "能量接收器", "设备"),
-    ("energy_monitor", "能量监控仪", "设备"),
-    ("smart_sorter", "智能分拣站", "设备"),
-    ("network_bridge", "网络桥接器", "设备"),
-    ("wireless_connector", "无线连接器", "工具"),
-    ("wireless_configuration_card", "无线配置卡", "工具"),
-    ("overclock_upgrade", "超频升级卡", "工具"),
+    ("wireless_crafting_grid", "无线合成终端"),
+    ("wireless_pattern_grid", "无线样板终端"),
+    ("wireless_autocrafter_manager", "自动合成仓管理器"),
+    ("wireless_monitor", "无线监控终端"),
+    ("battery_upgrade", "电池升级插件"),
+    ("energy_upgrade", "初级能耗插件"),
+    ("advanced_energy_upgrade", "高级能耗插件"),
+    ("range_upgrade", "距离升级插件"),
+    ("interdimensional_upgrade", "维度升级插件"),
+    ("remote_energy_upgrade", "远程输电插件"),
+    ("terminal_charging_station", "终端充电站"),
+    ("wireless_amplifier", "无线增幅塔"),
+    ("wireless_bridge", "无线桥"),
+    ("wireless_energy_receiver", "能量接收器"),
+    ("energy_monitor", "能量监控仪"),
+    ("smart_sorter", "智能分拣站"),
+    ("network_bridge", "网络桥接器"),
+    ("wireless_connector", "无线连接器"),
+    ("wireless_configuration_card", "无线配置卡"),
+    ("overclock_upgrade", "超频升级卡"),
 ]
 
 
-# ------------------------------------------------------------------ 01 总览
+# ------------------------------------------------------------------ 01
 
 def overview(path):
-    w, h = 1200, 1230
-    img = M.new_canvas(w, h)
-    M.card(img, (24, 24, w - 24, h - 24), radius=20)
-    d = ImageDraw.Draw(img)
+    img, d = frame("01 · 特点", "无线合成终端",
+                   "精致存储的无线合成附属 · 绑定一次，之后在任何地方打开网络合成界面",
+                   "终端按次计费；方块设备用无线连接器绑定；插件装在终端的 4 个槽位里，随时可拆。")
 
-    M.text(d, (56, 40), "无线合成终端", 30, INK, bold=True)
-    M.text(d, (56, 90), "精致存储的无线合成附属 · 20 件内容 · 绑定一次，之后在任何地方打开网络合成界面", 16, SUB)
-
-    size = 140
-    y = 150
-    xs = [96, 528, 960]
-    cell(img, xs[0], y, size, icon("wireless_crafting_grid"), "无线合成终端", "手持使用")
-    cell(img, xs[1], y, size, M.rs_cube("transmitter", size * 0.7), "无线访问点", "网络的入口")
-    cell(img, xs[2], y, size, M.rs_cube("controller", size * 0.7), "控制器", "网络本体")
+    size = 116
+    y = 138
+    xs = [96, 542, 988]
+    tile(img, xs[0], y, size, icon("wireless_crafting_grid"), "无线合成终端", "手持使用")
+    tile(img, xs[1], y, size, M.rs_cube("transmitter", size * 0.7), "无线访问点", "网络的入口")
+    tile(img, xs[2], y, size, M.rs_cube("controller", size * 0.7), "控制器", "网络本体")
     mid = y + size / 2
-    M.arrow(d, xs[0] + size + 26, mid, xs[1] - 26)
-    M.arrow(d, xs[1] + size + 26, mid, xs[2] - 26)
+    M.arrow(d, xs[0] + size + 40, mid, xs[1] - 40)
+    M.arrow(d, xs[1] + size + 40, mid, xs[2] - 40)
 
-    d.line([M.sc(56), M.sc(392), M.sc(w - 56), M.sc(392)], fill=BORDER, width=M.sc(1))
-    M.text(d, (56, 410), "全部内容", 18, INK, bold=True)
-    M.text(d, (w - 56, 414), "终端 4 · 升级插件 6 · 方块设备 7 · 工具 3", 13, MUTED, anchor="ra")
+    d.line([M.sc(MARGIN), M.sc(318), M.sc(W - MARGIN), M.sc(318)], fill=DIVIDER, width=M.sc(1))
+    M.text(d, (MARGIN, 332), "全部内容", 17, INK, bold=True)
+    M.text(d, (W - MARGIN, 336), "终端 4 · 升级插件 6 · 方块设备 7 · 工具 3", 12, MUTED, anchor="ra")
 
-    cols = 5
-    gap = 16
-    cw = (w - 112 - gap * (cols - 1)) / cols
-    ch = 168
-    y0 = 452
-    for i, (key, name, kind) in enumerate(ITEMS):
+    cols = 10
+    gap = 10
+    cw = (W - MARGIN * 2 - gap * (cols - 1)) / cols
+    for i, (key, name) in enumerate(ITEMS):
         r, c = divmod(i, cols)
-        x = 56 + c * (cw + gap)
-        yy = y0 + r * (ch + gap)
-        cell(img, x, yy, 104, icon(key), name, kind, name_size=14, note_size=12)
-
-    M.text(d, (56, h - 44),
-           "终端按次计费；方块设备用无线连接器绑定；插件装在终端的 4 个槽位里，随时可拆。",
-           15, MUTED)
-    M.save(img, path)
+        x = MARGIN + c * (cw + gap)
+        y = 368 + r * 128
+        tile(img, x + (cw - 100) / 2, y, 100, icon(key), name, None, name_size=12)
+    save(img, path)
 
 
-# ------------------------------------------------------------------ 02 终端
+# ------------------------------------------------------------------ 02
 
 def terminals(path):
-    w, h = 1200, 560
-    img = M.new_canvas(w, h)
-    M.card(img, (24, 24, w - 24, h - 24), radius=20)
-    d = ImageDraw.Draw(img)
-    M.text(d, (56, 40), "四件终端", 28, INK, bold=True)
-    M.text(d, (56, 86), "都能远程打开，插件槽与绑定方式完全相同；容量与单次费用一致", 15, SUB)
+    img, d = frame("02 · 终端", "四件终端",
+                   "都能远程打开，插件槽与绑定方式完全相同；容量与单次费用一致",
+                   "打开界面 5 FE · 手动合成 20 FE · 自动合成 40 FE · 清空矩阵 5 FE（基础值，乘以距离倍率）")
 
     data = [
-        ("wireless_crafting_grid", "无线合成终端", ["容量 400 FE · 插件槽 4", "合成 / 自动合成"]),
-        ("wireless_pattern_grid", "无线样板终端", ["4 种样板类型", "编写自动化样板"]),
-        ("wireless_autocrafter_manager", "自动合成仓管理器", ["全网范围", "查看 / 移动样板"]),
-        ("wireless_monitor", "无线监控终端", ["最多 4 条规则", "阈值提醒 / 自动补货"]),
+        ("wireless_crafting_grid", "无线合成终端", "容量 400 FE · 插件槽 4", "合成 / 自动合成"),
+        ("wireless_pattern_grid", "无线样板终端", "4 种样板类型", "编写自动化样板"),
+        ("wireless_autocrafter_manager", "自动合成仓管理器", "全网范围", "查看 / 移动样板"),
+        ("wireless_monitor", "无线监控终端", "最多 4 条规则", "阈值提醒 / 自动补货"),
     ]
-    cw, gap = 268, 20
-    x = 56
-    for key, name, lines in data:
-        d.rounded_rectangle([M.sc(x), M.sc(160), M.sc(x + cw), M.sc(430)],
-                            radius=M.sc(14), fill=TILE, outline=TILE_BORDER, width=M.sc(1))
-        img.alpha_composite(icon(key).resize((M.sc(112), M.sc(112)), Image.NEAREST),
-                            (M.sc(x + (cw - 112) / 2), M.sc(186)))
-        M.text(d, (x + cw / 2, 318), name, 17, INK, bold=True, anchor="ma")
-        M.text(d, (x + cw / 2, 352), lines[0], 13, SUB, anchor="ma")
-        M.text(d, (x + cw / 2, 380), lines[1], 13, ACCENT, anchor="ma")
+    cw, gap = 282, 24
+    x = MARGIN
+    for key, name, line1, line2 in data:
+        d.rounded_rectangle([M.sc(x), M.sc(136), M.sc(x + cw), M.sc(474)],
+                            radius=M.sc(16), fill=TILE, outline=TILE_BORDER, width=M.sc(1))
+        img.alpha_composite(icon(key).resize((M.sc(156), M.sc(156)), Image.NEAREST),
+                            (M.sc(x + (cw - 156) / 2), M.sc(170)))
+        M.text(d, (x + cw / 2, 356), name, 18, INK, bold=True, anchor="ma")
+        M.text(d, (x + cw / 2, 394), line1, 13, SUB, anchor="ma")
+        M.text(d, (x + cw / 2, 422), line2, 13, ACCENT, anchor="ma")
         x += cw + gap
 
-    M.text(d, (56, h - 74),
-           "打开界面 5 FE · 手动合成 20 FE · 自动合成 40 FE · 清空矩阵 5 FE（基础值，乘以距离倍率）",
-           14, MUTED)
-    M.save(img, path)
+    chips = [("终端容量", "400 FE"), ("插件槽位", "4 个"), ("单次费用", "5 – 40 FE")]
+    cx = MARGIN
+    for label, value in chips:
+        d.rounded_rectangle([M.sc(cx), M.sc(516), M.sc(cx + 372), M.sc(590)],
+                            radius=M.sc(14), fill=(249, 251, 253),
+                            outline=TILE_BORDER, width=M.sc(1))
+        M.text(d, (cx + 24, 538), label, 13, SUB)
+        M.text(d, (cx + 348, 532), value, 20, ACCENT, bold=True, anchor="ra")
+        cx += 396
+    save(img, path)
 
 
-# ------------------------------------------------------------------ 03 插件
+# ------------------------------------------------------------------ 03
 
 def upgrades(path):
-    w, h = 1200, 590
-    img = M.new_canvas(w, h)
-    M.card(img, (24, 24, w - 24, h - 24), radius=20)
-    d = ImageDraw.Draw(img)
-    M.text(d, (56, 40), "六张升级插件", 28, INK, bold=True)
-    M.text(d, (56, 86), "装在终端的 4 个槽位里，拖入即装、拖出即卸，不用重做终端", 15, SUB)
+    img, d = frame("03 · 升级插件", "六张升级插件",
+                   "装在终端的 4 个槽位里，拖入即装、拖出即卸，不用重做终端",
+                   "装配方式：手持任意无线终端（含精致存储原生的无线终端）→ 潜行 + 右键点击 → 4 个槽位。")
 
     data = [
         ("battery_upgrade", "电池升级插件", "每张 +1000 FE 容量", "可叠加"),
@@ -262,35 +322,28 @@ def upgrades(path):
         ("interdimensional_upgrade", "维度升级插件", "解锁跨维度访问", "需变送器 + 接收器"),
         ("remote_energy_upgrade", "远程输电插件", "扣电走绑定网络", "不足回落到电池"),
     ]
-    cw, chh = 356, 150
+    cw, ch = 392, 186
     gap = 20
     for i, (key, name, eff, note) in enumerate(data):
         r, c = divmod(i, 3)
-        x = 56 + c * (cw + gap)
-        y = 140 + r * (chh + gap)
-        d.rounded_rectangle([M.sc(x), M.sc(y), M.sc(x + cw), M.sc(y + chh)],
-                            radius=M.sc(14), fill=TILE, outline=TILE_BORDER, width=M.sc(1))
-        img.alpha_composite(icon(key).resize((M.sc(64), M.sc(64)), Image.NEAREST),
-                            (M.sc(x + 20), M.sc(y + 24)))
-        M.text(d, (x + 100, y + 26), name, 16, INK, bold=True)
-        M.text(d, (x + 100, y + 58), eff, 13, SUB)
-        M.text(d, (x + 100, y + 86), note, 13, ACCENT)
-
-    M.text(d, (56, 512), "装配方式", 15, INK, bold=True)
-    M.text(d, (56, 540), "手持任意无线终端（含精致存储原生的无线终端）→ 潜行 + 右键点击 → 4 个槽位，插件拖入即生效。",
-           14, MUTED)
-    M.save(img, path)
+        x = MARGIN + c * (cw + gap)
+        y = 142 + r * (ch + 24)
+        d.rounded_rectangle([M.sc(x), M.sc(y), M.sc(x + cw), M.sc(y + ch)],
+                            radius=M.sc(16), fill=TILE, outline=TILE_BORDER, width=M.sc(1))
+        img.alpha_composite(icon(key).resize((M.sc(76), M.sc(76)), Image.NEAREST),
+                            (M.sc(x + 24), M.sc(y + 28)))
+        M.text(d, (x + 120, y + 30), name, 17, INK, bold=True)
+        M.text(d, (x + 120, y + 66), eff, 14, SUB)
+        M.text(d, (x + 120, y + 96), note, 13, ACCENT)
+    save(img, path)
 
 
-# ------------------------------------------------------------------ 04 设备与工具
+# ------------------------------------------------------------------ 04
 
 def devices_tools(path):
-    w, h = 1240, 700
-    img = M.new_canvas(w, h)
-    M.card(img, (24, 24, w - 24, h - 24), radius=20)
-    d = ImageDraw.Draw(img)
-    M.text(d, (56, 40), "七件方块设备", 26, INK, bold=True)
-    M.text(d, (56, 84), "全部接入同一张精致存储网络，用线缆或无线桥连过去即可", 14, SUB)
+    img, d = frame("04 · 设备与工具", "七件设备 · 三件工具",
+                   "设备全部接入同一张精致存储网络；工具负责绑定、复制设置与超频",
+                   "方块设备不能手持右键绑定 —— 它们是方块物品，右键会先放置，所以绑定统一走连接器。")
 
     devices = [
         ("terminal_charging_station", "终端充电站", "3 槽 · 待机 128 FE/s"),
@@ -302,185 +355,139 @@ def devices_tools(path):
         ("network_bridge", "网络桥接器", "两张网络互通"),
     ]
     size = 140
-    gap = 12
-    x = 56
-    y = 130
+    gap = 17
+    total = len(devices) * size + (len(devices) - 1) * gap
+    x = (W - total) / 2
     for key, name, note in devices:
-        cell(img, x, y, size, icon(key), name, note, name_size=13, note_size=11)
+        tile(img, x, 146, size, icon(key), name, note, name_size=13, note_size=11)
         x += size + gap
 
-    d.line([M.sc(56), M.sc(392), M.sc(w - 56), M.sc(392)], fill=BORDER, width=M.sc(1))
-    M.text(d, (56, 412), "三件工具", 22, INK, bold=True)
+    d.line([M.sc(MARGIN), M.sc(360), M.sc(W - MARGIN), M.sc(360)], fill=DIVIDER, width=M.sc(1))
 
     tools = [
         ("wireless_connector", "无线连接器", "绑定方块设备"),
         ("wireless_configuration_card", "无线配置卡", "复制 RS 方块设置"),
-        ("overclock_upgrade", "超频升级卡", "等待间隔减半 · 最多 4 张"),
+        ("overclock_upgrade", "超频升级卡", "间隔减半 · 最多 4 张"),
     ]
-    x = 56
-    y = 462
+    x = MARGIN
     for key, name, note in tools:
-        cell(img, x, y, 120, icon(key), name, note, name_size=13, note_size=11)
-        x += 120 + 16
+        tile(img, x, 400, 132, icon(key), name, note, name_size=13, note_size=11)
+        x += 132 + 20
 
     bx = 520
-    M.text(d, (bx, 470), "绑定方块设备的方式", 15, INK, bold=True)
+    M.text(d, (bx, 404), "绑定方块设备的方式", 15, INK, bold=True)
     steps = [
         "① 手持连接器，右键任意精致存储网络方块，记录接入点",
         "② 右键要绑定的设备，完成绑定；两端亮起光环与粒子线",
         "③ 再次右键已绑定的设备即解绑；潜行右键清除记录",
     ]
     for i, line in enumerate(steps):
-        M.text(d, (bx, 502 + i * 34), line, 13, SUB)
-
-    M.text(d, (56, h - 58),
-           "方块设备不能手持右键绑定 —— 它们是方块物品，右键会先放置。所以绑定统一走连接器。",
-           13, MUTED)
-    M.save(img, path)
+        M.text(d, (bx, 440 + i * 40), line, 13, SUB)
+    save(img, path)
 
 
-# ------------------------------------------------------------------ 05 合成表
+# ------------------------------------------------------------------ 05/06
 
 def recipe_card(img, x, y, w, h, recipe, name):
     d = ImageDraw.Draw(img)
     d.rounded_rectangle([M.sc(x), M.sc(y), M.sc(x + w), M.sc(y + h)],
-                        radius=M.sc(12), fill=CARD, outline=BORDER, width=M.sc(1))
-    M.text(d, (x + 14, y + 12), name, 14, INK, bold=True)
+                        radius=M.sc(14), fill=CARD, outline=BORDER, width=M.sc(1))
+    M.text(d, (x + 16, y + 14), name, 15, INK, bold=True)
 
-    shaped = "pattern" in recipe
-    cell_size = 32
-    gap = 4
-    grid_x = x + 14
-    grid_y = y + 44
-    if shaped:
-        key = recipe["key"]
-        for r, row in enumerate(recipe["pattern"]):
-            for c, ch in enumerate(row):
-                if ch == " ":
-                    continue
-                spec = key[ch]
-                gx = grid_x + c * (cell_size + gap)
-                gy = grid_y + r * (cell_size + gap)
-                d.rounded_rectangle([M.sc(gx), M.sc(gy), M.sc(gx + cell_size), M.sc(gy + cell_size)],
-                                    radius=M.sc(4), fill=TILE)
-                img.alpha_composite(
-                    ingredient_icon(spec).resize((M.sc(cell_size - 4), M.sc(cell_size - 4)),
-                                                 Image.NEAREST),
-                    (M.sc(gx + 2), M.sc(gy + 2)),
-                )
-        grid_w = 3 * cell_size + 2 * gap
-    else:
-        specs = recipe["ingredients"]
-        grid_w = 0
-        for i, spec in enumerate(specs[:4]):
-            gx = grid_x + i * (cell_size + gap)
-            d.rounded_rectangle([M.sc(gx), M.sc(grid_y), M.sc(gx + cell_size),
-                                 M.sc(grid_y + cell_size)], radius=M.sc(4), fill=TILE)
+    cell_size, gap = 34, 4
+    gx0, gy0 = x + 16, y + 56
+    for r, row in enumerate(recipe["pattern"]):
+        for c, ch in enumerate(row):
+            if ch == " ":
+                continue
+            gx = gx0 + c * (cell_size + gap)
+            gy = gy0 + r * (cell_size + gap)
+            d.rounded_rectangle([M.sc(gx), M.sc(gy), M.sc(gx + cell_size), M.sc(gy + cell_size)],
+                                radius=M.sc(5), fill=TILE)
             img.alpha_composite(
-                ingredient_icon(spec).resize((M.sc(cell_size - 4), M.sc(cell_size - 4)),
-                                             Image.NEAREST),
-                (M.sc(gx + 2), M.sc(grid_y + 2)),
-            )
-            grid_w = (i + 1) * (cell_size + gap) - gap
+                ingredient_icon(recipe["key"][ch]).resize(
+                    (M.sc(cell_size - 6), M.sc(cell_size - 6)), Image.NEAREST),
+                (M.sc(gx + 3), M.sc(gy + 3)))
 
-    ax = grid_x + grid_w + 12
-    M.arrow(d, ax, grid_y + cell_size, ax + 26)
-    rx = ax + 36
-    rs = 40
-    d.rounded_rectangle([M.sc(rx), M.sc(grid_y - 4), M.sc(rx + rs), M.sc(grid_y - 4 + rs)],
-                        radius=M.sc(6), fill=TILE, outline=TILE_BORDER, width=M.sc(1))
-    img.alpha_composite(icon(recipe["result"]["id"].split(":")[1]).resize((M.sc(rs - 6), M.sc(rs - 6)),
-                                                                         Image.NEAREST),
-                        (M.sc(rx + 3), M.sc(grid_y - 1)))
+    grid_w = 3 * cell_size + 2 * gap
+    cy = gy0 + cell_size * 1.5
+    ax = gx0 + grid_w + 8
+    M.arrow(d, ax, cy, ax + 22)
+    rx = ax + 26
+    d.rounded_rectangle([M.sc(rx), M.sc(cy - 21), M.sc(rx + 42), M.sc(cy + 21)],
+                        radius=M.sc(8), fill=TILE, outline=TILE_BORDER, width=M.sc(1))
+    img.alpha_composite(
+        icon(recipe["result"]["id"].split(":")[1]).resize((M.sc(36), M.sc(36)), Image.NEAREST),
+        (M.sc(rx + 3), M.sc(cy - 18)))
+
+    materials = len({json.dumps(v, sort_keys=True) for v in recipe["key"].values()})
+    M.text(d, (x + 16, y + h - 34), "有序合成 · %d 种材料" % materials, 11, MUTED)
 
 
-def recipes(path):
+def recipes(path, part):
     files = sorted(glob.glob(os.path.join(RECIPES, "*.json")))
     names = zh_names()
-    recipes_data = []
-    for f in files:
-        data = json.load(open(f, encoding="utf-8"))
-        rid = os.path.basename(f)[:-5]
-        recipes_data.append((data, names.get(rid, rid)))
-
     order = [item[0] for item in ITEMS]
-    recipes_data.sort(key=lambda pair: order.index(pair[0]["result"]["id"].split(":")[1]))
+    data = []
+    for f in files:
+        rid = os.path.basename(f)[:-5]
+        data.append((json.load(open(f, encoding="utf-8")), names.get(rid, rid)))
+    data.sort(key=lambda pair: order.index(pair[0]["result"]["id"].split(":")[1]))
+    chunk = data[part * 10:(part + 1) * 10]
 
-    cols = 4
-    gap = 18
-    cw = (1200 - 112 - gap * (cols - 1)) / cols
-    ch = 150
-    rows = (len(recipes_data) + cols - 1) // cols
-    h = 130 + rows * (ch + gap) + 50
-    w = 1200
-    img = M.new_canvas(w, h)
-    M.card(img, (24, 24, w - 24, h - 24), radius=20)
-    d = ImageDraw.Draw(img)
-    M.text(d, (56, 40), "合成表", 28, INK, bold=True)
-    M.text(d, (56, 86), "20 件内容全部为有序合成，材料均为精致存储与后期材料", 15, SUB)
-
-    for i, (data, name) in enumerate(recipes_data):
+    img, d = frame("05 · 合成表 %s" % ("A" if part == 0 else "B"),
+                   "合成表" + ("（一）" if part == 0 else "（二）"),
+                   "20 件内容全部为有序合成，材料取自精致存储与后期材料；顺序与「全部内容」一致",
+                   "材料图标取自模组数据文件，与游戏内配方一致。")
+    cols, gap = 5, 16
+    cw = (W - MARGIN * 2 - gap * (cols - 1)) / cols
+    for i, (recipe, name) in enumerate(chunk):
         r, c = divmod(i, cols)
-        x = 56 + c * (cw + gap)
-        y = 130 + r * (ch + gap)
-        recipe_card(img, x, y, cw, ch, data, name)
-
-    M.text(d, (56, h - 56), "配方材料取自模组数据文件，与游戏内一致。", 13, MUTED)
-    M.save(img, path)
+        recipe_card(img, MARGIN + c * (cw + gap), 150 + r * 244, cw, 226, recipe, name)
+    save(img, path)
 
 
-# ------------------------------------------------------------------ 06 能量
+# ------------------------------------------------------------------ 07
 
 def energy(path):
-    w, h = 980, 660
-    img = M.new_canvas(w, h)
-    M.card(img, (24, 24, w - 24, h - 24), radius=20)
-    d = ImageDraw.Draw(img)
-    M.text(d, (56, 40), "能量与耗电", 28, INK, bold=True)
-    M.text(d, (56, 86), "按次收费，不按在线时间；每次动作 = 基础费用 × 距离倍率", 15, SUB)
+    img, d = frame("07 · 能量与耗电", "能量与耗电",
+                   "按次收费，不按在线时间；每次动作 = 基础费用 × 距离倍率",
+                   "跨维度固定 16 倍；增幅塔半径 64 格内倍率减半；能耗插件可再降。倍率与实际扣费同一套公式。")
 
-    left, right, top, bottom = 120, 600, 170, 420
+    left, right, top, bottom = 110, 700, 180, 520
     values = [1, 2, 4, 8, 16]
     labels = ["16", "32", "64", "128", "256"]
     for i in range(5):
         y = bottom - (bottom - top) * i / 4
-        d.line([M.sc(left), M.sc(y), M.sc(right), M.sc(y)], fill=(236, 239, 243), width=M.sc(1))
-    d.line([M.sc(left), M.sc(top), M.sc(left), M.sc(bottom)], fill=(200, 206, 214), width=M.sc(1))
-    d.line([M.sc(left), M.sc(bottom), M.sc(right), M.sc(bottom)], fill=(200, 206, 214), width=M.sc(1))
+        d.line([M.sc(left), M.sc(y), M.sc(right), M.sc(y)], fill=(238, 241, 245), width=M.sc(1))
+    d.line([M.sc(left), M.sc(top), M.sc(left), M.sc(bottom)], fill=(204, 210, 218), width=M.sc(1))
+    d.line([M.sc(left), M.sc(bottom), M.sc(right), M.sc(bottom)], fill=(204, 210, 218), width=M.sc(1))
 
-    bar_w = 56
+    bar_w = 62
     slot = (right - left) / 5
     for i, v in enumerate(values):
-        bh = (bottom - top - 12) * v / 16
+        bh = (bottom - top - 14) * v / 16
         x0 = left + slot * i + (slot - bar_w) / 2
         y0 = bottom - bh
         d.rounded_rectangle([M.sc(x0), M.sc(y0), M.sc(x0 + bar_w), M.sc(bottom)],
-                            radius=M.sc(4), fill=ACCENT)
-        M.text(d, (x0 + bar_w / 2, y0 - 26), "%d×" % v, 15, INK, bold=True, anchor="ma")
+                            radius=M.sc(5), fill=ACCENT)
+        M.text(d, (x0 + bar_w / 2, y0 - 28), "%d×" % v, 16, INK, bold=True, anchor="ma")
         M.text(d, (x0 + bar_w / 2, bottom + 10), labels[i], 12, SUB, anchor="ma")
-    M.text(d, ((left + right) / 2, bottom + 40), "与网络的距离（格）", 13, SUB, anchor="ma")
+    M.text(d, ((left + right) / 2, bottom + 42), "与网络的距离（格）", 13, SUB, anchor="ma")
 
-    fx = 650
-    M.text(d, (fx, 170), "单次基础费用", 15, INK, bold=True)
-    fees = [
-        ("打开界面", "5 FE"),
-        ("手动合成", "20 FE"),
-        ("自动合成", "40 FE"),
-        ("清空矩阵", "5 FE"),
-        ("配方转移", "5 FE"),
-        ("样板产出一张", "40 FE"),
-    ]
+    fx = 760
+    M.text(d, (fx, 180), "单次基础费用", 16, INK, bold=True)
+    fees = [("打开界面", "5 FE"), ("手动合成", "20 FE"), ("自动合成", "40 FE"),
+            ("清空矩阵", "5 FE"), ("配方转移", "5 FE"), ("样板产出一张", "40 FE")]
     for i, (label, value) in enumerate(fees):
-        yy = 204 + i * 30
+        yy = 218 + i * 34
         M.text(d, (fx, yy), label, 13, SUB)
-        M.text(d, (w - 56, yy), value, 13, INK, bold=True, anchor="ra")
+        M.text(d, (W - MARGIN, yy), value, 13, INK, bold=True, anchor="ra")
 
-    M.text(d, (fx, 400), "终端容量 400 FE", 13, SUB)
-    M.text(d, (fx, 426), "电池插件每张 +1000 FE", 13, SUB)
-
-    M.text(d, (56, h - 88), "跨维度固定 16 倍；增幅塔半径 64 格内倍率减半；能耗插件可再降。", 14, MUTED)
-    M.text(d, (56, h - 60), "倍率与实际扣费使用同一套公式，终端悬停提示会实时显示当前倍率。", 14, MUTED)
-    M.save(img, path)
+    M.text(d, (fx, 440), "终端容量 400 FE", 13, SUB)
+    M.text(d, (fx, 468), "电池插件每张 +1000 FE", 13, SUB)
+    M.text(d, (fx, 496), "增幅塔 128 FE/s · 桥 64 FE/s", 13, SUB)
+    save(img, path)
 
 
 def main():
@@ -488,8 +495,9 @@ def main():
     terminals(os.path.join(OUT, "mcmod-02-terminals.png"))
     upgrades(os.path.join(OUT, "mcmod-03-upgrades.png"))
     devices_tools(os.path.join(OUT, "mcmod-04-devices-tools.png"))
-    recipes(os.path.join(OUT, "mcmod-05-recipes.png"))
-    energy(os.path.join(OUT, "mcmod-06-energy.png"))
+    recipes(os.path.join(OUT, "mcmod-05-recipes-a.png"), 0)
+    recipes(os.path.join(OUT, "mcmod-06-recipes-b.png"), 1)
+    energy(os.path.join(OUT, "mcmod-07-energy.png"))
 
 
 if __name__ == "__main__":
