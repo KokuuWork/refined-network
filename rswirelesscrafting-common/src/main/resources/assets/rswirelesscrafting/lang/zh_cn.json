@@ -277,5 +277,14 @@
   "msg.rswirelesscrafting.connector.no_permission": "没有权限操作那个网络。",
   "gui.rswirelesscrafting.terminal_offline": "未接入网络：当前只能手动合成。",
   "text.autoconfig.rswirelesscrafting.option.wirelessCraftingGrid.offlineModeEnabled": "未接入网络时仍可打开终端（仅手动合成，不扣电）",
-  "text.autoconfig.rswirelesscrafting.option.wirelessCraftingGrid.offlineModeEnabled.tooltip": "未接入网络时仍可打开终端（仅手动合成，不扣电）"
+  "text.autoconfig.rswirelesscrafting.option.wirelessCraftingGrid.offlineModeEnabled.tooltip": "未接入网络时仍可打开终端（仅手动合成，不扣电）",
+  "block.rswirelesscrafting.wireless_redstone_link": "无线红石端点",
+  "block.rswirelesscrafting.wireless_redstone_link.desc": "成对使用：一端读红石，另一端跨距离输出。",
+  "block.rswirelesscrafting.wireless_redstone_link.hint": "潜行右键一个端点记为输入端，再潜行右键另一个端点完成配对；再次潜行右键解绑。",
+  "msg.rswirelesscrafting.redstone_link.anchor_set": "已记为输入端，去另一个端点潜行右键完成配对。",
+  "msg.rswirelesscrafting.redstone_link.bound": "配对完成：这个端点开始接收信号。",
+  "msg.rswirelesscrafting.redstone_link.unbound": "已解绑。",
+  "msg.rswirelesscrafting.redstone_link.not_a_link": "记录的位置不是无线红石端点，已清除。",
+  "msg.rswirelesscrafting.redstone_link.status_source": "当前是输入端：把它接到红石信号上即可。",
+  "msg.rswirelesscrafting.redstone_link.status_sink": "当前是输出端：从 %s 接收信号。"
 }

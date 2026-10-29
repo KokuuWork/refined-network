@@ -20,6 +20,7 @@ public final class ContentIds {
     public static final ResourceLocation ENERGY_MONITOR = createIdentifier("energy_monitor");
     public static final ResourceLocation SMART_SORTER = createIdentifier("smart_sorter");
     public static final ResourceLocation NETWORK_BRIDGE = createIdentifier("network_bridge");
+    public static final ResourceLocation REDSTONE_LINK = createIdentifier("wireless_redstone_link");
     public static final ResourceLocation WIRELESS_CRAFTING_GRID_UPGRADES =
         createIdentifier("wireless_crafting_grid_upgrades");
     public static final ResourceLocation RANGE_UPGRADE = createIdentifier("range_upgrade");

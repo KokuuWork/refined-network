@@ -277,5 +277,14 @@
   "msg.rswirelesscrafting.connector.no_permission": "No permission for that network.",
   "gui.rswirelesscrafting.terminal_offline": "Not connected to a network. Manual crafting only.",
   "text.autoconfig.rswirelesscrafting.option.wirelessCraftingGrid.offlineModeEnabled": "Allow opening the terminal when not connected to a network (manual crafting only, no energy cost)",
-  "text.autoconfig.rswirelesscrafting.option.wirelessCraftingGrid.offlineModeEnabled.tooltip": "Allow opening the terminal when not connected to a network (manual crafting only, no energy cost)"
+  "text.autoconfig.rswirelesscrafting.option.wirelessCraftingGrid.offlineModeEnabled.tooltip": "Allow opening the terminal when not connected to a network (manual crafting only, no energy cost)",
+  "block.rswirelesscrafting.wireless_redstone_link": "Wireless Redstone Link",
+  "block.rswirelesscrafting.wireless_redstone_link.desc": "Used in pairs: one end reads redstone, the other outputs it at any distance.",
+  "block.rswirelesscrafting.wireless_redstone_link.hint": "Sneak-right-click one end to mark it as the input, then sneak-right-click another to pair. Sneak-right-click again to unpair.",
+  "msg.rswirelesscrafting.redstone_link.anchor_set": "Marked as the input end. Sneak-right-click another endpoint to pair it.",
+  "msg.rswirelesscrafting.redstone_link.bound": "Paired. This endpoint now receives the signal.",
+  "msg.rswirelesscrafting.redstone_link.unbound": "Unpaired.",
+  "msg.rswirelesscrafting.redstone_link.not_a_link": "That position is not a wireless redstone link. Record cleared.",
+  "msg.rswirelesscrafting.redstone_link.status_source": "This is the input end. Feed it a redstone signal.",
+  "msg.rswirelesscrafting.redstone_link.status_sink": "This is the output end. Receiving from %s."
 }

@@ -1,0 +1,10 @@
+{
+  "parent": "rswirelesscrafting:block/cube_front",
+  "textures": {
+    "particle": "rswirelesscrafting:block/redstone_link_side",
+    "front": "rswirelesscrafting:block/redstone_link_on",
+    "side": "rswirelesscrafting:block/redstone_link_on_side",
+    "top": "rswirelesscrafting:block/redstone_link_on_top",
+    "bottom": "rswirelesscrafting:block/redstone_link_bottom"
+  }
+}

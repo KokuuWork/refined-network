@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "powered=false": {
+      "model": "rswirelesscrafting:block/redstone_link"
+    },
+    "powered=true": {
+      "model": "rswirelesscrafting:block/redstone_link_on"
+    }
+  }
+}

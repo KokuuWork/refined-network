@@ -6,6 +6,7 @@ import com.kokuu.rswirelesscrafting.common.chargingstation.ChargingStationBlockE
 import com.kokuu.rswirelesscrafting.common.energymonitor.EnergyMonitorBlockEntity;
 import com.kokuu.rswirelesscrafting.common.energyreceiver.WirelessEnergyReceiverBlockEntity;
 import com.kokuu.rswirelesscrafting.common.networkbridge.NetworkBridgeBlockEntity;
+import com.kokuu.rswirelesscrafting.common.redstonelink.RedstoneLinkBlockEntity;
 import com.kokuu.rswirelesscrafting.common.smartsorter.SmartSorterBlockEntity;
 
 import java.util.function.Supplier;
@@ -32,6 +33,7 @@ public final class BlockEntities {
     private Supplier<BlockEntityType<SmartSorterBlockEntity>> smartSorter;
     @Nullable
     private Supplier<BlockEntityType<NetworkBridgeBlockEntity>> networkBridge;
+    private Supplier<BlockEntityType<RedstoneLinkBlockEntity>> redstoneLink;
 
     private BlockEntities() {
     }
@@ -90,5 +92,13 @@ public final class BlockEntities {
 
     public void setNetworkBridge(final Supplier<BlockEntityType<NetworkBridgeBlockEntity>> supplier) {
         this.networkBridge = supplier;
+    }
+
+    public BlockEntityType<RedstoneLinkBlockEntity> getRedstoneLink() {
+        return requireNonNull(redstoneLink).get();
+    }
+
+    public void setRedstoneLink(final Supplier<BlockEntityType<RedstoneLinkBlockEntity>> supplier) {
+        this.redstoneLink = supplier;
     }
 }

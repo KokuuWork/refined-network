@@ -845,6 +845,50 @@ def smart_sorter_front_texture(active):
 
 # ============================================================== network bridge
 
+
+# ============================================================ redstone link
+
+RED_CORE = rgb("#8E2F2F")     # 红石信号：未点亮的深红
+RED_LIT = rgb("#FF5A4A")      # 点亮时的红
+
+
+def redstone_link_texture(on):
+    """Front face: a square lamp window with the case's pins running in from top and bottom."""
+    px = casing_frame("side")
+    panel(px, "side")
+    body = RED_LIT if on else RED_CORE
+    rim = rgb("#C2403A") if on else rgb("#5C3A3A")
+    for y in range(4, 12):
+        for x in range(4, 12):
+            if x in (4, 11) or y in (4, 11):
+                c = rim
+            elif on and (x + y) % 4 == 0:
+                c = mix(body, rgb("#FFE8DC"), 0.45)
+            else:
+                c = body
+            put(px, x, y, c)
+    for y in range(1, 4):
+        put(px, 7, y, rim)
+        put(px, 8, y, rim)
+    for y in range(12, 15):
+        put(px, 7, y, rim)
+        put(px, 8, y, rim)
+    return px
+
+
+def redstone_link_top(on):
+    """Top face: the lamp seen from above, ringed by case screws."""
+    px = casing_frame("side")
+    panel(px, "side")
+    body = RED_LIT if on else RED_CORE
+    for y in range(6, 10):
+        for x in range(6, 10):
+            put(px, x, y, body)
+    for x in (2, 13):
+        put(px, x, 2, rgb("#5C3A3A"))
+        put(px, x, 13, rgb("#5C3A3A"))
+    return px
+
 def network_bridge_texture(linked):
     """Two port housings with live sockets, beam between them."""
     px = casing_frame("side")
@@ -1249,6 +1293,18 @@ def main():
             (f"network_bridge{s}_top.png", netbr_top(linked)),
         ]
     face_sets.append(("network_bridge_bottom.png", casing_bottom()))
+
+    for on in (False, True):
+        s = "_on" if on else ""
+        face_sets += [
+            (f"redstone_link{s}_side.png", casing_side(motif_lattice, RED_LIT if on else LED_OFF)),
+            (f"redstone_link{s}_top.png", redstone_link_top(on)),
+        ]
+    face_sets += [
+        ("redstone_link.png", redstone_link_texture(False)),
+        ("redstone_link_on.png", redstone_link_texture(True)),
+    ]
+    face_sets.append(("redstone_link_bottom.png", casing_bottom()))
 
     for linked, low in ((False, False), (True, False), (True, True)):
         s = "_low" if low else ("_linked" if linked else "")

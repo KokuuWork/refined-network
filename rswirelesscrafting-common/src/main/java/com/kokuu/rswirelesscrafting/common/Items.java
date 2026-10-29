@@ -11,6 +11,7 @@ import com.kokuu.rswirelesscrafting.common.energyreceiver.WirelessEnergyReceiver
 import com.kokuu.rswirelesscrafting.common.monitor.WirelessMonitorItem;
 import com.kokuu.rswirelesscrafting.common.networkbridge.NetworkBridgeBlockItem;
 import com.kokuu.rswirelesscrafting.common.patterngrid.WirelessPatternGridItem;
+import com.kokuu.rswirelesscrafting.common.redstonelink.RedstoneLinkBlockItem;
 import com.kokuu.rswirelesscrafting.common.smartsorter.SmartSorterBlockItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.AdvancedEnergyUpgradeItem;
 import com.kokuu.rswirelesscrafting.common.upgrade.BatteryUpgradeItem;
@@ -69,6 +70,7 @@ public final class Items {
     private Supplier<SmartSorterBlockItem> smartSorter;
     @Nullable
     private Supplier<NetworkBridgeBlockItem> networkBridge;
+    private Supplier<RedstoneLinkBlockItem> redstoneLink;
 
     private Items() {
     }
@@ -231,5 +233,13 @@ public final class Items {
 
     public void setNetworkBridgeBlockItem(final Supplier<NetworkBridgeBlockItem> supplier) {
         this.networkBridge = supplier;
+    }
+
+    public RedstoneLinkBlockItem getRedstoneLinkBlockItem() {
+        return requireNonNull(redstoneLink).get();
+    }
+
+    public void setRedstoneLinkBlockItem(final Supplier<RedstoneLinkBlockItem> supplier) {
+        this.redstoneLink = supplier;
     }
 }

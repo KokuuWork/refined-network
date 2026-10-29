@@ -34,6 +34,9 @@ import com.kokuu.rswirelesscrafting.common.networkbridge.NetworkBridgeBlock;
 import com.kokuu.rswirelesscrafting.common.networkbridge.NetworkBridgeBlockEntity;
 import com.kokuu.rswirelesscrafting.common.networkbridge.NetworkBridgeBlockItem;
 import com.kokuu.rswirelesscrafting.common.patterngrid.WirelessPatternGridItem;
+import com.kokuu.rswirelesscrafting.common.redstonelink.RedstoneLinkBlock;
+import com.kokuu.rswirelesscrafting.common.redstonelink.RedstoneLinkBlockEntity;
+import com.kokuu.rswirelesscrafting.common.redstonelink.RedstoneLinkBlockItem;
 import com.kokuu.rswirelesscrafting.common.smartsorter.SmartSorterBlock;
 import com.kokuu.rswirelesscrafting.common.smartsorter.SmartSorterBlockEntity;
 import com.kokuu.rswirelesscrafting.common.smartsorter.SmartSorterBlockItem;
@@ -237,6 +240,13 @@ public class ModInitializer extends AbstractModInitializer {
                 .strength(3.0F, 9.0F)
                 .sound(SoundType.METAL))
         ));
+        Blocks.INSTANCE.setRedstoneLink(callback.register(
+            ContentIds.REDSTONE_LINK,
+            () -> new RedstoneLinkBlock(BlockBehaviour.Properties.of()
+                .mapColor(MapColor.STONE)
+                .strength(2.0F, 6.0F)
+                .sound(SoundType.STONE))
+        ));
         blockRegistry.register(eventBus);
 
         final RegistryCallback<BlockEntityType<?>> blockEntityCallback =
@@ -288,6 +298,13 @@ public class ModInitializer extends AbstractModInitializer {
             () -> BlockEntityType.Builder.of(
                 NetworkBridgeBlockEntity::new,
                 Blocks.INSTANCE.getNetworkBridge()
+            ).build(null)
+        ));
+        BlockEntities.INSTANCE.setRedstoneLink(blockEntityCallback.register(
+            ContentIds.REDSTONE_LINK,
+            () -> BlockEntityType.Builder.of(
+                RedstoneLinkBlockEntity::new,
+                Blocks.INSTANCE.getRedstoneLink()
             ).build(null)
         ));
         blockEntityTypeRegistry.register(eventBus);
@@ -437,6 +454,19 @@ public class ModInitializer extends AbstractModInitializer {
                 ContentIds.NETWORK_BRIDGE,
                 () -> new NetworkBridgeBlockItem(
                     Blocks.INSTANCE.getNetworkBridge(),
+                    new Item.Properties()
+                )
+            )
+        );
+        registerRedstoneLinkItem(callback);
+    }
+
+    private void registerRedstoneLinkItem(final RegistryCallback<Item> callback) {
+        Items.INSTANCE.setRedstoneLinkBlockItem(
+            callback.register(
+                ContentIds.REDSTONE_LINK,
+                () -> new RedstoneLinkBlockItem(
+                    Blocks.INSTANCE.getRedstoneLink(),
                     new Item.Properties()
                 )
             )

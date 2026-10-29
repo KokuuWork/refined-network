@@ -29,5 +29,6 @@ public final class CreativeModeTabItems {
         consumer.accept(Items.INSTANCE.getEnergyMonitorBlockItem().getDefaultInstance());
         consumer.accept(Items.INSTANCE.getSmartSorterBlockItem().getDefaultInstance());
         consumer.accept(Items.INSTANCE.getNetworkBridgeBlockItem().getDefaultInstance());
+        consumer.accept(Items.INSTANCE.getRedstoneLinkBlockItem().getDefaultInstance());
     }
 }
