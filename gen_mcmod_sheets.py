@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""MC百科配图（16:9，1280×720），按正文板块拆分。
+"""MC百科配图（2:1 扁版，1280×640 画布 → 1024×512），按正文板块拆分。
 
   01 特点      概念 + 20 件内容全展示
   02 终端      4 件终端与关键数值
@@ -34,8 +34,8 @@ LANG_ZH = os.path.join(
     "rswirelesscrafting", "lang", "zh_cn.json",
 )
 
-W, H = 1280, 720
-OUT_W, OUT_H = 1024, 576
+W, H = 1280, 640
+OUT_W, OUT_H = 1024, 512
 MARGIN = 40
 
 BG = (255, 255, 255)
@@ -48,6 +48,10 @@ SUB = (104, 112, 124)
 MUTED = (146, 154, 164)
 ACCENT = (32, 132, 156)
 DIVIDER = (233, 237, 242)
+
+# 版式基准：标题块占 40–100，正文自 110 起，底部注脚线在 H-54。
+TOP = 110
+FOOT = H - 54
 
 
 def icon(name):
@@ -190,16 +194,16 @@ def frame(kicker, title, sub=None, note=None):
     img.paste(Image.new("RGBA", img.size, BG + (255,)), (0, 0))
     d = ImageDraw.Draw(img)
 
-    d.rectangle([M.sc(MARGIN), M.sc(54), M.sc(MARGIN + 4), M.sc(102)], fill=ACCENT)
-    M.text(d, (MARGIN + 18, 48), title, 32, INK, bold=True)
+    d.rectangle([M.sc(MARGIN), M.sc(44), M.sc(MARGIN + 4), M.sc(88)], fill=ACCENT)
+    M.text(d, (MARGIN + 18, 36), title, 30, INK, bold=True)
     if sub:
-        M.text(d, (MARGIN + 18, 94), sub, 15, SUB)
-    M.text(d, (W - MARGIN, 58), kicker, 13, MUTED, anchor="ra")
+        M.text(d, (MARGIN + 18, 78), sub, 14, SUB)
+    M.text(d, (W - MARGIN, 46), kicker, 13, MUTED, anchor="ra")
 
     if note:
-        d.line([M.sc(MARGIN), M.sc(H - 62), M.sc(W - MARGIN), M.sc(H - 62)],
+        d.line([M.sc(MARGIN), M.sc(FOOT), M.sc(W - MARGIN), M.sc(FOOT)],
                fill=DIVIDER, width=M.sc(1))
-        M.text(d, (MARGIN, H - 46), note, 13, MUTED)
+        M.text(d, (MARGIN, H - 40), note, 13, MUTED)
     return img, d
 
 
@@ -220,6 +224,18 @@ def tile(img, x, y, size, icon_img, name, note, name_size=14, note_size=11, pad_
 def save(img, path):
     img.convert("RGB").resize((OUT_W, OUT_H), Image.LANCZOS).save(path)
     print("wrote", path)
+
+
+def leader(d, x0, x1, y, colour=(224, 230, 237)):
+    """标签与数值之间的浅色引导点线。"""
+    x = x0
+    while x < x1:
+        d.line([M.sc(x), M.sc(y), M.sc(min(x + 2, x1)), M.sc(y)], fill=colour, width=M.sc(1))
+        x += 6
+
+
+def text_width(d, value, size):
+    return d.textlength(value, font=M.font(size)) / M.S
 
 
 ITEMS = [
@@ -250,14 +266,16 @@ ITEMS = [
 
 def overview(path):
     img, d = frame("01 · 特点", "全部内容")
-    cols, rows = 5, 4
-    gap_x, gap_y = 18, 16
+    cols = 5
+    size = 84
+    gap_x, gap_y = 18, 14
+    pitch = size + 8 + 18 + gap_y
     cw = (W - MARGIN * 2 - gap_x * (cols - 1)) / cols
     for i, (key, name) in enumerate(ITEMS):
         r, c = divmod(i, cols)
         x = MARGIN + c * (cw + gap_x)
-        y = 126 + r * (128 + gap_y)
-        tile(img, x + (cw - 96) / 2, y, 96, icon(key), name, None, name_size=13)
+        y = TOP + r * pitch
+        tile(img, x + (cw - size) / 2, y, size, icon(key), name, None, name_size=13)
     save(img, path)
 
 
@@ -274,25 +292,26 @@ def terminals(path):
         ("wireless_monitor", "无线监控终端", "最多 4 条规则", "阈值提醒 / 自动补货"),
     ]
     cw, gap = 282, 24
+    top, bottom = TOP, 424
     x = MARGIN
     for key, name, line1, line2 in data:
-        d.rounded_rectangle([M.sc(x), M.sc(136), M.sc(x + cw), M.sc(474)],
+        d.rounded_rectangle([M.sc(x), M.sc(top), M.sc(x + cw), M.sc(bottom)],
                             radius=M.sc(16), fill=TILE, outline=TILE_BORDER, width=M.sc(1))
         img.alpha_composite(icon(key).resize((M.sc(156), M.sc(156)), Image.NEAREST),
-                            (M.sc(x + (cw - 156) / 2), M.sc(170)))
-        M.text(d, (x + cw / 2, 356), name, 18, INK, bold=True, anchor="ma")
-        M.text(d, (x + cw / 2, 394), line1, 13, SUB, anchor="ma")
-        M.text(d, (x + cw / 2, 422), line2, 13, ACCENT, anchor="ma")
+                            (M.sc(x + (cw - 156) / 2), M.sc(top + 16)))
+        M.text(d, (x + cw / 2, top + 190), name, 18, INK, bold=True, anchor="ma")
+        M.text(d, (x + cw / 2, top + 228), line1, 13, SUB, anchor="ma")
+        M.text(d, (x + cw / 2, top + 254), line2, 13, ACCENT, anchor="ma")
         x += cw + gap
 
     chips = [("终端容量", "400 FE"), ("插件槽位", "4 个"), ("单次费用", "5 – 40 FE")]
     cx = MARGIN
     for label, value in chips:
-        d.rounded_rectangle([M.sc(cx), M.sc(516), M.sc(cx + 372), M.sc(590)],
+        d.rounded_rectangle([M.sc(cx), M.sc(456), M.sc(cx + 372), M.sc(528)],
                             radius=M.sc(14), fill=(249, 251, 253),
                             outline=TILE_BORDER, width=M.sc(1))
-        M.text(d, (cx + 24, 538), label, 13, SUB)
-        M.text(d, (cx + 348, 532), value, 20, ACCENT, bold=True, anchor="ra")
+        M.text(d, (cx + 24, 480), label, 13, SUB)
+        M.text(d, (cx + 348, 474), value, 20, ACCENT, bold=True, anchor="ra")
         cx += 396
     save(img, path)
 
@@ -311,26 +330,27 @@ def upgrades(path):
         ("interdimensional_upgrade", "维度升级插件", "解锁跨维度访问", "需变送器 + 接收器"),
         ("remote_energy_upgrade", "远程输电插件", "扣电走绑定网络", "不足回落到电池"),
     ]
-    cw, ch = 386, 178
+    cw, ch = 386, 200
     gap = 20
     for i, (key, name, eff, note) in enumerate(data):
         r, c = divmod(i, 3)
         x = MARGIN + c * (cw + gap)
-        y = 138 + r * (ch + 18)
+        y = TOP + r * (ch + 20)
         d.rounded_rectangle([M.sc(x), M.sc(y), M.sc(x + cw), M.sc(y + ch)],
                             radius=M.sc(16), fill=TILE, outline=TILE_BORDER, width=M.sc(1))
         img.alpha_composite(icon(key).resize((M.sc(72), M.sc(72)), Image.NEAREST),
-                            (M.sc(x + 24), M.sc(y + 52)))
-        M.text(d, (x + 116, y + 46), name, 17, INK, bold=True)
-        M.text(d, (x + 116, y + 82), eff, 14, SUB)
-        M.text(d, (x + 116, y + 110), note, 13, ACCENT)
+                            (M.sc(x + 26), M.sc(y + 58)))
+        M.text(d, (x + 118, y + 50), name, 17, INK, bold=True)
+        M.text(d, (x + 118, y + 90), eff, 14, SUB)
+        M.text(d, (x + 118, y + 120), note, 13, ACCENT)
     save(img, path)
 
 
 # ------------------------------------------------------------------ 04
 
 def devices_tools(path):
-    img, d = frame("04 · 设备与工具", "七件设备 · 三件工具")
+    img, d = frame("04 · 设备与工具", "七件设备 · 三件工具",
+                   note="方块设备用无线连接器绑定；绑定后与终端共用同一张网络的电量。")
 
     devices = [
         ("terminal_charging_station", "终端充电站", "3 槽 · 待机 128 FE/s"),
@@ -341,15 +361,15 @@ def devices_tools(path):
         ("smart_sorter", "智能分拣站", "3×3 过滤 · 按物品/标签"),
         ("network_bridge", "网络桥接器", "两张网络互通"),
     ]
-    size = 140
-    gap = 17
+    size = 150
+    gap = 16
     total = len(devices) * size + (len(devices) - 1) * gap
     x = (W - total) / 2
     for key, name, note in devices:
-        tile(img, x, 136, size, icon(key), name, note, name_size=13, note_size=11)
+        tile(img, x, 104, size, icon(key), name, note, name_size=13, note_size=11)
         x += size + gap
 
-    d.line([M.sc(MARGIN), M.sc(362), M.sc(W - MARGIN), M.sc(362)], fill=DIVIDER, width=M.sc(1))
+    d.line([M.sc(MARGIN), M.sc(312), M.sc(W - MARGIN), M.sc(312)], fill=DIVIDER, width=M.sc(1))
 
     tools = [
         ("wireless_connector", "无线连接器", "绑定方块设备"),
@@ -358,18 +378,19 @@ def devices_tools(path):
     ]
     x = MARGIN
     for key, name, note in tools:
-        tile(img, x, 400, 152, icon(key), name, note, name_size=13, note_size=11)
-        x += 152 + 24
+        tile(img, x, 344, 144, icon(key), name, note, name_size=13, note_size=11)
+        x += 144 + 24
 
-    bx = 520
-    M.text(d, (bx, 404), "绑定方块设备的方式", 15, INK, bold=True)
+    bx = 548
+    M.text(d, (bx, 348), "绑定方块设备的方式", 15, INK, bold=True)
     steps = [
         "① 手持连接器，右键任意精致存储网络方块，记录接入点",
         "② 右键要绑定的设备，完成绑定；两端亮起光环与粒子线",
         "③ 再次右键已绑定的设备即解绑；潜行右键清除记录",
     ]
     for i, line in enumerate(steps):
-        M.text(d, (bx, 440 + i * 42), line, 13, SUB)
+        M.text(d, (bx, 392 + i * 46), line, 13, SUB)
+    M.text(d, (bx, 530), "接入点会留在连接器里，可以连续绑定多台设备。", 13, ACCENT)
     save(img, path)
 
 
@@ -381,8 +402,8 @@ def recipe_card(img, x, y, w, h, recipe, name):
                         radius=M.sc(14), fill=CARD, outline=BORDER, width=M.sc(1))
     M.text(d, (x + 16, y + 14), name, 15, INK, bold=True)
 
-    cell_size, gap = 34, 4
-    gx0, gy0 = x + 16, y + 56
+    cell_size, gap = 36, 4
+    gx0, gy0 = x + 16, y + 64
     for r, row in enumerate(recipe["pattern"]):
         for c, ch in enumerate(row):
             if ch == " ":
@@ -401,14 +422,14 @@ def recipe_card(img, x, y, w, h, recipe, name):
     ax = gx0 + grid_w + 8
     M.arrow(d, ax, cy, ax + 22)
     rx = ax + 26
-    d.rounded_rectangle([M.sc(rx), M.sc(cy - 21), M.sc(rx + 42), M.sc(cy + 21)],
+    d.rounded_rectangle([M.sc(rx), M.sc(cy - 22), M.sc(rx + 44), M.sc(cy + 22)],
                         radius=M.sc(8), fill=TILE, outline=TILE_BORDER, width=M.sc(1))
     img.alpha_composite(
-        icon(recipe["result"]["id"].split(":")[1]).resize((M.sc(36), M.sc(36)), Image.NEAREST),
-        (M.sc(rx + 3), M.sc(cy - 18)))
+        icon(recipe["result"]["id"].split(":")[1]).resize((M.sc(38), M.sc(38)), Image.NEAREST),
+        (M.sc(rx + 3), M.sc(cy - 19)))
 
     materials = len({json.dumps(v, sort_keys=True) for v in recipe["key"].values()})
-    M.text(d, (x + 16, y + h - 34), "有序合成 · %d 种材料" % materials, 11, MUTED)
+    M.text(d, (x + 16, y + h - 32), "有序合成 · %d 种材料" % materials, 11, MUTED)
 
 
 def recipes(path, part):
@@ -428,7 +449,7 @@ def recipes(path, part):
     cw = (W - MARGIN * 2 - gap * (cols - 1)) / cols
     for i, (recipe, name) in enumerate(chunk):
         r, c = divmod(i, cols)
-        recipe_card(img, MARGIN + c * (cw + gap), 150 + r * 244, cw, 226, recipe, name)
+        recipe_card(img, MARGIN + c * (cw + gap), 112 + r * 240, cw, 234, recipe, name)
     save(img, path)
 
 
@@ -438,7 +459,7 @@ def energy(path):
     img, d = frame("07 · 能量与耗电", "能量与耗电",
                    note="跨维度固定 16 倍；增幅塔半径 64 格内倍率减半。")
 
-    left, right, top, bottom = 110, 700, 180, 520
+    left, right, top, bottom = 110, 700, 136, 492
     values = [1, 2, 4, 8, 16]
     labels = ["16", "32", "64", "128", "256"]
     for i in range(5):
@@ -457,20 +478,22 @@ def energy(path):
                             radius=M.sc(5), fill=ACCENT)
         M.text(d, (x0 + bar_w / 2, y0 - 28), "%d×" % v, 16, INK, bold=True, anchor="ma")
         M.text(d, (x0 + bar_w / 2, bottom + 10), labels[i], 12, SUB, anchor="ma")
+    M.text(d, (left - 14, top - 20), "倍率", 13, MUTED, anchor="ra")
     M.text(d, ((left + right) / 2, bottom + 42), "与网络的距离（格）", 13, SUB, anchor="ma")
 
     fx = 760
-    M.text(d, (fx, 180), "单次基础费用", 16, INK, bold=True)
+    M.text(d, (fx, 136), "单次基础费用", 16, INK, bold=True)
     fees = [("打开界面", "5 FE"), ("手动合成", "20 FE"), ("自动合成", "40 FE"),
             ("清空矩阵", "5 FE"), ("配方转移", "5 FE"), ("样板产出一张", "40 FE")]
     for i, (label, value) in enumerate(fees):
-        yy = 218 + i * 34
+        yy = 176 + i * 38
         M.text(d, (fx, yy), label, 13, SUB)
+        leader(d, fx + text_width(d, label, 13) + 12, W - MARGIN - 54, yy + 9)
         M.text(d, (W - MARGIN, yy), value, 13, INK, bold=True, anchor="ra")
 
-    M.text(d, (fx, 440), "终端容量 400 FE", 13, SUB)
-    M.text(d, (fx, 468), "电池插件每张 +1000 FE", 13, SUB)
-    M.text(d, (fx, 496), "增幅塔 128 FE/s · 桥 64 FE/s", 13, SUB)
+    M.text(d, (fx, 412), "终端容量 400 FE", 13, SUB)
+    M.text(d, (fx, 444), "电池插件每张 +1000 FE", 13, SUB)
+    M.text(d, (fx, 476), "增幅塔 128 FE/s · 桥 64 FE/s", 13, SUB)
     save(img, path)
 
 
