@@ -21,8 +21,10 @@ import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.WirelessCrafting
 import java.util.function.Supplier;
 
 import com.refinedmods.refinedstorage.common.api.RefinedStorageApi;
+import com.refinedmods.refinedstorage.common.api.support.network.AbstractNetworkNodeContainerBlockEntity;
 import com.refinedmods.refinedstorage.common.content.ExtendedMenuTypeFactory;
 import com.refinedmods.refinedstorage.common.content.RegistryCallback;
+import com.refinedmods.refinedstorage.neoforge.api.RefinedStorageNeoForgeApi;
 import com.refinedmods.refinedstorage.neoforge.support.energy.EnergyStorageAdapter;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -198,6 +200,19 @@ public class ModInitializer extends AbstractModInitializer {
             Capabilities.EnergyStorage.BLOCK,
             BlockEntities.INSTANCE.getChargingStation(),
             (blockEntity, side) -> new ChargingStationEnergyStorage(blockEntity)
+        );
+        // 线缆和网络只认「方块类型上注册的容器能力」，只把容器塞在 BE 里是不够的。
+        registerNetworkNodeContainerProvider(event, BlockEntities.INSTANCE.getChargingStation());
+    }
+
+    private void registerNetworkNodeContainerProvider(
+        final RegisterCapabilitiesEvent event,
+        final BlockEntityType<? extends AbstractNetworkNodeContainerBlockEntity<?>> type
+    ) {
+        event.registerBlockEntity(
+            RefinedStorageNeoForgeApi.INSTANCE.getNetworkNodeContainerProviderCapability(),
+            type,
+            (blockEntity, side) -> blockEntity.getContainerProvider()
         );
     }
 

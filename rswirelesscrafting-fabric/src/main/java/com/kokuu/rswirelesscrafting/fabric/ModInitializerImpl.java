@@ -21,9 +21,11 @@ import com.kokuu.rswirelesscrafting.common.wirelesscraftinggrid.WirelessCrafting
 import java.util.Set;
 
 import com.refinedmods.refinedstorage.common.api.RefinedStorageApi;
+import com.refinedmods.refinedstorage.common.api.support.network.AbstractNetworkNodeContainerBlockEntity;
 import com.refinedmods.refinedstorage.common.content.DirectRegistryCallback;
 import com.refinedmods.refinedstorage.common.content.ExtendedMenuTypeFactory;
 import com.refinedmods.refinedstorage.common.content.RegistryCallback;
+import com.refinedmods.refinedstorage.fabric.api.RefinedStorageFabricApi;
 import com.refinedmods.refinedstorage.fabric.api.RefinedStoragePlugin;
 import com.refinedmods.refinedstorage.fabric.support.energy.EnergyStorageAdapter;
 import me.shedaniel.autoconfig.AutoConfig;
@@ -155,6 +157,17 @@ public class ModInitializerImpl extends AbstractModInitializer implements Refine
         EnergyStorage.SIDED.registerForBlockEntity(
             (blockEntity, context) -> new ChargingStationEnergyStorage(blockEntity),
             BlockEntities.INSTANCE.getChargingStation()
+        );
+        // 线缆和网络只认「方块类型上注册的容器」，只把容器塞在 BE 里是不够的。
+        registerNetworkNodeContainerProvider(BlockEntities.INSTANCE.getChargingStation());
+    }
+
+    private void registerNetworkNodeContainerProvider(
+        final BlockEntityType<? extends AbstractNetworkNodeContainerBlockEntity<?>> type
+    ) {
+        RefinedStorageFabricApi.INSTANCE.getNetworkNodeContainerProviderLookup().registerForBlockEntity(
+            (blockEntity, direction) -> blockEntity.getContainerProvider(),
+            type
         );
     }
 
