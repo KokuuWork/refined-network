@@ -72,6 +72,10 @@ public final class ContentNames {
         "item",
         "wireless_crafting_grid.unbound"
     ).withStyle(ChatFormatting.DARK_GRAY);
+    public static final MutableComponent TERMINAL_NOT_ENOUGH_ENERGY = createTranslation(
+        "gui",
+        "terminal_not_enough_energy"
+    ).withStyle(ChatFormatting.RED);
     public static final MutableComponent WIRELESS_CRAFTING_GRID_UPGRADES = createTranslation(
         "item",
         "wireless_crafting_grid.upgrades"

@@ -38,6 +38,7 @@
   "block.rswirelesscrafting.charging_station.redstone": "Redstone: shuts off wireless charging and pauses the idle drain",
   "block.rswirelesscrafting.charging_station.buffer": "External FE buffer: %s FE",
   "gui.rswirelesscrafting.wireless_crafting_grid_upgrades": "Upgrade Bay",
+  "gui.rswirelesscrafting.terminal_not_enough_energy": "Not enough energy. Charge the terminal first.",
   "gui.rswirelesscrafting.charging_station.wired_label": "Wired",
   "gui.rswirelesscrafting.charging_station.wireless_label": "Wireless",
   "gui.rswirelesscrafting.charging_station.buffer_info": "Buffer: internal energy, refilled from the network when not full",

@@ -38,6 +38,7 @@
   "block.rswirelesscrafting.charging_station.redstone": "红石信号：关闭无线充电并停扣待机损耗",
   "block.rswirelesscrafting.charging_station.buffer": "外部 FE 缓冲：%s FE",
   "gui.rswirelesscrafting.wireless_crafting_grid_upgrades": "插件装配",
+  "gui.rswirelesscrafting.terminal_not_enough_energy": "终端电量不足，请先充电。",
   "gui.rswirelesscrafting.charging_station.wired_label": "有线",
   "gui.rswirelesscrafting.charging_station.wireless_label": "无线",
   "gui.rswirelesscrafting.charging_station.buffer_info": "缓冲电量：充电站自身缓存，未满时自动从网络补电",

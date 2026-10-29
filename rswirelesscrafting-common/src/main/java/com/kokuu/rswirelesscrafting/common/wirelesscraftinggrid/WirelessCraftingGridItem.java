@@ -198,6 +198,12 @@ public class WirelessCraftingGridItem extends AbstractNetworkEnergyItem {
         }
         final ExtendedWirelessNetworkItemContext extendedContext =
             (ExtendedWirelessNetworkItemContext) context;
+        // 开界面本身就要钱：付不起就别开，否则界面会在「没注册 watcher」的半开状态下被关掉，
+        // RS 的 removeWatcher 会抛异常（断线时甚至崩服）。
+        if (!extendedContext.canAfford(Platform.getConfig().getWirelessCraftingGrid().getOpenEnergyUsage())) {
+            player.displayClientMessage(ContentNames.TERMINAL_NOT_ENOUGH_ENERGY, false);
+            return;
+        }
         final CraftingGrid craftingGrid = new WirelessCraftingGrid(player, extendedContext, slotReference);
         final Component correctedName = requireNonNullElse(name, ContentNames.WIRELESS_CRAFTING_GRID);
         final var provider = new WirelessCraftingGridExtendedMenuProvider(correctedName, craftingGrid, slotReference);
