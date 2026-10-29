@@ -60,13 +60,23 @@ public class WirelessCraftingGridItem extends AbstractWirelessTerminalItem {
         }
         final ExtendedWirelessNetworkItemContext extendedContext =
             (ExtendedWirelessNetworkItemContext) context;
-        // 开界面本身就要钱：付不起就别开，否则界面会在「没注册 watcher」的半开状态下被关掉，
-        // RS 的 removeWatcher 会抛异常（断线时甚至崩服）。
-        if (!extendedContext.canAfford(Platform.getConfig().getWirelessCraftingGrid().getOpenEnergyUsage())) {
+        // 没接入网络（没绑定 / 超出范围 / 缺维度插件）：退化成普通 3×3 合成台。
+        // 打开不收费，因为没有网络可供付费；新玩家绑定前也不会觉得「买了不能用」。
+        final boolean offline = extendedContext.resolveNetwork().isEmpty();
+        if (offline) {
+            if (!Platform.getConfig().getWirelessCraftingGrid().isOfflineModeEnabled()) {
+                player.displayClientMessage(ContentNames.TERMINAL_OFFLINE, false);
+                return;
+            }
+            player.displayClientMessage(ContentNames.TERMINAL_OFFLINE, true);
+        } else if (!extendedContext.canAfford(Platform.getConfig().getWirelessCraftingGrid().getOpenEnergyUsage())) {
+            // 有网络但终端没电：付不起就别开，否则界面会在「没注册 watcher」的半开状态下被关掉，
+            // RS 的 removeWatcher 会抛异常（断线时甚至崩服）。
             player.displayClientMessage(ContentNames.TERMINAL_NOT_ENOUGH_ENERGY, false);
             return;
         }
-        final CraftingGrid craftingGrid = new WirelessCraftingGrid(player, extendedContext, slotReference);
+        final CraftingGrid craftingGrid = new WirelessCraftingGrid(
+            player, extendedContext, slotReference, offline);
         final Component correctedName = requireNonNullElse(name, getTerminalName());
         final var provider = new WirelessCraftingGridExtendedMenuProvider(correctedName, craftingGrid, slotReference);
         com.refinedmods.refinedstorage.common.Platform.INSTANCE.getMenuOpener().openMenu(player, provider);

@@ -274,5 +274,8 @@
   "msg.rswirelesscrafting.connector.cleared": "已清除接入点记录。",
   "msg.rswirelesscrafting.connector.need_anchor": "先右键一个 RS 网络方块记录接入点。",
   "msg.rswirelesscrafting.connector.not_network": "这里没有可记录的 RS 网络。",
-  "msg.rswirelesscrafting.connector.no_permission": "没有权限操作那个网络。"
+  "msg.rswirelesscrafting.connector.no_permission": "没有权限操作那个网络。",
+  "gui.rswirelesscrafting.terminal_offline": "未接入网络：当前只能手动合成。",
+  "text.autoconfig.rswirelesscrafting.option.wirelessCraftingGrid.offlineModeEnabled": "未接入网络时仍可打开终端（仅手动合成，不扣电）",
+  "text.autoconfig.rswirelesscrafting.option.wirelessCraftingGrid.offlineModeEnabled.tooltip": "未接入网络时仍可打开终端（仅手动合成，不扣电）"
 }

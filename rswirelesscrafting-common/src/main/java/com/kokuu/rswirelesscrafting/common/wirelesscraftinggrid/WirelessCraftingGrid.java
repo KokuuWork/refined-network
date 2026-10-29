@@ -67,14 +67,21 @@ class WirelessCraftingGrid implements CraftingGrid {
     @Nullable
     private final RecipeMatrix<CraftingRecipe, CraftingInput> craftingRecipe;
     private final SlotReference slotReference;
+    /**
+     * 离线模式：没有可用的网络。此时界面退化成一台普通 3×3 合成台——
+     * 不读网络、不自动合成、不扣电，也不注册网络 watcher 之外的东西。
+     */
+    private final boolean offline;
 
     WirelessCraftingGrid(final Player player,
                          final ExtendedWirelessNetworkItemContext context,
-                         final SlotReference slotReference) {
+                         final SlotReference slotReference,
+                         final boolean offline) {
         this.level = player.level();
         this.gridPlayer = player;
         this.context = context;
         this.slotReference = slotReference;
+        this.offline = offline;
         this.craftingRecipe = createMatrix(player, () -> updateCraftingRecipe(player), slotReference);
     }
 
@@ -151,6 +158,9 @@ class WirelessCraftingGrid implements CraftingGrid {
 
     @Override
     public ExtractTransaction startExtractTransaction(final Player player, final boolean directCommit) {
+        if (offline) {
+            return ExtractTransaction.NOOP;
+        }
         if (!context.canAfford(Platform.getConfig().getWirelessCraftingGrid().getCraftingEnergyUsage())) {
             return ExtractTransaction.NOOP;
         }
@@ -173,6 +183,9 @@ class WirelessCraftingGrid implements CraftingGrid {
 
     @Override
     public boolean clearMatrix(final Player player, final boolean toPlayerInventory) {
+        if (offline) {
+            return toPlayerInventory && getCraftingMatrix().clearToPlayerInventory(player);
+        }
         if (!context.canAfford(Platform.getConfig().getWirelessCraftingGrid().getClearMatrixEnergyUsage())) {
             return false;
         }
@@ -194,6 +207,10 @@ class WirelessCraftingGrid implements CraftingGrid {
 
     @Override
     public void transferRecipe(final Player player, final List<List<ItemResource>> recipe) {
+        if (offline) {
+            getCraftingMatrix().transferRecipe(player, null, recipe);
+            return;
+        }
         if (!context.canAfford(Platform.getConfig().getWirelessCraftingGrid().getRecipeTransferEnergyUsage())) {
             return;
         }
@@ -235,7 +252,7 @@ class WirelessCraftingGrid implements CraftingGrid {
         // 付得起才扣开界面的钱，但无论扣没扣都必须完成注册：
         // RS 的 GridWatcherManagerImpl 在移除未注册的 watcher 时会直接抛异常，不能留下「半开」状态。
         final long openCost = Platform.getConfig().getWirelessCraftingGrid().getOpenEnergyUsage();
-        if (context.canAfford(openCost)) {
+        if (!offline && context.canAfford(openCost)) {
             context.drainEnergy(openCost);
         }
         final StorageNetworkComponent storage = context.resolveNetwork()

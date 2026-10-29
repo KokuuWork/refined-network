@@ -26,7 +26,7 @@ base {
 }
 
 // 与 neoforge 模块保持一致：插件会在求值前用 CI 环境变量重算 version，这里显式覆盖本地版本号。
-version = "0.4.1"
+version = "0.5.0"
 
 val refinedstorageVersion: String by project
 

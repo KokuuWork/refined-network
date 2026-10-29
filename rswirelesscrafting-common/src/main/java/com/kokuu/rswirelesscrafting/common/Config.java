@@ -109,6 +109,14 @@ public interface Config {
         long getClearMatrixEnergyUsage();
 
         long getRecipeTransferEnergyUsage();
+
+        /**
+         * 未接入网络（没绑定，或超出范围 / 缺维度插件）时，是否仍然允许打开终端。
+         *
+         * <p>打开后就是一台普通的 3×3 合成台：不读网络、不自动合成、不扣电。官方附属 Quartz Arsenal
+         * 也这么做，新玩家在绑定前不会觉得「买了不能用」。关掉则保持旧行为（直接拒绝并提示）。
+         */
+        boolean isOfflineModeEnabled();
     }
 
     /**

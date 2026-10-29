@@ -297,18 +297,15 @@ public final class ContentNames {
         "item",
         "wireless_autocrafter_manager.desc"
     ).withStyle(ChatFormatting.GRAY);
-    public static final MutableComponent WIRELESS_AUTOCRAFTER_MANAGER_FAILED = createTranslation(
-        "gui",
-        "wireless_autocrafter_manager_failed"
-    ).withStyle(ChatFormatting.RED);
-    public static final MutableComponent TERMINAL_NOT_ENOUGH_ENERGY = createTranslation(
-        "gui",
-        "terminal_not_enough_energy"
-    ).withStyle(ChatFormatting.RED);
-    public static final MutableComponent WIRELESS_PATTERN_GRID_FAILED = createTranslation(
-        "gui",
-        "wireless_pattern_grid_failed"
-    ).withStyle(ChatFormatting.RED);
+    public static final MutableComponent WIRELESS_AUTOCRAFTER_MANAGER_FAILED =
+        createTranslation("gui", "wireless_autocrafter_manager_failed").withStyle(ChatFormatting.RED);
+    public static final MutableComponent TERMINAL_NOT_ENOUGH_ENERGY =
+        createTranslation("gui", "terminal_not_enough_energy").withStyle(ChatFormatting.RED);
+    /** 没接入网络时打开终端：只剩 3×3 合成台，不读网络也不扣电。 */
+    public static final MutableComponent TERMINAL_OFFLINE =
+        createTranslation("gui", "terminal_offline").withStyle(ChatFormatting.YELLOW);
+    public static final MutableComponent WIRELESS_PATTERN_GRID_FAILED =
+        createTranslation("gui", "wireless_pattern_grid_failed").withStyle(ChatFormatting.RED);
     public static final MutableComponent WIRELESS_CRAFTING_GRID_UPGRADES_TITLE = createTranslation(
         "gui",
         "wireless_crafting_grid_upgrades"

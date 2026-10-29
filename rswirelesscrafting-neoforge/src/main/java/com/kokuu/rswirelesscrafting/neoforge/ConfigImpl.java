@@ -110,6 +110,7 @@ public class ConfigImpl implements Config {
         private final ModConfigSpec.LongValue autocraftingEnergyUsage;
         private final ModConfigSpec.LongValue clearMatrixEnergyUsage;
         private final ModConfigSpec.LongValue recipeTransferEnergyUsage;
+        private final ModConfigSpec.BooleanValue offlineModeEnabled;
 
         WirelessCraftingGridEntryImpl() {
             builder.translation(translationKey("wirelessCraftingGrid")).push("wirelessCraftingGrid");
@@ -140,6 +141,11 @@ public class ConfigImpl implements Config {
                 .translation(translationKey("wirelessCraftingGrid.recipeTransferEnergyUsage"))
                 .defineInRange("recipeTransferEnergyUsage", DefaultEnergyUsage.WIRELESS_CRAFTING_GRID_RECIPE_TRANSFER,
                     0, Long.MAX_VALUE);
+            offlineModeEnabled = builder
+                .translation(translationKey("wirelessCraftingGrid.offlineModeEnabled"))
+                .comment("Allow opening the terminal when it is not connected to a network.\n"
+                    + "It then works as a plain 3x3 crafting table and costs nothing.")
+                .define("offlineModeEnabled", true);
             builder.pop();
         }
 
@@ -176,6 +182,11 @@ public class ConfigImpl implements Config {
         @Override
         public long getRecipeTransferEnergyUsage() {
             return recipeTransferEnergyUsage.get();
+        }
+
+        @Override
+        public boolean isOfflineModeEnabled() {
+            return offlineModeEnabled.get();
         }
     }
 

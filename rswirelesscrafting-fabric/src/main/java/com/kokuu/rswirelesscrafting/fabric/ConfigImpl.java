@@ -123,6 +123,7 @@ public class ConfigImpl implements ConfigData, Config {
         private long clearMatrixEnergyUsage = DefaultEnergyUsage.WIRELESS_CRAFTING_GRID_CLEAR_MATRIX;
         @ConfigEntry.BoundedDiscrete(min = 0L, max = Long.MAX_VALUE)
         private long recipeTransferEnergyUsage = DefaultEnergyUsage.WIRELESS_CRAFTING_GRID_RECIPE_TRANSFER;
+        private boolean offlineModeEnabled = true;
 
         @Override
         public long getEnergyCapacity() {
@@ -157,6 +158,11 @@ public class ConfigImpl implements ConfigData, Config {
         @Override
         public long getRecipeTransferEnergyUsage() {
             return recipeTransferEnergyUsage;
+        }
+
+        @Override
+        public boolean isOfflineModeEnabled() {
+            return offlineModeEnabled;
         }
     }
 
