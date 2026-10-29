@@ -411,21 +411,28 @@ def sprite(assets, key, size):
 # ================================================================== figures
 
 def items_figure(assets, path):
+    # 25 个图标分两行排，单行太长在 README 里会被压得看不清。
     order = ["grid_off", "grid_on", "pattern_off", "pattern_on", "manager_off", "manager_on",
-             "battery", "energy", "advanced", "range", "interdim", "remote", "charging",
-             "amplifier", "bridge_on", "card", "connector", "monitor_on", "overclock"]
-    scale = 8
+             "monitor_off", "monitor_on",
+             "battery", "energy", "advanced", "range", "interdim", "remote",
+             "charging", "amplifier", "bridge_off", "bridge_on", "receiver", "emon",
+             "sorter", "netbridge",
+             "card", "connector", "overclock"]
+    per_row = 13
+    scale = 7
     cell = 16 * scale + 8          # slot size, leaving a 4px inset for the sprite
-    gap = 16
+    gap = 12
     margin = 16
-    width = margin * 2 + cell * len(order) + gap * (len(order) - 1)
-    height = margin * 2 + cell
+    rows = [order[i:i + per_row] for i in range(0, len(order), per_row)]
+    width = margin * 2 + cell * per_row + gap * (per_row - 1)
+    height = margin * 2 + cell * len(rows) + gap * (len(rows) - 1)
     px = canvas(width, height)
-    for i, key in enumerate(order):
-        x = margin + i * (cell + gap)
-        y = margin
-        slot(px, x, y, cell, scale)
-        blit_fit(px, sprite(assets, key, 16 * scale), x + 4, y + 4, 16 * scale)
+    for r, row in enumerate(rows):
+        for c, key in enumerate(row):
+            x = margin + c * (cell + gap)
+            y = margin + r * (cell + gap)
+            slot(px, x, y, cell, scale)
+            blit_fit(px, sprite(assets, key, 16 * scale), x + 4, y + 4, 16 * scale)
     write_png(path, px)
     print("wrote", path)
 
