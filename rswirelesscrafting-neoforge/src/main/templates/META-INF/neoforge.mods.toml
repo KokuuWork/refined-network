@@ -7,6 +7,7 @@ modId = "rswirelesscrafting"
 version = "${version}"
 displayName = "Refined Storage - Wireless Crafting"
 displayURL = "https://github.com/KokuuWork/rswirelesscrafting"
+logoFile = "assets/rswirelesscrafting/icon.png"
 authors = "Kokuu"
 description = '''
 Adds wireless crafting and pattern terminals, upgrade cards, charging, wireless links,

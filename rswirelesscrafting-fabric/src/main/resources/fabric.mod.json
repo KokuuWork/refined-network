@@ -4,6 +4,7 @@
   "version": "${version}",
   "name": "Refined Storage - Wireless Crafting",
   "description": "Adds wireless crafting and pattern terminals, upgrade cards, charging, wireless links, energy monitoring, smart sorting and network bridging for Refined Storage.",
+  "icon": "assets/rswirelesscrafting/icon.png",
   "authors": [
     "Kokuu"
   ],
