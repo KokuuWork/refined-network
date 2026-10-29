@@ -17,8 +17,8 @@
 > 👉 **[点击加入群聊（群号 498700382）](https://qm.qq.com/q/ueYTU8T3xK)** ｜ 也可以在 QQ 里**搜索群号 498700382** 找到我们。
 > 不方便用 QQ 的话，欢迎直接提 [Issue](https://github.com/KokuuWork/rswirelesscrafting/issues)。
 
-> ✅ **当前稳定线版本 0.3.3**（2026-10-28）· 基于 0.3.2 的权限与计费修复版，不包含 0.4.x 开发功能。
-> 🎨 **本版同步新美术**：终端图标、六张升级插件与充电站纹理整套重绘（RS2 风格灰机壳、深灰内嵌面板、青色信号色，充电站改为多面模型）。**0.3.2 及更早版本保持旧美术，不再回改**，玩法完全一致，只是外观不同。
+> ✅ **当前稳定线版本 0.3.4**（2026-10-29）· 修复 0.3.3 的崩溃回归，充电站可用线缆连接，不包含 0.4.x 开发功能。
+> 🎨 **新美术自 0.3.3 起启用**：终端图标、六张升级插件与充电站纹理整套重绘（RS2 风格灰机壳、深灰内嵌面板、青色信号色，充电站改为多面模型）。**0.3.2 及更早版本保持旧美术，不再回改**，玩法完全一致，只是外观不同。
 > 请在测试存档中使用并**先备份世界**；遇到问题欢迎来上面的 QQ 群反馈（附日志与复现步骤）。
 
 给 [Refined Storage 2](https://github.com/refinedmods/refinedstorage) 补上原版缺失的**无线合成**能力。
@@ -133,7 +133,7 @@
 1. 装好 Fabric 1.21.1、Fabric API 与 Refined Storage。
 2. 把 `rswirelesscrafting-fabric-<version>.jar` 丢进 `mods/`，并确保已装 Cloth Config 与 Team Reborn Energy（通常随 Refined Storage 一并提供）。
 
-两种加载器的 jar 都从 [Releases](https://github.com/KokuuWork/rswirelesscrafting/releases/latest) 下载，**二选一**（功能与配置完全一致，不要同时放进 `mods/`）。当前 0.3.3 对应 `rswirelesscrafting-neoforge-0.3.3.jar` / `rswirelesscrafting-fabric-0.3.3.jar`。
+两种加载器的 jar 都从 [Releases](https://github.com/KokuuWork/rswirelesscrafting/releases/latest) 下载，**二选一**（功能与配置完全一致，不要同时放进 `mods/`）。当前 0.3.4 对应 `rswirelesscrafting-neoforge-0.3.4.jar` / `rswirelesscrafting-fabric-0.3.4.jar`。
 
 > **升级注意**：NeoForge 只会更新配置文件的**注释**、不会覆盖你已经改过的值。跨版本升级后如果发现
 > `config/rswirelesscrafting-common.toml` 里「注释写的默认值」和「实际值」不一致，删掉该文件让它重新生成即可。
@@ -325,9 +325,11 @@ export JAVA_HOME="/path/to/jdk-21"
 
 ## 更新日志
 
-最新 **0.3.3**（2026-10-28，稳定线修复版）：终端动作先检查实际费用，自动合成检查权限，充电站接入 RS 权限管理，并限制异常数据中的隐藏插件。
+最新 **0.3.4**（2026-10-29，稳定线修复版）：修复电量不足时关闭终端导致服务端崩溃、电量不足仍打开空界面，以及终端充电站无法连接线缆。
 
-上一版 **0.3.2**（2026-10-15）：修复远程输电插件双重收费、无线充电实际间隔 11 tick，以及无线名额的过时文案。该版本的 Release 与标签继续保留作为历史记录。
+上一版 **0.3.3**（2026-10-28）：终端动作先检查实际费用，自动合成检查权限，充电站接入 RS 权限管理，并限制异常数据中的隐藏插件。该版本存在关闭终端崩服的回归，请勿使用。
+
+更早 **0.3.2**（2026-10-15）：修复远程输电插件双重收费、无线充电实际间隔 11 tick，以及无线名额的过时文案。该版本的 Release 与标签继续保留作为历史记录。
 
 完整记录见 [CHANGELOG.md](CHANGELOG.md)。
 
@@ -345,9 +347,9 @@ export JAVA_HOME="/path/to/jdk-21"
 > number **498700382** inside QQ.
 > No QQ? Open an [Issue](https://github.com/KokuuWork/rswirelesscrafting/issues) instead.
 
-> 🎨 **New art in this build**: the terminal icons, the six upgrade cards and the charging station were redrawn (RS2-style grey casing, dark inset panels, cyan signal colour, multi-face charging station model). **0.3.2 and older keep the old art and will not be retrofitted** — gameplay is identical, only the look differs.
+> 🎨 **New art since 0.3.3**: the terminal icons, the six upgrade cards and the charging station were redrawn (RS2-style grey casing, dark inset panels, cyan signal colour, multi-face charging station model). **0.3.2 and older keep the old art and will not be retrofitted** — gameplay is identical, only the look differs.
 
-> ✅ **Current stable-line version 0.3.3** (2026-10-28) · a permission and energy-check hotfix on top of 0.3.2,
+> ✅ **Current stable-line version 0.3.4** (2026-10-29) · fixes the crash regression in 0.3.3 and lets the charging station connect to cables,
 > without the 0.4.x development features. Back up your saves before updating; bug reports are welcome in
 > [Issues](https://github.com/KokuuWork/rswirelesscrafting/issues).
 
