@@ -179,19 +179,21 @@ def zh_names():
 
 # ------------------------------------------------------------------ 版式
 
-def frame(kicker, title, sub, note):
+def frame(kicker, title, sub=None, note=None):
     img = M.new_canvas(W, H)
     img.paste(Image.new("RGBA", img.size, BG + (255,)), (0, 0))
     d = ImageDraw.Draw(img)
 
     d.rectangle([M.sc(MARGIN), M.sc(54), M.sc(MARGIN + 4), M.sc(102)], fill=ACCENT)
     M.text(d, (MARGIN + 20, 50), title, 32, INK, bold=True)
-    M.text(d, (MARGIN + 20, 96), sub, 15, SUB)
+    if sub:
+        M.text(d, (MARGIN + 20, 96), sub, 15, SUB)
     M.text(d, (W - MARGIN, 58), kicker, 13, MUTED, anchor="ra")
 
-    d.line([M.sc(MARGIN), M.sc(H - 62), M.sc(W - MARGIN), M.sc(H - 62)],
-           fill=DIVIDER, width=M.sc(1))
-    M.text(d, (MARGIN, H - 46), note, 13, MUTED)
+    if note:
+        d.line([M.sc(MARGIN), M.sc(H - 62), M.sc(W - MARGIN), M.sc(H - 62)],
+               fill=DIVIDER, width=M.sc(1))
+        M.text(d, (MARGIN, H - 46), note, 13, MUTED)
     return img, d
 
 
@@ -241,32 +243,15 @@ ITEMS = [
 # ------------------------------------------------------------------ 01
 
 def overview(path):
-    img, d = frame("01 · 特点", "无线合成终端",
-                   "精致存储的无线合成附属 · 绑定一次，之后在任何地方打开网络合成界面",
-                   "终端按次计费；方块设备用无线连接器绑定；插件装在终端的 4 个槽位里，随时可拆。")
-
-    size = 116
-    y = 138
-    xs = [96, 542, 988]
-    tile(img, xs[0], y, size, icon("wireless_crafting_grid"), "无线合成终端", "手持使用")
-    tile(img, xs[1], y, size, M.rs_cube("transmitter", size * 0.7), "无线访问点", "网络的入口")
-    tile(img, xs[2], y, size, M.rs_cube("controller", size * 0.7), "控制器", "网络本体")
-    mid = y + size / 2
-    M.arrow(d, xs[0] + size + 40, mid, xs[1] - 40)
-    M.arrow(d, xs[1] + size + 40, mid, xs[2] - 40)
-
-    d.line([M.sc(MARGIN), M.sc(318), M.sc(W - MARGIN), M.sc(318)], fill=DIVIDER, width=M.sc(1))
-    M.text(d, (MARGIN, 332), "全部内容", 17, INK, bold=True)
-    M.text(d, (W - MARGIN, 336), "终端 4 · 升级插件 6 · 方块设备 7 · 工具 3", 12, MUTED, anchor="ra")
-
-    cols = 10
-    gap = 10
-    cw = (W - MARGIN * 2 - gap * (cols - 1)) / cols
+    img, d = frame("01 · 特点", "全部内容")
+    cols, rows = 5, 4
+    gap_x, gap_y = 18, 16
+    cw = (W - MARGIN * 2 - gap_x * (cols - 1)) / cols
     for i, (key, name) in enumerate(ITEMS):
         r, c = divmod(i, cols)
-        x = MARGIN + c * (cw + gap)
-        y = 368 + r * 128
-        tile(img, x + (cw - 100) / 2, y, 100, icon(key), name, None, name_size=12)
+        x = MARGIN + c * (cw + gap_x)
+        y = 132 + r * (132 + gap_y)
+        tile(img, x + (cw - 96) / 2, y, 96, icon(key), name, None, name_size=13)
     save(img, path)
 
 
@@ -274,8 +259,7 @@ def overview(path):
 
 def terminals(path):
     img, d = frame("02 · 终端", "四件终端",
-                   "都能远程打开，插件槽与绑定方式完全相同；容量与单次费用一致",
-                   "打开界面 5 FE · 手动合成 20 FE · 自动合成 40 FE · 清空矩阵 5 FE（基础值，乘以距离倍率）")
+                   note="打开 5 FE · 手动合成 20 FE · 自动合成 40 FE")
 
     data = [
         ("wireless_crafting_grid", "无线合成终端", "容量 400 FE · 插件槽 4", "合成 / 自动合成"),
@@ -311,8 +295,7 @@ def terminals(path):
 
 def upgrades(path):
     img, d = frame("03 · 升级插件", "六张升级插件",
-                   "装在终端的 4 个槽位里，拖入即装、拖出即卸，不用重做终端",
-                   "装配方式：手持任意无线终端（含精致存储原生的无线终端）→ 潜行 + 右键点击 → 4 个槽位。")
+                   note="装配：手持终端潜行 + 右键，4 个槽位，拖入即装。")
 
     data = [
         ("battery_upgrade", "电池升级插件", "每张 +1000 FE 容量", "可叠加"),
@@ -322,7 +305,7 @@ def upgrades(path):
         ("interdimensional_upgrade", "维度升级插件", "解锁跨维度访问", "需变送器 + 接收器"),
         ("remote_energy_upgrade", "远程输电插件", "扣电走绑定网络", "不足回落到电池"),
     ]
-    cw, ch = 392, 186
+    cw, ch = 392, 212
     gap = 20
     for i, (key, name, eff, note) in enumerate(data):
         r, c = divmod(i, 3)
@@ -341,9 +324,7 @@ def upgrades(path):
 # ------------------------------------------------------------------ 04
 
 def devices_tools(path):
-    img, d = frame("04 · 设备与工具", "七件设备 · 三件工具",
-                   "设备全部接入同一张精致存储网络；工具负责绑定、复制设置与超频",
-                   "方块设备不能手持右键绑定 —— 它们是方块物品，右键会先放置，所以绑定统一走连接器。")
+    img, d = frame("04 · 设备与工具", "七件设备 · 三件工具")
 
     devices = [
         ("terminal_charging_station", "终端充电站", "3 槽 · 待机 128 FE/s"),
@@ -362,7 +343,7 @@ def devices_tools(path):
         tile(img, x, 146, size, icon(key), name, note, name_size=13, note_size=11)
         x += size + gap
 
-    d.line([M.sc(MARGIN), M.sc(360), M.sc(W - MARGIN), M.sc(360)], fill=DIVIDER, width=M.sc(1))
+    d.line([M.sc(MARGIN), M.sc(378), M.sc(W - MARGIN), M.sc(378)], fill=DIVIDER, width=M.sc(1))
 
     tools = [
         ("wireless_connector", "无线连接器", "绑定方块设备"),
@@ -371,18 +352,18 @@ def devices_tools(path):
     ]
     x = MARGIN
     for key, name, note in tools:
-        tile(img, x, 400, 132, icon(key), name, note, name_size=13, note_size=11)
-        x += 132 + 20
+        tile(img, x, 418, 140, icon(key), name, note, name_size=13, note_size=11)
+        x += 140 + 22
 
     bx = 520
-    M.text(d, (bx, 404), "绑定方块设备的方式", 15, INK, bold=True)
+    M.text(d, (bx, 422), "绑定方块设备的方式", 15, INK, bold=True)
     steps = [
         "① 手持连接器，右键任意精致存储网络方块，记录接入点",
         "② 右键要绑定的设备，完成绑定；两端亮起光环与粒子线",
         "③ 再次右键已绑定的设备即解绑；潜行右键清除记录",
     ]
     for i, line in enumerate(steps):
-        M.text(d, (bx, 440 + i * 40), line, 13, SUB)
+        M.text(d, (bx, 458 + i * 42), line, 13, SUB)
     save(img, path)
 
 
@@ -436,9 +417,7 @@ def recipes(path, part):
     chunk = data[part * 10:(part + 1) * 10]
 
     img, d = frame("05 · 合成表 %s" % ("A" if part == 0 else "B"),
-                   "合成表" + ("（一）" if part == 0 else "（二）"),
-                   "20 件内容全部为有序合成，材料取自精致存储与后期材料；顺序与「全部内容」一致",
-                   "材料图标取自模组数据文件，与游戏内配方一致。")
+                   "合成表" + ("（一）" if part == 0 else "（二）"))
     cols, gap = 5, 16
     cw = (W - MARGIN * 2 - gap * (cols - 1)) / cols
     for i, (recipe, name) in enumerate(chunk):
@@ -451,8 +430,7 @@ def recipes(path, part):
 
 def energy(path):
     img, d = frame("07 · 能量与耗电", "能量与耗电",
-                   "按次收费，不按在线时间；每次动作 = 基础费用 × 距离倍率",
-                   "跨维度固定 16 倍；增幅塔半径 64 格内倍率减半；能耗插件可再降。倍率与实际扣费同一套公式。")
+                   note="跨维度固定 16 倍；增幅塔半径 64 格内倍率减半。")
 
     left, right, top, bottom = 110, 700, 180, 520
     values = [1, 2, 4, 8, 16]
