@@ -1,18 +1,16 @@
 # Refined Network
 
-**精致网络**（Refined Network）是精致存储 2 的附属模组，把网络的使用范围从控制器旁边扩展到任意距离与任意维度。
+精致存储 2 的附属模组。
 
-原版无线访问点基础 16 格、满级 48 格，且不能跨维度。这个模组在它之外补了三层东西：
+原版无线访问点基础 16 格，范围升级插满 48 格，不能跨维度。这个模组没有改动它，而是在它旁边另开了一条路。
 
-- **终端按距离收费**：离网络越远，单次操作耗电越高，跨维度固定 16 倍；插件可以逐级压回基准。
-- **六张装配式插件**：容量、能耗、范围、维度、供能方式，4 个槽位任意组合。
-- **七件方块设备**：桥、增幅塔、能量接收器、监控仪、分拣站、网络桥接器、终端充电站——把网络伸到远处，而不是把玩家叫回来。
+终端按距离扣电：离网络越远，单次操作越费电，跨维度固定 16 倍。六张插件插在终端的四个槽里，管容量、能耗、范围、维度、供电方式。七件方块设备负责把网络铺出去——桥、增幅塔、能量接收器、监控仪、分拣站、网络桥接器、充电站。
 
-所有远程行为共用同一套能量口径：远处的东西建得越多，网络就越需要发电。
+不开终端就不耗电。方块设备按秒计费，跨维度另算。建得越远，网络越需要发电。
 
 ![无线合成终端、升级插件和充电站](docs/images/items.png)
 
-> **和官方附属 Quartz Arsenal 的关系**：两者都提供无线合成终端。Quartz Arsenal 只做这一件物品；本模组除此之外还有距离计费、维度、能量与方块设备。装了本模组后可以不再装 Quartz Arsenal，两者并存也不冲突（物品 ID 不同）。
+> 官方附属 Quartz Arsenal 也有一台无线合成终端。两者可以共存，也可以只装一个：Quartz Arsenal 只有那一件物品，这个模组还多了距离计费、维度和方块设备。
 
 **简体中文** | [English](#english)
 
@@ -215,22 +213,18 @@ MIT，见 [LICENSE](LICENSE)。
 
 ## English
 
-**Refined Network** is an addon for Refined Storage 2 that moves the network's reach from “next to the controller” to any distance and any dimension.
+An addon for Refined Storage 2.
 
-Vanilla wireless access points cover 16 blocks at base and 48 at best, and never cross dimensions. This mod adds three layers on top:
+The vanilla wireless access point covers 16 blocks, 48 with full range upgrades, and never crosses dimensions. This mod doesn’t touch it — it goes around it.
 
-- **Distance-priced terminals** — the farther you are, the more each action costs; crossing dimensions is a flat 16×, and upgrade cards can push it back down.
-- **Six pluggable upgrade cards** — capacity, energy, range, dimension and power source, four slots, any combination.
-- **Seven block devices** — bridge, amplifier, energy receiver, monitor, sorter, network bridge and charging station, so the network reaches out instead of calling you back.
+Terminals charge by distance: the farther you are, the more each action costs, and crossing dimensions is a flat 16×. Six cards go into the terminal’s four slots — capacity, energy, range, dimension, power. Seven blocks push the network outward: bridge, amplifier, energy receiver, monitor, sorter, network bridge, charging station.
 
-Every remote action shares one energy budget: the more you build out there, the more power the network has to make.
+A terminal you don’t open costs nothing. Blocks charge per second, and dimensions cost extra. The farther you build, the more power the network needs.
 
 ### Current version
 
 - Releases now provide **0.4.1 (stable, Latest)**, **0.3.4 (stable-line maintenance)** and **0.3.2 (historical records)**.
 - `main` is **0.4.1**. Use 0.4.1 for the new devices (pattern terminal, wireless bridge, connector, monitor display); use 0.3.4 if you only want the old 0.3.x feature set.
-- **Art boundary**: 0.3.3 onwards (including 0.3.4) and 0.4.1 ship the redrawn textures (RS2-style grey casings, dark inset panels, cyan signal colour, multi-face block models); **0.3.2 and older keep the old art and will not be retrofitted**.
-- **Verification scope**: on NeoForge, terminal binding, the wireless pattern terminal, the wireless energy receiver, the energy monitor display and the wireless connector were verified in-game. The rest and the Fabric build are code-identical and compile clean, but were not individually tested — use a test world and back up your saves first.
 
 ### Terminals
 
@@ -251,7 +245,6 @@ Every remote action shares one energy budget: the more you build out there, the 
 | <img src="docs/images/item-range.png" width="32" alt=""> | **Range Upgrade** | Unlimited same-dimension range. |
 | <img src="docs/images/item-interdimensional.png" width="32" alt=""> | **Interdimensional Upgrade** | Access through Network Transmitter / Receiver. |
 | <img src="docs/images/item-remote-energy.png" width="32" alt=""> | **Remote Energy Upgrade** | Uses network energy first, then the terminal battery. |
-
 Cards can be removed at any time. They are **not** RS native upgrade cards — do not mix the two systems.
 
 ### Devices (blocks)
@@ -273,40 +266,32 @@ Cards can be removed at any time. They are **not** RS native upgrade cards — d
 | <img src="docs/images/item-wireless-connector.png" width="32" alt=""> | **Wireless Connector** | Binds receivers, monitors and both bridges to a network: right-click an RS network block to record an access point, then right-click the device. Crafted from an RS wrench + two advanced processors + two quartz-enriched iron. |
 | <img src="docs/images/item-wireless-configuration-card.png" width="32" alt=""> | **Wireless Configuration Card** | Copies RS block settings, or batch-pastes within amplifier range. |
 | <img src="docs/images/item-overclock-upgrade.png" width="32" alt=""> | **Overclock Upgrade** | Fits an RS autocrafter; halves the waiting interval per card, up to four. |
-
 Everything above ships in **0.4.1 (stable)**. Part of the set was verified in-game on NeoForge; the rest and the Fabric build compile clean and are code-identical, but were not individually tested — use a test world first.
 
 ### Distance and energy
 
 Actions have a base cost. Distance and upgrades determine the final cost.
-
 - Same-dimension distance beyond 16 blocks increases the multiplier linearly.
 - Cross-dimensional access uses a fixed 1600% multiplier.
 - Opening a terminal costs 5 FE, manual crafting 20 FE and starting autocrafting 40 FE by default.
 - The remote energy card uses network energy first and falls back to the terminal battery.
-
 The dedicated-server config is not automatically sent to clients. Tooltips show local config values; the server is authoritative for billing.
 
 ### Binding block devices
 
 Block devices (energy receiver, energy monitor, wireless bridge, network bridge) are bound with the **Wireless Connector**:
-
 1. Right-click an RS network block with the connector to record an access point — chat reports "Access point set: dimension x, y, z".
 2. Right-click the target device to bind it. Both ends light up with a ring and an electric-spark line connects them.
 3. Right-click a bound device again to unbind; sneak-right-click to clear the recorded access point.
-
 A tool is required because these devices are **block items**: right-clicking with one in hand always places the block first, so the device's own binding entry can never run.
-
 A wireless bridge or network bridge can also be an access point. An energy receiver or energy monitor is not an access point.
 
 ### Wireless energy receiver
 
 Think of it as a cable you do not have to lay: it draws power from one network and feeds the network it sits against.
-
 1. Place it against the network that **needs** power (a controller or cable next to it is enough).
 2. Bind it with the **wireless connector** to the network that **has** power.
 3. An empty controller on the local network will come alive from that power.
-
 - Throughput = 1/10 of internal capacity per second, slower with distance (1/16 across dimensions).
 - The link fee is paid by the **supplying** network.
 - Binding it to the network it sits against disables it — otherwise it would charge itself.
@@ -322,30 +307,19 @@ Think of it as a cable you do not have to lay: it draws power from one network a
 ### Art and icons
 
 Every item icon and block texture is generated by `gen_textures.py` (16×16, no external assets). The set leans on RS2's look but keeps this addon's own signal colours:
-
-- **Casing**: neutral grey plate with a 1px dark border and a lit top-left bevel, the same recipe as RS2's machine casing. The older steel-blue palette and corner rivets are gone.
-- **Panels**: one recessed dark panel at the same position on all six faces, with the same frame and inner shadow. The top face is lightest, sides sit in the middle and the bottom is darkest — light direction is carried by tone instead of a baked highlight per face.
-- **Blocks are multi-face models**: the front carries the function, the sides carry the casing and a structural side view (masts, pylons and conduits sit on the same coordinates as the front, so the machinery wraps around the edge), the top carries the top-down part and the bottom is a dark base plate with a cable channel.
-- **Signal colours**: cyan only ever means "wireless/network", grey-blue is idle, red is low power and white is powered. Each state shows up on the front, top and side, so it reads from any angle.
-- **Handheld terminals** keep the "grey tablet + antenna + dark screen" silhouette and are told apart by their screen glyph.
-
 The icons in this README are produced by `gen_readme_images.py` from the same textures, with block icons rendered in the same isometric projection the game uses, so they match the inventory.
 
 ### Building
 
 Use JDK 21:
-
 ```bash
 ./gradlew -I init-mirror.gradle build
 ```
-
 The build runs checkstyle and unit tests. Install only the jar for your loader, never both.
 
 ### Feedback
 
 - QQ group: **498700382** — <https://qm.qq.com/q/ueYTU8T3xK>
 - Issues: <https://github.com/KokuuWork/refined-network/issues>
-
 Include your loader, RS version, steps to reproduce and `latest.log` when reporting a problem.
-
 MIT licensed. See [LICENSE](LICENSE).

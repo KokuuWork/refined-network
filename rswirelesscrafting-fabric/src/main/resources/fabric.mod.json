@@ -3,7 +3,7 @@
   "id": "rswirelesscrafting",
   "version": "${version}",
   "name": "Refined Network",
-  "description": "An addon for Refined Storage 2 that moves the network's reach from next to the controller to any distance and any dimension: distance-priced terminals, six upgrade cards, a charging station and seven block devices.",
+  "description": "An addon for Refined Storage 2. Wireless terminals, upgrade cards and block devices that work at any distance and across dimensions; every remote action costs FE by distance.",
   "icon": "assets/rswirelesscrafting/icon.png",
   "authors": [
     "Kokuu"
