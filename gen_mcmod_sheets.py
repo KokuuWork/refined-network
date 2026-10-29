@@ -35,7 +35,8 @@ LANG_ZH = os.path.join(
 )
 
 W, H = 1280, 720
-MARGIN = 48
+OUT_W, OUT_H = 1024, 576
+MARGIN = 40
 
 BG = (255, 255, 255)
 CARD = (255, 255, 255)
@@ -76,6 +77,9 @@ TAGS = {
     "c:glass_blocks": "glass",
     "c:ingots/copper": "copper_ingot",
     "c:ingots/netherite": "netherite_ingot",
+}
+RS_TAGS = {
+    "refinedstorage:crafting_grids": "crafting_grid",
 }
 RS_SPECIAL = {
     "machine_casing": "block/machine_casing/side.png",
@@ -155,6 +159,8 @@ def ingredient_icon(spec):
             im = jar_png("assets/minecraft/textures/item/%s.png" % name)
             if im is None:
                 im = jar_png("assets/minecraft/textures/block/%s.png" % name)
+    elif spec["tag"] in RS_TAGS:
+        im = rs_icon(RS_TAGS[spec["tag"]])
     elif spec["tag"] in TAGS:
         name = TAGS[spec["tag"]]
         im = jar_png("assets/minecraft/textures/item/%s.png" % name)
@@ -185,9 +191,9 @@ def frame(kicker, title, sub=None, note=None):
     d = ImageDraw.Draw(img)
 
     d.rectangle([M.sc(MARGIN), M.sc(54), M.sc(MARGIN + 4), M.sc(102)], fill=ACCENT)
-    M.text(d, (MARGIN + 20, 50), title, 32, INK, bold=True)
+    M.text(d, (MARGIN + 18, 48), title, 32, INK, bold=True)
     if sub:
-        M.text(d, (MARGIN + 20, 96), sub, 15, SUB)
+        M.text(d, (MARGIN + 18, 94), sub, 15, SUB)
     M.text(d, (W - MARGIN, 58), kicker, 13, MUTED, anchor="ra")
 
     if note:
@@ -212,7 +218,7 @@ def tile(img, x, y, size, icon_img, name, note, name_size=14, note_size=11, pad_
 
 
 def save(img, path):
-    img.convert("RGB").resize((W, H), Image.LANCZOS).save(path)
+    img.convert("RGB").resize((OUT_W, OUT_H), Image.LANCZOS).save(path)
     print("wrote", path)
 
 
@@ -250,7 +256,7 @@ def overview(path):
     for i, (key, name) in enumerate(ITEMS):
         r, c = divmod(i, cols)
         x = MARGIN + c * (cw + gap_x)
-        y = 132 + r * (132 + gap_y)
+        y = 126 + r * (128 + gap_y)
         tile(img, x + (cw - 96) / 2, y, 96, icon(key), name, None, name_size=13)
     save(img, path)
 
@@ -305,19 +311,19 @@ def upgrades(path):
         ("interdimensional_upgrade", "维度升级插件", "解锁跨维度访问", "需变送器 + 接收器"),
         ("remote_energy_upgrade", "远程输电插件", "扣电走绑定网络", "不足回落到电池"),
     ]
-    cw, ch = 392, 212
+    cw, ch = 386, 178
     gap = 20
     for i, (key, name, eff, note) in enumerate(data):
         r, c = divmod(i, 3)
         x = MARGIN + c * (cw + gap)
-        y = 142 + r * (ch + 24)
+        y = 138 + r * (ch + 18)
         d.rounded_rectangle([M.sc(x), M.sc(y), M.sc(x + cw), M.sc(y + ch)],
                             radius=M.sc(16), fill=TILE, outline=TILE_BORDER, width=M.sc(1))
-        img.alpha_composite(icon(key).resize((M.sc(76), M.sc(76)), Image.NEAREST),
-                            (M.sc(x + 24), M.sc(y + 28)))
-        M.text(d, (x + 120, y + 30), name, 17, INK, bold=True)
-        M.text(d, (x + 120, y + 66), eff, 14, SUB)
-        M.text(d, (x + 120, y + 96), note, 13, ACCENT)
+        img.alpha_composite(icon(key).resize((M.sc(72), M.sc(72)), Image.NEAREST),
+                            (M.sc(x + 24), M.sc(y + 52)))
+        M.text(d, (x + 116, y + 46), name, 17, INK, bold=True)
+        M.text(d, (x + 116, y + 82), eff, 14, SUB)
+        M.text(d, (x + 116, y + 110), note, 13, ACCENT)
     save(img, path)
 
 
@@ -340,10 +346,10 @@ def devices_tools(path):
     total = len(devices) * size + (len(devices) - 1) * gap
     x = (W - total) / 2
     for key, name, note in devices:
-        tile(img, x, 146, size, icon(key), name, note, name_size=13, note_size=11)
+        tile(img, x, 136, size, icon(key), name, note, name_size=13, note_size=11)
         x += size + gap
 
-    d.line([M.sc(MARGIN), M.sc(378), M.sc(W - MARGIN), M.sc(378)], fill=DIVIDER, width=M.sc(1))
+    d.line([M.sc(MARGIN), M.sc(362), M.sc(W - MARGIN), M.sc(362)], fill=DIVIDER, width=M.sc(1))
 
     tools = [
         ("wireless_connector", "无线连接器", "绑定方块设备"),
@@ -352,18 +358,18 @@ def devices_tools(path):
     ]
     x = MARGIN
     for key, name, note in tools:
-        tile(img, x, 418, 140, icon(key), name, note, name_size=13, note_size=11)
-        x += 140 + 22
+        tile(img, x, 400, 152, icon(key), name, note, name_size=13, note_size=11)
+        x += 152 + 24
 
     bx = 520
-    M.text(d, (bx, 422), "绑定方块设备的方式", 15, INK, bold=True)
+    M.text(d, (bx, 404), "绑定方块设备的方式", 15, INK, bold=True)
     steps = [
         "① 手持连接器，右键任意精致存储网络方块，记录接入点",
         "② 右键要绑定的设备，完成绑定；两端亮起光环与粒子线",
         "③ 再次右键已绑定的设备即解绑；潜行右键清除记录",
     ]
     for i, line in enumerate(steps):
-        M.text(d, (bx, 458 + i * 42), line, 13, SUB)
+        M.text(d, (bx, 440 + i * 42), line, 13, SUB)
     save(img, path)
 
 
