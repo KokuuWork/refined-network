@@ -90,9 +90,19 @@ public final class Upgrades {
         return (int) getUpgrades(stack).stream().filter(upgrade -> upgrade.is(tag)).count();
     }
 
-    public static List<ItemStack> getUpgrades(final ItemStack stack) {
+    /**
+     * 组件里原样保存的槽位序列（可能含空位），供界面按固定槽位读写。
+     */
+    public static List<ItemStack> getUpgradeSlots(final ItemStack stack) {
         final List<ItemStack> all = stack.getOrDefault(DataComponents.INSTANCE.getUpgrades(), List.of());
         return new ArrayList<>(all.subList(0, Math.min(MAX_UPGRADES, all.size())));
+    }
+
+    /**
+     * 只含真实插件的列表。所有「装了哪些插件」的判断都走这里，空槽不会混进提示与计数。
+     */
+    public static List<ItemStack> getUpgrades(final ItemStack stack) {
+        return getUpgradeSlots(stack).stream().filter(upgrade -> !upgrade.isEmpty()).toList();
     }
 
     /**

@@ -25,7 +25,7 @@ public class UpgradeContainer implements Container {
      * 读取一个定长（{@value Upgrades#MAX_UPGRADES}）的升级列表快照，尾部用空栈补齐。
      */
     private List<ItemStack> snapshot() {
-        final List<ItemStack> upgrades = new ArrayList<>(Upgrades.getUpgrades(gridStack));
+        final List<ItemStack> upgrades = new ArrayList<>(Upgrades.getUpgradeSlots(gridStack));
         if (upgrades.size() > size) {
             return new ArrayList<>(upgrades.subList(0, size));
         }
@@ -36,19 +36,21 @@ public class UpgradeContainer implements Container {
     }
 
     /**
-     * 写回组件，并去掉尾部的空位（保持组件精简，也让悬停提示只列真实升级）。
+     * 写回组件时保留固定槽位：空槽留在原位，移除前一个插件不会把后面的插件左移。
+     *
+     * <p>悬停提示与计数走 {@link Upgrades#getUpgrades}，那里会过滤空槽，所以组件里存空位
+     * 不会让玩家看到「空气插件」。
      */
     private void commit(final List<ItemStack> upgrades) {
-        final List<ItemStack> compacted = new ArrayList<>(size);
-        for (final ItemStack stack : upgrades) {
-            if (!stack.isEmpty()) {
-                compacted.add(stack);
-            }
+        final List<ItemStack> slots = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            final ItemStack stack = i < upgrades.size() ? upgrades.get(i) : ItemStack.EMPTY;
+            slots.add(stack.isEmpty() ? ItemStack.EMPTY : stack);
         }
-        if (compacted.isEmpty()) {
+        if (slots.stream().allMatch(ItemStack::isEmpty)) {
             gridStack.remove(Upgrades.getUpgradesComponent());
         } else {
-            gridStack.set(Upgrades.getUpgradesComponent(), compacted);
+            gridStack.set(Upgrades.getUpgradesComponent(), slots);
         }
     }
 
