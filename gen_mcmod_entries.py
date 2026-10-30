@@ -62,6 +62,8 @@ ENTRIES = [
     ("wireless_connector", "工具", 1, ("item", "wireless_connector.png")),
     ("wireless_configuration_card", "工具", 1, ("item", "wireless_configuration_card.png")),
     ("overclock_upgrade", "物品", 64, ("item", "overclock_upgrade.png")),
+    ("wireless_redstone_link", "方块", 64,
+     ("block", "redstone_link.png", "redstone_link_side.png", "redstone_link_top.png")),
 ]
 
 COS30 = 0.8660254037844387
