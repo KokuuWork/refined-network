@@ -286,5 +286,6 @@
   "msg.refinednetwork.redstone_link.unbound": "已解绑。",
   "msg.refinednetwork.redstone_link.not_a_link": "记录的端点不可用，记录已清除。检查目标与区块加载，重新记录输入端。",
   "msg.refinednetwork.redstone_link.status_source": "当前为输入端。连接要读取的红石信号。",
-  "msg.refinednetwork.redstone_link.status_sink": "当前为输出端。信号来源：%s。"
+  "msg.refinednetwork.redstone_link.status_sink": "当前为输出端。信号来源：%s。",
+  "msg.refinednetwork.redstone_link.no_permission": "该端点已由其他玩家管理，无法修改。"
 }

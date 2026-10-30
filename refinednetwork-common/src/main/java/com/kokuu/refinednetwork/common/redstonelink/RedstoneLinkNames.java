@@ -25,6 +25,8 @@ public final class RedstoneLinkNames {
         .withStyle(ChatFormatting.YELLOW);
     public static final MutableComponent NOT_A_LINK = create("msg", "redstone_link.not_a_link")
         .withStyle(ChatFormatting.RED);
+    public static final MutableComponent NO_PERMISSION = create("msg", "redstone_link.no_permission")
+        .withStyle(ChatFormatting.RED);
     public static final MutableComponent STATUS_SOURCE = create("msg", "redstone_link.status_source");
     public static final String STATUS_SINK_KEY =
         ModIdentifierUtil.createTranslationKey("msg", "redstone_link.status_sink");

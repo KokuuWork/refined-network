@@ -63,6 +63,21 @@ public class RedstoneLinkBlockEntity extends BlockEntity {
     }
 
     /**
+     * 把自己登记为某个玩家的输入端；已被其他玩家登记时返回 {@code false}。
+     *
+     * <p>输入端本身不配对，所以没有 {@link #bindTo} 那样的 owner 赋值时机，必须单独登记，
+     * 否则任何人都能把别人的输入端当作自己的输出源。
+     */
+    public boolean claimAsInput(final Player player) {
+        if (owner == null) {
+            owner = player.getUUID();
+            setChanged();
+            return true;
+        }
+        return owner.equals(player.getUUID());
+    }
+
+    /**
      * 把自己配成输出端，指向 {@code anchor}（输入端）。
      */
     public void bindTo(final GlobalPos anchor, final Player player) {
@@ -95,6 +110,12 @@ public class RedstoneLinkBlockEntity extends BlockEntity {
     private static boolean readSource(final ServerLevel level, final GlobalPos source) {
         final ServerLevel sourceLevel = level.getServer().getLevel(source.dimension());
         if (sourceLevel == null || !sourceLevel.isLoaded(source.pos())) {
+            return false;
+        }
+        // 只认仍然是「输入端」的端点：方块被拆、同坐标换成别的方块，或对方后来自己配成了
+        // 输出端时，都不能继续把那里的邻居信号当作有效输入。
+        if (!(sourceLevel.getBlockEntity(source.pos()) instanceof RedstoneLinkBlockEntity input)
+            || input.isEndpoint()) {
             return false;
         }
         return sourceLevel.getBestNeighborSignal(source.pos()) > 0;

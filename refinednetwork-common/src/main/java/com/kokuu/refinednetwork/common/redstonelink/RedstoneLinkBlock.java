@@ -125,27 +125,73 @@ public class RedstoneLinkBlock extends BaseEntityBlock {
                                   final BlockPos pos,
                                   final RedstoneLinkBlockEntity link) {
         if (link.isEndpoint()) {
-            link.unbind();
-            PairingClipboard.clearAnchor(player);
-            player.displayClientMessage(RedstoneLinkNames.UNBOUND, false);
+            if (link.isOwnedBy(player)) {
+                link.unbind();
+                PairingClipboard.clearAnchor(player);
+                player.displayClientMessage(RedstoneLinkNames.UNBOUND, false);
+            } else {
+                player.displayClientMessage(RedstoneLinkNames.NO_PERMISSION, false);
+            }
             return;
         }
         final var anchor = PairingClipboard.getAnchor(player);
         if (anchor.isEmpty()) {
-            PairingClipboard.setAnchor(player, GlobalPos.of(level.dimension(), pos));
-            player.displayClientMessage(RedstoneLinkNames.ANCHOR_SET, false);
+            recordInput(player, level, pos, link);
             return;
         }
-        final GlobalPos source = anchor.orElseThrow();
-        if (!(level.getServer().getLevel(source.dimension()) instanceof ServerLevel sourceLevel)
-            || !(sourceLevel.getBlockState(source.pos()).getBlock() instanceof RedstoneLinkBlock)) {
+        pairToAnchor(player, level, pos, anchor.orElseThrow(), link);
+    }
+
+    private static void recordInput(final ServerPlayer player,
+                                    final Level level,
+                                    final BlockPos pos,
+                                    final RedstoneLinkBlockEntity link) {
+        if (!link.claimAsInput(player)) {
+            player.displayClientMessage(RedstoneLinkNames.NO_PERMISSION, false);
+            return;
+        }
+        PairingClipboard.setAnchor(player, GlobalPos.of(level.dimension(), pos));
+        player.displayClientMessage(RedstoneLinkNames.ANCHOR_SET, false);
+    }
+
+    private static void pairToAnchor(final ServerPlayer player,
+                                     final Level level,
+                                     final BlockPos pos,
+                                     final GlobalPos source,
+                                     final RedstoneLinkBlockEntity link) {
+        // 自己指向自己会形成永久自反馈，直接按无效记录处理。
+        if (source.dimension().equals(level.dimension()) && source.pos().equals(pos)) {
             PairingClipboard.clearAnchor(player);
             player.displayClientMessage(RedstoneLinkNames.NOT_A_LINK, false);
+            return;
+        }
+        final RedstoneLinkBlockEntity input = resolveInput(level, source);
+        if (input == null) {
+            PairingClipboard.clearAnchor(player);
+            player.displayClientMessage(RedstoneLinkNames.NOT_A_LINK, false);
+            return;
+        }
+        if (!input.claimAsInput(player)) {
+            PairingClipboard.clearAnchor(player);
+            player.displayClientMessage(RedstoneLinkNames.NO_PERMISSION, false);
             return;
         }
         link.bindTo(source, player);
         PairingClipboard.clearAnchor(player);
         player.displayClientMessage(RedstoneLinkNames.BOUND, false);
+    }
+
+    /**
+     * 记录位置是否仍是可用的输入端：方块实体存在、仍是无线红石端点、且没有被别人配成输出端。
+     */
+    @Nullable
+    private static RedstoneLinkBlockEntity resolveInput(final Level level, final GlobalPos source) {
+        if (!(level.getServer().getLevel(source.dimension()) instanceof ServerLevel sourceLevel)
+            || !(sourceLevel.getBlockEntity(source.pos()) instanceof RedstoneLinkBlockEntity input)
+            || input.isEndpoint()) {
+            return null;
+        }
+        return input;
     }
 
     private static void report(final ServerPlayer player, final RedstoneLinkBlockEntity link) {

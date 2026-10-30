@@ -286,5 +286,6 @@
   "msg.refinednetwork.redstone_link.unbound": "Unpaired.",
   "msg.refinednetwork.redstone_link.not_a_link": "Recorded end unavailable. Record cleared. Check the target and chunk loading, then record the input again.",
   "msg.refinednetwork.redstone_link.status_source": "This is the input end. Connect the redstone signal to read.",
-  "msg.refinednetwork.redstone_link.status_sink": "This is the output end. Signal source: %s."
+  "msg.refinednetwork.redstone_link.status_sink": "This is the output end. Signal source: %s.",
+  "msg.refinednetwork.redstone_link.no_permission": "This endpoint is managed by another player."
 }
