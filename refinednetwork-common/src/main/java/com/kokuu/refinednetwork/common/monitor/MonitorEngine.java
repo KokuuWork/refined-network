@@ -4,11 +4,13 @@ import com.kokuu.refinednetwork.common.Platform;
 import com.kokuu.refinednetwork.common.link.BoundTargetResolver;
 import com.kokuu.refinednetwork.common.notify.NotifyCenter;
 import com.kokuu.refinednetwork.common.terminal.AbstractWirelessTerminalItem;
+import com.kokuu.refinednetwork.common.upgrade.Upgrades;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.annotation.Nullable;
 
 import com.refinedmods.refinedstorage.api.autocrafting.calculation.CancellationToken;
 import com.refinedmods.refinedstorage.api.network.Network;
@@ -64,18 +66,11 @@ public final class MonitorEngine {
      */
     public static void tickTerminal(final ServerPlayer player, final ItemStack stack) {
         final List<MonitorRule> rules = MonitorRules.getRaw(stack);
-        if (rules.isEmpty()) {
+        if (rules.isEmpty() || player.tickCount % CHECK_INTERVAL != 0) {
             return;
         }
-        if (player.tickCount % CHECK_INTERVAL != 0) {
-            return;
-        }
-        final GlobalPos bound = AbstractWirelessTerminalItem.getBoundLocation(stack);
-        if (bound == null) {
-            return;
-        }
-        final Network network = BoundTargetResolver.resolveNetwork(player.level(), bound).orElse(null);
-        if (network == null || !SecurityHelper.isAllowed(player, BuiltinPermission.OPEN, network)) {
+        final Network network = resolveMonitoredNetwork(player, stack);
+        if (network == null) {
             return;
         }
         final StorageNetworkComponent storages = network.getComponent(StorageNetworkComponent.class);
@@ -91,6 +86,27 @@ public final class MonitorEngine {
                 alert(player, rule, stored, now);
             }
         }
+    }
+
+    /**
+     * 后台监控可用的网络：沿用与手动访问相同的准入。
+     * 跨维度必须有维度插件，否则范围插件会顺带把维度插件架空。
+     */
+    @Nullable
+    private static Network resolveMonitoredNetwork(final ServerPlayer player, final ItemStack stack) {
+        final GlobalPos bound = AbstractWirelessTerminalItem.getBoundLocation(stack);
+        if (bound == null) {
+            return null;
+        }
+        if (!bound.dimension().equals(player.level().dimension())
+            && !Upgrades.hasInterdimensionalUpgrade(stack)) {
+            return null;
+        }
+        final Network network = BoundTargetResolver.resolveNetwork(player.level(), bound).orElse(null);
+        if (network == null || !SecurityHelper.isAllowed(player, BuiltinPermission.OPEN, network)) {
+            return null;
+        }
+        return network;
     }
 
     private static void alert(final ServerPlayer player,

@@ -133,7 +133,16 @@ public class ExtendedWirelessNetworkItemContext implements NetworkItemContext {
         if (blockEntity instanceof NetworkReceiverBlockEntity) {
             return interdimensional;
         }
-        return blockEntity instanceof WirelessTransmitterBlockEntity && rangeUpgrade;
+        // 范围插件只放宽「同维度」的距离限制：跨维度必须靠维度插件，
+        // 否则两张卡功能重叠，维度插件就没有存在意义。
+        return blockEntity instanceof WirelessTransmitterBlockEntity
+            && rangeUpgrade
+            && isSameDimension(blockEntity);
+    }
+
+    private boolean isSameDimension(final BlockEntity blockEntity) {
+        return blockEntity.getLevel() != null
+            && blockEntity.getLevel().dimension().equals(player.level().dimension());
     }
 
     /**
