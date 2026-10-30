@@ -25,8 +25,19 @@ public final class TerminalDiagnostics {
     public static final MutableComponent NEED_DIMENSION = line("diag_need_dimension");
     public static final MutableComponent NEED_RANGE = line("diag_need_range");
     public static final MutableComponent OK = line("diag_ok");
+    private static final String ENERGY_KEY = ModIdentifierUtil.createTranslationKey("gui", "diag_energy");
 
     private TerminalDiagnostics() {
+    }
+
+    /**
+     * 服务端算出的这笔动作费与两个可用的供电源，用于「付不起」时把账摊开给玩家看。
+     */
+    public static Component energyQuote(final ServerPlayer player, final ItemStack stack, final long baseCost) {
+        final long cost = AbstractWirelessTerminalItem.actionCost(stack, player, baseCost);
+        final long network = AbstractWirelessTerminalItem.boundNetworkStored(stack, player);
+        final long battery = AbstractWirelessTerminalItem.getStoredEnergy(stack);
+        return Component.translatable(ENERGY_KEY, cost, network, battery).withStyle(ChatFormatting.GRAY);
     }
 
     private static MutableComponent line(final String key) {

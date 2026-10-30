@@ -293,5 +293,6 @@
   "gui.refinednetwork.diag_unloaded": "诊断：绑定的目标所在区块未加载。",
   "gui.refinednetwork.diag_need_dimension": "诊断：目标在另一个维度，需要维度升级插件。",
   "gui.refinednetwork.diag_need_range": "诊断：已超出基础范围，需要距离升级插件。",
-  "gui.refinednetwork.diag_ok": "诊断：访问条件已满足，若仍打不开请检查终端电量与权限。"
+  "gui.refinednetwork.diag_ok": "诊断：访问条件已满足，若仍打不开请检查终端电量与权限。",
+  "gui.refinednetwork.diag_energy": "诊断：本次动作需要 %s FE；绑定网络 %s FE，终端电池 %s FE。"
 }

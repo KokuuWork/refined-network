@@ -81,7 +81,13 @@ public class WirelessCraftingGridItem extends AbstractWirelessTerminalItem {
             // RS 的 removeWatcher 会抛异常（断线时甚至崩服）。
             player.displayClientMessage(ContentNames.TERMINAL_NOT_ENOUGH_ENERGY, false);
             player.displayClientMessage(
-                TerminalDiagnostics.blockingReason(player, terminalStack), false);
+                TerminalDiagnostics.energyQuote(
+                    player,
+                    terminalStack,
+                    Platform.getConfig().getWirelessCraftingGrid().getOpenEnergyUsage()
+                ),
+                false
+            );
             return;
         }
         final CraftingGrid craftingGrid = new WirelessCraftingGrid(

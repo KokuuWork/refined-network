@@ -179,6 +179,14 @@ public abstract class AbstractWirelessTerminalItem extends AbstractNetworkEnergy
     }
 
     /**
+     * 绑定网络当前存量；未绑定或网络不可达时为 0，供费用诊断显示。
+     */
+    public static long boundNetworkStored(final ItemStack stack, final Player player) {
+        final Network network = boundNetwork(stack, player);
+        return network == null ? 0L : network.getComponent(EnergyNetworkComponent.class).getStored();
+    }
+
+    /**
      * 读回终端物品当前的存量电量（与 {@link #createEnergyStorage} 同一套包装，故数值一致）。
      */
     public static long getStoredEnergy(final ItemStack stack) {
