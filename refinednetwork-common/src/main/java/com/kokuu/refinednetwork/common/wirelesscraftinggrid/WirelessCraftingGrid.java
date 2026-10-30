@@ -1,5 +1,6 @@
 package com.kokuu.refinednetwork.common.wirelesscraftinggrid;
 
+import com.kokuu.refinednetwork.common.ContentNames;
 import com.kokuu.refinednetwork.common.DataComponents;
 import com.kokuu.refinednetwork.common.Platform;
 
@@ -122,23 +123,31 @@ class WirelessCraftingGrid implements CraftingGrid {
         ));
     }
 
+    /**
+     * 本次会话可见的网络。离线窗口固定为「没有网络」，即使玩家在窗口打开期间走回了网络范围，
+     * 也不会中途变成半在线状态——恢复后由 {@link #canMenuStayOpen} 提示重开。
+     */
+    private Optional<Network> sessionNetwork() {
+        return offline ? Optional.empty() : context.resolveNetwork();
+    }
+
     private Optional<StorageNetworkComponent> getStorage() {
-        return context.resolveNetwork().map(network -> network.getComponent(StorageNetworkComponent.class));
+        return sessionNetwork().map(network -> network.getComponent(StorageNetworkComponent.class));
     }
 
     private Optional<PlatformSecurityNetworkComponent> getSecurity() {
-        return context.resolveNetwork().map(network -> network.getComponent(PlatformSecurityNetworkComponent.class));
+        return sessionNetwork().map(network -> network.getComponent(PlatformSecurityNetworkComponent.class));
     }
 
     private Optional<AutocraftingNetworkComponent> getAutocrafting() {
-        return context.resolveNetwork().map(network -> network.getComponent(AutocraftingNetworkComponent.class));
+        return sessionNetwork().map(network -> network.getComponent(AutocraftingNetworkComponent.class));
     }
 
     private Optional<Network> getNetworkForActiveGrid() {
         if (!isGridActive()) {
             return Optional.empty();
         }
-        return context.resolveNetwork();
+        return sessionNetwork();
     }
 
     @Override
@@ -228,6 +237,10 @@ class WirelessCraftingGrid implements CraftingGrid {
         if (player.getInventory().add(craftedStack)) {
             return;
         }
+        if (offline) {
+            player.drop(craftedStack.copy(), false);
+            return;
+        }
         final long inserted = getNetworkForActiveGrid()
             .map(network -> network.getComponent(StorageNetworkComponent.class))
             .map(rootStorage -> rootStorage.insert(
@@ -282,6 +295,9 @@ class WirelessCraftingGrid implements CraftingGrid {
 
     @Override
     public boolean isGridActive() {
+        if (offline) {
+            return false;
+        }
         final boolean networkActive = context.resolveNetwork()
             .map(network -> !RefinedStorageApi.INSTANCE.isEnergyRequired()
                 || network.getComponent(EnergyNetworkComponent.class).getStored() > 0)
@@ -318,7 +334,15 @@ class WirelessCraftingGrid implements CraftingGrid {
     public boolean canMenuStayOpen(final Player player) {
         // 终端被移走 / 替换成别的实例后，这个界面不再代表任何真实物品，必须关闭。
         final ItemStack held = context.getStack();
-        return slotReference.resolve(player).map(current -> current == held).orElse(false);
+        if (!slotReference.resolve(player).map(current -> current == held).orElse(false)) {
+            return false;
+        }
+        // 离线窗口期间网络恢复：直接关闭并提示重开，避免出现一半在线、一半离线的混合状态。
+        if (offline && context.resolveNetwork().isPresent()) {
+            player.displayClientMessage(ContentNames.TERMINAL_ONLINE_REOPEN, false);
+            return false;
+        }
+        return true;
     }
 
     private GridOperations createGridOperations(final ResourceType resourceType,

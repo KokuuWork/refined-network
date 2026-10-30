@@ -304,6 +304,8 @@ public final class ContentNames {
     /** 没接入网络时打开终端：只剩 3×3 合成台，不读网络也不扣电。 */
     public static final MutableComponent TERMINAL_OFFLINE =
         createTranslation("gui", "terminal_offline").withStyle(ChatFormatting.YELLOW);
+    public static final MutableComponent TERMINAL_ONLINE_REOPEN =
+        createTranslation("gui", "terminal_online_reopen").withStyle(ChatFormatting.YELLOW);
     public static final MutableComponent WIRELESS_PATTERN_GRID_FAILED =
         createTranslation("gui", "wireless_pattern_grid_failed").withStyle(ChatFormatting.RED);
     public static final MutableComponent WIRELESS_CRAFTING_GRID_UPGRADES_TITLE = createTranslation(
