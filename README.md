@@ -149,6 +149,7 @@ Windows 可使用 `gradlew.bat` 对应命令。发行产物在两个平台模块
 - 可执行开发规范：[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)
 - 当前架构与历史边界：[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - 文案术语与待核实项：[docs/TEXT_REVIEW.md](docs/TEXT_REVIEW.md)
+- 实机验证清单：[docs/TESTING.md](docs/TESTING.md)
 - 提交反馈：加载器、本模组及 RS 版本、步骤、实际 / 预期结果、日志；截图作辅助，日志注意移除私人信息。
 - [GitHub Issues](https://github.com/KokuuWork/refined-network/issues)；既有 QQ 群号：498700382。
 

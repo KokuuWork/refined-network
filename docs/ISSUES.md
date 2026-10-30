@@ -63,6 +63,10 @@
 | [N09 / #32](https://github.com/KokuuWork/refined-network/issues/32) | 仅保活额度/来源/恢复方案 | P3 | 无 |
 | [N10 / #33](https://github.com/KokuuWork/refined-network/issues/33) | 大型RS附属下一批内容评审，选1原型规格 | P3 | 维护者批准首项后另拆实现 |
 
+## 实机验证
+
+代码改动尚未做游戏内验证。按 [TESTING.md](TESTING.md) 的清单逐项跑，失败项回到对应 Issue 回复环境与复现步骤，通过项勾掉验收条目后即可关闭。
+
 ## 本地正文与接手方式
 
 完整正文在`docs/issues/M01.md`–`M04.md`、`D01.md`–`D20.md`、`N01.md`–`N10.md`，与创建时线上Issue一致；后续以Issue最新依赖和维护者确认更新。不要只按这个索引写代码。
