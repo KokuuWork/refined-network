@@ -3,6 +3,7 @@ package com.kokuu.refinednetwork.common.energyreceiver;
 import com.kokuu.refinednetwork.common.BlockEntities;
 import com.kokuu.refinednetwork.common.Config;
 import com.kokuu.refinednetwork.common.ContentNames;
+import com.kokuu.refinednetwork.common.DeviceDiagnosticsNames;
 import com.kokuu.refinednetwork.common.Platform;
 import com.kokuu.refinednetwork.common.connector.ConnectorTarget;
 import com.kokuu.refinednetwork.common.link.AdjacentNetworks;
@@ -82,6 +83,10 @@ public class WirelessEnergyReceiverBlockEntity extends BlockEntity implements Co
     private long buffer;
     private int syncCountdown;
     private boolean linked;
+    /**
+     * 最近一次对齐失败的原因；只用于右键状态行，不参与任何逻辑判定。
+     */
+    private OfflineReason offlineReason = OfflineReason.NONE;
 
     public WirelessEnergyReceiverBlockEntity(final BlockPos pos, final BlockState state) {
         super(BlockEntities.INSTANCE.getWirelessEnergyReceiver(), pos, state);
@@ -208,22 +213,34 @@ public class WirelessEnergyReceiverBlockEntity extends BlockEntity implements Co
 
     private void sync(final ServerLevel serverLevel) {
         final Network remote = BoundTargetResolver.resolveNetwork(serverLevel, target).orElse(null);
-        if (remote == null || !isAuthorized(remote)) {
-            detachLink();
-            setLinked(false);
+        if (remote == null) {
+            fail(OfflineReason.UNREACHABLE);
+            return;
+        }
+        if (!isAuthorized(remote)) {
+            fail(OfflineReason.NO_PERMISSION);
             return;
         }
         final Network local = AdjacentNetworks.find(serverLevel, worldPosition);
-        if (local == null || local == remote) {
-            // 旁边没有自己的网络；或者绑定的就是自己这张网——那等于自己给自己充电，
-            // 一点新电都不会产生，只会让链路费在两张「同一张网」之间空转。
-            detachLink();
-            setLinked(false);
+        if (local == null) {
+            fail(OfflineReason.NO_LOCAL_NETWORK);
+            return;
+        }
+        if (local == remote) {
+            // 绑定的就是自己旁边这张网：等于自己给自己充电，一点新电都不会产生。
+            fail(OfflineReason.SELF_BOUND);
             return;
         }
         remoteNetwork = remote;
         mount.mount(local);
         setLinked(mount.isMounted());
+        offlineReason = mount.isMounted() ? OfflineReason.NONE : OfflineReason.MOUNT_REJECTED;
+    }
+
+    private void fail(final OfflineReason reason) {
+        detachLink();
+        setLinked(false);
+        offlineReason = reason;
     }
 
     /**
@@ -365,12 +382,13 @@ public class WirelessEnergyReceiverBlockEntity extends BlockEntity implements Co
         if (current == null) {
             return ContentNames.ENERGY_RECEIVER_UNBOUND;
         }
-        return Component.translatable(
+        final Component status = Component.translatable(
             ContentNames.ENERGY_RECEIVER_STATUS_TRANSLATION_KEY,
             current.pos().toShortString(),
             linked ? ContentNames.ENERGY_RECEIVER_ONLINE : ContentNames.ENERGY_RECEIVER_OFFLINE,
             getFeePerSecond()
         );
+        return linked ? status : status.copy().append(Component.literal("\n")).append(offlineReason.describe());
     }
 
     // ------------------------------------------------------------- 生命周期
@@ -398,5 +416,28 @@ public class WirelessEnergyReceiverBlockEntity extends BlockEntity implements Co
         buffer = Math.min(tag.getLong(TAG_BUFFER), getCapacity());
         target = BoundPosition.load(tag);
         owner = tag.hasUUID(TAG_OWNER) ? tag.getUUID(TAG_OWNER) : null;
+    }
+
+    /**
+     * 未工作的原因，仅用于状态行展示。
+     */
+    public enum OfflineReason {
+        NONE,
+        UNREACHABLE,
+        NO_PERMISSION,
+        NO_LOCAL_NETWORK,
+        SELF_BOUND,
+        MOUNT_REJECTED;
+
+        Component describe() {
+            return switch (this) {
+                case UNREACHABLE -> DeviceDiagnosticsNames.UNREACHABLE;
+                case NO_PERMISSION -> DeviceDiagnosticsNames.NO_PERMISSION;
+                case NO_LOCAL_NETWORK -> DeviceDiagnosticsNames.NO_LOCAL_NETWORK;
+                case SELF_BOUND -> DeviceDiagnosticsNames.SELF_BOUND;
+                case MOUNT_REJECTED -> DeviceDiagnosticsNames.MOUNT_REJECTED;
+                case NONE -> Component.empty();
+            };
+        }
     }
 }

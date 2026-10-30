@@ -294,5 +294,10 @@
   "gui.refinednetwork.diag_need_dimension": "Diagnosis: the target is in another dimension; an interdimensional upgrade is required.",
   "gui.refinednetwork.diag_need_range": "Diagnosis: beyond the base range; a range upgrade is required.",
   "gui.refinednetwork.diag_ok": "Diagnosis: access conditions are met; check terminal energy and permissions if it still fails.",
-  "gui.refinednetwork.diag_energy": "Diagnosis: this action costs %s FE; bound network has %s FE, terminal battery has %s FE."
+  "gui.refinednetwork.diag_energy": "Diagnosis: this action costs %s FE; bound network has %s FE, terminal battery has %s FE.",
+  "gui.refinednetwork.device_unreachable": "Reason: the bound target is unreachable. Check that it still exists and its chunk is loaded.",
+  "gui.refinednetwork.device_no_permission": "Reason: no permission on that network.",
+  "gui.refinednetwork.device_no_local_network": "Reason: no RS network next to this block. Place it against a controller or cable.",
+  "gui.refinednetwork.device_self_bound": "Reason: bound to the network it sits against, so it is stopped to avoid charging itself.",
+  "gui.refinednetwork.device_mount_rejected": "Reason: the local network rejected the mount. Check the network state."
 }
