@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 
 import com.refinedmods.refinedstorage.api.network.Network;
 import com.refinedmods.refinedstorage.common.autocrafting.autocraftermanager.AutocrafterManagerBlockEntity;
+import com.refinedmods.refinedstorage.common.autocrafting.autocraftermanager.AutocrafterManagerData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -50,6 +51,19 @@ public class VirtualAutocrafterManager extends AutocrafterManagerBlockEntity {
     @Override
     protected void initialize(final ServerLevel level, final Direction direction) {
         // 虚拟方块实体不参与世界里的网络图，不注册任何节点。
+    }
+
+    /**
+     * 菜单数据里的 {@code active} 来自网络节点是否被网络遍历到，而虚拟实体刻意不注册节点，
+     * 所以默认实现恒为 {@code false}，客户端会把样板槽画成未激活。
+     *
+     * <p>这里按「绑定网络是否仍在」判定：分组仍由 RS 自己从网络上的合成器实时收集，
+     * 只把激活标记换成真实可达性，不为显示去世界里注册幽灵节点。
+     */
+    @Override
+    public AutocrafterManagerData getMenuData() {
+        final AutocrafterManagerData data = super.getMenuData();
+        return new AutocrafterManagerData(data.groups(), mainNetworkNode.getNetwork() != null);
     }
 
     /**
