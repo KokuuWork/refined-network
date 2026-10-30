@@ -4,6 +4,7 @@ import com.kokuu.rswirelesscrafting.common.terminal.AbstractWirelessTerminalItem
 import com.kokuu.rswirelesscrafting.common.upgrade.Upgrades;
 
 import com.refinedmods.refinedstorage.api.network.energy.EnergyNetworkComponent;
+import com.refinedmods.refinedstorage.common.api.RefinedStorageApi;
 import com.refinedmods.refinedstorage.common.api.support.network.item.NetworkItemContext;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -54,18 +55,21 @@ public class VirtualTerminalSession {
     }
 
     /**
-     * 装远程输电插件时看绑定网络的存量，否则看终端自身电池——与实际扣电的取电顺序一致。
+     * 装远程输电插件时优先看绑定网络的存量，不足时与扣电路径一样回落到终端电池；
+     * 与 {@code ExtendedWirelessNetworkItemContext#canAfford} 保持同一口径。
      *
      * <p>必须先看余额再扣：网络在电量不足时也会把剩下的那点抽走，直接判
      * 「扣回来的够不够」会让网络白扣一份、余额再从电池补一次（双重收费）。
      */
     public boolean canAfford(final long baseCost) {
+        if (!RefinedStorageApi.INSTANCE.isEnergyRequired()) {
+            return true;
+        }
         final long actualCost = AbstractWirelessTerminalItem.actionCost(stack, player, baseCost);
-        if (Upgrades.hasRemoteEnergyUpgrade(stack)) {
-            return context.resolveNetwork()
+        final boolean networkCovers = Upgrades.hasRemoteEnergyUpgrade(stack)
+            && context.resolveNetwork()
                 .map(network -> network.getComponent(EnergyNetworkComponent.class).getStored() >= actualCost)
                 .orElse(false);
-        }
-        return AbstractWirelessTerminalItem.getStoredEnergy(stack) >= actualCost;
+        return networkCovers || AbstractWirelessTerminalItem.getStoredEnergy(stack) >= actualCost;
     }
 }

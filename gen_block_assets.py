@@ -102,6 +102,7 @@ for name in (
     "energy_monitor",
     "smart_sorter",
     "network_bridge",
+    "wireless_redstone_link",
 ):
     dump(os.path.join(DATA, "loot_table", "blocks", name + ".json"), {
         "type": "minecraft:block",

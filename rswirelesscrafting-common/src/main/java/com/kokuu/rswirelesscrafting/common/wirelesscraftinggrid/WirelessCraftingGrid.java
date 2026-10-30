@@ -371,9 +371,10 @@ class WirelessCraftingGrid implements CraftingGrid {
             return Optional.empty();
         }
         return getAutocrafting()
-            .map(autocrafting -> autocrafting.startTask(resourceKey, amount, actor, notify,
+            .flatMap(autocrafting -> autocrafting.startTask(resourceKey, amount, actor, notify,
                 cancellationToken))
-            .flatMap(taskId -> {
+            .map(taskId -> {
+                // 只有真的拿到任务 ID 才结算；startTask 返回 empty 时一分不扣。
                 context.drainEnergy(Platform.getConfig().getWirelessCraftingGrid().getAutocraftingEnergyUsage());
                 return taskId;
             });
