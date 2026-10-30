@@ -47,7 +47,7 @@ Minecraft 1.21.1 的精致存储 2（Refined Storage 2，简称 RS）附属模�
 | 无线自动合成仓管理器 | 远程查看与移动网络合成仓内的样板；当前虚拟菜单激活状态需专项核实 |
 | 无线监控终端 | 最多 4 条物品规则、库存高低阈值提醒和自动补货；要求玩家携带且终端被更新，不是离线托管服务 |
 
-潜行并右键使用终端打开 4 槽插件装配界面。当前统一快捷键只查找**合成终端、样板终端**；管理器和监控暂未接入该快捷入口。手持状态提示（HUD）默认关闭，可在配置中开启。
+潜行并右键使用终端打开 4 槽插件装配界面。统一快捷键覆盖四类终端：合成 → 样板 → 管理器 → 监控，按此顺序取背包/饰品栏里第一件。手持状态提示（HUD）默认关闭，可在配置中开启。
 
 ### 终端插件
 
@@ -172,7 +172,7 @@ Install **one** loader-specific JAR. Back up saves and configurations before upg
 
 ### Content and use
 
-- Terminals: **Wireless Crafting Grid**, **Wireless Pattern Terminal**, **Wireless Autocrafter Manager**, **Wireless Monitor Terminal**. The common hotkey currently searches only crafting and pattern terminals. The held-item HUD is optional and off by default.
+- Terminals: **Wireless Crafting Grid**, **Wireless Pattern Terminal**, **Wireless Autocrafter Manager**, **Wireless Monitor Terminal**. The shared hotkey covers all four terminals, trying crafting, pattern, manager and monitor in that order. The held-item HUD is optional and off by default.
 - Terminal upgrades: battery, basic / advanced energy, range, interdimensional and remote energy, fitted in four slots. Remote energy prefers the bound network; battery fallback differs across current terminal paths and is tracked for correction.
 - Devices: charging station, amplifier, wireless bridge, energy receiver, energy monitor, smart sorter and network bridge. Tools include the wireless connector, configuration card and RS autocrafter overclock upgrade.
 - The energy receiver takes energy **from the bound supply network into its buffer and supplies the adjacent local RS network**. The network bridge proxies remote resources under rate and access constraints; it does not merge every subsystem of two networks.

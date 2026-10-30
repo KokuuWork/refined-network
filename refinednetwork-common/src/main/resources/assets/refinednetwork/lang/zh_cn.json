@@ -46,7 +46,7 @@
   "item.refinednetwork.dimension.overworld": "主世界",
   "item.refinednetwork.dimension.nether": "下界",
   "item.refinednetwork.dimension.end": "末地",
-  "key.refinednetwork.open_wireless_crafting_grid": "打开无线终端（合成 / 样板）",
+  "key.refinednetwork.open_wireless_crafting_grid": "打开无线终端（合成 / 样板 / 管理器 / 监控）",
   "text.autoconfig.refinednetwork.title": "精致网络配置",
   "refinednetwork.configuration.title": "精致网络配置",
   "refinednetwork.configuration.section.refinednetwork.common.toml": "精致网络配置",
