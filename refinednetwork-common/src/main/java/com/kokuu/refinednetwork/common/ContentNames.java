@@ -306,6 +306,7 @@ public final class ContentNames {
         createTranslation("gui", "terminal_offline").withStyle(ChatFormatting.YELLOW);
     public static final MutableComponent TERMINAL_ONLINE_REOPEN =
         createTranslation("gui", "terminal_online_reopen").withStyle(ChatFormatting.YELLOW);
+
     public static final MutableComponent WIRELESS_PATTERN_GRID_FAILED =
         createTranslation("gui", "wireless_pattern_grid_failed").withStyle(ChatFormatting.RED);
     public static final MutableComponent WIRELESS_CRAFTING_GRID_UPGRADES_TITLE = createTranslation(

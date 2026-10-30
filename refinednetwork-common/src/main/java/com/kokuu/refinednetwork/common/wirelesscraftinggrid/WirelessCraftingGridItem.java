@@ -3,6 +3,7 @@ package com.kokuu.refinednetwork.common.wirelesscraftinggrid;
 import com.kokuu.refinednetwork.common.ContentNames;
 import com.kokuu.refinednetwork.common.Platform;
 import com.kokuu.refinednetwork.common.terminal.AbstractWirelessTerminalItem;
+import com.kokuu.refinednetwork.common.terminal.TerminalDiagnostics;
 
 import com.refinedmods.refinedstorage.common.api.RefinedStorageApi;
 import com.refinedmods.refinedstorage.common.api.security.SecurityHelper;
@@ -15,6 +16,7 @@ import com.refinedmods.refinedstorage.common.security.BuiltinPermission;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 
 import static java.util.Objects.requireNonNullElse;
@@ -51,6 +53,7 @@ public class WirelessCraftingGridItem extends AbstractWirelessTerminalItem {
                                 final ServerPlayer player,
                                 final SlotReference slotReference,
                                 final NetworkItemContext context) {
+        final ItemStack terminalStack = slotReference.resolve(player).orElse(ItemStack.EMPTY);
         final boolean isAllowed = context.resolveNetwork()
             .map(network -> SecurityHelper.isAllowed(player, BuiltinPermission.OPEN, network))
             .orElse(true);
@@ -66,13 +69,19 @@ public class WirelessCraftingGridItem extends AbstractWirelessTerminalItem {
         if (offline) {
             if (!Platform.getConfig().getWirelessCraftingGrid().isOfflineModeEnabled()) {
                 player.displayClientMessage(ContentNames.TERMINAL_OFFLINE, false);
+                player.displayClientMessage(
+                    TerminalDiagnostics.blockingReason(player, terminalStack), false);
                 return;
             }
             player.displayClientMessage(ContentNames.TERMINAL_OFFLINE, true);
+            player.displayClientMessage(
+                TerminalDiagnostics.blockingReason(player, terminalStack), false);
         } else if (!extendedContext.canAfford(Platform.getConfig().getWirelessCraftingGrid().getOpenEnergyUsage())) {
             // 有网络但终端没电：付不起就别开，否则界面会在「没注册 watcher」的半开状态下被关掉，
             // RS 的 removeWatcher 会抛异常（断线时甚至崩服）。
             player.displayClientMessage(ContentNames.TERMINAL_NOT_ENOUGH_ENERGY, false);
+            player.displayClientMessage(
+                TerminalDiagnostics.blockingReason(player, terminalStack), false);
             return;
         }
         final CraftingGrid craftingGrid = new WirelessCraftingGrid(

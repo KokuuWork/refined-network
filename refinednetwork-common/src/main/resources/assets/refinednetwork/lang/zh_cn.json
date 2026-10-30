@@ -288,5 +288,10 @@
   "msg.refinednetwork.redstone_link.status_source": "当前为输入端。连接要读取的红石信号。",
   "msg.refinednetwork.redstone_link.status_sink": "当前为输出端。信号来源：%s。",
   "msg.refinednetwork.redstone_link.no_permission": "该端点已由其他玩家管理，无法修改。",
-  "gui.refinednetwork.terminal_online_reopen": "网络已恢复：请关闭并重新打开终端以使用在线功能。"
+  "gui.refinednetwork.terminal_online_reopen": "网络已恢复：请关闭并重新打开终端以使用在线功能。",
+  "gui.refinednetwork.diag_unbound": "诊断：尚未绑定网络。先用终端右键无线访问点或网络接收器。",
+  "gui.refinednetwork.diag_unloaded": "诊断：绑定的目标所在区块未加载。",
+  "gui.refinednetwork.diag_need_dimension": "诊断：目标在另一个维度，需要维度升级插件。",
+  "gui.refinednetwork.diag_need_range": "诊断：已超出基础范围，需要距离升级插件。",
+  "gui.refinednetwork.diag_ok": "诊断：访问条件已满足，若仍打不开请检查终端电量与权限。"
 }
