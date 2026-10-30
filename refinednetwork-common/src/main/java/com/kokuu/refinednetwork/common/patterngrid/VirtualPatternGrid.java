@@ -115,7 +115,7 @@ public class VirtualPatternGrid extends PatternGridBlockEntity {
      */
     @Override
     public boolean canMenuStayOpen(final Player who) {
-        return true;
+        return isTerminalValid();
     }
 
     /**

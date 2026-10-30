@@ -91,6 +91,13 @@ public class ExtendedWirelessNetworkItemContext implements NetworkItemContext {
         );
     }
 
+    /**
+     * 会话期间使用的终端物品，用于校验界面仍属于同一个物品实例。
+     */
+    public ItemStack getStack() {
+        return stack;
+    }
+
     @Override
     public Optional<Network> resolveNetwork(final boolean force) {
         // 1) 标准逻辑优先：覆盖「同维度 + 发射器范围内」的正常情况。

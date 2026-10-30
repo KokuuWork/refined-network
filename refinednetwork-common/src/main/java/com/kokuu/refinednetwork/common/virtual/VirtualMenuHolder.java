@@ -1,5 +1,7 @@
 package com.kokuu.refinednetwork.common.virtual;
 
+import net.minecraft.world.entity.player.Player;
+
 /**
  * 由 mixin 打进 RS 方块菜单上的「这是给虚拟方块实体开的界面」标记。
  *
@@ -35,4 +37,10 @@ public interface VirtualMenuHolder {
     void refinednetworkMarkVirtual();
 
     boolean refinednetworkIsVirtual();
+
+    /**
+     * 登记会话有效性判定：终端被移走、替换或不再持有对应物品时，菜单应当关闭。
+     * 未登记时按「只要求虚拟标记」放行，保持原有行为。
+     */
+    void refinednetworkSetSessionCheck(java.util.function.Predicate<Player> check);
 }

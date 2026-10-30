@@ -316,7 +316,9 @@ class WirelessCraftingGrid implements CraftingGrid {
 
     @Override
     public boolean canMenuStayOpen(final Player player) {
-        return true;
+        // 终端被移走 / 替换成别的实例后，这个界面不再代表任何真实物品，必须关闭。
+        final ItemStack held = context.getStack();
+        return slotReference.resolve(player).map(current -> current == held).orElse(false);
     }
 
     private GridOperations createGridOperations(final ResourceType resourceType,

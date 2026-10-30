@@ -2,6 +2,7 @@ package com.kokuu.refinednetwork.common.autocraftermanager;
 
 import com.kokuu.refinednetwork.common.virtual.VirtualMenuHolder;
 
+import com.refinedmods.refinedstorage.common.api.support.slotreference.SlotReference;
 import com.refinedmods.refinedstorage.common.autocrafting.autocraftermanager.AutocrafterManagerBlockEntity;
 import com.refinedmods.refinedstorage.common.autocrafting.autocraftermanager.AutocrafterManagerData;
 import com.refinedmods.refinedstorage.common.support.containermenu.ExtendedMenuProvider;
@@ -11,6 +12,7 @@ import net.minecraft.network.codec.StreamEncoder;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * 打开「无线自动合成管理器」的界面。
@@ -25,11 +27,17 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 public class WirelessAutocrafterManagerMenuProvider implements ExtendedMenuProvider<AutocrafterManagerData> {
     private final AutocrafterManagerBlockEntity manager;
     private final Component name;
+    private final SlotReference slotReference;
+    private final ItemStack stack;
 
     public WirelessAutocrafterManagerMenuProvider(final AutocrafterManagerBlockEntity manager,
-                                                  final Component name) {
+                                                  final Component name,
+                                                  final SlotReference slotReference,
+                                                  final ItemStack stack) {
         this.manager = manager;
         this.name = name;
+        this.slotReference = slotReference;
+        this.stack = stack;
     }
 
     @Override
@@ -52,6 +60,10 @@ public class WirelessAutocrafterManagerMenuProvider implements ExtendedMenuProvi
         final AbstractContainerMenu menu = manager.createMenu(syncId, inventory, player);
         if (menu instanceof VirtualMenuHolder holder) {
             holder.refinednetworkMarkVirtual();
+            // 终端被移出槽位、被替换或换成别的实例后，这个界面不再代表任何真实物品。
+            holder.refinednetworkSetSessionCheck(
+                who -> slotReference.resolve(who).map(current -> current == stack).orElse(false)
+            );
         }
         return menu;
     }

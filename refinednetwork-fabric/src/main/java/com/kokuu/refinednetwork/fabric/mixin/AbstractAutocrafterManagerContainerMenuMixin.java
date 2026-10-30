@@ -2,6 +2,8 @@ package com.kokuu.refinednetwork.fabric.mixin;
 
 import com.kokuu.refinednetwork.common.virtual.VirtualMenuHolder;
 
+import javax.annotation.Nullable;
+
 import com.refinedmods.refinedstorage.common.autocrafting.autocraftermanager.AutocrafterManagerContainerMenu;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
@@ -24,6 +26,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class AbstractAutocrafterManagerContainerMenuMixin implements VirtualMenuHolder {
     @Unique
     private boolean refinednetworkVirtual;
+    @Unique
+    @Nullable
+    private java.util.function.Predicate<Player> refinednetworkSessionCheck;
 
     @Override
     public void refinednetworkMarkVirtual() {
@@ -35,10 +40,16 @@ public abstract class AbstractAutocrafterManagerContainerMenuMixin implements Vi
         return this.refinednetworkVirtual;
     }
 
+    @Override
+    public void refinednetworkSetSessionCheck(final java.util.function.Predicate<Player> check) {
+        this.refinednetworkSessionCheck = check;
+    }
+
     @Inject(method = "stillValid", at = @At("HEAD"), cancellable = true)
     private void refinednetworkStillValid(final Player player, final CallbackInfoReturnable<Boolean> cir) {
         if (this.refinednetworkVirtual) {
-            cir.setReturnValue(true);
+            final java.util.function.Predicate<Player> check = this.refinednetworkSessionCheck;
+            cir.setReturnValue(check == null || check.test(player));
         }
     }
 }

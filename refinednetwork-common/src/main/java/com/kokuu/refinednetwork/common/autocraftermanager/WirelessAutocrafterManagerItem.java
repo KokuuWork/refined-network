@@ -100,7 +100,12 @@ public class WirelessAutocrafterManagerItem extends AbstractWirelessTerminalItem
             );
             com.refinedmods.refinedstorage.common.Platform.INSTANCE.getMenuOpener().openMenu(
                 player,
-                new WirelessAutocrafterManagerMenuProvider(manager, requireNonNullElse(name, getTerminalName()))
+                new WirelessAutocrafterManagerMenuProvider(
+                    manager,
+                    requireNonNullElse(name, getTerminalName()),
+                    slotReference,
+                    resolved.get()
+                )
             );
             logFirstOpen(player, resolved.get());
         } catch (final IllegalStateException | NullPointerException | ClassCastException | LinkageError e) {
