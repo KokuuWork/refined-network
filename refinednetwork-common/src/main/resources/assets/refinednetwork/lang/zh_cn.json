@@ -299,5 +299,8 @@
   "gui.refinednetwork.device_no_permission": "原因：没有该网络的权限。",
   "gui.refinednetwork.device_no_local_network": "原因：旁边没有可供电的 RS 网络。贴着控制器或线缆放置。",
   "gui.refinednetwork.device_self_bound": "原因：绑定到了自己旁边的这张网，已停止以免自我充电。",
-  "gui.refinednetwork.device_mount_rejected": "原因：本地网络拒绝了挂载，检查网络状态。"
+  "gui.refinednetwork.device_mount_rejected": "原因：本地网络拒绝了挂载，检查网络状态。",
+  "gui.refinednetwork.device_disabled": "原因：配置里关闭了该设备。",
+  "gui.refinednetwork.device_suspended": "原因：红石信号挂起了链路。",
+  "gui.refinednetwork.device_unpaid": "原因：本地网络付不起链路费。"
 }

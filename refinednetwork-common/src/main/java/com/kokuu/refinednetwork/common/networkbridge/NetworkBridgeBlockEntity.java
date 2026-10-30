@@ -3,6 +3,7 @@ package com.kokuu.refinednetwork.common.networkbridge;
 import com.kokuu.refinednetwork.common.BlockEntities;
 import com.kokuu.refinednetwork.common.Config;
 import com.kokuu.refinednetwork.common.ContentNames;
+import com.kokuu.refinednetwork.common.DeviceDiagnosticsNames;
 import com.kokuu.refinednetwork.common.Platform;
 import com.kokuu.refinednetwork.common.connector.ConnectorTarget;
 import com.kokuu.refinednetwork.common.link.BoundPosition;
@@ -76,6 +77,8 @@ public class NetworkBridgeBlockEntity extends AbstractNetworkNodeContainerBlockE
     private boolean linked;
     /** 检测到桥接环后永久停用本次绑定，直到玩家重新绑定或切换配置。 */
     private boolean cyclic;
+    /** 最近一次未连通的原因，仅用于状态行展示。 */
+    private OfflineReason offlineReason = OfflineReason.NONE;
 
     public NetworkBridgeBlockEntity(final BlockPos pos, final BlockState state) {
         super(BlockEntities.INSTANCE.getNetworkBridge(), pos, state, new NetworkBridgeNetworkNode());
@@ -245,6 +248,7 @@ public class NetworkBridgeBlockEntity extends AbstractNetworkNodeContainerBlockE
             remote = null;
             cyclic = false;
             setLinked(false);
+            offlineReason = OfflineReason.NONE;
             mainNetworkNode.pollStorage();
             return;
         }
@@ -253,6 +257,7 @@ public class NetworkBridgeBlockEntity extends AbstractNetworkNodeContainerBlockE
             remote = null;
             cyclic = false;
             setLinked(false);
+            offlineReason = config.isEnabled() ? OfflineReason.SUSPENDED : OfflineReason.DISABLED;
             mainNetworkNode.pollStorage();
             return;
         }
@@ -267,6 +272,7 @@ public class NetworkBridgeBlockEntity extends AbstractNetworkNodeContainerBlockE
             // 欠费时断开转发，保留下一次同步重试；不向玩家提供免费桥接。
             remote = null;
             setLinked(false);
+            offlineReason = OfflineReason.UNPAID;
             mainNetworkNode.pollStorage();
         }
     }
@@ -277,8 +283,18 @@ public class NetworkBridgeBlockEntity extends AbstractNetworkNodeContainerBlockE
             // 自指桥必然让网络读取自己的提供者，直接拒绝，不进入递归。
             remote = null;
             cyclic = true;
+            offlineReason = OfflineReason.CYCLE;
         } else if (!cyclic) {
-            remote = candidate != null && isAuthorized(candidate) ? candidate : null;
+            if (candidate == null) {
+                remote = null;
+                offlineReason = OfflineReason.UNREACHABLE;
+            } else if (!isAuthorized(candidate)) {
+                remote = null;
+                offlineReason = OfflineReason.NO_PERMISSION;
+            } else {
+                remote = candidate;
+                offlineReason = OfflineReason.NONE;
+            }
         }
     }
 
@@ -385,7 +401,7 @@ public class NetworkBridgeBlockEntity extends AbstractNetworkNodeContainerBlockE
         if (current == null) {
             return ContentNames.NETWORK_BRIDGE_UNBOUND;
         }
-        return Component.translatable(
+        final Component status = Component.translatable(
             ContentNames.NETWORK_BRIDGE_STATUS_TRANSLATION_KEY,
             current.pos().toShortString(),
             cyclic
@@ -395,6 +411,34 @@ public class NetworkBridgeBlockEntity extends AbstractNetworkNodeContainerBlockE
             Platform.getConfig().getNetworkBridge().getEnergyTransferRate(),
             feePerSecond()
         );
+        if (linked || cyclic) {
+            return status;
+        }
+        return status.copy().append(Component.literal("\n")).append(offlineReason.describe());
+    }
+
+    /**
+     * 未连通的原因，仅用于状态行展示。
+     */
+    public enum OfflineReason {
+        NONE,
+        DISABLED,
+        SUSPENDED,
+        UNREACHABLE,
+        NO_PERMISSION,
+        UNPAID,
+        CYCLE;
+
+        Component describe() {
+            return switch (this) {
+                case DISABLED -> DeviceDiagnosticsNames.DISABLED;
+                case SUSPENDED -> DeviceDiagnosticsNames.SUSPENDED;
+                case UNREACHABLE -> DeviceDiagnosticsNames.UNREACHABLE;
+                case NO_PERMISSION -> DeviceDiagnosticsNames.NO_PERMISSION;
+                case UNPAID -> DeviceDiagnosticsNames.UNPAID;
+                case NONE, CYCLE -> Component.empty();
+            };
+        }
     }
 
     // ------------------------------------------------------------- 生命周期

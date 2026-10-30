@@ -15,6 +15,9 @@ public final class DeviceDiagnosticsNames {
     public static final MutableComponent NO_LOCAL_NETWORK = line("device_no_local_network");
     public static final MutableComponent SELF_BOUND = line("device_self_bound");
     public static final MutableComponent MOUNT_REJECTED = line("device_mount_rejected");
+    public static final MutableComponent DISABLED = line("device_disabled");
+    public static final MutableComponent SUSPENDED = line("device_suspended");
+    public static final MutableComponent UNPAID = line("device_unpaid");
 
     private DeviceDiagnosticsNames() {
     }

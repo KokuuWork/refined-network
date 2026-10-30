@@ -299,5 +299,8 @@
   "gui.refinednetwork.device_no_permission": "Reason: no permission on that network.",
   "gui.refinednetwork.device_no_local_network": "Reason: no RS network next to this block. Place it against a controller or cable.",
   "gui.refinednetwork.device_self_bound": "Reason: bound to the network it sits against, so it is stopped to avoid charging itself.",
-  "gui.refinednetwork.device_mount_rejected": "Reason: the local network rejected the mount. Check the network state."
+  "gui.refinednetwork.device_mount_rejected": "Reason: the local network rejected the mount. Check the network state.",
+  "gui.refinednetwork.device_disabled": "Reason: this device is disabled in the config.",
+  "gui.refinednetwork.device_suspended": "Reason: a redstone signal suspended the link.",
+  "gui.refinednetwork.device_unpaid": "Reason: the local network cannot pay the link fee."
 }
