@@ -69,21 +69,27 @@ public final class MonitorEngine {
         if (rules.isEmpty() || player.tickCount % CHECK_INTERVAL != 0) {
             return;
         }
-        final Network network = resolveMonitoredNetwork(player, stack);
+        final GlobalPos bound = AbstractWirelessTerminalItem.getBoundLocation(stack);
+        if (bound == null) {
+            return;
+        }
+        final Network network = resolveMonitoredNetwork(player, stack, bound);
         if (network == null) {
             return;
         }
         final StorageNetworkComponent storages = network.getComponent(StorageNetworkComponent.class);
         final long now = player.level().getGameTime();
-        for (final MonitorRule rule : rules) {
+        for (int index = 0; index < rules.size(); index++) {
+            final MonitorRule rule = rules.get(index);
             if (rule.isEmpty()) {
                 continue;
             }
             final long stored = storages.get(ItemResource.ofItemStack(rule.item()));
+            final String key = cooldownKey(player, stack, bound, index, rule);
             if (rule.isRestock()) {
-                restock(player, stack, network, rule, stored, now);
+                restock(player, stack, network, rule, stored, now, key);
             } else if (rule.isTriggered(stored)) {
-                alert(player, rule, stored, now);
+                alert(player, rule, stored, now, key);
             }
         }
     }
@@ -93,11 +99,9 @@ public final class MonitorEngine {
      * 跨维度必须有维度插件，否则范围插件会顺带把维度插件架空。
      */
     @Nullable
-    private static Network resolveMonitoredNetwork(final ServerPlayer player, final ItemStack stack) {
-        final GlobalPos bound = AbstractWirelessTerminalItem.getBoundLocation(stack);
-        if (bound == null) {
-            return null;
-        }
+    private static Network resolveMonitoredNetwork(final ServerPlayer player,
+                                                   final ItemStack stack,
+                                                   final GlobalPos bound) {
         if (!bound.dimension().equals(player.level().dimension())
             && !Upgrades.hasInterdimensionalUpgrade(stack)) {
             return null;
@@ -112,8 +116,9 @@ public final class MonitorEngine {
     private static void alert(final ServerPlayer player,
                               final MonitorRule rule,
                               final long stored,
-                              final long now) {
-        if (coolingDown(cooldownKey(player, rule) + "|alert", now, ALERT_COOLDOWN_TICKS)) {
+                              final long now,
+                              final String key) {
+        if (coolingDown(key + "|alert", now, ALERT_COOLDOWN_TICKS)) {
             return;
         }
         NotifyCenter.alert(player, rule, stored);
@@ -127,7 +132,8 @@ public final class MonitorEngine {
                                 final Network network,
                                 final MonitorRule rule,
                                 final long stored,
-                                final long now) {
+                                final long now,
+                                final String key) {
         final long missing = rule.missingToTarget(stored);
         if (missing <= 0) {
             return;
@@ -137,7 +143,7 @@ public final class MonitorEngine {
             network.getComponent(AutocraftingNetworkComponent.class);
         if (autocrafting.getPatternsByOutput(resource).isEmpty()) {
             // 网络里根本没有能产出它的样板——说一次，别让玩家以为补货坏了。
-            blocked(player, rule, true, now);
+            blocked(player, rule, true, now, key);
             return;
         }
         if (!SecurityHelper.isAllowed(player, BuiltinPermission.AUTOCRAFTING, network)) {
@@ -162,7 +168,7 @@ public final class MonitorEngine {
                 AbstractWirelessTerminalItem.tryConsumeEnergy(terminal, player, baseCost);
                 NotifyCenter.restockStarted(player, rule, stored);
             }
-            case MISSING_RESOURCES -> blocked(player, rule, false, now);
+            case MISSING_RESOURCES -> blocked(player, rule, false, now, key);
             default -> {
                 // TASK_ALREADY_RUNNING：同类任务已经在跑了。既不下单也不收费，安静地等它跑完。
             }
@@ -172,20 +178,32 @@ public final class MonitorEngine {
     private static void blocked(final ServerPlayer player,
                                 final MonitorRule rule,
                                 final boolean noPattern,
-                                final long now) {
-        final String key = cooldownKey(player, rule) + (noPattern ? "|nopattern" : "|missing");
-        if (coolingDown(key, now, BLOCKED_COOLDOWN_TICKS)) {
+                                final long now,
+                                final String key) {
+        final String blockedKey = key + (noPattern ? "|nopattern" : "|missing");
+        if (coolingDown(blockedKey, now, BLOCKED_COOLDOWN_TICKS)) {
             return;
         }
         NotifyCenter.restockBlocked(player, rule, noPattern);
     }
 
     /**
-     * 冷却键：同一玩家 + 同一件物品 + 同一套参数。玩家改过规则（阈值 / 方向 / 动作）就会重新计时。
+     * 冷却键：玩家 + 具体终端 + 绑定目标 + 规则槽位 + 完整物品与参数。
+     *
+     * <p>只用「玩家 + 物品类型」会让同一玩家在另一台终端、另一张网络或另一个规则槽上的
+     * 同名物品互相压掉提醒，所以这里把终端身份、绑定坐标和槽位一并算进去。
      */
-    private static String cooldownKey(final ServerPlayer player, final MonitorRule rule) {
+    private static String cooldownKey(final ServerPlayer player,
+                                      final ItemStack terminal,
+                                      final GlobalPos bound,
+                                      final int slot,
+                                      final MonitorRule rule) {
         return player.getUUID()
+            + "|" + System.identityHashCode(terminal)
+            + "|" + bound
+            + "|" + slot
             + "|" + rule.item().getItem()
+            + "|" + rule.item().getComponents()
             + "|" + rule.threshold()
             + "|" + rule.alertWhenBelow()
             + "|" + rule.action();
