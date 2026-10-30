@@ -1,7 +1,7 @@
-"""Append the lang entries for the four new blocks to zh_cn.json / en_us.json.
+"""更新 zh_cn.json / en_us.json 中四种方块及共用绑定提示的文案。
 
-Reads both files as ordered dicts (json preserves insertion order), appends the
-new keys at the end, and writes them back with the same 2-space indent style.
+按现有键顺序读取；新增键追加至末尾，已有键的值更新为下方文案源。
+输出保持 2 空格缩进。
 """
 import json
 import os
@@ -16,239 +16,239 @@ LANG = os.path.join(
 ZH = {
     # ------------------------------------------------------- 无线能量接收器
     "block.rswirelesscrafting.wireless_energy_receiver": "无线能量接收器",
-    "block.rswirelesscrafting.wireless_energy_receiver.desc": "把远处的发电接进网络：它以能量提供者的身份挂进去，远处发的电直接算进网络电量",
-    "block.rswirelesscrafting.wireless_energy_receiver.hint.bind": "潜行 + 右键接入点（无线访问点 / 网络接收器）记下它，再右键本方块完成绑定",
-    "block.rswirelesscrafting.wireless_energy_receiver.capacity": "FE 缓冲：%s（同时向网络贡献这么多电量）",
-    "block.rswirelesscrafting.wireless_energy_receiver.energy": "链路费：%s FE/s（按距离倍率缩放）",
+    "block.rswirelesscrafting.wireless_energy_receiver.desc": "从绑定的供电网络取电，存入缓冲并供给旁边的本地 RS 网络。",
+    "block.rswirelesscrafting.wireless_energy_receiver.hint.bind": "贴着用电网络放置。用无线连接器右键供电网络方块记录接入点，再右键本方块绑定。",
+    "block.rswirelesscrafting.wireless_energy_receiver.capacity": "缓冲上限：%s FE（不是当前电量）。",
+    "block.rswirelesscrafting.wireless_energy_receiver.energy": "基础链路费：%s FE/s，按距离或跨维度倍率计算，从供电网络扣取。",
     "block.rswirelesscrafting.wireless_energy_receiver.buffer": "缓冲：%s / %s FE",
-    "block.rswirelesscrafting.wireless_energy_receiver.hint.redstone": "红石信号 = 停止接收并停扣链路费",
-    "msg.rswirelesscrafting.energy_receiver.unbound": "已解绑",
-    "msg.rswirelesscrafting.energy_receiver.bound": "已绑定接入点",
-    "msg.rswirelesscrafting.energy_receiver.anchor_set": "已记为接入点：去远处右键无线能量接收器完成绑定",
+    "block.rswirelesscrafting.wireless_energy_receiver.hint.redstone": "红石信号停止接收并暂停链路费，保留已有缓冲电量。",
+    "msg.rswirelesscrafting.energy_receiver.unbound": "已解绑。",
+    "msg.rswirelesscrafting.energy_receiver.bound": "已绑定供电接入点。",
+    "msg.rswirelesscrafting.energy_receiver.anchor_set": "已记录供电接入点。用无线连接器右键无线能量接收器完成绑定。",
     "msg.rswirelesscrafting.energy_receiver.status": "能量接收器 → %s：%s · 链路费 %s FE/s",
-    "msg.rswirelesscrafting.energy_receiver.online": "工作中",
-    "msg.rswirelesscrafting.energy_receiver.offline": "未工作（检查接入点是否在网络里、区块是否加载）",
-    "msg.rswirelesscrafting.link.anchor_set": "已记下接入点：去目标设备潜行右键完成绑定",
-    "msg.rswirelesscrafting.link.anchor_required": "请先在 RS 网络方块或无线桥上潜行右键记录接入点",
+    "msg.rswirelesscrafting.energy_receiver.online": "链路已接通",
+    "msg.rswirelesscrafting.energy_receiver.offline": "链路未接通。检查两端网络、供电、权限和区块加载。",
+    "msg.rswirelesscrafting.link.anchor_set": "已记录接入点。用无线连接器右键目标设备完成绑定。",
+    "msg.rswirelesscrafting.link.anchor_required": "尚未记录接入点。用无线连接器右键 RS 网络方块，再右键目标设备绑定。",
     "text.autoconfig.rswirelesscrafting.option.energyReceiver": "无线能量接收器",
-    "text.autoconfig.rswirelesscrafting.option.energyReceiver.tooltip": "把远处 FE 发电接进网络的配置项。",
+    "text.autoconfig.rswirelesscrafting.option.energyReceiver.tooltip": "从绑定的供电网络取电，通过缓冲供给旁边的本地 RS 网络。",
     "text.autoconfig.rswirelesscrafting.option.energyReceiver.enabled": "启用能量接收器",
-    "text.autoconfig.rswirelesscrafting.option.energyReceiver.enabled.tooltip": "关掉后所有接收器停止工作（已放置的全部视为未接入）。",
-    "text.autoconfig.rswirelesscrafting.option.energyReceiver.capacity": "FE 缓冲容量",
-    "text.autoconfig.rswirelesscrafting.option.energyReceiver.capacity.tooltip": "内部缓冲上限，同时也是它向网络贡献的那部分能量。",
-    "text.autoconfig.rswirelesscrafting.option.energyReceiver.energyUsage": "链路费（FE/s）",
-    "text.autoconfig.rswirelesscrafting.option.energyReceiver.energyUsage.tooltip": "链路费的基础值，按距离倍率缩放；跨维度按维度倍率。",
+    "text.autoconfig.rswirelesscrafting.option.energyReceiver.enabled.tooltip": "关闭后接收器停止接收和供电、暂停链路费，保留已有缓冲电量。",
+    "text.autoconfig.rswirelesscrafting.option.energyReceiver.capacity": "缓冲容量（FE）",
+    "text.autoconfig.rswirelesscrafting.option.energyReceiver.capacity.tooltip": "内部缓冲的电量上限，不是当前电量。只有实际存入缓冲的电量可供本地网络使用。",
+    "text.autoconfig.rswirelesscrafting.option.energyReceiver.energyUsage": "基础链路费（FE/s）",
+    "text.autoconfig.rswirelesscrafting.option.energyReceiver.energyUsage.tooltip": "从绑定的供电网络扣取的基础链路费。同维度按距离倍率计算，跨维度按跨维度倍率计算。",
 
     # ----------------------------------------------------------- 能量监控仪
     "block.rswirelesscrafting.energy_monitor": "能量监控仪",
-    "block.rswirelesscrafting.energy_monitor.desc": "让网络能量第一次可观测：存量 / 容量 / 净收支 / 预计耗尽",
-    "block.rswirelesscrafting.energy_monitor.hint.place": "贴着 RS 网络方块放，自动盯着那张网",
-    "block.rswirelesscrafting.energy_monitor.hint.bind": "或潜行 + 右键接入点记下它，再右键本方块绑定到远处",
-    "block.rswirelesscrafting.energy_monitor.threshold": "低电红线：%s%%",
-    "block.rswirelesscrafting.energy_monitor.energy": "常驻耗电：%s FE/s",
-    "msg.rswirelesscrafting.energy_monitor.unbound": "已解绑",
-    "msg.rswirelesscrafting.energy_monitor.anchor_set": "已记为接入点：去远处右键能量监控仪完成绑定",
-    "msg.rswirelesscrafting.energy_monitor.bound": "已绑定接入点 %s",
-    "msg.rswirelesscrafting.energy_monitor.unlinked": "还没读到网络：贴着网络方块放，或潜行绑定接入点",
-    "msg.rswirelesscrafting.energy_monitor.not_draining": "不会耗尽（正在进电 / 收支平衡）",
-    "msg.rswirelesscrafting.energy_monitor.status": "网络电量 %s / %s FE · 净收支 %s FE/s · 预计耗尽 %s",
+    "block.rswirelesscrafting.energy_monitor.desc": "显示网络电量、容量、净收支与预计耗尽时间。",
+    "block.rswirelesscrafting.energy_monitor.hint.place": "贴着 RS 网络方块放置，自动读取该网络。",
+    "block.rswirelesscrafting.energy_monitor.hint.bind": "远程监控：用无线连接器右键 RS 网络方块记录接入点，再右键本方块绑定。",
+    "block.rswirelesscrafting.energy_monitor.threshold": "低电阈值：%s%%。",
+    "block.rswirelesscrafting.energy_monitor.energy": "持续耗电：%s FE/s。",
+    "msg.rswirelesscrafting.energy_monitor.unbound": "已解绑。",
+    "msg.rswirelesscrafting.energy_monitor.anchor_set": "已记录接入点。用无线连接器右键能量监控仪完成绑定。",
+    "msg.rswirelesscrafting.energy_monitor.bound": "已绑定接入点：%s。",
+    "msg.rswirelesscrafting.energy_monitor.unlinked": "尚未读到网络。贴着 RS 网络方块放置，或用无线连接器先记录接入点再右键本方块绑定；检查权限和区块加载。",
+    "msg.rswirelesscrafting.energy_monitor.not_draining": "暂无法估算（收支非负或电量为零）",
+    "msg.rswirelesscrafting.energy_monitor.status": "网络电量 %s / %s FE · 净收支 %s FE/s · 预计耗尽（秒）：%s",
     "text.autoconfig.rswirelesscrafting.option.energyMonitor": "能量监控仪",
-    "text.autoconfig.rswirelesscrafting.option.energyMonitor.tooltip": "让网络能量可观测的配置项。",
+    "text.autoconfig.rswirelesscrafting.option.energyMonitor.tooltip": "读取网络电量、容量和净收支，并估算耗尽时间。",
     "text.autoconfig.rswirelesscrafting.option.energyMonitor.enabled": "启用能量监控仪",
-    "text.autoconfig.rswirelesscrafting.option.energyMonitor.enabled.tooltip": "关掉后所有监控仪停止工作（已放置的全部视为未接入）。",
-    "text.autoconfig.rswirelesscrafting.option.energyMonitor.energyUsage": "常驻耗电（FE/s）",
-    "text.autoconfig.rswirelesscrafting.option.energyMonitor.energyUsage.tooltip": "监控仪只是个读取设备，收一点「看仪表」的钱。",
-    "text.autoconfig.rswirelesscrafting.option.energyMonitor.lowThresholdPercent": "低电红线（%）",
-    "text.autoconfig.rswirelesscrafting.option.energyMonitor.lowThresholdPercent.tooltip": "网络电量低于这个百分比就亮红灯。",
+    "text.autoconfig.rswirelesscrafting.option.energyMonitor.enabled.tooltip": "关闭后监控仪停止读取网络和扣取运行耗电，显示未连接状态。",
+    "text.autoconfig.rswirelesscrafting.option.energyMonitor.energyUsage": "持续耗电（FE/s）",
+    "text.autoconfig.rswirelesscrafting.option.energyMonitor.energyUsage.tooltip": "监控仪读取网络时，从所监控网络扣取的持续耗电。",
+    "text.autoconfig.rswirelesscrafting.option.energyMonitor.lowThresholdPercent": "低电阈值（%）",
+    "text.autoconfig.rswirelesscrafting.option.energyMonitor.lowThresholdPercent.tooltip": "网络电量占容量的百分比低于或等于该阈值时亮红灯；容量为零时也触发。",
     "text.autoconfig.rswirelesscrafting.option.energyMonitor.sampleInterval": "采样间隔（tick）",
-    "text.autoconfig.rswirelesscrafting.option.energyMonitor.sampleInterval.tooltip": "净收支的采样间隔，20 = 每秒一次。",
+    "text.autoconfig.rswirelesscrafting.option.energyMonitor.sampleInterval.tooltip": "净收支采样间隔。按 20 tick/s 计算，20 tick 为每秒采样一次。",
 
     # ----------------------------------------------------------- 智能分拣站
     "block.rswirelesscrafting.smart_sorter": "智能分拣站",
-    "block.rswirelesscrafting.smart_sorter.desc": "按物品或标签分流，把网络里的东西搬进面前的容器",
-    "block.rswirelesscrafting.smart_sorter.hint.place": "朝着目标容器摆放（和 RS 输出总线一个方向逻辑）",
-    "block.rswirelesscrafting.smart_sorter.hint.filter": "界面里 3×3 过滤槽：每格放一个代表物品",
-    "block.rswirelesscrafting.smart_sorter.rate": "搬运速率：%s 组/秒",
-    "block.rswirelesscrafting.smart_sorter.energy": "搬运耗能：%s FE/组",
+    "block.rswirelesscrafting.smart_sorter.desc": "按物品或标签筛选，将网络物品送入面前的容器。",
+    "block.rswirelesscrafting.smart_sorter.hint.place": "面向目标容器放置，方向逻辑与 RS 输出总线相同。",
+    "block.rswirelesscrafting.smart_sorter.hint.filter": "界面内有 3×3 过滤槽，每格放一个代表物品。",
+    "block.rswirelesscrafting.smart_sorter.rate": "搬运批次预算：%s 次/秒（单次数量另受容器限制）。",
+    "block.rswirelesscrafting.smart_sorter.energy": "每次成功搬运耗能：%s FE（当前按批次结算）。",
     "gui.rswirelesscrafting.smart_sorter.mode.exact": "按物品",
     "gui.rswirelesscrafting.smart_sorter.mode.tag": "按标签",
-    "gui.rswirelesscrafting.smart_sorter.mode_tooltip": "点击切换匹配方式：\n按物品 = 只搬完全相同的物品\n按标签 = 搬同标签的全部物品",
-    "gui.rswirelesscrafting.smart_sorter.matches": "命中 %s 条规则",
+    "gui.rswirelesscrafting.smart_sorter.mode_tooltip": "点击切换匹配方式。\n按物品：仅搬运与过滤物品相同的物品。\n按标签：搬运与过滤物品共享标签的物品。",
+    "gui.rswirelesscrafting.smart_sorter.matches": "匹配 %s 条规则",
     "text.autoconfig.rswirelesscrafting.option.smartSorter": "智能分拣站",
-    "text.autoconfig.rswirelesscrafting.option.smartSorter.tooltip": "按物品 / 标签把网络里的东西搬进面前的容器。",
+    "text.autoconfig.rswirelesscrafting.option.smartSorter.tooltip": "按物品或标签筛选，将网络物品送入面前的容器。",
     "text.autoconfig.rswirelesscrafting.option.smartSorter.enabled": "启用智能分拣站",
-    "text.autoconfig.rswirelesscrafting.option.smartSorter.enabled.tooltip": "关掉后所有分拣站停止搬运（已放置的全部视为未激活）。",
-    "text.autoconfig.rswirelesscrafting.option.smartSorter.energyPerStack": "每组搬运耗能（FE）",
-    "text.autoconfig.rswirelesscrafting.option.smartSorter.energyPerStack.tooltip": "每搬动一组物品从网络扣除的能量。",
-    "text.autoconfig.rswirelesscrafting.option.smartSorter.stacksPerSecond": "搬运速率（组/秒）",
-    "text.autoconfig.rswirelesscrafting.option.smartSorter.stacksPerSecond.tooltip": "搬运速率上限，防止一次抽干网络。",
+    "text.autoconfig.rswirelesscrafting.option.smartSorter.enabled.tooltip": "关闭后分拣站停止搬运，显示未激活状态。",
+    "text.autoconfig.rswirelesscrafting.option.smartSorter.energyPerStack": "每成功搬运批次耗能（FE）",
+    "text.autoconfig.rswirelesscrafting.option.smartSorter.energyPerStack.tooltip": "当前实现每个成功搬运批次扣取一次费用，并非按实际堆叠组数；单次数量上限待核实。",
+    "text.autoconfig.rswirelesscrafting.option.smartSorter.stacksPerSecond": "搬运批次预算（次/秒）",
+    "text.autoconfig.rswirelesscrafting.option.smartSorter.stacksPerSecond.tooltip": "当前用于分配成功搬运批次预算，不是物品堆叠数上限；单次可跨多个槽位，数量限制另行核实。",
 
     # ----------------------------------------------------------- 网络桥接器
     "block.rswirelesscrafting.network_bridge": "网络桥接器",
-    "block.rswirelesscrafting.network_bridge.desc": "让两张各自独立的网络互通：物品和能量都能过，可限速",
-    "block.rswirelesscrafting.network_bridge.hint.bind": "潜行 + 右键另一张网络的接入点记下它，再右键本方块完成绑定",
-    "block.rswirelesscrafting.network_bridge.item_rate": "物品过桥：%s 件/秒",
-    "block.rswirelesscrafting.network_bridge.energy_rate": "能量过桥：%s FE/s",
-    "block.rswirelesscrafting.network_bridge.fee": "链路费：%s FE/s（按距离倍率缩放）",
-    "msg.rswirelesscrafting.network_bridge.unbound": "已解绑",
-    "msg.rswirelesscrafting.network_bridge.anchor_set": "已记为接入点：去远处右键网络桥接器完成绑定",
-    "msg.rswirelesscrafting.network_bridge.bound": "已绑定接入点 %s",
-    "msg.rswirelesscrafting.network_bridge.status": "桥接器 → %s：%s · 物品 %s 件/秒 · 能量 %s FE/s · 链路费 %s FE/s",
-    "msg.rswirelesscrafting.network_bridge.online": "已连通",
-    "msg.rswirelesscrafting.network_bridge.offline": "未连通（检查对端网络 / 区块是否加载）",
-    "msg.rswirelesscrafting.network_bridge.cycle": "检测到桥接环路，已停用（请重新绑定）",
+    "block.rswirelesscrafting.network_bridge.desc": "让本地网络访问另一张独立网络的物品与电量，传输受速率上限限制。",
+    "block.rswirelesscrafting.network_bridge.hint.bind": "用无线连接器右键另一张 RS 网络的方块记录接入点，再右键本方块绑定。",
+    "block.rswirelesscrafting.network_bridge.item_rate": "物品传输上限：%s 件/秒。",
+    "block.rswirelesscrafting.network_bridge.energy_rate": "能量传输上限：%s FE/s。",
+    "block.rswirelesscrafting.network_bridge.fee": "基础链路费：%s FE/s，按距离或跨维度倍率计算，从本地网络扣取。",
+    "msg.rswirelesscrafting.network_bridge.unbound": "已解绑。",
+    "msg.rswirelesscrafting.network_bridge.anchor_set": "已记录接入点。用无线连接器右键网络桥接器完成绑定。",
+    "msg.rswirelesscrafting.network_bridge.bound": "已绑定接入点：%s。",
+    "msg.rswirelesscrafting.network_bridge.status": "网络桥接器 → %s：%s · 物品上限 %s 件/秒 · 能量上限 %s FE/s · 链路费 %s FE/s",
+    "msg.rswirelesscrafting.network_bridge.online": "链路已接通",
+    "msg.rswirelesscrafting.network_bridge.offline": "链路未接通。检查两端网络、供电、权限、红石和区块加载。",
+    "msg.rswirelesscrafting.network_bridge.cycle": "已触发桥接环路保护。检查绑定关系，重新绑定后重试。",
     "text.autoconfig.rswirelesscrafting.option.networkBridge": "网络桥接器",
-    "text.autoconfig.rswirelesscrafting.option.networkBridge.tooltip": "让两张各自独立的网络互通（可限速）。",
+    "text.autoconfig.rswirelesscrafting.option.networkBridge.tooltip": "让本地网络访问另一张独立网络的物品与电量，可限制传输速率。",
     "text.autoconfig.rswirelesscrafting.option.networkBridge.enabled": "启用网络桥接器",
-    "text.autoconfig.rswirelesscrafting.option.networkBridge.enabled.tooltip": "关掉后所有桥接器停止转发（已放置的全部视为未连通）。",
-    "text.autoconfig.rswirelesscrafting.option.networkBridge.energyUsage": "链路费（FE/s）",
-    "text.autoconfig.rswirelesscrafting.option.networkBridge.energyUsage.tooltip": "链路费的基础值，按距离倍率缩放。",
-    "text.autoconfig.rswirelesscrafting.option.networkBridge.itemTransferRate": "物品过桥速率（件/秒）",
-    "text.autoconfig.rswirelesscrafting.option.networkBridge.itemTransferRate.tooltip": "经过桥搬运物品的速率上限。",
-    "text.autoconfig.rswirelesscrafting.option.networkBridge.energyTransferRate": "能量过桥速率（FE/s）",
-    "text.autoconfig.rswirelesscrafting.option.networkBridge.energyTransferRate.tooltip": "经过桥搬运能量的速率上限。",
+    "text.autoconfig.rswirelesscrafting.option.networkBridge.enabled.tooltip": "关闭后桥接器停止转发和扣取链路费，显示未连通状态。",
+    "text.autoconfig.rswirelesscrafting.option.networkBridge.energyUsage": "基础链路费（FE/s）",
+    "text.autoconfig.rswirelesscrafting.option.networkBridge.energyUsage.tooltip": "从本地网络扣取的基础链路费。同维度按距离倍率计算，跨维度按跨维度倍率计算。",
+    "text.autoconfig.rswirelesscrafting.option.networkBridge.itemTransferRate": "物品传输上限（件/秒）",
+    "text.autoconfig.rswirelesscrafting.option.networkBridge.itemTransferRate.tooltip": "每秒经桥接器传输的物品数量上限。",
+    "text.autoconfig.rswirelesscrafting.option.networkBridge.energyTransferRate": "能量传输上限（FE/s）",
+    "text.autoconfig.rswirelesscrafting.option.networkBridge.energyTransferRate.tooltip": "每秒经桥接器传输的电量上限。",
 }
 
 EN = {
     # ------------------------------------------------------- 无线能量接收器
     "block.rswirelesscrafting.wireless_energy_receiver": "Wireless Energy Receiver",
     "block.rswirelesscrafting.wireless_energy_receiver.desc":
-        "Feeds far-away power generation into the network: it joins as an energy provider, "
-        "so remote power counts straight into the network",
+        "Draws energy from the bound supply network into its buffer, "
+        "then supplies the adjacent local RS network.",
     "block.rswirelesscrafting.wireless_energy_receiver.hint.bind":
-        "Sneak + right-click the access point (wireless transmitter / network receiver) to record it, "
-        "then right-click this block to bind",
+        "Place against the network needing power. Use the Wireless Connector to right-click a supply network block, "
+        "then right-click this block to bind.",
     "block.rswirelesscrafting.wireless_energy_receiver.capacity":
-        "FE buffer: %s (this is how much it contributes to the network)",
+        "Buffer capacity: %s FE (not the current stored energy).",
     "block.rswirelesscrafting.wireless_energy_receiver.energy":
-        "Link fee: %s FE/s (scaled by the distance multiplier)",
+        "Base link fee: %s FE/s, scaled by distance or the interdimensional multiplier and drawn from the supply network.",
     "block.rswirelesscrafting.wireless_energy_receiver.buffer": "Buffer: %s / %s FE",
     "block.rswirelesscrafting.wireless_energy_receiver.hint.redstone":
-        "A redstone signal stops receiving and pauses the link fee",
-    "msg.rswirelesscrafting.energy_receiver.unbound": "unbound",
-    "msg.rswirelesscrafting.energy_receiver.bound": "bound to the access point",
+        "Redstone stops receiving and pauses the link fee; stored buffer energy is retained.",
+    "msg.rswirelesscrafting.energy_receiver.unbound": "Unbound.",
+    "msg.rswirelesscrafting.energy_receiver.bound": "Bound to the supply access point.",
     "msg.rswirelesscrafting.energy_receiver.anchor_set":
-        "Access point recorded: right-click a wireless energy receiver far away to bind it",
-    "msg.rswirelesscrafting.energy_receiver.status": "Energy receiver -> %s: %s - link fee %s FE/s",
-    "msg.rswirelesscrafting.energy_receiver.online": "working",
+        "Supply access point recorded. Right-click the Wireless Energy Receiver with the Wireless Connector to bind.",
+    "msg.rswirelesscrafting.energy_receiver.status": "Energy receiver -> %s: %s - Link fee %s FE/s",
+    "msg.rswirelesscrafting.energy_receiver.online": "Link connected",
     "msg.rswirelesscrafting.energy_receiver.offline":
-        "not working (check the access point and chunk loading)",
+        "Link disconnected. Check both networks, power, permissions and chunk loading.",
     "msg.rswirelesscrafting.link.anchor_set":
-        "Access point recorded: sneak-right-click the target device to bind",
+        "Access point recorded. Right-click the target device with the Wireless Connector to bind.",
     "msg.rswirelesscrafting.link.anchor_required":
-        "Record an access point on an RS network block or wireless bridge first",
+        "No access point recorded. Use the Wireless Connector to right-click an RS network block, then the target device to bind.",
     "text.autoconfig.rswirelesscrafting.option.energyReceiver": "Wireless Energy Receiver",
     "text.autoconfig.rswirelesscrafting.option.energyReceiver.tooltip":
-        "Feeds far-away FE generation into the network.",
+        "Draws energy from the bound supply network through a buffer to supply the adjacent local RS network.",
     "text.autoconfig.rswirelesscrafting.option.energyReceiver.enabled": "Enable the energy receiver",
     "text.autoconfig.rswirelesscrafting.option.energyReceiver.enabled.tooltip":
-        "When off, all receivers stop working.",
-    "text.autoconfig.rswirelesscrafting.option.energyReceiver.capacity": "FE buffer capacity",
+        "When off, receivers stop receiving and supplying energy and pause the link fee; stored buffer energy is retained.",
+    "text.autoconfig.rswirelesscrafting.option.energyReceiver.capacity": "Buffer capacity (FE)",
     "text.autoconfig.rswirelesscrafting.option.energyReceiver.capacity.tooltip":
-        "Internal buffer cap, which is also how much it contributes to the network.",
-    "text.autoconfig.rswirelesscrafting.option.energyReceiver.energyUsage": "Link fee (FE/s)",
+        "Internal buffer capacity, not the current stored energy. Only energy actually stored in the buffer can supply the local network.",
+    "text.autoconfig.rswirelesscrafting.option.energyReceiver.energyUsage": "Base link fee (FE/s)",
     "text.autoconfig.rswirelesscrafting.option.energyReceiver.energyUsage.tooltip":
-        "Base link fee, scaled by the distance multiplier.",
+        "Base link fee drawn from the bound supply network. Scaled by distance in the same dimension, or by the interdimensional multiplier across dimensions.",
 
     # ----------------------------------------------------------- 能量监控仪
     "block.rswirelesscrafting.energy_monitor": "Energy Monitor",
     "block.rswirelesscrafting.energy_monitor.desc":
-        "Makes network energy observable for the first time: stored / capacity / net throughput / time to empty",
+        "Shows network energy, capacity, net rate and estimated time to empty.",
     "block.rswirelesscrafting.energy_monitor.hint.place":
-        "Place it against an RS network block and it watches that network",
+        "Place against an RS network block to read that network automatically.",
     "block.rswirelesscrafting.energy_monitor.hint.bind":
-        "Or sneak + right-click an access point to record it, then right-click this block to watch it remotely",
-    "block.rswirelesscrafting.energy_monitor.threshold": "Low warning line: %s%%",
-    "block.rswirelesscrafting.energy_monitor.energy": "Drain: %s FE/s",
-    "msg.rswirelesscrafting.energy_monitor.unbound": "unbound",
+        "Remote monitoring: use the Wireless Connector to right-click an RS network block, then right-click this block to bind.",
+    "block.rswirelesscrafting.energy_monitor.threshold": "Low-energy threshold: %s%%.",
+    "block.rswirelesscrafting.energy_monitor.energy": "Continuous drain: %s FE/s.",
+    "msg.rswirelesscrafting.energy_monitor.unbound": "Unbound.",
     "msg.rswirelesscrafting.energy_monitor.anchor_set":
-        "Access point recorded: right-click an energy monitor far away to bind it",
-    "msg.rswirelesscrafting.energy_monitor.bound": "bound to access point %s",
+        "Access point recorded. Right-click the Energy Monitor with the Wireless Connector to bind.",
+    "msg.rswirelesscrafting.energy_monitor.bound": "Bound to access point: %s.",
     "msg.rswirelesscrafting.energy_monitor.unlinked":
-        "no network read yet: place it against a network block, or sneak-bind an access point",
-    "msg.rswirelesscrafting.energy_monitor.not_draining": "never (charging or balanced)",
+        "No network reading. Place against an RS network block, or use the Wireless Connector to record an access point and right-click this block to bind; check permissions and chunk loading.",
+    "msg.rswirelesscrafting.energy_monitor.not_draining": "Not estimated (nonnegative net rate or zero stored energy)",
     "msg.rswirelesscrafting.energy_monitor.status":
-        "Network energy %s / %s FE - net %s FE/s - empty in %s",
+        "Network energy %s / %s FE - Net rate %s FE/s - Estimated time to empty (seconds): %s",
     "text.autoconfig.rswirelesscrafting.option.energyMonitor": "Energy Monitor",
     "text.autoconfig.rswirelesscrafting.option.energyMonitor.tooltip":
-        "Makes network energy observable.",
+        "Reads network energy, capacity and net rate, and estimates time to empty.",
     "text.autoconfig.rswirelesscrafting.option.energyMonitor.enabled": "Enable the energy monitor",
     "text.autoconfig.rswirelesscrafting.option.energyMonitor.enabled.tooltip":
-        "When off, all monitors stop working.",
-    "text.autoconfig.rswirelesscrafting.option.energyMonitor.energyUsage": "Drain (FE/s)",
+        "When off, monitors stop reading networks and drawing operating energy, and show a disconnected state.",
+    "text.autoconfig.rswirelesscrafting.option.energyMonitor.energyUsage": "Continuous drain (FE/s)",
     "text.autoconfig.rswirelesscrafting.option.energyMonitor.energyUsage.tooltip":
-        "The monitor only reads the network; it charges a little for the dashboard.",
-    "text.autoconfig.rswirelesscrafting.option.energyMonitor.lowThresholdPercent": "Low warning line (%)",
+        "Continuous energy drawn from the monitored network while taking readings.",
+    "text.autoconfig.rswirelesscrafting.option.energyMonitor.lowThresholdPercent": "Low-energy threshold (%)",
     "text.autoconfig.rswirelesscrafting.option.energyMonitor.lowThresholdPercent.tooltip":
-        "Light up the warning state below this percentage of stored energy.",
+        "Lights the warning when stored energy as a percentage of capacity is at or below this threshold, or capacity is zero.",
     "text.autoconfig.rswirelesscrafting.option.energyMonitor.sampleInterval": "Sample interval (ticks)",
     "text.autoconfig.rswirelesscrafting.option.energyMonitor.sampleInterval.tooltip":
-        "Net throughput sampling interval; 20 = once per second.",
+        "Net rate sampling interval. At 20 ticks/s, 20 ticks means one sample per second.",
 
     # ----------------------------------------------------------- 智能分拣站
     "block.rswirelesscrafting.smart_sorter": "Smart Sorter",
     "block.rswirelesscrafting.smart_sorter.desc":
-        "Routes items by item or tag from the network into the container it faces",
+        "Filters by item or tag and sends network items into the container it faces.",
     "block.rswirelesscrafting.smart_sorter.hint.place":
-        "Place it facing the target container (same direction logic as an RS exporter)",
+        "Place facing the target container, with the same direction logic as an RS Exporter.",
     "block.rswirelesscrafting.smart_sorter.hint.filter":
-        "The 3x3 filter grid in its screen: one representative item per slot",
-    "block.rswirelesscrafting.smart_sorter.rate": "Transfer rate: %s stacks/s",
-    "block.rswirelesscrafting.smart_sorter.energy": "Transfer cost: %s FE per stack",
+        "The screen has a 3x3 filter grid; place one representative item per slot.",
+    "block.rswirelesscrafting.smart_sorter.rate": "Transfer budget: %s batches/s (amount also depends on the container).",
+    "block.rswirelesscrafting.smart_sorter.energy": "Cost per successful transfer: %s FE (currently billed per batch).",
     "gui.rswirelesscrafting.smart_sorter.mode.exact": "By item",
     "gui.rswirelesscrafting.smart_sorter.mode.tag": "By tag",
     "gui.rswirelesscrafting.smart_sorter.mode_tooltip":
-        "Click to switch the match mode:\nBy item = only identical items\nBy tag = everything sharing a tag",
-    "gui.rswirelesscrafting.smart_sorter.matches": "%s matching rules",
+        "Click to switch the match mode.\nBy item: only items identical to the filter item.\nBy tag: items sharing a tag with the filter item.",
+    "gui.rswirelesscrafting.smart_sorter.matches": "Matching rules: %s",
     "text.autoconfig.rswirelesscrafting.option.smartSorter": "Smart Sorter",
     "text.autoconfig.rswirelesscrafting.option.smartSorter.tooltip":
-        "Moves items from the network into the container it faces, filtered by item or tag.",
+        "Filters by item or tag and sends network items into the container it faces.",
     "text.autoconfig.rswirelesscrafting.option.smartSorter.enabled": "Enable the smart sorter",
     "text.autoconfig.rswirelesscrafting.option.smartSorter.enabled.tooltip":
-        "When off, all sorters stop hauling.",
-    "text.autoconfig.rswirelesscrafting.option.smartSorter.energyPerStack": "Energy per stack (FE)",
+        "When off, sorters stop transferring items and show an inactive state.",
+    "text.autoconfig.rswirelesscrafting.option.smartSorter.energyPerStack": "Energy per successful batch (FE)",
     "text.autoconfig.rswirelesscrafting.option.smartSorter.energyPerStack.tooltip":
-        "Network energy spent per stack moved.",
-    "text.autoconfig.rswirelesscrafting.option.smartSorter.stacksPerSecond": "Transfer rate (stacks/s)",
+        "Currently billed once per successful batch, not per item stack. The per-transfer amount limit needs verification.",
+    "text.autoconfig.rswirelesscrafting.option.smartSorter.stacksPerSecond": "Transfer budget (batches/s)",
     "text.autoconfig.rswirelesscrafting.option.smartSorter.stacksPerSecond.tooltip":
-        "Transfer rate cap, so it cannot drain the network in one go.",
+        "Currently allocates a transfer-batch budget, not a limit on item stacks. A batch may span slots; amount limits need verification.",
 
     # ----------------------------------------------------------- 网络桥接器
     "block.rswirelesscrafting.network_bridge": "Network Bridge",
     "block.rswirelesscrafting.network_bridge.desc":
-        "Links two otherwise separate networks: items and energy both cross, with rate limits",
+        "Lets the local network access items and energy from another independent network, subject to transfer limits.",
     "block.rswirelesscrafting.network_bridge.hint.bind":
-        "Sneak + right-click an access point on the other network to record it, "
-        "then right-click this block to bind",
-    "block.rswirelesscrafting.network_bridge.item_rate": "Items across: %s/s",
-    "block.rswirelesscrafting.network_bridge.energy_rate": "Energy across: %s FE/s",
-    "block.rswirelesscrafting.network_bridge.fee": "Link fee: %s FE/s (scaled by the distance multiplier)",
-    "msg.rswirelesscrafting.network_bridge.unbound": "unbound",
+        "Use the Wireless Connector to right-click a block on the other RS network to record its access point, "
+        "then right-click this block to bind.",
+    "block.rswirelesscrafting.network_bridge.item_rate": "Item transfer limit: %s items/s.",
+    "block.rswirelesscrafting.network_bridge.energy_rate": "Energy transfer limit: %s FE/s.",
+    "block.rswirelesscrafting.network_bridge.fee": "Base link fee: %s FE/s, scaled by distance or the interdimensional multiplier and drawn from the local network.",
+    "msg.rswirelesscrafting.network_bridge.unbound": "Unbound.",
     "msg.rswirelesscrafting.network_bridge.anchor_set":
-        "Access point recorded: right-click a network bridge far away to bind it",
-    "msg.rswirelesscrafting.network_bridge.bound": "bound to access point %s",
+        "Access point recorded. Right-click the Network Bridge with the Wireless Connector to bind.",
+    "msg.rswirelesscrafting.network_bridge.bound": "Bound to access point: %s.",
     "msg.rswirelesscrafting.network_bridge.status":
-        "Bridge -> %s: %s - items %s/s - energy %s FE/s - link fee %s FE/s",
-    "msg.rswirelesscrafting.network_bridge.online": "connected",
+        "Network bridge -> %s: %s - Item limit %s items/s - Energy limit %s FE/s - Link fee %s FE/s",
+    "msg.rswirelesscrafting.network_bridge.online": "Link connected",
     "msg.rswirelesscrafting.network_bridge.offline":
-        "not connected (check the far network and chunk loading)",
+        "Link disconnected. Check both networks, power, permissions, redstone and chunk loading.",
     "msg.rswirelesscrafting.network_bridge.cycle":
-        "bridge loop detected, disabled (rebind to retry)",
+        "Bridge loop protection triggered. Check bindings, then rebind to retry.",
     "text.autoconfig.rswirelesscrafting.option.networkBridge": "Network Bridge",
     "text.autoconfig.rswirelesscrafting.option.networkBridge.tooltip":
-        "Links two otherwise separate networks, with rate limits.",
+        "Lets the local network access items and energy from another independent network, with configurable transfer limits.",
     "text.autoconfig.rswirelesscrafting.option.networkBridge.enabled": "Enable the network bridge",
     "text.autoconfig.rswirelesscrafting.option.networkBridge.enabled.tooltip":
-        "When off, all bridges stop forwarding.",
-    "text.autoconfig.rswirelesscrafting.option.networkBridge.energyUsage": "Link fee (FE/s)",
+        "When off, Network Bridges stop forwarding and drawing link fees, and show a disconnected state.",
+    "text.autoconfig.rswirelesscrafting.option.networkBridge.energyUsage": "Base link fee (FE/s)",
     "text.autoconfig.rswirelesscrafting.option.networkBridge.energyUsage.tooltip":
-        "Base link fee, scaled by the distance multiplier.",
-    "text.autoconfig.rswirelesscrafting.option.networkBridge.itemTransferRate": "Item rate (items/s)",
+        "Base link fee drawn from the local network. Scaled by distance in the same dimension, or by the interdimensional multiplier across dimensions.",
+    "text.autoconfig.rswirelesscrafting.option.networkBridge.itemTransferRate": "Item transfer limit (items/s)",
     "text.autoconfig.rswirelesscrafting.option.networkBridge.itemTransferRate.tooltip":
-        "Cap on items crossing the bridge per second.",
-    "text.autoconfig.rswirelesscrafting.option.networkBridge.energyTransferRate": "Energy rate (FE/s)",
+        "Maximum number of items transferred through the bridge per second.",
+    "text.autoconfig.rswirelesscrafting.option.networkBridge.energyTransferRate": "Energy transfer limit (FE/s)",
     "text.autoconfig.rswirelesscrafting.option.networkBridge.energyTransferRate.tooltip":
-        "Cap on FE crossing the bridge per second.",
+        "Maximum energy transferred through the bridge per second.",
 }
 
 

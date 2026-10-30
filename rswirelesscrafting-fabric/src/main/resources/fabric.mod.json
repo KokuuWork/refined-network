@@ -3,7 +3,7 @@
   "id": "rswirelesscrafting",
   "version": "${version}",
   "name": "Refined Network",
-  "description": "An addon for Refined Storage 2. Wireless terminals, upgrade cards and block devices that work at any distance and across dimensions; the farther you are, the more each action costs.",
+  "description": "A Refined Storage 2 addon with wireless crafting, pattern editing, inventory monitoring and network devices. Remote access requires an eligible target, upgrades, permission, energy and loaded chunks; action costs depend on distance or dimension.",
   "icon": "assets/rswirelesscrafting/icon.png",
   "authors": [
     "Kokuu"

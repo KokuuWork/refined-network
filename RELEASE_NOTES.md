@@ -1,131 +1,36 @@
-# rswirelesscrafting 0.4.1
+# Refined Network 0.5.0 — 未发布说明草稿
 
-> ✅ **正式版 / Stable** —— 取代 `0.4.1-beta.1`（该测试版已**撤下**：它包含几个恶性 bug，包括关闭无线合成终端会崩服）。
-> NeoForge 侧已完成**部分功能**的实机验证：终端绑定、无线样板终端、无线能量接收器、能量监控仪显示屏、无线连接器。
-> 其余功能与 Fabric 侧代码一致、构建与 checkstyle 通过，但**本轮未逐项实测**——建议先在测试存档里过一遍并备份世界。
+**这是开发分支说明，不是已经发行的版本或完成验收的公告。** 发布前必须核对 tag、三模块版本、产物、依赖与验证结果。当前发布流程会原样读取本文件，手动发布的 tag 检出和版本一致性检查尚待修正；不要直接运行发布流程。
 
-> ✅ **Stable release.** Replaces `0.4.1-beta.1`, withdrawn because it shipped several serious bugs (including a
-> server crash when closing the wireless crafting grid). Part of the feature set has been verified in-game on
-> NeoForge; the rest and the Fabric build are code-identical and compile clean but were not individually tested
-> this round. Use a test world and back up your saves first.
+## 已进入开发分支的内容
 
-## 下载 / Downloads
+- 显示名改为「精致网络 / Refined Network」。当前 modId、注册命名空间和产物前缀仍为 `rswirelesscrafting`；迁移是后续任务，不是本版已完成变更。
+- 无线合成终端无可用网络时可按配置打开本地 3×3 合成模式，使用背包原料，不是离线自动合成队列。开关：`wirelessCraftingGrid.offlineModeEnabled`。
+- 无线红石端点以输入 / 输出配对，读取红石后输出 0 / 15，每 2 tick 采样；可跨维度，不主动保活区块。
+- 文档、双语提示与语言生成源勘误；新增开发规范和可验收的后续任务。不包含游戏功能修复。
 
-| 加载器 Loader | 文件 File | 说明 Notes |
-| --- | --- | --- |
-| **NeoForge** | `rswirelesscrafting-neoforge-0.4.1.jar` | Minecraft 1.21.1 |
-| **Fabric** | `rswirelesscrafting-fabric-0.4.1.jar` | Minecraft 1.21.1，需 Fabric API |
+## 发布前阻断项
 
-两个 jar **二选一**，按你的加载器下载；不要同时放进 mods 目录。
-**升级**：删除旧 jar 再放新的（不要直接覆盖，避免 duplicate mod）。
+计费与电池兜底、失败自动合成收费、样板回滚、会话权限、虚拟管理器激活、桥接缓存和红石权限 / 失效 / 掉落等需按 [Issue 索引](docs/ISSUES.md) 处理。部分问题只有代码依据、尚未实机复现。离线窗口恢复网络时的行为也需验收。
 
-**前置依赖 Requirements**
+modId 的新值、旧存档 / 配置策略和迁移发行版本待维护者确认。不承诺原存档直接无损使用新 namespace。
 
-- Minecraft **1.21.1**
-- [Refined Storage 2](https://modrinth.com/mod/refined-storage) **2.0.7+**（实测 2.0.9）
-- NeoForge 侧：NeoForge for 1.21.1
-- Fabric 侧：Fabric Loader + Fabric API
-- 可选：Curios（NeoForge）/ Trinkets（Fabric）+ 对应的 RS 整合模组 → 终端可放进饰品栏
+## 安装与升级草稿
 
----
+目标环境：Minecraft 1.21.1、Java 21、对应加载器的 RS 2。开发编译基线 RS 2.0.7；其他小版本须独立测试。Fabric 额外依赖 Fabric API、Cloth Config API 和 Team Reborn Energy，以最终发行元数据为准。
 
-## 版本时间线 / Timeline
+按加载器选一个 JAR，不安装 sources JAR。升级前备份世界与配置，在隔离世界验证；保留并按需迁移自定义配置，不默认删除。卸载前处理已配对桥的区块保活。
 
-从立项到现在的全部节点（详细条目见 [CHANGELOG.md](CHANGELOG.md)）。
+## 验证状态
 
-| 版本 | 日期 | 性质 | 关键内容 |
-| --- | --- | --- | --- |
-| **0.1.0** | 2026-10-14 | 🏁 立项 / 首版 | 无线合成终端 + 范围 / 维度升级卡 |
-| 0.1.4 | 2026-10-14 | 平衡 | 三件物品配方定为后期 / 终局材料 |
-| 0.1.5 | 2026-10-14 | 功能 | 终端充电站、电池 / 远程输电卡、升级改为装配式 |
-| 0.1.9 | 2026-10-14 | 修复 | 充电站放置后透视；速率统一为 FE/s |
-| 0.1.10 | 2026-10-14 | 修复 | 自定义 GUI 全部错乱；已装升级高亮 |
-| 0.2.0 | 2026-10-14 | 重做 | 单档终端充电站（3 有线槽 + 无线补电） |
-| **0.3.0** | 2026-10-15 | 大版本 | 距离耗电模型、六张插件、红石可关充电站、模组定名 |
-| **0.3.1** | 2026-10-15 | 移植 | Fabric 移植、饰品栏兼容、耗电改线性、跨维度 ×16 |
-| 0.3.2 | 2026-10-15 | 修复 | 远程输电双重收费、无线充电速率偏低 |
-| 0.3.3 | 2026-10-28 | 维护（已撤下） | 费用 / 权限检查、稳定线同步新美术；引入关闭终端的崩溃回归 |
-| 0.3.4 | 2026-10-29 | 维护 | 修复 0.3.3 的崩溃回归与空界面，充电站可用线缆连接 |
-| 0.4.0-beta.1 | 2026-10-28 | 🧪 测试版 | 样板终端、合成仓管理器、增幅塔、无线桥、配置卡、监控终端、超频卡 |
-| 0.4.1-beta.1 | 2026-10-28 | 🧪 测试版（已撤下） | 美术重绘、能量接收器 / 监控仪 / 智能分拣站 / 网络桥接器 |
-| **0.4.1** | 2026-10-28 | ✅ 正式版 | 无线连接器、接收器改为取电供本地、监控仪显示屏、一批恶性 bug 修复 |
+2026-10-30 本轮只修改文案、规范和任务材料，未重新构建、启动客户端 / 专服或测试旧存档。已有0.5.0本地产物与历史7项纯逻辑测试不作为完整验收。发布时填写真实测试记录，未执行的项目必须保留“未验证”。
 
----
+历史发行说明：[0.4.1](docs/releases/v0.4.1.md)、[0.3.4](docs/releases/v0.3.4.md)、[0.3.2](docs/releases/v0.3.2.md)。正文勘误不会改变已有 tag、二进制、发布日期或原发行状态。
 
-## 更新日志 / Changelog（0.4.1）
+## English
 
-### 新增
+**Unpublished development notes, not a release announcement.** Main contains the display-name update, local offline crafting and wireless redstone endpoints. The mod ID remains `rswirelesscrafting`; the planned migration is not implemented. Offline crafting is an inventory-backed local crafting table, not a persistent order queue. Redstone relays 0 / 15 every 2 ticks without keeping chunks loaded.
 
-- **无线连接器**（`wireless_connector`）—— 方块设备的统一绑定工具。
-  - **合成**：RS 原版扳手 + 高级处理器 ×2 + 石英富集铁 ×2。
-  - 右键 RS 网络方块 → 记录接入点，聊天栏报「已设置接入点：主世界 120, 64, -35」。
-  - 右键目标设备 → 完成绑定（敲哪台绑哪台）；对着已绑定设备再右键 → 解绑；潜行右键 → 清除记录。
-  - 绑定成功时两端各亮起一圈光环、中间撒一条电火花连线；跨维度时只在设备端亮起，靠聊天栏坐标确认。
-  - 为什么需要工具：本模组的设备本身是**方块物品**，手持它们右键任何方块都会先被原版「放置」逻辑吃掉，方块自己的绑定入口根本走不到。
-- **能量监控仪显示屏** —— 方块上方悬浮三行数字：电量 / 净收支 / 预计耗尽。
-  - 始终朝向玩家，48 格视距，每 0.5 秒刷新，不用再右键看聊天栏。
-  - 光影与高清补丁兼容：文字全亮（不吃世界光照）、半透明背板、不写深度（避免光影下 Z-fighting 条纹）、按字体实测宽度居中（高清字体资源包不错位）。
+Billing, rollback, session validation, manager activation, bridge cache and redstone safety / drops need further work or verification. Check [tracked tasks](docs/ISSUES.md) before release. No new build, in-game, dedicated-server or save-migration validation was performed for this documentation update.
 
-### 修复（恶性）
-
-- **关闭无线合成终端导致服务端崩溃**（`IllegalArgumentException: Watcher is not registered`）：watcher 注册 / 移除改为幂等，打开界面之前先检查电量，不再留下「已打开但未注册」的半开状态。
-- **无线样板终端打开即关**：虚拟样板网格的存活判定要求「坐标上的方块实体就是自己」，虚拟实体必然不满足，菜单下一 tick 就被服务端关掉。
-- **无线样板终端打开后界面空白**：界面「已激活」判定读节点的 active 标记，虚拟网格不入网、永远不会被标成 active，客户端于是按未激活绘制，资源栏与网格全空。
-- **三件无线终端没有能量能力**（样板终端 / 自动合成仓管理器 / 监控终端）：没电量条、不能放进充电站、右键直接提示没电。四件终端统一注册物品能量能力。
-- **RS 2.0.9 下样板终端 / 管理器打不开**：虚拟方块实体用 AIR 状态构造，2.0.9 新增「BE 类型 ↔ 方块状态」校验直接抛 `Invalid block entity`。改用真实方块状态构造，并覆写 `initialize` 阻止节点注册。
-
-### 修复（功能）
-
-- **充电站、增幅塔、无线桥、网络桥接器、智能分拣站不认线缆**：补注册方块容器能力，贴着线缆即可取电。
-- **无线桥 / 网络桥接器不能作为接入点**：已实现所需接口，桥可以被记录为接入点，终端也能直接绑到桥上。
-- **能量监控仪贴着控制器 / 线缆读不到网络**：只查了一种接口，而 RS 自己的方块实体走的是另一种路径，已补齐。
-- **无线能量接收器方向反了**：此前是「外部 FE 充电 → 注入绑定的网络」，等于一块无线电池。现在改为**从绑定的网络取电、供给它旁边这张网络**（详见下方用法说明）。
-- **绑定提示重复**：描述里「未绑定…右键绑定」与「潜行 + 右键装配插件」两行都在讲右键绑定，已合并为「状态一行 + 操作一行」。
-- **绑定终端没有反馈**：绑定时在聊天栏输出「已绑定：维度 x,y,z」，同一 tick 内不会重复刷屏。
-
-### 美术 / 文档
-
-- 新增无线连接器图标：斜向开口扳手，青蓝色系 + 深色描边，风格对齐 RS 原版扳手。
-- 全部物品 / 方块描述按 RS 原版风格重写；绑定相关文案统一为「用无线连接器绑定」。
-- README 补充连接器的合成与两段式绑定流程。
-
----
-
-## 无线能量接收器怎么用 / How the receiver works now
-
-1. 把它**贴着要用电的那张网络**放（旁边有控制器或线缆即可）。
-2. 用**无线连接器**绑到**有电的那张网络**（比如主基地控制器）。
-3. 本地网络的空控制器会被这份电点亮。
-
-带宽 = 内部容量的 1/10 每秒，按距离倍率变慢（跨维度 1/16）；链路费从供电方那张网扣；绑定到自己旁边这张网会直接停机，避免自己给自己充电。
-
----
-
-## 升级注意 / Upgrading
-
-- **从 `0.4.1-beta.1` 升级**：建议**重放**无线能量接收器——语义变了，旧存档里已有的接收器需要重新用连接器绑到「有电的那张网」。
-- 升级前请**删掉旧 jar** 再放新的。
-- 改过配置的服务器：本版没有新增配置项；若手动改过 `config/rswirelesscrafting-common.toml`，删掉让它重新生成即可。
-- **卸模组前先拆掉已配对的无线桥据点**，否则强加载记录会留在存档里。
-
-## 已知限制 / Known limitations
-
-- **专用服务器配置不同步**：NeoForge 侧配置注册为 `COMMON` 类型，服务器不会把 `rswirelesscrafting-common.toml` 下发给客户端。服主修改数值后，客户端 tooltip 显示的是本地配置值，**实际扣费以服务端为准**。
-- **升级默认值改动需要重生成配置**：NeoForge 只会更新配置注释、不会覆盖已存在的值。
-- **无线配置卡只作用于 RS 方块**：本模组自己的方块大多是全局配置，没有可复制的「每方块字段」。
-- **跨维度需要两端区块加载**（与 RS 原生的 Transmitter / Receiver 一致）。
-- **Fabric 侧本轮未做完整实机验证**，若遇到与 NeoForge 侧表现不一致的地方请优先反馈。
-
----
-
-## 反馈 / Feedback
-
-请到 [Issues](https://github.com/KokuuWork/refined-network/issues) 反馈，也可以加 QQ 群 `498700382`。
-
-反馈请附：
-
-1. 加载器 + 版本号（NeoForge / Fabric，本模组与 RS 的版本）
-2. `latest.log` 或崩溃报告
-3. 复现步骤与截图
-
-License: MIT
+Use Minecraft 1.21.1, Java 21 and matching loader / RS builds; verify the final dependency metadata. Back up saves and customized configurations. Do not promise lossless namespace migration or delete configurations unconditionally. Check tag, source version, artifacts and test evidence before publishing.

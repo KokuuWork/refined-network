@@ -10,9 +10,9 @@ displayURL = "https://github.com/KokuuWork/refined-network"
 logoFile = "assets/rswirelesscrafting/icon.png"
 authors = "Kokuu"
 description = '''
-An addon for Refined Storage 2. Wireless terminals, upgrade cards and block devices
-that work at any distance and across dimensions; the farther you are, the more each
-action costs.
+A Refined Storage 2 addon with wireless crafting, pattern editing, inventory monitoring
+and network devices. Remote access requires an eligible target, upgrades, permission,
+energy and loaded chunks; action costs depend on distance or dimension.
 '''
 [[mixins]]
 config="rswirelesscrafting.mixins.json"
