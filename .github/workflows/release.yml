@@ -6,8 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Tag to release (e.g. v0.1.0)"
+        description: "Tag to release (e.g. v0.5.0)"
         required: true
+        type: string
 
 permissions:
   contents: write
@@ -16,7 +17,29 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
+      # 手动发布时必须真正检出所选的 tag；否则会把当前分支的产物挂到另一个 tag 上。
+      - name: Resolve target ref
+        id: target
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          if [ -n "${INPUT_TAG}" ]; then
+            ref="${INPUT_TAG}"
+          else
+            ref="${REF_NAME}"
+          fi
+          if [ -z "${ref}" ]; then
+            echo "::error::No target tag resolved."
+            exit 1
+          fi
+          echo "ref=${ref}" >> "$GITHUB_OUTPUT"
+
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ steps.target.outputs.ref }}
+          fetch-depth: 1
 
       - name: Set up JDK 21
         uses: actions/setup-java@v5
@@ -27,51 +50,82 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build
-        run: ./gradlew build
-
-      - name: Read mod version
+      # 先校验再构建：tag、三模块版本与发布说明不一致时直接失败，不产出可误发的资产。
+      - name: Validate version and release notes
         id: mod
         env:
-          TAG_NAME: ${{ github.event.inputs.tag || github.ref_name }}
+          TARGET_REF: ${{ steps.target.outputs.ref }}
         run: |
-          version="$(grep -oP '^version = "\K[^"]+' refinednetwork-neoforge/build.gradle.kts | head -1)"
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-          echo "Built mod version: $version"
-          # 预发布判定：tag 里带 -beta / -alpha / -rc 就标记为 Prerelease，并在标题上标注 Beta
-          case "$TAG_NAME" in
+          set -euo pipefail
+          read_version() {
+            grep -oP '^version = "\K[^"]+' "$1" | head -1
+          }
+          neo="$(read_version refinednetwork-neoforge/build.gradle.kts)"
+          common="$(read_version refinednetwork-common/build.gradle.kts)"
+          fabric="$(read_version refinednetwork-fabric/build.gradle.kts)"
+          if [ -z "${neo}" ] || [ "${neo}" != "${common}" ] || [ "${neo}" != "${fabric}" ]; then
+            echo "::error::Module versions differ: common=${common} fabric=${fabric} neoforge=${neo}"
+            exit 1
+          fi
+          if [ "${TARGET_REF}" != "v${neo}" ]; then
+            echo "::error::Tag ${TARGET_REF} does not match module version ${neo} (expected v${neo})"
+            exit 1
+          fi
+          if [ ! -f RELEASE_NOTES.md ]; then
+            echo "::error::RELEASE_NOTES.md is required for a release."
+            exit 1
+          fi
+          if grep -qE '未发布说明草稿|Unpublished development notes' RELEASE_NOTES.md; then
+            echo "::error::RELEASE_NOTES.md still contains the unpublished draft marker."
+            exit 1
+          fi
+          if ! grep -q "${neo}" RELEASE_NOTES.md; then
+            echo "::error::RELEASE_NOTES.md does not mention version ${neo}."
+            exit 1
+          fi
+          echo "version=${neo}" >> "$GITHUB_OUTPUT"
+          case "${TARGET_REF}" in
             *-beta*|*-alpha*|*-rc*)
               echo "prerelease=true" >> "$GITHUB_OUTPUT"
-              echo "name=refinednetwork $version (Beta)" >> "$GITHUB_OUTPUT"
+              echo "name=Refined Network ${neo} (Beta)" >> "$GITHUB_OUTPUT"
               ;;
             *)
               echo "prerelease=false" >> "$GITHUB_OUTPUT"
-              echo "name=refinednetwork $version" >> "$GITHUB_OUTPUT"
+              echo "name=Refined Network ${neo}" >> "$GITHUB_OUTPUT"
               ;;
           esac
+          echo "Validated ${TARGET_REF} with version ${neo}"
 
-      # 仓库根目录存在 RELEASE_NOTES.md 时用它作为发布说明，否则退回 GitHub 自动生成
-      - name: Read release notes
-        id: notes
+      - name: Build
+        run: ./gradlew build
+
+      # 产物版本必须与 tag 一致，且只上传两个加载器 JAR（不含 sources）。
+      - name: Verify release artifacts
+        env:
+          VERSION: ${{ steps.mod.outputs.version }}
         run: |
-          if [ -f RELEASE_NOTES.md ]; then
-            {
-              echo 'body<<RELEASE_NOTES_EOF'
-              cat RELEASE_NOTES.md
-              echo 'RELEASE_NOTES_EOF'
-            } >> "$GITHUB_OUTPUT"
-          fi
+          set -euo pipefail
+          for loader in neoforge fabric; do
+            jar="refinednetwork-${loader}/build/libs/refinednetwork-${loader}-${VERSION}.jar"
+            if [ ! -f "${jar}" ]; then
+              echo "::error::Missing expected artifact ${jar}"
+              exit 1
+            fi
+          done
+          unzip -p "refinednetwork-neoforge/build/libs/refinednetwork-neoforge-${VERSION}.jar" \
+            META-INF/neoforge.mods.toml | grep -q "version=\"${VERSION}\"" \
+            || { echo "::error::NeoForge jar metadata version mismatch"; exit 1; }
+          unzip -p "refinednetwork-fabric/build/libs/refinednetwork-fabric-${VERSION}.jar" \
+            fabric.mod.json | grep -q '"id": "refinednetwork"' \
+            || { echo "::error::Fabric jar mod id mismatch"; exit 1; }
 
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event.inputs.tag || github.ref_name }}
+          tag_name: ${{ steps.target.outputs.ref }}
           name: ${{ steps.mod.outputs.name }}
-          body: ${{ steps.notes.outputs.body }}
+          body_path: RELEASE_NOTES.md
           prerelease: ${{ steps.mod.outputs.prerelease == 'true' }}
-          generate_release_notes: ${{ steps.notes.outputs.body == '' }}
-          # Exact filename rather than a glob: excluding *-sources.jar via "!"
-          # negation is not honoured reliably by this action.
           files: |
             refinednetwork-neoforge/build/libs/refinednetwork-neoforge-${{ steps.mod.outputs.version }}.jar
             refinednetwork-fabric/build/libs/refinednetwork-fabric-${{ steps.mod.outputs.version }}.jar
