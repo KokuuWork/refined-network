@@ -245,6 +245,7 @@ public class NetworkBridgeBlockEntity extends AbstractNetworkNodeContainerBlockE
             remote = null;
             cyclic = false;
             setLinked(false);
+            mainNetworkNode.pollStorage();
             return;
         }
         if (!config.isEnabled() || serverLevel.hasNeighborSignal(worldPosition)) {
@@ -252,17 +253,21 @@ public class NetworkBridgeBlockEntity extends AbstractNetworkNodeContainerBlockE
             remote = null;
             cyclic = false;
             setLinked(false);
+            mainNetworkNode.pollStorage();
             return;
         }
         if (syncCountdown-- <= 0) {
             syncCountdown = SYNC_INTERVAL - 1;
             sync(serverLevel, current);
+            // 远端库存可能被别的玩家直接改动；按同步周期主动对账，父级缓存才不会长期停在旧值。
+            mainNetworkNode.pollStorage();
         }
         setLinked(remote != null && !cyclic);
         if (linked && !chargeFee(config)) {
             // 欠费时断开转发，保留下一次同步重试；不向玩家提供免费桥接。
             remote = null;
             setLinked(false);
+            mainNetworkNode.pollStorage();
         }
     }
 

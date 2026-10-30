@@ -36,6 +36,16 @@ public class NetworkBridgeNetworkNode extends AbstractNetworkNode implements Sto
         this.blockEntity = bridge;
     }
 
+    /**
+     * 让已暴露给本地网络的存储与远端重新对账；尚未被网络取用过存储时无需处理。
+     */
+    public void pollStorage() {
+        final BridgedStorage current = storage;
+        if (current != null) {
+            current.pollRemote();
+        }
+    }
+
     @Override
     public long getEnergyUsage() {
         return 0;

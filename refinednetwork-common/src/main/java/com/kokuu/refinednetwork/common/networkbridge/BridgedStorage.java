@@ -122,6 +122,15 @@ public class BridgedStorage implements CompositeAwareChild {
         return new Amount(extract(resource, amount, action, actor), 0);
     }
 
+    /**
+     * 主动对账：远端库存可能在本地没有任何读写的情况下独立变化，而父级缓存只认差量通知。
+     * 由方块实体按固定周期调用，保证即使没人读这张桥，本地列表也会在有限时间内收敛。
+     */
+    public void pollRemote() {
+        invalidateCache();
+        refreshCache();
+    }
+
     private void invalidateCache() {
         lastCacheRefresh = Long.MIN_VALUE;
     }
