@@ -10,7 +10,7 @@ import zlib
 WIDTH = 240
 HEIGHT = 150
 
-TEX_DIR = "rswirelesscrafting-common/src/main/resources/assets/rswirelesscrafting/textures"
+TEX_DIR = "refinednetwork-common/src/main/resources/assets/refinednetwork/textures"
 OUTPUT = "docs/images/mcmod-cover-240x150.png"
 
 BG = (27, 32, 41)

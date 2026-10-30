@@ -1,0 +1,10 @@
+{
+  "parent": "refinednetwork:block/cube_front",
+  "textures": {
+    "particle": "refinednetwork:block/network_bridge_linked_side",
+    "front": "refinednetwork:block/network_bridge_linked",
+    "side": "refinednetwork:block/network_bridge_linked_side",
+    "top": "refinednetwork:block/network_bridge_linked_top",
+    "bottom": "refinednetwork:block/network_bridge_bottom"
+  }
+}

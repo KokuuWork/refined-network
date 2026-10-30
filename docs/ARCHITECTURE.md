@@ -6,13 +6,13 @@
 
 | 模块 / 位置 | 责任 | 不应承担 |
 |---|---|---|
-| `rswirelesscrafting-common` | 共用玩法、菜单数据、终端费用、规则、设备逻辑、资源与纯逻辑测试 | 直接依赖某加载器实现，服务端路径加载客户端类 |
-| `rswirelesscrafting-fabric` | 初始化、Fabric事件、配置、能量事务、客户端注册与平台Mixin | 复制一套独立玩法或与NeoForge规则分叉 |
-| `rswirelesscrafting-neoforge` | 初始化、NeoForge事件、配置、能力、客户端注册与平台Mixin | 用平台注册代替共用业务校验 |
+| `refinednetwork-common` | 共用玩法、菜单数据、终端费用、规则、设备逻辑、资源与纯逻辑测试 | 直接依赖某加载器实现，服务端路径加载客户端类 |
+| `refinednetwork-fabric` | 初始化、Fabric事件、配置、能量事务、客户端注册与平台Mixin | 复制一套独立玩法或与NeoForge规则分叉 |
+| `refinednetwork-neoforge` | 初始化、NeoForge事件、配置、能力、客户端注册与平台Mixin | 用平台注册代替共用业务校验 |
 | `Platform`及平台实现 | 能量、配置、槽位引用和平台能力适配 | 虚构不存在的通用注册器 |
 | `ContentIds` / `ContentNames` / 注册单例 | 注册路径、翻译键与公共内容定义 | 擅自变更持久ID以整理名称 |
 
-公共Java根：`com.kokuu.rswirelesscrafting.common`。模块名、包名和modId不同概念；后续改变modId不自动要求同时改包与模块名称。
+公共Java根：`com.kokuu.refinednetwork.common`。modId、包名、模块名与产物前缀已于2026-10-30统一为 `refinednetwork`；它们仍是不同概念，未来单改其中一项要单独评估。
 
 ## 功能链
 
@@ -40,6 +40,6 @@
 
 维护者希望发展成内容丰富的大型RS附属。历史“只做无线、不做新机器”等不是永久禁令。允许研究存储管理、自动化生产、网络基础设施、监测控制和实用工具等方向，但每个内容先说明玩家需求、与RS原生 / 已有附属的差异、资源流、费用、权限、性能、加载和失败语义，再拆成独立可验收Issue。
 
-本轮只治理文案、规范和任务，不实现上述新内容、不修改modId。迁移前先确认目标ID与旧世界策略；迁移与功能修复分开提交、验证，避免无法定位回归。
+本轮只治理文案、规范、任务并完成标识重写，不实现上述新内容。标识重写与功能修复分开提交，旧namespace不提供迁移。
 
 现行执行规则见[DEVELOPMENT](DEVELOPMENT.md)，任务与依赖见[ISSUES](ISSUES.md)。类名仅作为定位入口，读取真实源码后再写代码；不要根据本文件创造不存在的`ContentRegistry`、`NotifyCenter`能力或其它抽象。

@@ -12,7 +12,7 @@ Minecraft 1.21.1 的精致存储 2（Refined Storage 2，简称 RS）附属模�
 
 - **已发行**：0.4.1（正式发行线）、0.3.4（0.3.x 维护线）；0.3.2 保留为历史版本。发行状态以对应 Release 为准。
 - **当前主线**：0.5.0，尚未发布。不要把主线源码或本地 JAR 当成已经发行并完整验证的版本。
-- **显示名**：精致网络 / Refined Network。**当前 modId、注册命名空间和文件前缀仍为 `rswirelesscrafting`**；计划迁移，目标 ID 和旧存档策略尚待确认，本次文案整理没有修改它们。
+- **显示名与注册标识**：精致网络 / Refined Network；modId、注册命名空间、包名与产物前缀均为 `refinednetwork`。本版直接重写旧 `rswirelesscrafting` 标识，**不提供旧存档 / 配置迁移**，旧世界必须新建。
 - 历史发布记录称 0.4.1 在 NeoForge 验证过终端绑定、样板终端、接收器、监控仪显示屏和连接器；这不是所有功能、所有 RS 小版本或 Fabric 的完整验收证明。2026-10-30 文案复核未重新进行游戏测试。
 
 详细历史见 [CHANGELOG.md](CHANGELOG.md)。开发任务、证据状态和依赖见 [docs/ISSUES.md](docs/ISSUES.md)。
@@ -29,7 +29,7 @@ Minecraft 1.21.1 的精致存储 2（Refined Storage 2，简称 RS）附属模�
 1. 按加载器下载 **一个**模组 JAR；不要混装 Fabric 和 NeoForge 产物。
 2. 升级前备份世界和配置，在测试世界验证；移出旧 JAR 后再放入新 JAR，避免重复加载。
 3. 自定义配置应与新默认值比较、按需迁移，**不要无条件删除配置文件**。
-4. 更改 modId 会涉及物品、方块、数据组件、配方和其他存档引用。迁移实施前，不承诺旧世界无损升级。
+4. 本版重写了注册标识，旧 namespace 的物品、方块、数据组件与配方引用不会被转换。旧世界请继续使用旧 JAR，或新建世界后再升级。
 5. 卸载前先处理已配对无线桥的区块保活；仅删除 JAR 不等于清除了存档中的加载记录。
 
 元数据允许加载某个版本，不等于该版本已经实测兼容；不要将“RS 2.0.7 及以上”理解为无上限兼容承诺。
@@ -140,7 +140,7 @@ Minecraft 1.21.1 的精致存储 2（Refined Storage 2，简称 RS）附属模�
 # 如果常规依赖解析受网络影响，使用项目已有镜像方案：
 ./gradlew -I init-mirror.gradle build
 # 仅运行公共模块的单元测试：
-./gradlew :rswirelesscrafting-common:test
+./gradlew :refinednetwork-common:test
 ```
 
 Windows 可使用 `gradlew.bat` 对应命令。发行产物在两个平台模块的 `build/libs/`；不要把 `-sources.jar` 当游戏模组安装。
@@ -161,7 +161,7 @@ Refined Network is a Refined Storage 2 addon for Minecraft 1.21.1. It adds wirel
 ### Version and identity
 
 - Published lines: **0.4.1**, **0.3.4**; **0.3.2** is retained for history. **Main is the unpublished 0.5.0 development version.**
-- Display name: **Refined Network**. The mod ID, registry namespace and file prefix are still **`rswirelesscrafting`**. A future migration requires an approved target ID and old-save policy; no ID was changed in this documentation update.
+- Display name and registry identity: **Refined Network**, with mod ID, namespace, packages and artifact prefix all **`refinednetwork`**. The old `rswirelesscrafting` identity was rewritten without a migration path; existing worlds must not be upgraded in place.
 - Original 0.4.1 notes report limited NeoForge testing. They do not prove complete Fabric, server or future RS-version compatibility. No new in-game testing was performed for this text review.
 
 ### Installation

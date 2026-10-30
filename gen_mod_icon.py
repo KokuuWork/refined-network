@@ -6,7 +6,7 @@
   · 右侧一格按像素块拆散、向右拖出零星像素（RS 的 dissolve 手法）
 
 输出
-  assets/rswirelesscrafting/icon.png   512×512，Fabric / NeoForge 共用
+  assets/refinednetwork/icon.png   512×512，Fabric / NeoForge 共用
   docs/images/mod-icon.png             同上（README 与 mcmod 用）
 """
 
@@ -17,8 +17,8 @@ from PIL import Image, ImageDraw
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 OUT_MOD = os.path.join(
-    ROOT, "rswirelesscrafting-common", "src", "main", "resources",
-    "assets", "rswirelesscrafting", "icon.png",
+    ROOT, "refinednetwork-common", "src", "main", "resources",
+    "assets", "refinednetwork", "icon.png",
 )
 OUT_DOC = os.path.join(ROOT, "docs", "images", "mod-icon.png")
 

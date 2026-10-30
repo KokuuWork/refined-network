@@ -8,12 +8,12 @@ import os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ASSETS = os.path.join(
-    HERE, "rswirelesscrafting-common", "src", "main", "resources",
-    "assets", "rswirelesscrafting"
+    HERE, "refinednetwork-common", "src", "main", "resources",
+    "assets", "refinednetwork"
 )
 DATA = os.path.join(
-    HERE, "rswirelesscrafting-common", "src", "main", "resources",
-    "data", "rswirelesscrafting"
+    HERE, "refinednetwork-common", "src", "main", "resources",
+    "data", "refinednetwork"
 )
 
 
@@ -28,7 +28,7 @@ def dump(path, obj):
 def cube_all(name):
     return {
         "parent": "block/cube_all",
-        "textures": {"all": "rswirelesscrafting:block/" + name},
+        "textures": {"all": "refinednetwork:block/" + name},
     }
 
 
@@ -36,23 +36,23 @@ def cube_all(name):
 
 dump(os.path.join(ASSETS, "blockstates", "wireless_energy_receiver.json"), {
     "variants": {
-        "linked=false": {"model": "rswirelesscrafting:block/wireless_energy_receiver"},
-        "linked=true": {"model": "rswirelesscrafting:block/wireless_energy_receiver_linked"},
+        "linked=false": {"model": "refinednetwork:block/wireless_energy_receiver"},
+        "linked=true": {"model": "refinednetwork:block/wireless_energy_receiver_linked"},
     }
 })
 
 dump(os.path.join(ASSETS, "blockstates", "energy_monitor.json"), {
     "variants": {
-        "linked=false": {"model": "rswirelesscrafting:block/energy_monitor"},
-        "linked=true,low=false": {"model": "rswirelesscrafting:block/energy_monitor_linked"},
-        "linked=true,low=true": {"model": "rswirelesscrafting:block/energy_monitor_low"},
+        "linked=false": {"model": "refinednetwork:block/energy_monitor"},
+        "linked=true,low=false": {"model": "refinednetwork:block/energy_monitor_linked"},
+        "linked=true,low=true": {"model": "refinednetwork:block/energy_monitor_low"},
     }
 })
 
 dump(os.path.join(ASSETS, "blockstates", "network_bridge.json"), {
     "variants": {
-        "linked=false": {"model": "rswirelesscrafting:block/network_bridge"},
-        "linked=true": {"model": "rswirelesscrafting:block/network_bridge_linked"},
+        "linked=false": {"model": "refinednetwork:block/network_bridge"},
+        "linked=true": {"model": "refinednetwork:block/network_bridge_linked"},
     }
 })
 
@@ -61,7 +61,7 @@ for facing, yaw in (("north", 0), ("east", 90), ("south", 180), ("west", 270)):
     for active in ("false", "true"):
         model = "smart_sorter_active" if active == "true" else "smart_sorter"
         sorter_variants["facing=%s,active=%s" % (facing, active)] = {
-            "model": "rswirelesscrafting:block/" + model,
+            "model": "refinednetwork:block/" + model,
             "y": yaw,
         }
 dump(os.path.join(ASSETS, "blockstates", "smart_sorter.json"), {"variants": sorter_variants})
@@ -90,7 +90,7 @@ for name in (
     "network_bridge",
 ):
     dump(os.path.join(ASSETS, "models", "item", name + ".json"), {
-        "parent": "rswirelesscrafting:block/" + name
+        "parent": "refinednetwork:block/" + name
     })
 
 # -------------------------------------------------------------- loot tables
@@ -111,7 +111,7 @@ for name in (
             "bonus_rolls": 0,
             "entries": [{
                 "type": "minecraft:item",
-                "name": "rswirelesscrafting:" + name,
+                "name": "refinednetwork:" + name,
             }],
             "conditions": [{"condition": "minecraft:survives_explosion"}],
         }],
@@ -128,7 +128,7 @@ dump(os.path.join(DATA, "recipe", "wireless_energy_receiver.json"), {
         "T": {"item": "refinedstorage:wireless_transmitter"},
         "M": {"item": "refinedstorage:machine_casing"},
     },
-    "result": {"id": "rswirelesscrafting:wireless_energy_receiver"},
+    "result": {"id": "refinednetwork:wireless_energy_receiver"},
 })
 
 dump(os.path.join(DATA, "recipe", "energy_monitor.json"), {
@@ -140,7 +140,7 @@ dump(os.path.join(DATA, "recipe", "energy_monitor.json"), {
         "A": {"item": "refinedstorage:advanced_processor"},
         "M": {"item": "refinedstorage:machine_casing"},
     },
-    "result": {"id": "rswirelesscrafting:energy_monitor"},
+    "result": {"id": "refinednetwork:energy_monitor"},
 })
 
 dump(os.path.join(DATA, "recipe", "smart_sorter.json"), {
@@ -153,7 +153,7 @@ dump(os.path.join(DATA, "recipe", "smart_sorter.json"), {
         "M": {"item": "refinedstorage:machine_casing"},
         "A": {"item": "refinedstorage:advanced_processor"},
     },
-    "result": {"id": "rswirelesscrafting:smart_sorter"},
+    "result": {"id": "refinednetwork:smart_sorter"},
 })
 
 dump(os.path.join(DATA, "recipe", "network_bridge.json"), {
@@ -166,5 +166,5 @@ dump(os.path.join(DATA, "recipe", "network_bridge.json"), {
         "C": {"item": "refinedstorage:controller"},
         "X": {"item": "refinedstorage:64k_storage_block"},
     },
-    "result": {"id": "rswirelesscrafting:network_bridge"},
+    "result": {"id": "refinednetwork:network_bridge"},
 })

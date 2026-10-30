@@ -31,14 +31,14 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: rswirelesscrafting-neoforge
-          path: rswirelesscrafting-neoforge/build/libs/*.jar
+          name: refinednetwork-neoforge
+          path: refinednetwork-neoforge/build/libs/*.jar
           if-no-files-found: error
 
       - name: Upload artifacts
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: rswirelesscrafting-fabric
-          path: rswirelesscrafting-fabric/build/libs/*.jar
+          name: refinednetwork-fabric
+          path: refinednetwork-fabric/build/libs/*.jar
           if-no-files-found: error

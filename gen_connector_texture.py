@@ -10,8 +10,8 @@ import zlib
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(
-    HERE, "rswirelesscrafting-common", "src", "main", "resources",
-    "assets", "rswirelesscrafting", "textures", "item", "wireless_connector.png"
+    HERE, "refinednetwork-common", "src", "main", "resources",
+    "assets", "refinednetwork", "textures", "item", "wireless_connector.png"
 )
 
 W = H = 16

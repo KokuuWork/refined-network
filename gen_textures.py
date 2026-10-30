@@ -1,4 +1,4 @@
-"""Generate the 16x16 textures for rswirelesscrafting.
+"""Generate the 16x16 textures for refinednetwork.
 
 Pure standard library (struct + zlib) so it runs anywhere without Pillow.
 Re-run with:  python gen_textures.py
@@ -30,8 +30,8 @@ import zlib
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(
-    HERE, "rswirelesscrafting-common", "src", "main", "resources",
-    "assets", "rswirelesscrafting", "textures", "item"
+    HERE, "refinednetwork-common", "src", "main", "resources",
+    "assets", "refinednetwork", "textures", "item"
 )
 
 W = H = 16
@@ -1182,8 +1182,8 @@ def main():
         write_png(path, pixels)
         print("wrote", path)
 
-    block_out = os.path.join(HERE, "rswirelesscrafting-common", "src", "main", "resources",
-                             "assets", "rswirelesscrafting", "textures", "block")
+    block_out = os.path.join(HERE, "refinednetwork-common", "src", "main", "resources",
+                             "assets", "refinednetwork", "textures", "block")
     os.makedirs(block_out, exist_ok=True)
     amplifier_textures = [
         ("wireless_amplifier.png", amplifier_texture(False)),

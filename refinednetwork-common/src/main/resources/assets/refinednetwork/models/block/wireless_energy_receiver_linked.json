@@ -1,0 +1,10 @@
+{
+  "parent": "refinednetwork:block/cube_front",
+  "textures": {
+    "particle": "refinednetwork:block/wireless_energy_receiver_linked_side",
+    "front": "refinednetwork:block/wireless_energy_receiver_linked",
+    "side": "refinednetwork:block/wireless_energy_receiver_linked_side",
+    "top": "refinednetwork:block/wireless_energy_receiver_linked_top",
+    "bottom": "refinednetwork:block/wireless_energy_receiver_bottom"
+  }
+}

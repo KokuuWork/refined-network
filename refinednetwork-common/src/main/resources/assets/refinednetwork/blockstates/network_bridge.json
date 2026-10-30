@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "linked=false": {
+      "model": "refinednetwork:block/network_bridge"
+    },
+    "linked=true": {
+      "model": "refinednetwork:block/network_bridge_linked"
+    }
+  }
+}

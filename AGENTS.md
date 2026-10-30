@@ -10,7 +10,7 @@
 
 ## 必守规则
 
-- 显示名是精致网络 / Refined Network；**当前modId仍rswirelesscrafting**。新ID与旧存档策略未经维护者确认，不得机械全局替换、改包名/模块或持久ID。
+- 显示名是精致网络 / Refined Network；modId、命名空间、包名与模块名为 `refinednetwork`。不得再引入旧 `rswirelesscrafting` 标识；也不得机械替换注册 path、数据组件字段等持久标识。
 - common写共用逻辑；平台模块只做必要适配。服务端不能加载客户端类。遵守已有Checkstyle，不降低门槛或加抑制让测试“通过”。
 - 以真实源码/目标版本依赖确认API和Mixin签名；不存在的API禁止编造。虚拟实体不恢复AIR构造，不注册幽灵节点，不用恒true替代动作权限复核。
 - 物品/能量必须守恒；模拟不消耗，失败不部分收费，成功一次。读余额不等于扣费成功；任务建立不等于完成。
@@ -25,4 +25,4 @@
 
 ## 本轮范围提醒
 
-2026-10-30治理任务只修改文案、开发规范、Issue材料。代码功能修复与modId迁移全部为后续Issue；本次不实现。相关证据与任务见[docs/ISSUES.md](docs/ISSUES.md)，文案待核实项见[docs/TEXT_REVIEW.md](docs/TEXT_REVIEW.md)。
+2026-10-30已完成文案治理、开发规范与任务整理，并按维护者决定把标识直接重写为 `refinednetwork`（不做旧存档迁移）。游戏功能修复仍在[docs/ISSUES.md](docs/ISSUES.md)跟踪，文案待核实项见[docs/TEXT_REVIEW.md](docs/TEXT_REVIEW.md)。

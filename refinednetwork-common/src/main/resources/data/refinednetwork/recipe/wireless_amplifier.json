@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "QBQ",
+    "TXT",
+    "QMQ"
+  ],
+  "key": {
+    "Q": {
+      "item": "refinedstorage:quartz_enriched_iron"
+    },
+    "B": {
+      "item": "refinedstorage:wireless_transmitter"
+    },
+    "T": {
+      "item": "refinedstorage:64k_storage_block"
+    },
+    "X": {
+      "item": "minecraft:nether_star"
+    },
+    "M": {
+      "item": "refinedstorage:machine_casing"
+    }
+  },
+  "result": {
+    "id": "refinednetwork:wireless_amplifier"
+  }
+}

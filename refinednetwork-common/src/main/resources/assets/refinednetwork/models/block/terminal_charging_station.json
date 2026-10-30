@@ -1,0 +1,10 @@
+{
+  "parent": "refinednetwork:block/cube_front",
+  "textures": {
+    "particle": "refinednetwork:block/terminal_charging_station_side",
+    "front": "refinednetwork:block/terminal_charging_station",
+    "side": "refinednetwork:block/terminal_charging_station_side",
+    "top": "refinednetwork:block/terminal_charging_station_top",
+    "bottom": "refinednetwork:block/terminal_charging_station_bottom"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "QWQ",
+    "RSR",
+    "QXQ"
+  ],
+  "key": {
+    "Q": {
+      "item": "refinedstorage:quartz_enriched_iron"
+    },
+    "W": {
+      "item": "refinedstorage:wireless_transmitter"
+    },
+    "R": {
+      "item": "refinedstorage:network_receiver"
+    },
+    "S": {
+      "item": "minecraft:nether_star"
+    },
+    "X": {
+      "item": "refinedstorage:64k_storage_block"
+    }
+  },
+  "result": {
+    "id": "refinednetwork:wireless_bridge"
+  }
+}

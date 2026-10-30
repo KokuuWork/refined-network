@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "refinednetwork:wireless_crafting_grid",
+    "refinednetwork:wireless_pattern_grid",
+    "refinednetwork:wireless_autocrafter_manager",
+    "refinednetwork:wireless_monitor"
+  ]
+}

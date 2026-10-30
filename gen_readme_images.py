@@ -24,8 +24,8 @@ MC_JAR = os.environ.get("MC_CLIENT_JAR")
 RS_TEXTURES = os.environ.get("RS_TEXTURES")
 
 OWN_TEXTURES = os.path.join(
-    HERE, "rswirelesscrafting-common", "src", "main", "resources",
-    "assets", "rswirelesscrafting", "textures", "item",
+    HERE, "refinednetwork-common", "src", "main", "resources",
+    "assets", "refinednetwork", "textures", "item",
 )
 
 CLEAR = (0, 0, 0, 0)

@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "QAQ",
+    "TPT",
+    "QMQ"
+  ],
+  "key": {
+    "Q": {
+      "item": "refinedstorage:quartz_enriched_iron"
+    },
+    "A": {
+      "item": "refinedstorage:advanced_processor"
+    },
+    "T": {
+      "item": "refinedstorage:pattern"
+    },
+    "P": {
+      "item": "refinednetwork:wireless_crafting_grid"
+    },
+    "M": {
+      "item": "refinedstorage:machine_casing"
+    }
+  },
+  "result": {
+    "id": "refinednetwork:wireless_pattern_grid"
+  }
+}

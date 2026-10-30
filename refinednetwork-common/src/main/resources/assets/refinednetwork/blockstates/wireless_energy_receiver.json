@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "linked=false": {
+      "model": "refinednetwork:block/wireless_energy_receiver"
+    },
+    "linked=true": {
+      "model": "refinednetwork:block/wireless_energy_receiver_linked"
+    }
+  }
+}

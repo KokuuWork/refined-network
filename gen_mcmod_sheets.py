@@ -27,12 +27,12 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(ROOT, "docs", "images")
 ICON = os.path.join(ROOT, "docs", "mcmod", "icons")
 RECIPES = os.path.join(
-    ROOT, "rswirelesscrafting-common", "src", "main", "resources", "data",
-    "rswirelesscrafting", "recipe",
+    ROOT, "refinednetwork-common", "src", "main", "resources", "data",
+    "refinednetwork", "recipe",
 )
 LANG_ZH = os.path.join(
-    ROOT, "rswirelesscrafting-common", "src", "main", "resources", "assets",
-    "rswirelesscrafting", "lang", "zh_cn.json",
+    ROOT, "refinednetwork-common", "src", "main", "resources", "assets",
+    "refinednetwork", "lang", "zh_cn.json",
 )
 
 W, H = 1280, 320
@@ -150,7 +150,7 @@ def ingredient_icon(spec):
     im = None
     if "item" in spec:
         ns, name = spec["item"].split(":", 1)
-        if ns == "rswirelesscrafting":
+        if ns == "refinednetwork":
             im = icon(name)
         elif ns == "refinedstorage":
             im = rs_icon(name)
@@ -175,9 +175,9 @@ def zh_names():
     data = json.load(open(LANG_ZH, encoding="utf-8"))
     names = {}
     for key, value in data.items():
-        if key.startswith("item.rswirelesscrafting.") and key.count(".") == 2:
+        if key.startswith("item.refinednetwork.") and key.count(".") == 2:
             names[key.split(".")[2]] = value
-        elif key.startswith("block.rswirelesscrafting.") and key.count(".") == 2:
+        elif key.startswith("block.refinednetwork.") and key.count(".") == 2:
             names.setdefault(key.split(".")[2], value)
     return names
 

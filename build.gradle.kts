@@ -4,5 +4,5 @@ plugins {
 }
 
 subprojects {
-    group = "com.kokuu.rswirelesscrafting"
+    group = "com.kokuu.refinednetwork"
 }

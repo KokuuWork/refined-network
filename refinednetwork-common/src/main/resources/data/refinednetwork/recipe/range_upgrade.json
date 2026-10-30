@@ -1,0 +1,31 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "PHP",
+    "TSR",
+    "PXP"
+  ],
+  "key": {
+    "P": {
+      "tag": "c:ender_pearls"
+    },
+    "H": {
+      "item": "minecraft:heart_of_the_sea"
+    },
+    "T": {
+      "item": "refinedstorage:wireless_transmitter"
+    },
+    "S": {
+      "item": "minecraft:nether_star"
+    },
+    "R": {
+      "item": "refinedstorage:network_receiver"
+    },
+    "X": {
+      "item": "refinedstorage:64k_storage_block"
+    }
+  },
+  "result": {
+    "id": "refinednetwork:range_upgrade"
+  }
+}

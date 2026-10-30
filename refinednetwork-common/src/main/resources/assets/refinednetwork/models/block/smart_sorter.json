@@ -1,0 +1,10 @@
+{
+  "parent": "refinednetwork:block/cube_front",
+  "textures": {
+    "particle": "refinednetwork:block/smart_sorter",
+    "front": "refinednetwork:block/smart_sorter_front",
+    "side": "refinednetwork:block/smart_sorter",
+    "top": "refinednetwork:block/smart_sorter_top",
+    "bottom": "refinednetwork:block/smart_sorter_bottom"
+  }
+}

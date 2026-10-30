@@ -1,4 +1,4 @@
-"""Generate the GUI background textures for rswirelesscrafting.
+"""Generate the GUI background textures for refinednetwork.
 
 Pure standard library, same PNG writer approach as gen_textures.py.
 Re-run with:  python gen_gui_textures.py
@@ -9,8 +9,8 @@ import zlib
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(
-    HERE, "rswirelesscrafting-common", "src", "main", "resources",
-    "assets", "rswirelesscrafting", "textures", "gui"
+    HERE, "refinednetwork-common", "src", "main", "resources",
+    "assets", "refinednetwork", "textures", "gui"
 )
 
 WIDTH = 176

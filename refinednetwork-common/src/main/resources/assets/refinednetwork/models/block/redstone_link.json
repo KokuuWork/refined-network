@@ -1,0 +1,10 @@
+{
+  "parent": "refinednetwork:block/cube_front",
+  "textures": {
+    "particle": "refinednetwork:block/redstone_link_side",
+    "front": "refinednetwork:block/redstone_link",
+    "side": "refinednetwork:block/redstone_link_side",
+    "top": "refinednetwork:block/redstone_link_top",
+    "bottom": "refinednetwork:block/redstone_link_bottom"
+  }
+}

@@ -21,14 +21,14 @@ import zlib
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 ASSETS = os.path.join(
-    ROOT, "rswirelesscrafting-common", "src", "main", "resources", "assets", "rswirelesscrafting"
+    ROOT, "refinednetwork-common", "src", "main", "resources", "assets", "refinednetwork"
 )
 LANG_ZH = os.path.join(ASSETS, "lang", "zh_cn.json")
 LANG_EN = os.path.join(ASSETS, "lang", "en_us.json")
 OUT_DIR = os.path.join(ROOT, "docs", "mcmod")
 ICON_DIR = os.path.join(OUT_DIR, "icons")
 
-MOD_ID = "rswirelesscrafting"
+MOD_ID = "refinednetwork"
 
 # 逐条定义：注册名、资料类型、堆叠上限、图标来源
 # icon: ("item", 相对 textures/item 的路径) 或 ("block", 正/侧/顶 三张图)
@@ -371,7 +371,7 @@ def main():
     md.append("## 字段说明\n")
     md.append("| 字段 | 取值 |")
     md.append("|---|---|")
-    md.append("| `registerName` | `rswirelesscrafting:<注册名>`，与游戏内一致 |")
+    md.append("| `registerName` | `refinednetwork:<注册名>`，与游戏内一致 |")
     md.append("| `englishName` | 取 `en_us.json`，未自行翻译 |")
     md.append("| `OredictList` | `[]`，本模组未给这些物品加物品标签 |")
     md.append("| `maxStackSize` | 终端 / 工具为 1，插件与方块为 64（取自 `Item.Properties`） |")

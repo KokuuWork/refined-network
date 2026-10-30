@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "QAQ",
+    "TMT",
+    "QXQ"
+  ],
+  "key": {
+    "Q": {
+      "item": "refinedstorage:quartz_enriched_iron"
+    },
+    "A": {
+      "item": "refinedstorage:advanced_processor"
+    },
+    "T": {
+      "item": "refinedstorage:storage_monitor"
+    },
+    "M": {
+      "item": "refinednetwork:wireless_crafting_grid"
+    },
+    "X": {
+      "item": "refinedstorage:network_receiver"
+    }
+  },
+  "result": {
+    "id": "refinednetwork:wireless_monitor"
+  }
+}

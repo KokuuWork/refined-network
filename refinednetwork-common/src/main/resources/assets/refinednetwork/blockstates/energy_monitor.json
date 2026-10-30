@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "linked=false": {
+      "model": "refinednetwork:block/energy_monitor"
+    },
+    "linked=true,low=false": {
+      "model": "refinednetwork:block/energy_monitor_linked"
+    },
+    "linked=true,low=true": {
+      "model": "refinednetwork:block/energy_monitor_low"
+    }
+  }
+}

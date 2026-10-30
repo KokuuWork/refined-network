@@ -1,6 +1,6 @@
 # 可执行开发规范
 
-适用对象：本仓库维护者、贡献者与AI。基线为Minecraft 1.21.1 / Java21 / RS2.0.7、common/Fabric/NeoForge三模块，当前0.5.0未发布。注册标识仍为rswirelesscrafting。本文是现行规范，历史DESIGN/审计/移植方案仅作溯源。
+适用对象：本仓库维护者、贡献者与AI。基线为Minecraft 1.21.1 / Java21 / RS2.0.7、common/Fabric/NeoForge三模块，当前0.5.0未发布。注册标识已重写为refinednetwork，旧namespace不迁移。本文是现行规范，历史DESIGN/审计/移植方案仅作溯源。
 
 ## 1. 权威与冲突处理
 
@@ -12,9 +12,9 @@
 
 | 位置 | 应做 | 禁止 |
 |---|---|---|
-| rswirelesscrafting-common/src/main/java | 共用状态、操作、费用、业务菜单、权限调用、设备生命周期 | importing Fabric/NeoForge实现；服务端类静态引用客户端代码 |
-| rswirelesscrafting-common/src/main/resources | 共用assets/data、语言、配方、标签、掉落 | 改显示名时同时改注册ID；漏掉调用引用或只改单语言 |
-| rswirelesscrafting-common/src/test/java | 费用、算法、状态、序列/缓存差量等可隔离测试 | 空断言、删除回归、把旧测试记录当新运行 |
+| refinednetwork-common/src/main/java | 共用状态、操作、费用、业务菜单、权限调用、设备生命周期 | importing Fabric/NeoForge实现；服务端类静态引用客户端代码 |
+| refinednetwork-common/src/main/resources | 共用assets/data、语言、配方、标签、掉落 | 改显示名时同时改注册ID；漏掉调用引用或只改单语言 |
+| refinednetwork-common/src/test/java | 费用、算法、状态、序列/缓存差量等可隔离测试 | 空断言、删除回归、把旧测试记录当新运行 |
 | fabric | 事件、平台注册/配置、能量事务、菜单打开、Mixin及客户端注册 | 独立复制common业务规则；模拟过程写入缓冲 |
 | neoforge | 对应事件/能力/配置与客户端注册 | 平台侧新增与Fabric不一致的免费/越权行为 |
 | root build / .github | 依赖、构建、校验、版本与发布契约 | 为修文案升级工具链、悄悄发版或跳过测试 |
@@ -53,15 +53,13 @@ Flash接手每条Issue必须能独立回答：做什么、为什么、在哪里�
 - 解绑/重绑/拆除清旧引用/监听/缓存；桥环路有界保护不等于多桥库存去重。
 - 当前保活不因欠费暂停释放是既有政策，改动需决策和恢复测试；不能取消属于原版forceload或其他模组的加载，也不静默新增无限强载。
 
-## 6. modId迁移规则
+## 6. 标识与持久ID
 
-用户明确希望修改modId，但准确目标和旧存档策略待确认。建议候选refinednetwork仅作为候选。
+2026-10-30已按维护者决定完成一次硬重写：modId、命名空间、Java包、模块与产物前缀统一为 `refinednetwork`，**不提供旧 `rswirelesscrafting` 存档迁移**。之后不得再出现旧标识，也不得为了让旧世界“看起来能用”而加入未验证的别名映射。
 
-实施前须批准：目标ID、发行版本、是否支持旧世界/配置、一次性转换/过渡别名/硬切选择、备份回退，以及包名/模块/JAR是否改。用户少只影响取舍，不免除声明数据损失风险。
+改动任何持久标识（modId、注册path、数据组件字段、NBT键、配置键）仍需单独决策与盘点：平台声明与build、assets/data命名空间、注册单例与持久字段、mixin配置、饰品tag、生成脚本、历史文档例外。历史发行说明保留旧名是正确做法，不要改写成新名。
 
-盘点范围：常量/平台mod声明/build；assets和data namespace；block/item/BE/menu/components/recipes/tags/条件/网络与配置标识；mixin文件及引用；饰品tags；generator；宣传导出和历史例外；旧world NBT和RS引用。按注册表保存old→new映射，提供允许残留的历史文本清单。
-
-禁止对仓库所有字符串直接replace_all；不改上游refinedstorage ID；不在原个人世界上试转换；不在迁移Issue混修费用等功能。包名/模块保留不等于迁移失败，决定后再分独立切片。硬切必须显式警告旧namespace不能直接加载，迁移支持必须逐平台验证而非承诺理论无损。
+禁止对全仓直接replace_all后直接发布；不改上游refinedstorage ID；不在维护者个人世界上试迁移；标识变更不与功能修复混在同一提交。若未来再次改名，必须显式说明旧世界不可直接加载，并逐平台验证。
 
 ## 7. 测试与验证矩阵
 
@@ -71,13 +69,13 @@ Flash接手每条Issue必须能独立回答：做什么、为什么、在哪里�
 |---|---|---|
 | 纯Markdown/Release | diff --check、链接/事实/历史快照；线上写后读回 | 不等于游戏构建或兼容测试 |
 | 语言/元数据描述 | JSON无重复键、键与占位符、生成一致、mod声明ID不变；目标游戏语言加载待测 | 文案不等于修了业务缺陷 |
-| 共用纯算法 | ./gradlew :rswirelesscrafting-common:test、相关checkstyle | 纯逻辑通过不等于菜单集成通过 |
+| 共用纯算法 | ./gradlew :refinednetwork-common:test、相关checkstyle | 纯逻辑通过不等于菜单集成通过 |
 | common业务/资源 | 定向回归、./gradlew build、双平台相关游戏场景 | NeoForge通过不等于Fabric通过 |
 | 平台能力/Mixin | 双平台build、各平台生产JAR客户端和专服，目标RS版本 | 开发映射成功不等于生产映射安全 |
 | 持久ID/组件/票据 | 双平台新世界/备份旧世界、重启/卸载/回滚/故障窗口 | 存档可打开不等于物品完整保留 |
 | 发布流水线 | tag/ref/version/body/asset校验、只读或dry-run检查，不建真实Release | CI脚本语法通过不等于发布正确 |
 
-检查命令：`git diff --check`、`./gradlew build`、`./gradlew -I init-mirror.gradle build`（需要时）、`./gradlew :rswirelesscrafting-common:test`。Checkstyle任务名称先用`./gradlew tasks --all`确认，不编造不存在任务。菜单/供能/桥/迁移至少检查成功、无权限、欠费、目标变化/卸载、重开/重启、并发、模拟/执行。
+检查命令：`git diff --check`、`./gradlew build`、`./gradlew -I init-mirror.gradle build`（需要时）、`./gradlew :refinednetwork-common:test`。Checkstyle任务名称先用`./gradlew tasks --all`确认，不编造不存在任务。菜单/供能/桥/迁移至少检查成功、无权限、欠费、目标变化/卸载、重开/重启、并发、模拟/执行。
 
 测试世界必须备份/隔离；不自动移动/删除用户mods、存档、配置。测试报告写实际配置和版本、前后库存/能量、命令退出码、日志路径；失败/未执行明确标注。不要在构建产物混存多版时只看文件存在。
 

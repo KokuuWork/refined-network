@@ -1,0 +1,10 @@
+{
+  "parent": "refinednetwork:block/cube_front",
+  "textures": {
+    "particle": "refinednetwork:block/energy_monitor_linked_side",
+    "front": "refinednetwork:block/energy_monitor_linked",
+    "side": "refinednetwork:block/energy_monitor_linked_side",
+    "top": "refinednetwork:block/energy_monitor_linked_top",
+    "bottom": "refinednetwork:block/energy_monitor_bottom"
+  }
+}

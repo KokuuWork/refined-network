@@ -1,0 +1,10 @@
+{
+  "parent": "refinednetwork:block/cube_front",
+  "textures": {
+    "particle": "refinednetwork:block/wireless_amplifier_side",
+    "front": "refinednetwork:block/wireless_amplifier",
+    "side": "refinednetwork:block/wireless_amplifier_side",
+    "top": "refinednetwork:block/wireless_amplifier_top",
+    "bottom": "refinednetwork:block/wireless_amplifier_bottom"
+  }
+}

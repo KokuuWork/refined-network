@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "active=true": {
+      "model": "refinednetwork:block/wireless_amplifier_active"
+    },
+    "active=false": {
+      "model": "refinednetwork:block/wireless_amplifier"
+    }
+  }
+}

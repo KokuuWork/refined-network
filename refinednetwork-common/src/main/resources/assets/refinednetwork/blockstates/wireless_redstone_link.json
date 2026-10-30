@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "powered=false": {
+      "model": "refinednetwork:block/redstone_link"
+    },
+    "powered=true": {
+      "model": "refinednetwork:block/redstone_link_on"
+    }
+  }
+}

@@ -10,7 +10,7 @@
 
 - 第一件：[M01 / #1](https://github.com/KokuuWork/refined-network/issues/1)，确认准确新modId和旧世界策略。`refinednetwork`只是候选，不是已批准值。
 - 可并行核实/修复：D01供电兜底、D02空任务扣费、D05管理器、D09/D10/D11红石、D12桥缓存、D16发布流程；每项独立分支/提交，不混入namespace切换。
-- 迁移链：M01→M02→M03→M04。它们只处理身份/数据；不能借机修所有功能。
+- 迁移链 M01→M04 已完成：标识统一为 `refinednetwork`，不提供旧存档迁移。
 - 基础缺陷处理后：N01诊断、N02四终端快捷入口；随后N03命名档案。
 - 后续内容：N04–N07为明确小切片；N08订单、N09票据、N10大型附属首原型先设计评审，不直接写功能。
 
@@ -18,10 +18,10 @@
 
 | ID / Issue | 工作 | 依赖 |
 |---|---|---|
-| [M01 / #1](https://github.com/KokuuWork/refined-network/issues/1) | 新ID、迁移版本、旧世界/配置策略决策 | 维护者明确批准 |
-| [M02 / #2](https://github.com/KokuuWork/refined-network/issues/2) | 注册表映射、生成源与历史允许残留盘点 | M01 |
-| [M03 / #3](https://github.com/KokuuWork/refined-network/issues/3) | 仅批准runtime namespace双平台协调迁移 | M01、M02 |
-| [M04 / #4](https://github.com/KokuuWork/refined-network/issues/4) | 批准的旧世界/配置兼容或明确硬切边界 | M01–M03 |
+| [M01 / #1](https://github.com/KokuuWork/refined-network/issues/1) | 决策：新ID `refinednetwork`，硬重写、不做迁移 | ✅ 已完成（已关闭） |
+| [M02 / #2](https://github.com/KokuuWork/refined-network/issues/2) | 标识盘点 | ✅ 随重写完成（已关闭），历史文档保留旧名 |
+| [M03 / #3](https://github.com/KokuuWork/refined-network/issues/3) | modId/包名/模块/资源/产物重写 | ✅ 双平台构建通过（已关闭） |
+| [M04 / #4](https://github.com/KokuuWork/refined-network/issues/4) | 旧世界兼容 | ❌ 按决定不做；旧世界须用旧 JAR 或新建世界 |
 
 ## 缺陷与质量补强
 

@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "QGQ",
+    "CMC",
+    "QGQ"
+  ],
+  "key": {
+    "Q": {
+      "tag": "c:gems/quartz"
+    },
+    "G": {
+      "item": "minecraft:redstone_block"
+    },
+    "C": {
+      "item": "refinedstorage:machine_casing"
+    },
+    "M": {
+      "item": "refinedstorage:advanced_processor"
+    }
+  },
+  "result": {
+    "id": "refinednetwork:terminal_charging_station"
+  }
+}

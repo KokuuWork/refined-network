@@ -35,18 +35,18 @@ jobs:
         env:
           TAG_NAME: ${{ github.event.inputs.tag || github.ref_name }}
         run: |
-          version="$(grep -oP '^version = "\K[^"]+' rswirelesscrafting-neoforge/build.gradle.kts | head -1)"
+          version="$(grep -oP '^version = "\K[^"]+' refinednetwork-neoforge/build.gradle.kts | head -1)"
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "Built mod version: $version"
           # 预发布判定：tag 里带 -beta / -alpha / -rc 就标记为 Prerelease，并在标题上标注 Beta
           case "$TAG_NAME" in
             *-beta*|*-alpha*|*-rc*)
               echo "prerelease=true" >> "$GITHUB_OUTPUT"
-              echo "name=rswirelesscrafting $version (Beta)" >> "$GITHUB_OUTPUT"
+              echo "name=refinednetwork $version (Beta)" >> "$GITHUB_OUTPUT"
               ;;
             *)
               echo "prerelease=false" >> "$GITHUB_OUTPUT"
-              echo "name=rswirelesscrafting $version" >> "$GITHUB_OUTPUT"
+              echo "name=refinednetwork $version" >> "$GITHUB_OUTPUT"
               ;;
           esac
 
@@ -73,5 +73,5 @@ jobs:
           # Exact filename rather than a glob: excluding *-sources.jar via "!"
           # negation is not honoured reliably by this action.
           files: |
-            rswirelesscrafting-neoforge/build/libs/rswirelesscrafting-neoforge-${{ steps.mod.outputs.version }}.jar
-            rswirelesscrafting-fabric/build/libs/rswirelesscrafting-fabric-${{ steps.mod.outputs.version }}.jar
+            refinednetwork-neoforge/build/libs/refinednetwork-neoforge-${{ steps.mod.outputs.version }}.jar
+            refinednetwork-fabric/build/libs/refinednetwork-fabric-${{ steps.mod.outputs.version }}.jar
