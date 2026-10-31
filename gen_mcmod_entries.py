@@ -16,6 +16,8 @@ import base64
 import io
 import json
 import os
+import re
+import sys
 import struct
 import zlib
 
@@ -25,10 +27,18 @@ ASSETS = os.path.join(
 )
 LANG_ZH = os.path.join(ASSETS, "lang", "zh_cn.json")
 LANG_EN = os.path.join(ASSETS, "lang", "en_us.json")
-OUT_DIR = os.path.join(ROOT, "docs", "mcmod")
+OUT_DIR = os.environ.get("MCMOD_OUT_DIR") or os.path.join(ROOT, "docs", "mcmod")
 ICON_DIR = os.path.join(OUT_DIR, "icons")
 
 MOD_ID = "refinednetwork"
+
+
+def mod_version():
+    """从 NeoForge 模块的构建脚本读当前版本，避免文档里写死旧版本号。"""
+    build = os.path.join(ROOT, "refinednetwork-neoforge", "build.gradle.kts")
+    with open(build, encoding="utf-8") as f:
+        match = re.search(r'^version = "([^"]+)"', f.read(), re.MULTILINE)
+    return match.group(1) if match else "unknown"
 
 # 逐条定义：注册名、资料类型、堆叠上限、图标来源
 # icon: ("item", 相对 textures/item 的路径) 或 ("block", 正/侧/顶 三张图)
@@ -348,8 +358,13 @@ def main():
 
     md = []
     md.append("# MC百科 资料条目提交包\n")
-    md.append("适用版本：**0.4.1**（Minecraft 1.21.1，NeoForge / Fabric）。")
-    md.append("共 20 条资料：终端 4、升级插件 6、方块设备 7、工具 3。\n")
+    version = mod_version()
+    counts = {}
+    for _, _, _, kind, _ in table:
+        counts[kind] = counts.get(kind, 0) + 1
+    summary = "、".join("%s %d" % (kind, counts[kind]) for kind in sorted(counts))
+    md.append("适用版本：**%s**（Minecraft 1.21.1，NeoForge / Fabric）。" % version)
+    md.append("共 %d 条资料：%s。\n" % (len(table), summary))
     md.append("## 文件说明\n")
     md.append("| 文件 | 用途 |")
     md.append("|---|---|")
@@ -357,7 +372,7 @@ def main():
     md.append("| `icons/<注册名>.png` | 64×64 图标（JSON 里已内嵌，此目录供核对或替换） |")
     md.append("| `icons/<注册名>_32.png` | 32×32 小图标 |\n")
     md.append("## 提交步骤\n")
-    md.append("1. 打开 [批量添加资料 JSON 收纳帖](https://bbs.mcmod.cn/thread-1281-1-1.html)，按帖子格式回帖：模组名称、站内 ID（31918）、模组版本 `0.4.1`、游戏版本 `1.21.1 NeoForge`、导出工具填「手动整理」。")
+    md.append("1. 打开 [批量添加资料 JSON 收纳帖](https://bbs.mcmod.cn/thread-1281-1-1.html)，按帖子格式回帖：模组名称、站内 ID（31918）、模组版本 `%s`、游戏版本 `1.21.1 NeoForge`、导出工具填「手动整理」。" % version)
     md.append("2. 附上 `mcmod-items.json`。每行一条，导入器会按 `I:` 计数。")
     md.append("3. 导入后按类型批量调整：把 7 个方块设备从「方块」改为「机器」（如果站内分类更合适）。")
     md.append("4. 合成表单独提交，用 RecipeDumper 或 IconRenderer 导出，本站格式为 `R:` 行。\n")
@@ -380,12 +395,16 @@ def main():
     md.append("| `maxDurability` | `0`，全部无耐久 |")
     md.append("\n> 1.13+ 格式不含 `metadata` 字段，导入器会忽略旧字段。\n")
 
-    md_path = os.path.join(OUT_DIR, "资料条目.md")
+    # 默认写到 generated 文件：资料条目.md 是人工维护的提交稿，直接覆盖会丢掉勘误。
+    force = "--force" in sys.argv
+    md_path = os.path.join(OUT_DIR, "资料条目.md" if force else "资料条目.generated.md")
     with open(md_path, "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(md))
 
     print("wrote", json_path)
     print("wrote", md_path)
+    if not force:
+        print("提示：默认不覆盖人工维护的 资料条目.md；确认要覆盖时加 --force")
 
 
 if __name__ == "__main__":
