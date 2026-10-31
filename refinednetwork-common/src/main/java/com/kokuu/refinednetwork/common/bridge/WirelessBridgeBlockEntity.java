@@ -3,6 +3,7 @@ package com.kokuu.refinednetwork.common.bridge;
 import com.kokuu.refinednetwork.common.BlockEntities;
 import com.kokuu.refinednetwork.common.Config;
 import com.kokuu.refinednetwork.common.ContentNames;
+import com.kokuu.refinednetwork.common.DeviceDiagnosticsNames;
 import com.kokuu.refinednetwork.common.Platform;
 import com.kokuu.refinednetwork.common.connector.ConnectorTarget;
 import com.kokuu.refinednetwork.common.link.BoundTargetResolver;
@@ -81,6 +82,8 @@ public class WirelessBridgeBlockEntity extends AbstractNetworkNodeContainerBlock
     private boolean linked;
     private boolean suspended;
     private boolean unpaid;
+    /** 未连通原因中「挂起 / 欠费」之外的两类，仅用于状态行。 */
+    private Reason reason = Reason.NONE;
     private boolean holdingOwnChunk;
     private boolean holdingTargetChunk;
 
@@ -230,8 +233,16 @@ public class WirelessBridgeBlockEntity extends AbstractNetworkNodeContainerBlock
             return;
         }
         final Network anchorNetwork = BoundTargetResolver.resolveNetwork(serverLevel, target).orElse(null);
-        if (anchorNetwork == null || !isAuthorized(anchorNetwork)) {
+        if (anchorNetwork == null) {
             unpaid = false;
+            reason = Reason.UNREACHABLE;
+            detachLink();
+            setLinked(false);
+            return;
+        }
+        if (!isAuthorized(anchorNetwork)) {
+            unpaid = false;
+            reason = Reason.NO_PERMISSION;
             detachLink();
             setLinked(false);
             return;
@@ -245,6 +256,7 @@ public class WirelessBridgeBlockEntity extends AbstractNetworkNodeContainerBlock
             return;
         }
         unpaid = false;
+        reason = Reason.NONE;
         attachment(serverLevel).ensureAttached();
         setLinked(attachment(serverLevel).isAttached());
     }
@@ -355,6 +367,27 @@ public class WirelessBridgeBlockEntity extends AbstractNetworkNodeContainerBlock
     /**
      * 是否被红石信号临时挂起（挂起 = 不搬东西、不耗电，但区块照旧保活）。
      */
+    public Reason getReason() {
+        return reason;
+    }
+
+    /**
+     * 状态行里「挂起 / 欠费」之外的原因。
+     */
+    public enum Reason {
+        NONE,
+        UNREACHABLE,
+        NO_PERMISSION;
+
+        public Component describe() {
+            return switch (this) {
+                case UNREACHABLE -> DeviceDiagnosticsNames.UNREACHABLE;
+                case NO_PERMISSION -> DeviceDiagnosticsNames.NO_PERMISSION;
+                case NONE -> Component.empty();
+            };
+        }
+    }
+
     public boolean isSuspended() {
         return suspended;
     }

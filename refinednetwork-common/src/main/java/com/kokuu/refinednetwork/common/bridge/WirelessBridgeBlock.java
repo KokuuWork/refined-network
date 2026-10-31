@@ -141,13 +141,15 @@ public class WirelessBridgeBlock extends BaseEntityBlock {
             );
             return;
         }
-        player.displayClientMessage(
-            Component.translatable(
-                ContentNames.BRIDGE_STATUS_ENDPOINT_TRANSLATION_KEY,
-                target.pos().toShortString(),
-                statusOf(bridge)
-            ),
-            false
+        final Component status = Component.translatable(
+            ContentNames.BRIDGE_STATUS_ENDPOINT_TRANSLATION_KEY,
+            target.pos().toShortString(),
+            statusOf(bridge)
         );
+        final WirelessBridgeBlockEntity.Reason reason = bridge.getReason();
+        final Component message = reason == WirelessBridgeBlockEntity.Reason.NONE
+            ? status
+            : status.copy().append(Component.literal("\n")).append(reason.describe());
+        player.displayClientMessage(message, false);
     }
 }
