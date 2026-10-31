@@ -200,9 +200,30 @@ public class RedstoneLinkBlock extends BaseEntityBlock {
             player.displayClientMessage(RedstoneLinkNames.STATUS_SOURCE, false);
             return;
         }
-        player.displayClientMessage(
-            Component.translatable(RedstoneLinkNames.STATUS_SINK_KEY, target.pos().toShortString()),
-            false
-        );
+        final Component status = Component.translatable(
+            RedstoneLinkNames.STATUS_SINK_KEY, target.pos().toShortString());
+        final Component problem = sourceProblem(player, target);
+        final Component message = problem == null
+            ? status
+            : status.copy().append(Component.literal("\n")).append(problem);
+        player.displayClientMessage(message, false);
+    }
+
+    /**
+     * 输出端「现在收不到信号」的原因；输入正常时返回 {@code null}。
+     *
+     * <p>只做单点判定，不加载区块，也不把原因当成逻辑：真正的信号判定仍在方块实体里。
+     */
+    @Nullable
+    private static Component sourceProblem(final ServerPlayer player, final GlobalPos target) {
+        if (!(player.getServer().getLevel(target.dimension()) instanceof ServerLevel sourceLevel)
+            || !sourceLevel.isLoaded(target.pos())) {
+            return RedstoneLinkNames.SOURCE_UNLOADED;
+        }
+        if (!(sourceLevel.getBlockEntity(target.pos()) instanceof RedstoneLinkBlockEntity input)
+            || input.isEndpoint()) {
+            return RedstoneLinkNames.SOURCE_INVALID;
+        }
+        return null;
     }
 }

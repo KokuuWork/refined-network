@@ -302,5 +302,7 @@
   "gui.refinednetwork.device_mount_rejected": "原因：本地网络拒绝了挂载，检查网络状态。",
   "gui.refinednetwork.device_disabled": "原因：配置里关闭了该设备。",
   "gui.refinednetwork.device_suspended": "原因：红石信号挂起了链路。",
-  "gui.refinednetwork.device_unpaid": "原因：本地网络付不起链路费。"
+  "gui.refinednetwork.device_unpaid": "原因：本地网络付不起链路费。",
+  "msg.refinednetwork.redstone_link.source_unloaded": "原因：输入端所在区块未加载，信号按无信号处理。",
+  "msg.refinednetwork.redstone_link.source_invalid": "原因：输入端已失效（被拆或被改配），请重新配对。"
 }
