@@ -31,9 +31,9 @@ import net.minecraft.world.item.ItemStack;
  * {@link #tickTerminal}）。目前支持两种动作：
  * <ul>
  *   <li>{@link MonitorRule.RuleAction#ALERT} —— 越线了就在聊天栏说一声；</li>
- *   <li>{@link MonitorRule.RuleAction#RESTOCK} —— 低于目标就**自动发起合成**把库存补回去
- *       （走 RS 的公开 API {@code AutocraftingNetworkComponent#ensureTask}，
- *       RS 本体只有构造器上那个「缺料补 1 个」的残缺版本）。</li>
+ *   <li>{@link MonitorRule.RuleAction#RESTOCK} —— 低于目标就**自动发起合成**把库存补回去，
+ *       走 RS 的公开 API {@code AutocraftingNetworkComponent#ensureTask}；
+ *       是否真的新建任务由 RS 结合在制需求判断，不保证「存在同类任务就一律不再建单」。</li>
  * </ul>
  *
  * <p>三条自律：
@@ -44,9 +44,9 @@ import net.minecraft.world.item.ItemStack;
  *       {@link #BLOCKED_COOLDOWN_TICKS}——否则缺料会变成每秒一条的刷屏。</li>
  * </ol>
  *
- * <p><b>补货为什么不会重复下单</b>：{@code ensureTask} 在同类任务已在跑时返回
- * {@code TASK_ALREADY_RUNNING}，这时我们既不重复下单、也**不再收费**；
- * 只有真正 {@code TASK_CREATED} 才扣那笔自动合成费。付不起时静默跳过（不报警，不然会刷屏）。
+ * <p><b>收费时机</b>：{@code ensureTask} 返回 {@code TASK_ALREADY_RUNNING} 时不重复收费；
+ * 只有 {@code TASK_CREATED} 才扣那笔自动合成费。返回结果不能反推「缺口一定已被覆盖」，
+ * 因此这里不承诺绝对幂等。付不起时静默跳过（不报警，否则会刷屏）。
  */
 public final class MonitorEngine {
     private static final int CHECK_INTERVAL = 20;

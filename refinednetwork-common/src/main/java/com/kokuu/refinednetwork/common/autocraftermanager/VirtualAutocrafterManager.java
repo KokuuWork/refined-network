@@ -27,8 +27,9 @@ import net.minecraft.world.level.block.state.BlockState;
  *       关掉界面不会丢东西。</li>
  * </ul>
  *
- * <p>三条虚拟方块实体的铁律见 {@code VirtualBlockEntities}：用 {@code AIR} 状态构造（不注册幽灵节点）、
- * 覆写 {@link #setChanged()}（不碰区块）、入网只 {@code setNetwork} 一句。
+ * <p>三条虚拟方块实体的铁律见 {@code VirtualBlockEntities}：用真实方块状态构造但覆写
+ * {@code initialize} 阻止注册节点、覆写 {@link #setChanged()}（不碰区块）、入网只 {@code setNetwork} 一句。
+ * 不能用 {@code AIR} 构造——RS 2.0.9 起会校验「方块实体类型 ↔ 方块状态」并直接抛异常。
  */
 public class VirtualAutocrafterManager extends AutocrafterManagerBlockEntity {
     public VirtualAutocrafterManager(final Level level, @Nullable final Network network) {
